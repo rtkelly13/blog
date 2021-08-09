@@ -18,10 +18,10 @@ const LayoutWrapper = ({ children }: Props) => {
       <div className="flex flex-col justify-between h-screen">
         <header className="flex items-center justify-between py-10">
           <div>
-            <Link href="/" aria-label="Tailwind CSS Blog">
+            <Link href="/" aria-label="Ryan Kelly Blog">
               <div className="flex items-center justify-between">
                 <div className="mr-3">
-                  <Logo />
+                  <Logo className="w-12 h-12" />
                 </div>
                 {typeof siteMetadata.headerTitle === 'string' ? (
                   <div className="hidden h-6 text-2xl font-semibold sm:block">
