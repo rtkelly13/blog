@@ -1,15 +1,26 @@
-import { Node } from 'unist'
 import { bundleMDX } from 'mdx-bundler'
 import fs from 'fs'
 import matter from 'gray-matter'
 import path from 'path'
 import readingTime from 'reading-time'
-import visit from 'unist-util-visit'
-import codeTitles from './remark-code-title'
-import imgToJsx from './img-to-jsx'
+import { visit } from 'unist-util-visit'
+import type { Pluggable } from 'unified'
 import getAllFilesRecursively from './utils/files'
 import { PostFrontMatter } from 'types/PostFrontMatter'
 import { AuthorFrontMatter } from 'types/AuthorFrontMatter'
+import { Toc } from 'types/Toc'
+// Remark packages
+import remarkSlug from 'remark-slug'
+import remarkAutolinkHeadings from 'remark-autolink-headings'
+import remarkGfm from 'remark-gfm'
+import remarkFootnotes from 'remark-footnotes'
+import remarkMath from 'remark-math'
+import remarkCodeTitles from './remark-code-title'
+import remarkTocHeadings from './remark-toc-headings'
+import remarkImgToJsx from './remark-img-to-jsx'
+// Rehype packages
+import rehypeKatex from 'rehype-katex'
+import rehypePrismPlus from 'rehype-prism-plus'
 
 const root = process.cwd()
 
@@ -69,6 +80,8 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
     )
   }
 
+  const toc: Toc = []
+
   const { frontmatter, code } = await bundleMDX(source, {
     // mdx imports can be automatically source from the components directory
     cwd: path.join(process.cwd(), 'components'),
@@ -78,21 +91,22 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
       // plugins in the future.
       options.remarkPlugins = [
         ...(options.remarkPlugins ?? []),
-        require('remark-slug'),
-        require('remark-autolink-headings'),
-        require('remark-gfm'),
-        codeTitles,
-        [require('remark-footnotes'), { inlineNotes: true }],
-        require('remark-math'),
-        imgToJsx,
+        remarkSlug,
+        remarkAutolinkHeadings,
+        [remarkTocHeadings, { exportRef: toc }],
+        remarkGfm,
+        remarkCodeTitles,
+        [remarkFootnotes, { inlineNotes: true }],
+        remarkMath,
+        remarkImgToJsx,
       ]
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
-        require('rehype-katex'),
-        [require('rehype-prism-plus'), { ignoreMissing: true }],
+        rehypeKatex,
+        [rehypePrismPlus, { ignoreMissing: true }] as Pluggable,
         () => {
           return (tree) => {
-            visit<Node & { properties: { className: string[] } }>(tree, 'element', (node) => {
+            visit(tree, 'element', (node) => {
               const [token, type] = node.properties.className || []
               if (token === 'token') {
                 node.properties.className = [tokenClassNames[type]]
@@ -114,11 +128,13 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
 
   return {
     mdxSource: code,
+    toc,
     frontMatter: {
       readingTime: readingTime(code),
       slug: slug || null,
       fileName: fs.existsSync(mdxPath) ? `${slug}.mdx` : `${slug}.md`,
-      ...(frontmatter as T),
+      ...frontmatter,
+      date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
     },
   }
 }
@@ -139,9 +155,13 @@ export async function getAllFilesFrontMatter(folder: 'blog') {
     }
     const source = fs.readFileSync(file, 'utf8')
     const matterFile = matter(source)
-    const data = matterFile.data as AuthorFrontMatter | PostFrontMatter
-    if ('draft' in data && data.draft !== true) {
-      allFrontMatter.push({ ...data, slug: formatSlug(fileName) })
+    const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter
+    if ('draft' in frontmatter && frontmatter.draft !== true) {
+      allFrontMatter.push({
+        ...frontmatter,
+        slug: formatSlug(fileName),
+        date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
+      })
     }
   })
 

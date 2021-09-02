@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "analyze",
+      "problemMatcher": [],
+      "label": "npm: analyze",
+      "detail": "cross-env ANALYZE=true next build"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: build",
+      "detail": "next build && node ./scripts/generate-sitemap"
+    },
+    {
+      "type": "npm",
+      "script": "lint",
+      "problemMatcher": [],
+      "label": "npm: lint",
+      "detail": "next lint --fix --dir pages --dir components --dir lib --dir layouts --dir scripts"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "label": "npm: dev",
+      "detail": "NODE_OPTIONS='--inspect' next dev"
+    },
+    {
+      "type": "npm",
+      "script": "serve",
+      "problemMatcher": [],
+      "label": "npm: serve",
+      "detail": "next start"
+    },
+    {
+      "type": "npm",
+      "script": "prepare",
+      "problemMatcher": [],
+      "label": "npm: prepare",
+      "detail": "husky install"
+    }
+  ]
+}
