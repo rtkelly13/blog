@@ -1,0 +1,104 @@
+---
+title: AWS Batch - Cookbook
+date: '2022-08-19'
+tags: ['aws', 'aws-batch', 'docker']
+draft: false
+summary: Ways to use AWS batch, focusing on problems and solutions with technical information appended
+images: ['/static/batch/headers/cookbook-light.png']
+layout: PostLayout
+authors: ['default']
+---
+
+<TOCInline toc={props.toc} indentDepth={2} />
+
+# Batch Intro
+
+[AWS Batch](https://aws.amazon.com/batch/) is a service in AWS which allows running of an arbitrary docker container for one time tasks rather than framed as a big data solution.
+It is closer to bare metal than lambda running on an [ECS Cluster](https://aws.amazon.com/ecs/) under the hood, which you can see in the console, and has the ability to use spot instances to reduce costs futher.
+If you have a workload that takes longer than can fit on a [Lambda](https://aws.amazon.com/lambda/) this is probably the service you want.
+
+# Patterns
+
+There are numerous patterns that can be implemented with AWS Batch starting below
+
+## Fan In Fan Out
+
+If you wish for one or more jobs to be linked together and be dependent on the first to success this is a great mechanism to achieve this.
+Letting you build solutions using the Fan In / Fan Out model.
+This is called _Job Dependencies_ in AWS Batch
+
+<Image
+  alt="HeaderImage"
+  src="/static/batch/diagrams/dependent-jobs.drawio.svg"
+  width={350}
+  height={200}
+/>
+
+<div
+  className="bg-primary-100 border-t-8 border-primary-500 rounded-b text-primary-900 px-3 py-1 shadow-md"
+  role="alert"
+>
+  <div className="flex">
+    <div>
+      <p class="font-bold">Note</p>
+      <p className="text-sm">
+        If any of jobs in the map phase fail the subsequent phase will not run, it's best to track
+        individual job status in a seperate location and process that in the last phase. Explaining
+        the above is that if the primary job succeeds both secondary jobs are queued up to run
+        simultanously. If both the secondary jobs succeed the ternary jobs is queued up.
+      </p>
+    </div>
+  </div>
+</div>
+
+## Array Job
+
+An array job lets you take a single type of job and run it in parallel or sequentially. You specify the number of number of jobs to be ran,
+read an environment variable to determine which element is needed to be run and process that.
+
+<Image alt="HeaderImage" src="/static/batch/diagrams/array.drawio.svg" width={350} height={120} />
+
+# Potential Use Cases
+
+## Map/ Reduce
+
+<Image
+  alt="HeaderImage"
+  src="/static/batch/diagrams/map-reduce.drawio.svg"
+  width={350}
+  height={120}
+/>
+
+[Map Reduce](https://en.wikipedia.org/wiki/MapReduce) is a programming model for processing of large data sets or performing large computations over a distributed cluster of computers.
+The definition shifts based on where you look but it typically involves at least these two steps
+
+- Map - Performing some processing to produce an output for a portion of the task at hand
+- Reduce - Combining the various results of the map phase into a single result
+
+There are obviously other steps you could add such as a phase which breaks up your task in order to setup the map phase.
+Another feature of Map/Reduce is a mechanism to move data in and out of the compute nodes as necessary, [S3](https://aws.amazon.com/s3/) can be used for such purposes
+if you wish to store files or one of the many [Databases provided on AWS](https://aws.amazon.com/products/databases/) for state of the system.
+
+## Compute/ Memory Intensive applications
+
+When you have a horizontally scalable workload there are a number of different mechanisms within AWS you can use to scale those workloads.
+Such as lambda, each mechanism has it's tradeoffs but there is a set of criteria where AWS Batch may be the right solution.
+
+### Cost
+
+AWS batch has a number of modes it can operate in, Fargate, EC2 and [EC2 Spot](https://aws.amazon.com/ec2/spot/) instances. If you choose AWS Spot instances massive savings can be achived,
+but that comes at the cost of having to make your application resiliant to shutdown and task recovery.
+According to AWS up to 90% savings can be achieved Batch lets you specify the maximum spot instance costs as a percentage relative to the on demand pricing.
+You can set a minimum number of VCPUs and a family of instances this would let you use reserved instances also. Batch lets you configure your pricing very flexibly.
+
+## Limited parallelisation of Jobs
+
+If you have a constrained resouce to which you want to achieve maximum throughput for your jobs but you cannot achieve maximum throughput there are two ways you can handle this.
+Set off multiple array jobs with all jobs exhausting the maximum throughput of the system as sequential jobs. Or setup multiple job queues and compute environmets with different purposes,
+one for maxium throughput by having a much higher number of VCPUs and another which the maximum VCPUs is set based on the constrained resouce.
+Allocating jobs to the specific queues based on that criteria.
+
+# Links
+
+- [Older video about AWS Batch](https://youtu.be/H8bmHU_z8Ac)
+- [Spot instance on Batch](https://www.youtube.com/watch?v=qPU9FzuAKIw&ab_channel=AmazonWebServices)

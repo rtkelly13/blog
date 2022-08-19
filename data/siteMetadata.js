@@ -1,7 +1,7 @@
 const siteMetadata = {
   title: 'Ryan Kelly Blog',
   author: 'Ryan Kelly',
-  headerTitle: 'Ryan Kelly Blog',
+  headerTitle: '',
   description: 'A blog created with Next.js and Tailwind.css',
   language: 'en-us',
   siteUrl: 'https://ryankelly.dev/',

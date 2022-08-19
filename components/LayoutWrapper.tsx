@@ -21,7 +21,7 @@ const LayoutWrapper = ({ children }: Props) => {
             <Link href="/" aria-label="Ryan Kelly Blog">
               <div className="flex items-center justify-between">
                 <div className="mr-3">
-                  <Logo className="w-12 h-12" />
+                  <Logo className="w-24 h-24" />
                 </div>
                 {typeof siteMetadata.headerTitle === 'string' ? (
                   <div className="hidden h-6 text-2xl font-semibold sm:block">
