@@ -1,6 +1,6 @@
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
-})
+});
 
 /**
  * @type {import('next').NextConfig}
@@ -21,13 +21,13 @@ module.exports = withBundleAnalyzer({
           },
         },
       ],
-    })
+    });
 
     config.module.rules.push({
       test: /\.svg$/,
       use: ['@svgr/webpack'],
-    })
+    });
 
-    return config
+    return config;
   },
-})
+});

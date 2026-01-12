@@ -1,11 +1,11 @@
-import '@/css/tailwind.css'
+import '@/css/tailwind.css';
 
-import { ThemeProvider } from 'next-themes'
-import type { AppProps } from 'next/app'
-import Head from 'next/head'
+import type { AppProps } from 'next/app';
+import Head from 'next/head';
+import { ThemeProvider } from 'next-themes';
 
-import Analytics from '@/components/analytics'
-import LayoutWrapper from '@/components/LayoutWrapper'
+import Analytics from '@/components/analytics';
+import LayoutWrapper from '@/components/LayoutWrapper';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -18,5 +18,5 @@ export default function App({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
       </LayoutWrapper>
     </ThemeProvider>
-  )
+  );
 }

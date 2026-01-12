@@ -1,63 +1,64 @@
-const {
-    defineConfig,
-    globalIgnores,
-} = require("eslint/config");
+const { defineConfig, globalIgnores } = require('eslint/config');
 
-const tsParser = require("@typescript-eslint/parser");
-const globals = require("globals");
-const typescriptEslint = require("@typescript-eslint/eslint-plugin");
-const js = require("@eslint/js");
+const tsParser = require('@typescript-eslint/parser');
+const globals = require('globals');
+const typescriptEslint = require('@typescript-eslint/eslint-plugin');
+const js = require('@eslint/js');
 
-const {
-    FlatCompat,
-} = require("@eslint/eslintrc");
+const { FlatCompat } = require('@eslint/eslintrc');
 
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all,
 });
 
-module.exports = defineConfig([{
+module.exports = defineConfig([
+  {
     languageOptions: {
-        parser: tsParser,
+      parser: tsParser,
 
-        globals: {
-            ...globals.browser,
-            ...globals.amd,
-            ...globals.node,
-        },
+      globals: {
+        ...globals.browser,
+        ...globals.amd,
+        ...globals.node,
+      },
     },
 
     plugins: {
-        "@typescript-eslint": typescriptEslint,
+      '@typescript-eslint': typescriptEslint,
     },
 
     extends: compat.extends(
-        "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:jsx-a11y/recommended",
-        "plugin:prettier/recommended",
-        "next",
-        "next/core-web-vitals",
+      'eslint:recommended',
+      'plugin:@typescript-eslint/eslint-recommended',
+      'plugin:@typescript-eslint/recommended',
+      'plugin:jsx-a11y/recommended',
+      'plugin:prettier/recommended',
+      'next',
+      'next/core-web-vitals',
     ),
 
     rules: {
-        "prettier/prettier": "error",
-        "react/react-in-jsx-scope": "off",
+      'prettier/prettier': 'error',
+      'react/react-in-jsx-scope': 'off',
 
-        "jsx-a11y/anchor-is-valid": ["error", {
-            components: ["Link"],
-            specialLink: ["hrefLeft", "hrefRight"],
-            aspects: ["invalidHref", "preferButton"],
-        }],
+      'jsx-a11y/anchor-is-valid': [
+        'error',
+        {
+          components: ['Link'],
+          specialLink: ['hrefLeft', 'hrefRight'],
+          aspects: ['invalidHref', 'preferButton'],
+        },
+      ],
 
-        "react/prop-types": 0,
-        "no-unused-vars": 0,
-        "react/no-unescaped-entities": 0,
-        "@typescript-eslint/explicit-module-boundary-types": "off",
-        "@typescript-eslint/no-var-requires": "off",
-        "@typescript-eslint/ban-ts-comment": "off",
+      'react/prop-types': 0,
+      'no-unused-vars': 0,
+      'react/no-unescaped-entities': 0,
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
     },
-}, globalIgnores(["**/node_modules"])]);
+  },
+  globalIgnores(['**/node_modules']),
+]);

@@ -1,28 +1,26 @@
-import { bundleMDX } from 'mdx-bundler'
-import fs from 'fs'
-import matter from 'gray-matter'
-import path from 'path'
-import readingTime from 'reading-time'
-import { visit } from 'unist-util-visit'
-import type { Pluggable } from 'unified'
-import getAllFilesRecursively from './utils/files'
-import { PostFrontMatter } from 'types/PostFrontMatter'
-import { AuthorFrontMatter } from 'types/AuthorFrontMatter'
-import { Toc } from 'types/Toc'
-// Remark packages
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
-import remarkCodeTitles from './remark-code-title'
-import remarkTocHeadings from './remark-toc-headings'
-import remarkImgToJsx from './remark-img-to-jsx'
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+import { bundleMDX } from 'mdx-bundler';
+import readingTime from 'reading-time';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeKatex from 'rehype-katex';
+import rehypePrismPlus from 'rehype-prism-plus';
 // Rehype packages
-import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import rehypeKatex from 'rehype-katex'
-import rehypePrismPlus from 'rehype-prism-plus'
+import rehypeSlug from 'rehype-slug';
+// Remark packages
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
+import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Toc } from 'types/Toc';
+import type { Pluggable } from 'unified';
+import { visit } from 'unist-util-visit';
+import remarkCodeTitles from './remark-code-title';
+import remarkTocHeadings from './remark-toc-headings';
+import getAllFilesRecursively from './utils/files';
 
-const root = process.cwd()
-
+const root = process.cwd();
 
 const tokenClassNames = {
   tag: 'text-code-red',
@@ -36,31 +34,36 @@ const tokenClassNames = {
   function: 'text-code-blue',
   boolean: 'text-code-red',
   comment: 'text-gray-400 italic',
-}
+};
 
 export function getFiles(type: 'blog' | 'authors') {
-  const prefixPaths = path.join(root, 'data', type)
-  const files = getAllFilesRecursively(prefixPaths)
+  const prefixPaths = path.join(root, 'data', type);
+  const files = getAllFilesRecursively(prefixPaths);
   // Only want to return blog/path and ignore root, replace is needed to work on Windows
-  return files.map((file) => file.slice(prefixPaths.length + 1).replace(/\\/g, '/'))
+  return files.map((file) =>
+    file.slice(prefixPaths.length + 1).replace(/\\/g, '/'),
+  );
 }
 
 export function formatSlug(slug: string) {
-  return slug.replace(/\.(mdx|md)/, '')
+  return slug.replace(/\.(mdx|md)/, '');
 }
 
 export function dateSortDesc(a: string, b: string) {
-  if (a > b) return -1
-  if (a < b) return 1
-  return 0
+  if (a > b) return -1;
+  if (a < b) return 1;
+  return 0;
 }
 
-export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | string[]) {
-  const mdxPath = path.join(root, 'data', type, `${slug}.mdx`)
-  const mdPath = path.join(root, 'data', type, `${slug}.md`)
+export async function getFileBySlug<_T>(
+  type: 'authors' | 'blog',
+  slug: string | string[],
+) {
+  const mdxPath = path.join(root, 'data', type, `${slug}.mdx`);
+  const mdPath = path.join(root, 'data', type, `${slug}.md`);
   const source = fs.existsSync(mdxPath)
     ? fs.readFileSync(mdxPath, 'utf8')
-    : fs.readFileSync(mdPath, 'utf8')
+    : fs.readFileSync(mdPath, 'utf8');
 
   // https://github.com/kentcdodds/mdx-bundler#nextjs-esbuild-enoent
   if (process.platform === 'win32') {
@@ -68,19 +71,19 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
       process.cwd(),
       'node_modules',
       'esbuild',
-      'esbuild.exe'
-    )
+      'esbuild.exe',
+    );
   } else {
     process.env.ESBUILD_BINARY_PATH = path.join(
       process.cwd(),
       'node_modules',
       'esbuild',
       'bin',
-      'esbuild'
-    )
+      'esbuild',
+    );
   }
 
-  const toc: Toc = []
+  const toc: Toc = [];
 
   const { frontmatter, code } = await bundleMDX({
     source,
@@ -97,7 +100,7 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
         remarkCodeTitles,
         remarkMath,
         // remarkImgToJsx,
-      ]
+      ];
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
         rehypeSlug,
@@ -107,24 +110,24 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
         () => {
           return (tree) => {
             visit(tree, 'element', (node: any) => {
-              const [token, type] = node.properties.className || []
+              const [token, type] = node.properties.className || [];
               if (token === 'token') {
-                node.properties.className = [tokenClassNames[type]]
+                node.properties.className = [tokenClassNames[type]];
               }
-            })
-          }
+            });
+          };
         },
-      ]
-      return options
+      ];
+      return options;
     },
     esbuildOptions: (options) => {
       options.loader = {
         ...options.loader,
         '.js': 'jsx',
-      }
-      return options
+      };
+      return options;
     },
-  })
+  });
 
   return {
     mdxSource: code,
@@ -136,34 +139,36 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
       ...frontmatter,
       date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
     },
-  }
+  };
 }
 
 export async function getAllFilesFrontMatter(folder: 'blog') {
-  const prefixPaths = path.join(root, 'data', folder)
+  const prefixPaths = path.join(root, 'data', folder);
 
-  const files = getAllFilesRecursively(prefixPaths)
+  const files = getAllFilesRecursively(prefixPaths);
 
-  const allFrontMatter: PostFrontMatter[] = []
+  const allFrontMatter: PostFrontMatter[] = [];
 
   files.forEach((file: string) => {
     // Replace is needed to work on Windows
-    const fileName = file.slice(prefixPaths.length + 1).replace(/\\/g, '/')
+    const fileName = file.slice(prefixPaths.length + 1).replace(/\\/g, '/');
     // Remove Unexpected File
     if (path.extname(fileName) !== '.md' && path.extname(fileName) !== '.mdx') {
-      return
+      return;
     }
-    const source = fs.readFileSync(file, 'utf8')
-    const matterFile = matter(source)
-    const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter
+    const source = fs.readFileSync(file, 'utf8');
+    const matterFile = matter(source);
+    const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter;
     if ('draft' in frontmatter && frontmatter.draft !== true) {
       allFrontMatter.push({
         ...frontmatter,
         slug: formatSlug(fileName),
-        date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
-      })
+        date: frontmatter.date
+          ? new Date(frontmatter.date).toISOString()
+          : null,
+      });
     }
-  })
+  });
 
-  return allFrontMatter.sort((a, b) => dateSortDesc(a.date, b.date))
+  return allFrontMatter.sort((a, b) => dateSortDesc(a.date, b.date));
 }

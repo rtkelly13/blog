@@ -1,4 +1,4 @@
-import NextImage, { ImageProps } from 'next/image'
+import NextImage, { type ImageProps } from 'next/image';
 
 const Image = ({ ...rest }: ImageProps) => (
   <div className="flex flex-wrap -mx-2 overflow-hidden xl:-mx-2">
@@ -6,6 +6,6 @@ const Image = ({ ...rest }: ImageProps) => (
       <NextImage {...rest} />
     </div>
   </div>
-)
+);
 
-export default Image
+export default Image;

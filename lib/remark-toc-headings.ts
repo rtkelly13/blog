@@ -1,11 +1,11 @@
-import { Parent } from 'unist'
-import { visit } from 'unist-util-visit'
-import { toString } from 'mdast-util-to-string'
+import { toString } from 'mdast-util-to-string';
+import type { Parent } from 'unist';
+import { visit } from 'unist-util-visit';
 
 export default function remarkTocHeadings(options) {
   return (tree: Parent) =>
     visit(tree, 'heading', (node: any) => {
-      const textContent = toString(node)
+      const textContent = toString(node);
       // rehype-slug adds id to the heading node's data.hProperties.id or standard id
       // But this is a remark plugin, running BEFORE rehype.
       // So we might need to rely on what remark-slug (now rehype-slug) does.
@@ -15,11 +15,18 @@ export default function remarkTocHeadings(options) {
       // For now, let's try to extract text and url if it exists (e.g. autolinked)
       // But standard headings just have text.
       // The original code tried to find a link.
-      
+
       options.exportRef.push({
         value: textContent,
-        url: '#' + (node.data?.hProperties?.id || node.data?.id || textContent.toLowerCase().replace(/\s/g, '-').replace(/[^\w-]/g, '')),
+        url:
+          '#' +
+          (node.data?.hProperties?.id ||
+            node.data?.id ||
+            textContent
+              .toLowerCase()
+              .replace(/\s/g, '-')
+              .replace(/[^\w-]/g, '')),
         depth: node.depth,
-      })
-    })
+      });
+    });
 }

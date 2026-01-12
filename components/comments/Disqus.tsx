@@ -1,46 +1,50 @@
-import React, { useState } from 'react'
-
-import siteMetadata from '@/data/siteMetadata'
-import { PostFrontMatter } from 'types/PostFrontMatter'
+import { useState } from 'react';
+import type { PostFrontMatter } from 'types/PostFrontMatter';
+import siteMetadata from '@/data/siteMetadata';
 
 interface Props {
-  frontMatter: PostFrontMatter
+  frontMatter: PostFrontMatter;
 }
 
 const Disqus = ({ frontMatter }: Props) => {
-  const [enableLoadComments, setEnabledLoadComments] = useState(true)
+  const [enableLoadComments, setEnabledLoadComments] = useState(true);
 
-  const COMMENTS_ID = 'disqus_thread'
+  const COMMENTS_ID = 'disqus_thread';
 
   function LoadComments() {
-    setEnabledLoadComments(false)
+    setEnabledLoadComments(false);
 
-    // @ts-ignore
+    // @ts-expect-error
     window.disqus_config = function () {
-      this.page.url = window.location.href
-      this.page.identifier = frontMatter.slug
-    }
-    // @ts-ignore
+      this.page.url = window.location.href;
+      this.page.identifier = frontMatter.slug;
+    };
+    // @ts-expect-error
     if (window.DISQUS === undefined) {
-      const script = document.createElement('script')
-      script.src = 'https://' + siteMetadata.comment.disqus.shortname + '.disqus.com/embed.js'
-      // @ts-ignore
-      script.setAttribute('data-timestamp', +new Date())
-      script.setAttribute('crossorigin', 'anonymous')
-      script.async = true
-      document.body.appendChild(script)
+      const script = document.createElement('script');
+      script.src =
+        'https://' +
+        siteMetadata.comment.disqus.shortname +
+        '.disqus.com/embed.js';
+      // @ts-expect-error
+      script.setAttribute('data-timestamp', Date.now());
+      script.setAttribute('crossorigin', 'anonymous');
+      script.async = true;
+      document.body.appendChild(script);
     } else {
-      // @ts-ignore
-      window.DISQUS.reset({ reload: true })
+      // @ts-expect-error
+      window.DISQUS.reset({ reload: true });
     }
   }
 
   return (
     <div className="pt-6 pb-6 text-center text-gray-700 dark:text-gray-300">
-      {enableLoadComments && <button onClick={LoadComments}>Load Comments</button>}
+      {enableLoadComments && (
+        <button onClick={LoadComments}>Load Comments</button>
+      )}
       <div className="disqus-frame" id={COMMENTS_ID} />
     </div>
-  )
-}
+  );
+};
 
-export default Disqus
+export default Disqus;
