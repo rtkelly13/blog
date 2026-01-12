@@ -10,19 +10,19 @@ import { PostFrontMatter } from 'types/PostFrontMatter'
 import { AuthorFrontMatter } from 'types/AuthorFrontMatter'
 import { Toc } from 'types/Toc'
 // Remark packages
-import remarkSlug from 'remark-slug'
-import remarkAutolinkHeadings from 'remark-autolink-headings'
 import remarkGfm from 'remark-gfm'
-import remarkFootnotes from 'remark-footnotes'
 import remarkMath from 'remark-math'
 import remarkCodeTitles from './remark-code-title'
 import remarkTocHeadings from './remark-toc-headings'
 import remarkImgToJsx from './remark-img-to-jsx'
 // Rehype packages
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeKatex from 'rehype-katex'
 import rehypePrismPlus from 'rehype-prism-plus'
 
 const root = process.cwd()
+
 
 const tokenClassNames = {
   tag: 'text-code-red',
@@ -82,31 +82,31 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
 
   const toc: Toc = []
 
-  const { frontmatter, code } = await bundleMDX(source, {
+  const { frontmatter, code } = await bundleMDX({
+    source,
     // mdx imports can be automatically source from the components directory
     cwd: path.join(process.cwd(), 'components'),
-    xdmOptions(options) {
+    mdxOptions(options) {
       // this is the recommended way to add custom remark/rehype plugins:
       // The syntax might look weird, but it protects you in case we add/remove
       // plugins in the future.
       options.remarkPlugins = [
         ...(options.remarkPlugins ?? []),
-        remarkSlug,
-        remarkAutolinkHeadings,
         [remarkTocHeadings, { exportRef: toc }],
         remarkGfm,
         remarkCodeTitles,
-        [remarkFootnotes, { inlineNotes: true }],
         remarkMath,
-        remarkImgToJsx,
+        // remarkImgToJsx,
       ]
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
+        rehypeSlug,
+        rehypeAutolinkHeadings,
         rehypeKatex,
         [rehypePrismPlus, { ignoreMissing: true }] as Pluggable,
         () => {
           return (tree) => {
-            visit(tree, 'element', (node) => {
+            visit(tree, 'element', (node: any) => {
               const [token, type] = node.properties.className || []
               if (token === 'token') {
                 node.properties.className = [tokenClassNames[type]]
