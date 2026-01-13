@@ -10,7 +10,7 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack && node ./scripts/generate-sitemap",
     "serve": "next start",
-    "analyze": "cross-env ANALYZE=true next build",
+    "analyze": "cross-env ANALYZE=true next build --webpack",
     "lint": "biome check .",
     "format": "biome format --write .",
     "prepare": "husky install"
@@ -50,7 +50,7 @@
     "@types/node": "^25.0.6",
     "@types/react": "^19.2.8",
     "@types/unist": "^3.0.3",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "dedent": "^1.7.1",
     "file-loader": "^6.0.0",
     "globby": "11.0.3",

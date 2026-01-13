@@ -25,16 +25,11 @@ This document outlines the remaining dependency upgrades and migrations that req
 | `lint-staged` | 11.2.6 | 16.2.7 |
 | `dedent` | 0.7.0 | 1.7.1 |
 | `next-remote-watch` | 1.0.0 | 2.0.0 |
+| `cross-env` | 7.0.3 | 10.1.0 |
 
 ---
 
 ## Medium Risk Upgrades (Require Testing)
-
-### cross-env 7.0.3 -> 10.1.0
-- **Used in:** `analyze` script (`cross-env ANALYZE=true next build`)
-- **Risk:** Low-Medium
-- **Test:** Run `pnpm run analyze` after upgrade
-- **Command:** `pnpm add -D cross-env@10.1.0`
 
 ### inquirer 8.2.7 -> 13.2.0
 - **Used in:** Unknown (check scripts)
@@ -132,10 +127,9 @@ pnpm add pliny
 
 ## Recommended Order of Execution
 
-1. **cross-env upgrade** (5 min) - Low risk, quick win
-2. **Tailwind v4 migration** (4-8 hours) - High value, modernizes styling
-3. **globby/inquirer** - Only if needed for other changes
-4. **Contentlayer adoption** - Optional, only if wanting template parity
+1. **Tailwind v4 migration** (4-8 hours) - High value, modernizes styling
+2. **globby/inquirer** - Only if needed for other changes
+3. **Contentlayer adoption** - Optional, only if wanting template parity
 
 ---
 
