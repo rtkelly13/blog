@@ -24,8 +24,10 @@ export default function remarkImgToJsx() {
         ) as ImageNode;
 
         // only local files
-        if (fs.existsSync(`${process.cwd()}/public${imageNode.url}`)) {
-          const dimensions = sizeOf(`${process.cwd()}/public${imageNode.url}`);
+        const imagePath = `${process.cwd()}/public${imageNode.url}`;
+        if (fs.existsSync(imagePath)) {
+          const buffer = fs.readFileSync(imagePath);
+          const dimensions = sizeOf(buffer);
 
           // Convert original node to next/image
           (imageNode.type = 'mdxJsxFlowElement'),
