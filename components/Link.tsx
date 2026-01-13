@@ -4,6 +4,7 @@ import type { AnchorHTMLAttributes, DetailedHTMLProps } from 'react';
 
 const CustomLink = ({
   href,
+  ref,
   ...rest
 }: DetailedHTMLProps<
   AnchorHTMLAttributes<HTMLAnchorElement>,
