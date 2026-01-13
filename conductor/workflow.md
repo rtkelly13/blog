@@ -113,7 +113,8 @@ All tasks follow a strict lifecycle:
         ```bash
         git reset --soft <previous_checkpoint_sha>
         ```
-    -   **Step 6.3: Commit Phase:** Commit all staged changes (including the updated `plan.md` which tracks the task status) with a descriptive message.
+    -   **Step 6.3: Update Plan:** Read `plan.md` and ensure all tasks for the current phase are marked as complete (`[x]`).
+    -   **Step 6.4: Commit Phase:** Commit all staged changes (including the updated `plan.md`) with a descriptive message.
         ```bash
         git commit -m "feat(phase): Complete <Phase Name>"
         ```
@@ -125,16 +126,7 @@ All tasks follow a strict lifecycle:
         git notes add -m "<verification report>" HEAD
         ```
 
-8.  **Get and Record Phase Checkpoint SHA:**
-    -   **Step 8.1: Get Commit Hash:** Obtain the hash of the commit (`git log -1 --format="%H"`).
-    -   **Step 8.2: Update Plan:** Read `plan.md`, find the heading for the completed phase, and append the first 7 characters of the commit hash in the format `[checkpoint: <sha>]`.
-    -   **Step 8.3: Commit Plan Update:** Stage and commit the updated `plan.md` as a small, separate commit to finalize the phase record.
-        ```bash
-        git add conductor/plan.md
-        git commit -m "conductor(plan): Mark phase '<PHASE NAME>' as complete"
-        ```
-
-9.  **Announce Completion:** Inform the user that the phase is complete, the history has been squashed into a single commit, and the verification report is attached.
+8.  **Announce Completion:** Inform the user that the phase is complete, the history has been squashed into a single commit, and the verification report is attached.
 
 ### Quality Gates
 
