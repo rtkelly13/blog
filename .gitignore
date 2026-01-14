@@ -20,6 +20,9 @@ public/sitemap.xml
 # rss feed
 /public/feed.xml
 
+# search index
+/public/search.json
+
 # misc
 .DS_Store
 

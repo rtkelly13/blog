@@ -6,6 +6,7 @@ import Footer from './Footer';
 import Link from './Link';
 import MobileNav from './MobileNav';
 import SectionContainer from './SectionContainer';
+import SearchButton from './search/SearchButton';
 import ThemeSwitch from './ThemeSwitch';
 
 interface Props {
@@ -45,6 +46,7 @@ const LayoutWrapper = ({ children }: Props) => {
                 </Link>
               ))}
             </div>
+            <SearchButton />
             <ThemeSwitch />
             <MobileNav />
           </div>
