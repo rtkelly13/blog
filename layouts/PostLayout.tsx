@@ -1,8 +1,8 @@
+import NextImage from 'next/image';
 import type { ReactNode } from 'react';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
 import Comments from '@/components/comments';
-import Image from '@/components/Image';
 import Link from '@/components/Link';
 import NewsletterForm from '@/components/NewsletterForm';
 import PageTitle from '@/components/PageTitle';
@@ -86,10 +86,10 @@ export default function PostLayout({
                       key={author.name}
                     >
                       {author.avatar && (
-                        <Image
+                        <NextImage
                           src={author.avatar}
-                          width="38"
-                          height="38"
+                          width={38}
+                          height={38}
                           alt="avatar"
                           className="w-10 h-10 rounded-full"
                         />
