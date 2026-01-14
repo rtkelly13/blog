@@ -11,6 +11,8 @@
     "build": "next build --webpack && node ./scripts/generate-sitemap",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build --webpack",
+    "test:e2e": "playwright test",
+    "test:update-snapshots": "playwright test --update-snapshots",
     "lint": "biome check .",
     "format": "biome format --write .",
     "prepare": "husky install"
