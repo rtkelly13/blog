@@ -16,6 +16,7 @@ const siteMetadata = {
   youtube: '',
   linkedin: 'https://www.linkedin.com/in/rtkelly94/',
   locale: 'en-US',
+  stickyNav: true, // Set to false to disable sticky navigation
   analytics: {
     // supports plausible, simpleAnalytics or googleAnalytics
     plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
