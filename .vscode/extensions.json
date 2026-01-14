@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "unifiedjs.vscode-mdx",
+    "ms-playwright.playwright",
+    "dbaeumer.vscode-eslint"
+  ]
+}

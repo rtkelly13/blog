@@ -2,11 +2,58 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Next.js: Debug Server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev",
+      "serverReadyAction": {
+        "pattern": "- Local:.+(https?://.+)",
+        "uriFormat": "%s",
+        "action": "debugWithChrome"
+      }
+    },
+    {
+      "name": "Next.js: Debug Client-side",
       "type": "chrome",
       "request": "launch",
-      "name": "Next: Chrome",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}"
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true
+    },
+    {
+      "name": "Next.js: Debug Full Stack",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev",
+      "serverReadyAction": {
+        "pattern": "- Local:.+(https?://.+)",
+        "uriFormat": "%s",
+        "action": "debugWithChrome"
+      },
+      "env": {
+        "NODE_OPTIONS": "--inspect"
+      }
+    },
+    {
+      "name": "Playwright: Debug Tests",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm exec playwright test --ui",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Playwright: Debug Current File",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm exec playwright test ${relativeFile} --debug",
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Next.js: Full Stack + Chrome",
+      "configurations": ["Next.js: Debug Server-side"],
+      "stopAll": true
     }
   ]
 }

@@ -53,3 +53,58 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Diagram theming with CSS variables */
+:root {
+  --diagram-bg: #ffffff;
+  --diagram-bg-secondary: #f9fafb;
+  --diagram-stroke: #6b7280;
+  --diagram-stroke-light: #d1d5db;
+  --diagram-fill-primary: #3b82f6;
+  --diagram-fill-secondary: #10b981;
+  --diagram-fill-tertiary: #f59e0b;
+  --diagram-fill-quaternary: #8b5cf6;
+  --diagram-text: #1f2937;
+  --diagram-text-light: #6b7280;
+}
+
+.dark {
+  --diagram-bg: #1f2937;
+  --diagram-bg-secondary: #111827;
+  --diagram-stroke: #9ca3af;
+  --diagram-stroke-light: #4b5563;
+  --diagram-fill-primary: #60a5fa;
+  --diagram-fill-secondary: #34d399;
+  --diagram-fill-tertiary: #fbbf24;
+  --diagram-fill-quaternary: #a78bfa;
+  --diagram-text: #f3f4f6;
+  --diagram-text-light: #9ca3af;
+}
+
+/* SVG diagrams using CSS variables */
+.svg-diagram .diagram-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Theme-aware SVG styling (for SVGs that use currentColor or CSS vars) */
+.svg-diagram .diagram-svg [fill="var(--diagram-fill-primary)"],
+.svg-diagram .diagram-svg .fill-primary {
+  fill: var(--diagram-fill-primary);
+}
+
+.svg-diagram .diagram-svg [fill="var(--diagram-fill-secondary)"],
+.svg-diagram .diagram-svg .fill-secondary {
+  fill: var(--diagram-fill-secondary);
+}
+
+.svg-diagram .diagram-svg [stroke="var(--diagram-stroke)"],
+.svg-diagram .diagram-svg .stroke-main {
+  stroke: var(--diagram-stroke);
+}
+
+/* Mermaid diagram overrides */
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}

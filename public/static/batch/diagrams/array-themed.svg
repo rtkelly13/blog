@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160" class="diagram-svg">
+  <style>
+    .box { fill: var(--diagram-fill-primary, #3b82f6); }
+    .box-stroke { stroke: var(--diagram-stroke, #6b7280); stroke-width: 2; fill: none; }
+    .text { fill: var(--diagram-bg, #ffffff); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+  </style>
+  
+  <!-- Stacked boxes representing array jobs -->
+  <g transform="translate(20, 10)">
+    <!-- Back boxes (stack effect) -->
+    <rect x="40" y="0" width="100" height="80" rx="6" class="box" opacity="0.3"/>
+    <rect x="30" y="10" width="100" height="80" rx="6" class="box" opacity="0.5"/>
+    <rect x="20" y="20" width="100" height="80" rx="6" class="box" opacity="0.7"/>
+    <rect x="10" y="30" width="100" height="80" rx="6" class="box" opacity="0.85"/>
+    
+    <!-- Front box -->
+    <rect x="0" y="40" width="100" height="80" rx="6" class="box"/>
+    <rect x="0" y="40" width="100" height="80" rx="6" class="box-stroke"/>
+    
+    <!-- Text -->
+    <text x="50" y="88" text-anchor="middle" class="text">Array Job</text>
+  </g>
+</svg>

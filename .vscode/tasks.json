@@ -2,47 +2,140 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "analyze",
-      "problemMatcher": [],
-      "label": "npm: analyze",
-      "detail": "cross-env ANALYZE=true next build"
+      "label": "Dev Server",
+      "type": "shell",
+      "command": "pnpm dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc-watch"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
     },
     {
-      "type": "npm",
-      "script": "build",
+      "label": "Dev Server (Debug)",
+      "type": "shell",
+      "command": "NODE_OPTIONS='--inspect' pnpm dev",
       "group": "build",
-      "problemMatcher": [],
-      "label": "npm: build",
-      "detail": "next build && node ./scripts/generate-sitemap"
+      "problemMatcher": ["$tsc-watch"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
     },
     {
-      "type": "npm",
-      "script": "lint",
-      "problemMatcher": [],
-      "label": "npm: lint",
-      "detail": "next lint --fix --dir pages --dir components --dir lib --dir layouts --dir scripts"
+      "label": "Build",
+      "type": "shell",
+      "command": "pnpm build",
+      "group": "build",
+      "problemMatcher": ["$tsc"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     },
     {
-      "type": "npm",
-      "script": "dev",
+      "label": "Serve Production",
+      "type": "shell",
+      "command": "pnpm serve",
+      "dependsOn": ["Build"],
       "problemMatcher": [],
-      "label": "npm: dev",
-      "detail": "NODE_OPTIONS='--inspect' next dev"
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "serve"
+      }
     },
     {
-      "type": "npm",
-      "script": "serve",
+      "label": "Test: E2E",
+      "type": "shell",
+      "command": "pnpm test:e2e",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
       "problemMatcher": [],
-      "label": "npm: serve",
-      "detail": "next start"
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     },
     {
-      "type": "npm",
-      "script": "prepare",
+      "label": "Test: E2E (Watch)",
+      "type": "shell",
+      "command": "pnpm test:e2e:watch",
+      "group": "test",
       "problemMatcher": [],
-      "label": "npm: prepare",
-      "detail": "husky install"
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "test"
+      }
+    },
+    {
+      "label": "Test: Update Snapshots",
+      "type": "shell",
+      "command": "pnpm test:update-snapshots",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "pnpm lint",
+      "problemMatcher": ["$eslint-stylish"],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Format",
+      "type": "shell",
+      "command": "pnpm format",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Analyze Bundle",
+      "type": "shell",
+      "command": "pnpm analyze",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Install Dependencies",
+      "type": "shell",
+      "command": "pnpm install",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
     }
   ]
 }

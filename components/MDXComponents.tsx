@@ -4,6 +4,7 @@ import type { MDXComponents as MDXComponentsType } from 'mdx/types';
 import { getMDXComponent } from 'mdx-bundler/client';
 import type React from 'react';
 import { useMemo } from 'react';
+import Diagram from './diagrams/Diagram';
 import Image from './Image';
 import CustomLink from './Link';
 import Pre from './Pre';
@@ -20,6 +21,7 @@ const Wrapper: React.ComponentType<{ layout: string }> = ({
 export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
+  Diagram,
   a: CustomLink,
   pre: Pre,
   wrapper: Wrapper,

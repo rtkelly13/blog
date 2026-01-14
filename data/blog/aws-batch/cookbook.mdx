@@ -27,12 +27,27 @@ If you wish for one or more jobs to be linked together and be dependent on the f
 Letting you build solutions using the Fan In / Fan Out model.
 This is called _Job Dependencies_ in AWS Batch
 
-<Image
-  alt="HeaderImage"
-  src="/static/batch/diagrams/dependent-jobs.drawio.svg"
-  width={350}
-  height={200}
-/>
+<Diagram type="mermaid" caption="Job Dependencies - Fan In/Fan Out Pattern">
+  {`graph LR
+    subgraph Primary
+        P[Primary Job]
+    end
+    subgraph Secondary
+        S1[Secondary Job 1]
+        S2[Secondary Job 2]
+    end
+    subgraph Tertiary
+        T[Tertiary Job]
+    end
+    P --> S1
+    P --> S2
+    S1 --> T
+    S2 --> T
+    style P fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style S1 fill:#3b82f6,stroke:#2563eb,color:#fff
+    style S2 fill:#10b981,stroke:#059669,color:#fff
+    style T fill:#ef4444,stroke:#dc2626,color:#fff`}
+</Diagram>
 
 <div
   className="bg-primary-100 border-t-8 border-primary-500 rounded-b text-primary-900 px-3 py-1 shadow-md"
@@ -56,18 +71,34 @@ This is called _Job Dependencies_ in AWS Batch
 An array job lets you take a single type of job and run it in parallel or sequentially. You specify the number of number of jobs to be ran,
 read an environment variable to determine which element is needed to be run and process that.
 
-<Image alt="HeaderImage" src="/static/batch/diagrams/array.drawio.svg" width={350} height={120} />
+<Diagram
+  type="svg"
+  src="/static/batch/diagrams/array-themed.svg"
+  caption="Array Job - Multiple parallel instances"
+/>
 
 # Potential Use Cases
 
 ## Map/ Reduce
 
-<Image
-  alt="HeaderImage"
-  src="/static/batch/diagrams/map-reduce.drawio.svg"
-  width={350}
-  height={120}
-/>
+<Diagram type="mermaid" caption="Map/Reduce Pattern">
+  {`graph LR
+    subgraph Map[Map Phase]
+        M1[Map Job 1]
+        M2[Map Job 2]
+        M3[Map Job 3]
+    end
+    subgraph Reduce[Reduce Phase]
+        R[Reduce Job]
+    end
+    M1 --> R
+    M2 --> R
+    M3 --> R
+    style M1 fill:#10b981,stroke:#059669,color:#fff
+    style M2 fill:#10b981,stroke:#059669,color:#fff
+    style M3 fill:#10b981,stroke:#059669,color:#fff
+    style R fill:#f59e0b,stroke:#d97706,color:#fff`}
+</Diagram>
 
 [Map Reduce](https://en.wikipedia.org/wiki/MapReduce) is a programming model for processing of large data sets or performing large computations over a distributed cluster of computers.
 The definition shifts based on where you look but it typically involves at least these two steps
