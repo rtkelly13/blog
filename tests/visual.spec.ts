@@ -17,10 +17,10 @@ test.skip(process.platform !== 'linux', 'Visual tests only run on Linux CI');
 
 // Helper to wait for page to be fully loaded
 async function waitForPageReady(page: import('@playwright/test').Page) {
-  // Wait for network to be idle and no pending requests
-  await page.waitForLoadState('networkidle');
-  // Additional wait for any animations/transitions to settle
-  await page.waitForTimeout(500);
+  // Wait for DOM content to be loaded (more reliable than networkidle with broken images)
+  await page.waitForLoadState('domcontentloaded');
+  // Wait for fonts and initial render
+  await page.waitForTimeout(1000);
 }
 
 // Helper to set dark mode before navigation
