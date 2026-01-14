@@ -20,7 +20,7 @@ const LayoutWrapper = ({ children }: Props) => {
         <header
           className={`flex items-center justify-between py-10 ${
             siteMetadata.stickyNav
-              ? 'sticky top-0 z-50 bg-white/75 dark:bg-gray-950/75 backdrop-blur-lg'
+              ? 'sticky top-0 z-50 bg-white/75 dark:bg-gray-900/75 backdrop-blur-lg'
               : ''
           }`}
         >

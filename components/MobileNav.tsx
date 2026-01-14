@@ -21,7 +21,7 @@ const MobileNav = () => {
     <div className="sm:hidden">
       <button
         type="button"
-        className="w-8 h-8 ml-1 mr-1 rounded"
+        className="w-8 h-8 ml-1 mr-1 rounded-sm"
         aria-label="Toggle Menu"
         onClick={onToggleNav}
       >
@@ -54,7 +54,7 @@ const MobileNav = () => {
         <button
           type="button"
           aria-label="toggle modal"
-          className="fixed w-full h-full cursor-auto focus:outline-none"
+          className="fixed w-full h-full cursor-auto focus:outline-hidden"
           onClick={onToggleNav}
         ></button>
         <nav className="fixed h-full mt-8">

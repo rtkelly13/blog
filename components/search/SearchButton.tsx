@@ -7,7 +7,7 @@ export default function SearchButton() {
     <button
       aria-label="Search"
       onClick={() => query.toggle()}
-      className="ml-1 mr-1 h-8 w-8 rounded p-1 sm:ml-4"
+      className="ml-1 mr-1 h-8 w-8 rounded-sm p-1 sm:ml-4"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

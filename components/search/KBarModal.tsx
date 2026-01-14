@@ -19,7 +19,7 @@ export default function KBarModal({ actions, isLoading }: Props) {
 
   return (
     <KBarPortal>
-      <KBarPositioner className="z-50 bg-gray-300/50 p-4 backdrop-blur-sm dark:bg-black/50">
+      <KBarPositioner className="z-50 bg-gray-300/50 p-4 backdrop-blur-xs dark:bg-black/50">
         <KBarAnimator className="w-full max-w-xl">
           <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center space-x-4 p-4">
@@ -41,9 +41,9 @@ export default function KBarModal({ actions, isLoading }: Props) {
               </span>
               <KBarSearch
                 defaultPlaceholder="Search..."
-                className="h-8 w-full bg-transparent text-gray-600 placeholder-gray-400 focus:outline-none dark:text-gray-200 dark:placeholder-gray-500"
+                className="h-8 w-full bg-transparent text-gray-600 placeholder-gray-400 focus:outline-hidden dark:text-gray-200 dark:placeholder-gray-500"
               />
-              <kbd className="inline-block whitespace-nowrap rounded border border-gray-400 px-1.5 align-middle text-xs font-medium leading-4 tracking-wide text-gray-400">
+              <kbd className="inline-block whitespace-nowrap rounded-sm border border-gray-400 px-1.5 align-middle text-xs font-medium leading-4 tracking-wide text-gray-400">
                 ESC
               </kbd>
             </div>
@@ -99,7 +99,7 @@ function RenderResults() {
                   {item.shortcut.map((sc) => (
                     <kbd
                       key={sc}
-                      className={`flex h-6 w-6 items-center justify-center rounded border text-xs font-medium ${
+                      className={`flex h-6 w-6 items-center justify-center rounded-sm border text-xs font-medium ${
                         active
                           ? 'border-gray-200 text-gray-200'
                           : 'border-gray-400 text-gray-400'
