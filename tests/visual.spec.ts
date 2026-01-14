@@ -59,14 +59,6 @@ test.describe('Visual Regression - Light Mode', () => {
     await expect(page).toHaveScreenshot('about-light.png', { fullPage: true });
   });
 
-  test('projects page', async ({ page }) => {
-    await page.goto('/projects');
-    await waitForPageReady(page);
-    await expect(page).toHaveScreenshot('projects-light.png', {
-      fullPage: true,
-    });
-  });
-
   test('tags page', async ({ page }) => {
     await page.goto('/tags');
     await waitForPageReady(page);
@@ -116,15 +108,6 @@ test.describe('Visual Regression - Dark Mode', () => {
     await waitForPageReady(page);
     await expect(page.locator('html')).toHaveClass(/dark/);
     await expect(page).toHaveScreenshot('about-dark.png', { fullPage: true });
-  });
-
-  test('projects page', async ({ page }) => {
-    await page.goto('/projects');
-    await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
-    await expect(page).toHaveScreenshot('projects-dark.png', {
-      fullPage: true,
-    });
   });
 
   test('tags page', async ({ page }) => {

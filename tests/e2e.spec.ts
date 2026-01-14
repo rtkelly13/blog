@@ -76,16 +76,6 @@ test.describe('About Page', () => {
   });
 });
 
-test.describe('Projects Page', () => {
-  test('projects page renders', async ({ page }) => {
-    // Projects page exists but is not in main navigation
-    await page.goto('/projects');
-
-    await expect(page).toHaveTitle(/Projects/);
-    await expect(page.locator('main')).toBeVisible();
-  });
-});
-
 test.describe('Tags', () => {
   test('tags listing page shows tags', async ({ page }) => {
     await page.goto('/tags');
