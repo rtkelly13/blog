@@ -10,6 +10,7 @@ import rehypePrismPlus from 'rehype-prism-plus';
 import rehypeSlug from 'rehype-slug';
 // Remark packages
 import remarkGfm from 'remark-gfm';
+import { remarkAlert } from 'remark-github-blockquote-alert';
 import remarkMath from 'remark-math';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
@@ -99,6 +100,7 @@ export async function getFileBySlug<_T>(
         remarkGfm,
         remarkCodeTitles,
         remarkMath,
+        remarkAlert,
         // remarkImgToJsx,
       ];
       options.rehypePlugins = [
