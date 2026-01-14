@@ -8,7 +8,7 @@
   "scripts": {
     "start": "next-remote-watch ./data",
     "dev": "next dev --webpack",
-    "build": "next build --webpack && node ./scripts/generate-sitemap && node ./scripts/generate-search.js",
+    "build": "next build --webpack && node ./scripts/generate-sitemap && node ./scripts/generate-search.js && node ./scripts/generate-tag-rss.js",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build --webpack",
     "test:e2e": "playwright test",
