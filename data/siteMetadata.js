@@ -11,9 +11,9 @@ const siteMetadata = {
   socialBanner: '/static/images/twitter-card.png',
   email: 'me@ryankelly.dev',
   github: 'https://github.com/rtkelly13',
-  twitter: 'https://twitter.com/RTKelly25',
-  facebook: 'https://facebook.com',
-  youtube: 'https://youtube.com',
+  x: 'https://x.com/RTKelly25',
+  facebook: '',
+  youtube: '',
   linkedin: 'https://www.linkedin.com/in/rtkelly94/',
   locale: 'en-US',
   analytics: {
