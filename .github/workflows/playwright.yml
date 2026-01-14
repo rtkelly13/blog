@@ -38,9 +38,22 @@ jobs:
     - name: Install Playwright Browsers
       run: pnpm exec playwright install --with-deps
 
+    - name: Check if snapshots exist
+      id: snapshots
+      run: |
+        if [ -d "tests/__snapshots__" ] && [ "$(ls -A tests/__snapshots__ 2>/dev/null)" ]; then
+          echo "exist=true" >> $GITHUB_OUTPUT
+        else
+          echo "exist=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Run Playwright tests
-      if: ${{ !inputs.update_snapshots }}
+      if: ${{ !inputs.update_snapshots && steps.snapshots.outputs.exist == 'true' }}
       run: pnpm exec playwright test
+
+    - name: Run Playwright tests (no snapshots yet - update mode)
+      if: ${{ !inputs.update_snapshots && steps.snapshots.outputs.exist == 'false' }}
+      run: pnpm exec playwright test --update-snapshots
 
     - name: Update snapshots
       if: ${{ inputs.update_snapshots }}
@@ -55,7 +68,7 @@ jobs:
 
     - name: Upload snapshots
       uses: actions/upload-artifact@v4
-      if: ${{ inputs.update_snapshots && !cancelled() }}
+      if: ${{ (inputs.update_snapshots || steps.snapshots.outputs.exist == 'false') && !cancelled() }}
       with:
         name: playwright-snapshots
         path: tests/__snapshots__/
