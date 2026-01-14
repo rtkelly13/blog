@@ -4,6 +4,7 @@ import type { PostFrontMatter } from 'types/PostFrontMatter';
 import Comments from '@/components/comments';
 import Image from '@/components/Image';
 import Link from '@/components/Link';
+import NewsletterForm from '@/components/NewsletterForm';
 import PageTitle from '@/components/PageTitle';
 import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import { BlogSEO } from '@/components/SEO';
@@ -129,6 +130,11 @@ export default function PostLayout({
                 {` • `}
                 <Link href={editUrl(fileName)}>{'View on GitHub'}</Link>
               </div>
+              {siteMetadata.newsletter?.enabled && (
+                <div className="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+                  <NewsletterForm />
+                </div>
+              )}
               <Comments frontMatter={frontMatter} />
             </div>
             <footer>

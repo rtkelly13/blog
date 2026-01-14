@@ -64,6 +64,10 @@ const siteMetadata = {
       shortname: process.env.NEXT_PUBLIC_DISQUS_SHORTNAME,
     },
   },
+  newsletter: {
+    provider: 'buttondown',
+    enabled: false, // Set to true when ready to enable
+  },
 };
 
 module.exports = siteMetadata;
