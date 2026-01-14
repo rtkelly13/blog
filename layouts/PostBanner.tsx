@@ -1,0 +1,98 @@
+import NextImage from 'next/image';
+import type { ReactNode } from 'react';
+import type { PostFrontMatter } from 'types/PostFrontMatter';
+import Comments from '@/components/comments';
+import Link from '@/components/Link';
+import PageTitle from '@/components/PageTitle';
+import ScrollTopAndComment from '@/components/ScrollTopAndComment';
+import { BlogSEO } from '@/components/SEO';
+import SectionContainer from '@/components/SectionContainer';
+import siteMetadata from '@/data/siteMetadata';
+import formatDate from '@/lib/utils/formatDate';
+
+interface Props {
+  frontMatter: PostFrontMatter;
+  children: ReactNode;
+  next?: { slug: string; title: string };
+  prev?: { slug: string; title: string };
+}
+
+export default function PostBanner({
+  frontMatter,
+  next,
+  prev,
+  children,
+}: Props) {
+  const { slug, date, title, images } = frontMatter;
+
+  // Use first image from frontmatter, or fallback to placeholder
+  const displayImage =
+    images && images.length > 0 ? images[0] : '/static/images/twitter-card.png';
+
+  return (
+    <>
+      <BlogSEO url={`${siteMetadata.siteUrl}/blog/${slug}`} {...frontMatter} />
+      <ScrollTopAndComment />
+
+      {/* Full-width banner - breaks out of container */}
+      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+        <div className="relative aspect-[2/1] w-full">
+          <NextImage
+            src={displayImage}
+            alt={title}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      </div>
+
+      <SectionContainer>
+        <article>
+          <header className="pt-6 pb-8 text-center">
+            <div className="space-y-1">
+              <dl>
+                <dt className="sr-only">Published on</dt>
+                <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                  <time dateTime={date}>{formatDate(date)}</time>
+                </dd>
+              </dl>
+              <PageTitle>{title}</PageTitle>
+            </div>
+          </header>
+
+          <div className="pb-8 prose dark:prose-dark max-w-none">
+            {children}
+          </div>
+
+          <Comments frontMatter={frontMatter} />
+
+          <footer className="pt-8">
+            <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
+              {prev && (
+                <div className="pt-4 xl:pt-8">
+                  <Link
+                    href={`/blog/${prev.slug}`}
+                    className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                  >
+                    &larr; {prev.title}
+                  </Link>
+                </div>
+              )}
+              {next && (
+                <div className="pt-4 xl:pt-8">
+                  <Link
+                    href={`/blog/${next.slug}`}
+                    className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                  >
+                    {next.title} &rarr;
+                  </Link>
+                </div>
+              )}
+            </div>
+          </footer>
+        </article>
+      </SectionContainer>
+    </>
+  );
+}
