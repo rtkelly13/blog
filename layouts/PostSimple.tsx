@@ -3,6 +3,7 @@ import type { PostFrontMatter } from 'types/PostFrontMatter';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
+import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
@@ -80,6 +81,7 @@ export default function PostLayout({
           </div>
         </div>
       </article>
+      <ScrollTopAndComment />
     </SectionContainer>
   );
 }

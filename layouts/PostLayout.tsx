@@ -5,6 +5,7 @@ import Comments from '@/components/comments';
 import Image from '@/components/Image';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
+import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import Tag from '@/components/Tag';
@@ -181,6 +182,7 @@ export default function PostLayout({
           </div>
         </div>
       </article>
+      <ScrollTopAndComment />
     </SectionContainer>
   );
 }
