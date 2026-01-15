@@ -12,14 +12,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.join(__dirname, '..');
 
+// Normalize siteUrl to remove trailing slash
+const siteUrl = siteMetadata.siteUrl.replace(/\/$/, '');
+
 (async () => {
   const prettierConfig = await prettier.resolveConfig('./.prettierrc.js');
   const pages = await globby(
     [
+      'pages/*.tsx',
       'pages/*.js',
       'data/blog/**/*.mdx',
       'data/blog/**/*.md',
       'public/tags/**/*.xml',
+      '!pages/_*.tsx',
       '!pages/_*.js',
       '!pages/api',
     ],
@@ -31,24 +36,27 @@ const root = path.join(__dirname, '..');
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
             ${pages
               .map((page) => {
-                const path = page
+                const pagePath = page
                   .replace('pages/', '/')
                   .replace('data/blog', '/blog')
                   .replace('public/', '/')
+                  .replace('.tsx', '')
                   .replace('.js', '')
                   .replace('.mdx', '')
                   .replace('.md', '')
                   .replace('/feed.xml', '');
-                const route = path === '/index' ? '' : path;
+                const route = pagePath === '/index' ? '' : pagePath;
                 if (
-                  page === `pages/404.js` ||
-                  page === `pages/blog/[...slug].js`
+                  page === 'pages/404.tsx' ||
+                  page === 'pages/404.js' ||
+                  page === 'pages/blog/[...slug].tsx' ||
+                  page === 'pages/blog/[...slug].js'
                 ) {
                   return;
                 }
                 return `
                         <url>
-                            <loc>${siteMetadata.siteUrl}${route}</loc>
+                            <loc>${siteUrl}${route}</loc>
                         </url>
                     `;
               })
