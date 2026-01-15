@@ -126,19 +126,11 @@ git checkout -b <branch-name>
 
 ### Step 2: Planning
 
-For complex tasks, create or update a plan:
+For complex tasks, break down the work before starting:
 
-**For feature work:**
-
-- Check `conductor/` directory for existing plans
-- Reference `conductor/workflow.md` for detailed TDD workflow
-- Create task breakdown if implementing multiple changes
-
-**For upgrades/migrations:**
-
-- Document in `UPGRADE_PLAN.md` or similar
-- List all files requiring changes
-- Note breaking changes and migration steps
+- Create a task breakdown if implementing multiple changes
+- For upgrades/migrations, list all files requiring changes and note breaking changes
+- Consider writing tests first (TDD approach)
 
 ---
 
@@ -183,10 +175,10 @@ pnpm run build
 
 This command:
 
-1. Runs `next build --webpack`
-2. Generates sitemap (`scripts/generate-sitemap`)
-3. Generates search index (`scripts/generate-search.js`)
-4. Generates per-tag RSS feeds (`scripts/generate-tag-rss.js`)
+1. Runs `next build` (Turbopack)
+2. Generates sitemap (`scripts/generate-sitemap.mjs`)
+3. Generates search index (`scripts/generate-search.mjs`)
+4. Generates per-tag RSS feeds (`scripts/generate-tag-rss.mjs`)
 
 **Expected output:**
 
@@ -415,11 +407,11 @@ Before merging, ensure:
 2. Add frontmatter:
    ```yaml
    ---
-   title: 'Post Title'
-   date: '2026-01-15'
-   tags: ['tag1', 'tag2']
+   title: "Post Title"
+   date: "2026-01-15"
+   tags: ["tag1", "tag2"]
    draft: false
-   summary: 'Brief description'
+   summary: "Brief description"
    ---
    ```
 3. Write content using MDX (Markdown + React components)
@@ -488,16 +480,12 @@ blog/
 ├── .github/workflows/     # CI workflows
 │   └── playwright.yml     # E2E tests (triggered by Vercel)
 ├── components/            # React components
-├── conductor/             # Project documentation
-│   ├── workflow.md        # Detailed TDD workflow
-│   ├── tech-stack.md      # Technology decisions
-│   └── product.md         # Product vision
 ├── css/
 │   └── tailwind.css       # Main CSS (Tailwind v4 imports)
 ├── data/
 │   ├── blog/              # MDX blog posts
 │   ├── authors/           # Author profiles
-│   ├── headerNavLinks.js  # Navigation config
+│   ├── headerNavLinks.ts  # Navigation config
 │   └── siteMetadata.js    # Site configuration
 ├── layouts/               # Page layouts (PostLayout, ListLayout, etc.)
 ├── lib/                   # Utility functions
@@ -604,15 +592,6 @@ git push
 gh api repos/rtkelly13/blog/commits/main/status --jq '.state'
 open https://ryankelly.dev
 ```
-
----
-
-## Additional Resources
-
-- **Conductor Docs:** `conductor/workflow.md` - Detailed TDD workflow and quality gates
-- **Tech Stack:** `conductor/tech-stack.md` - Technology decisions and rationale
-- **Product Guide:** `conductor/product.md` - Vision and target audience
-- **Style Guides:** `conductor/code_styleguides/` - TypeScript/JavaScript conventions
 
 ---
 
