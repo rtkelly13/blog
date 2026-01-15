@@ -1,9 +1,12 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const matter = require('gray-matter');
-const globby = require('globby');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { globby } from 'globby';
+import matter from 'gray-matter';
 
-const root = process.cwd();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.join(__dirname, '..');
 
 async function generateSearchIndex() {
   const blogDir = path.join(root, 'data', 'blog');

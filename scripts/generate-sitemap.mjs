@@ -1,18 +1,30 @@
-const fs = require('node:fs');
-const globby = require('globby');
-const prettier = require('prettier');
-const siteMetadata = require('../data/siteMetadata');
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { globby } from 'globby';
+import prettier from 'prettier';
+
+const require = createRequire(import.meta.url);
+const siteMetadata = require('../data/siteMetadata.js');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.join(__dirname, '..');
 
 (async () => {
   const prettierConfig = await prettier.resolveConfig('./.prettierrc.js');
-  const pages = await globby([
-    'pages/*.js',
-    'data/blog/**/*.mdx',
-    'data/blog/**/*.md',
-    'public/tags/**/*.xml',
-    '!pages/_*.js',
-    '!pages/api',
-  ]);
+  const pages = await globby(
+    [
+      'pages/*.js',
+      'data/blog/**/*.mdx',
+      'data/blog/**/*.md',
+      'public/tags/**/*.xml',
+      '!pages/_*.js',
+      '!pages/api',
+    ],
+    { cwd: root },
+  );
 
   const sitemap = `
         <?xml version="1.0" encoding="UTF-8"?>
@@ -49,6 +61,5 @@ const siteMetadata = require('../data/siteMetadata');
     parser: 'html',
   });
 
-  // eslint-disable-next-line no-sync
-  fs.writeFileSync('public/sitemap.xml', formatted);
+  fs.writeFileSync(path.join(root, 'public/sitemap.xml'), formatted);
 })();

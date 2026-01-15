@@ -1,9 +1,12 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const inquirer = require('inquirer');
-const dedent = require('dedent');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import dedent from 'dedent';
+import inquirer from 'inquirer';
 
-const root = process.cwd();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.join(__dirname, '..');
 
 const getAuthors = () => {
   const authorPath = path.join(root, 'data', 'authors');
@@ -104,9 +107,12 @@ inquirer
       .replace(/ /g, '-')
       .replace(/-+/g, '-');
     const frontMatter = genFrontMatter(answers);
-    const filePath = `data/blog/${fileName ? fileName : 'untitled'}.${
-      answers.extension ? answers.extension : 'md'
-    }`;
+    const filePath = path.join(
+      root,
+      'data',
+      'blog',
+      `${fileName || 'untitled'}.${answers.extension || 'md'}`,
+    );
     fs.writeFile(filePath, frontMatter, { flag: 'wx' }, (err) => {
       if (err) {
         throw err;

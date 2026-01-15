@@ -1,11 +1,16 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const matter = require('gray-matter');
-const globby = require('globby');
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { globby } from 'globby';
+import matter from 'gray-matter';
 
-const siteMetadata = require('../data/siteMetadata');
+const require = createRequire(import.meta.url);
+const siteMetadata = require('../data/siteMetadata.js');
 
-const root = process.cwd();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.join(__dirname, '..');
 
 // Remove trailing slash from URL if present
 const siteUrl = siteMetadata.siteUrl.replace(/\/$/, '');
