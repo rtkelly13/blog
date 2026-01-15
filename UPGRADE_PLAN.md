@@ -46,6 +46,62 @@ All scripts converted from CommonJS (`.js`) to ES Modules (`.mjs`):
 
 ---
 
+## Phase 2.5: Feed Validation & Bug Fixes (Completed)
+
+Added comprehensive RSS/sitemap validation tests and fixed URL generation bugs.
+
+### New Tests Added
+
+| Test File             | Tests | Description                      |
+| --------------------- | ----- | -------------------------------- |
+| `tests/feeds.spec.ts` | 8     | RSS and sitemap validation tests |
+
+**Test breakdown:**
+
+- RSS Feed Validation (2 tests): Valid RSS 2.0 structure, no double-slash URLs
+- Sitemap Validation (3 tests): Valid XML structure, main pages included, no double-slash URLs
+- Tag RSS Feeds (3 tests): Valid structure and correct tag filtering for aws, aws-batch, docker
+
+### Bugs Fixed
+
+| Bug                           | File                           | Fix                                          |
+| ----------------------------- | ------------------------------ | -------------------------------------------- |
+| Double-slash URLs in RSS feed | `lib/generate-rss.ts`          | Normalize `siteUrl` to remove trailing slash |
+| Double-slash URLs in sitemap  | `scripts/generate-sitemap.mjs` | Normalize `siteUrl` to remove trailing slash |
+| Missing main pages in sitemap | `scripts/generate-sitemap.mjs` | Add `.tsx` glob patterns alongside `.js`     |
+
+### New Dependencies
+
+| Package           | Version | Purpose                 |
+| ----------------- | ------- | ----------------------- |
+| `fast-xml-parser` | 5.3.3   | XML validation in tests |
+
+### Sitemap Now Includes
+
+The sitemap previously only included blog posts and tag pages. It now includes:
+
+```
+https://ryankelly.dev          (homepage)
+https://ryankelly.dev/about
+https://ryankelly.dev/blog
+https://ryankelly.dev/tags
+https://ryankelly.dev/blog/aws-batch/cookbook
+https://ryankelly.dev/tags/aws
+https://ryankelly.dev/tags/aws-batch
+https://ryankelly.dev/tags/docker
+```
+
+### Test Count Summary
+
+| Suite             | Tests  |
+| ----------------- | ------ |
+| E2E functional    | 12     |
+| Feed validation   | 8      |
+| Visual regression | 12     |
+| **Total**         | **32** |
+
+---
+
 ## Historical Upgrades (Previous Sessions)
 
 | Package                 | From    | To     |
@@ -159,7 +215,7 @@ kbar 0.1.0-beta.48
 After any upgrade:
 
 - [ ] `pnpm build` succeeds
-- [ ] `pnpm test:e2e` passes (12 functional tests)
+- [ ] `pnpm test:e2e` passes (20 functional + feed tests, 12 visual on CI)
 - [ ] `pnpm lint` reports no errors
 - [ ] Visual inspection in `pnpm dev`
 - [ ] Deploy to Vercel preview before merging
