@@ -46,6 +46,70 @@ All scripts converted from CommonJS (`.js`) to ES Modules (`.mjs`):
 
 ---
 
+## Phase 3: Turbopack Migration (Completed)
+
+Migrated from Webpack to Turbopack for faster development and build times.
+
+### Changes Made
+
+| Change          | Before                 | After                            |
+| --------------- | ---------------------- | -------------------------------- |
+| **Dev Server**  | `next dev --webpack`   | `next dev --turbopack`           |
+| **Build**       | `next build --webpack` | `next build` (Turbopack default) |
+| **Dev Startup** | ~2-3s                  | ~637ms                           |
+
+### Dependencies Removed
+
+| Package         | Version | Reason                                       |
+| --------------- | ------- | -------------------------------------------- |
+| `@svgr/webpack` | 8.1.0   | Not compatible with Turbopack                |
+| `file-loader`   | 6.2.0   | Not needed (Next.js handles assets natively) |
+
+### SVG Migration
+
+Converted all SVG imports from `@svgr/webpack` to inline React components:
+
+| Old Location                              | New Location                        |
+| ----------------------------------------- | ----------------------------------- |
+| `data/logo.svg`                           | `components/Logo.tsx`               |
+| `components/social-icons/*.svg` (7 files) | `components/social-icons/icons.tsx` |
+
+**Removed social icons (unused):**
+
+- `facebook.svg`
+- `youtube.svg`
+
+### Configuration Changes
+
+**`next.config.js`:**
+
+- Removed entire `webpack()` function (file-loader and SVGR rules)
+
+**`package.json` scripts:**
+
+- `dev`: `next dev --webpack` → `next dev --turbopack`
+- `build`: `next build --webpack` → `next build`
+- `analyze`: `cross-env ANALYZE=true next build --webpack` → `cross-env ANALYZE=true next build`
+
+### Static Output Verification
+
+All pages remain fully static (SSG):
+
+```
+Route (pages)
+├ ● /                    (SSG)
+├ ○ /404                 (Static)
+├ ● /about               (SSG)
+├ ƒ /api/newsletter      (API Route - serverless)
+├ ● /blog                (SSG)
+├ ● /blog/[...slug]      (SSG)
+├ ● /blog/page/[page]    (SSG)
+├ ● /tags                (SSG)
+└ ● /tags/[tag]          (SSG)
+```
+
+---
+
 ## Phase 2.5: Feed Validation & Bug Fixes (Completed)
 
 Added comprehensive RSS/sitemap validation tests and fixed URL generation bugs.
@@ -130,7 +194,7 @@ https://ryankelly.dev/tags/docker
 
 ---
 
-## Phase 3: Template Alignment (Optional Future)
+## Phase 4: Template Alignment (Optional Future)
 
 Major architectural changes to align with upstream [tailwind-nextjs-starter-blog v2.4.0](https://github.com/timlrx/tailwind-nextjs-starter-blog).
 

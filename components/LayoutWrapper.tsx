@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
+import Logo from '@/components/Logo';
 import headerNavLinks from '@/data/headerNavLinks';
-import Logo from '@/data/logo.svg';
 import siteMetadata from '@/data/siteMetadata';
 import Footer from './Footer';
 import Link from './Link';
