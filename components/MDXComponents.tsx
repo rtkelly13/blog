@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import Diagram from './diagrams/Diagram';
 import Image from './Image';
 import CustomLink from './Link';
+import NoteBlock from './NoteBlock';
 import Pre from './Pre';
 import TOCInline from './TOCInline';
 
@@ -22,6 +23,7 @@ export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
   Diagram,
+  NoteBlock,
   a: CustomLink,
   pre: Pre,
   wrapper: Wrapper,

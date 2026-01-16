@@ -18,17 +18,15 @@ const LayoutWrapper = ({ children }: Props) => {
     <SectionContainer>
       <div className="flex flex-col justify-between h-screen">
         <header
-          className={`flex items-center justify-between py-10 ${
-            siteMetadata.stickyNav
-              ? 'sticky top-0 z-50 bg-white/75 dark:bg-gray-900/75 backdrop-blur-lg'
-              : ''
-          }`}
+          className={`flex items-center justify-between py-4 ${
+            siteMetadata.stickyNav ? 'sticky top-0 z-50' : ''
+          } text-slate-800 dark:text-slate-100`}
         >
           <div>
             <Link href="/" aria-label="Ryan Kelly Blog">
               <div className="flex items-center justify-between">
                 <div className="mr-3">
-                  <Logo className="w-24 h-24" />
+                  <Logo className="w-16 h-16" />
                 </div>
                 {typeof siteMetadata.headerTitle === 'string' ? (
                   <div className="hidden h-6 text-2xl font-semibold sm:block">
@@ -46,7 +44,7 @@ const LayoutWrapper = ({ children }: Props) => {
                 <Link
                   key={link.title}
                   href={link.href}
-                  className="p-1 font-medium text-gray-900 sm:p-4 dark:text-gray-100"
+                  className="p-1 font-medium sm:p-4 text-inherit hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   {link.title}
                 </Link>

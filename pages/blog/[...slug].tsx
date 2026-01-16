@@ -6,12 +6,8 @@ import type { Toc } from 'types/Toc';
 import { MDXLayoutRenderer } from '@/components/MDXComponents';
 import PageTitle from '@/components/PageTitle';
 import generateRss from '@/lib/generate-rss';
-import {
-  formatSlug,
-  getAllFilesFrontMatter,
-  getFileBySlug,
-  getFiles,
-} from '@/lib/mdx';
+import { getFiles } from '@/lib/mdx';
+import { show_drafts } from '@/lib/utils/showDrafts';
 
 const DEFAULT_LAYOUT = 'PostLayout';
 
@@ -76,7 +72,8 @@ export default function Blog({
 
   return (
     <>
-      {'draft' in frontMatter && frontMatter.draft !== true ? (
+      {('draft' in frontMatter && frontMatter.draft !== true) ||
+      show_drafts() ? (
         <MDXLayoutRenderer
           layout={frontMatter.layout || DEFAULT_LAYOUT}
           toc={toc}

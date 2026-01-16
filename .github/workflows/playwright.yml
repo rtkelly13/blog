@@ -35,6 +35,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Configure Draft Visibility
+        run: |
+          REF_NAME="${{ github.event.deployment.ref || github.ref_name }}"
+          echo "Checking ref: $REF_NAME"
+          if [[ "$REF_NAME" == drafts/* ]]; then
+            echo "Draft branch detected. Enabling drafts."
+            echo "SHOW_DRAFTS=true" >> $GITHUB_ENV
+          else
+            echo "Not a draft branch."
+          fi
+
       - name: Build the site
         run: pnpm run build
 

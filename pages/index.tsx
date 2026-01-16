@@ -1,6 +1,7 @@
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
 import Link from '@/components/Link';
+import MountainHero from '@/components/MountainHero';
 import { PageSEO } from '@/components/SEO';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
@@ -26,6 +27,7 @@ export default function Home({
         title={siteMetadata.title}
         description={siteMetadata.description}
       />
+      <MountainHero />
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">

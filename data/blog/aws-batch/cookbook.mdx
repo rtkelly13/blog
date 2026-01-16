@@ -49,22 +49,12 @@ This is called _Job Dependencies_ in AWS Batch
     style T fill:#ef4444,stroke:#dc2626,color:#fff`}
 </Diagram>
 
-<div
-  className="bg-primary-100 border-t-8 border-primary-500 rounded-b text-primary-900 px-3 py-1 shadow-md"
-  role="alert"
->
-  <div className="flex">
-    <div>
-      <p class="font-bold">Note</p>
-      <p className="text-sm">
-        If any of jobs in the map phase fail the subsequent phase will not run, it's best to track
-        individual job status in a seperate location and process that in the last phase. Explaining
-        the above is that if the primary job succeeds both secondary jobs are queued up to run
-        simultanously. If both the secondary jobs succeed the ternary jobs is queued up.
-      </p>
-    </div>
-  </div>
-</div>
+<NoteBlock>
+  If any of jobs in the map phase fail the subsequent phase will not run, it's best to track
+  individual job status in a seperate location and process that in the last phase. Explaining
+  the above is that if the primary job succeeds both secondary jobs are queued up to run
+  simultanously. If both the secondary jobs succeed the ternary jobs is queued up.
+</NoteBlock>
 
 ## Array Job
 

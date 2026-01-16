@@ -14,6 +14,11 @@
     "test:e2e": "playwright test",
     "test:e2e:watch": "playwright test --reporter=list",
     "test:update-snapshots": "playwright test --update-snapshots",
+    "test:snapshots:remote": "node scripts/update-snapshots.mjs",
+    "post:create": "node scripts/create-post.mjs",
+    "post:wizard": "node scripts/compose.mjs",
+    "check:seo": "node scripts/audit-seo.mjs",
+    "check:deploy": "node scripts/verify-deployment.mjs",
     "lint": "biome check .",
     "format": "biome format --write .",
     "prepare": "husky install"

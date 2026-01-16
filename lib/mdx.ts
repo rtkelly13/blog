@@ -20,6 +20,7 @@ import { visit } from 'unist-util-visit';
 import remarkCodeTitles from './remark-code-title';
 import remarkTocHeadings from './remark-toc-headings';
 import getAllFilesRecursively from './utils/files';
+import { show_drafts } from './utils/showDrafts';
 
 const root = process.cwd();
 
@@ -161,7 +162,10 @@ export async function getAllFilesFrontMatter(folder: 'blog') {
     const source = fs.readFileSync(file, 'utf8');
     const matterFile = matter(source);
     const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter;
-    if ('draft' in frontmatter && frontmatter.draft !== true) {
+    if (
+      ('draft' in frontmatter && frontmatter.draft !== true) ||
+      show_drafts()
+    ) {
       allFrontMatter.push({
         ...frontmatter,
         slug: formatSlug(fileName),
