@@ -6,7 +6,12 @@ import type { Toc } from 'types/Toc';
 import { MDXLayoutRenderer } from '@/components/MDXComponents';
 import PageTitle from '@/components/PageTitle';
 import generateRss from '@/lib/generate-rss';
-import { getFiles } from '@/lib/mdx';
+import {
+  formatSlug,
+  getAllFilesFrontMatter,
+  getFileBySlug,
+  getFiles,
+} from '@/lib/mdx';
 import { show_drafts } from '@/lib/utils/showDrafts';
 
 const DEFAULT_LAYOUT = 'PostLayout';

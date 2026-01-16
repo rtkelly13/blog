@@ -94,8 +94,7 @@ async function updateSnapshots() {
 
   try {
     run(`gh run download ${runId} -n playwright-snapshots -D "${tempDir}"`);
-  } catch (e) {
-    console.error(
+  } catch (_e) {
       '❌ Failed to download artifacts. Did the run generate them?',
     );
     process.exit(1);

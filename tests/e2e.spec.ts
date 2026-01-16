@@ -47,7 +47,7 @@ test.describe('Blog', () => {
     await page.locator('h3 > a').first().click();
 
     // Should be on a blog post page with article content
-    await expect(page.locator('article')).toBeVisible();
+    await expect(page.locator('article').first()).toBeVisible();
     // Post should have a title
     await expect(page.locator('article h1').first()).toBeVisible();
   });

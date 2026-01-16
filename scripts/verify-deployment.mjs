@@ -7,7 +7,7 @@ function run(command) {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 }

@@ -39,7 +39,11 @@ export const getStaticProps: GetStaticProps<{
   );
 
   // rss
-  const rss = generateRss(filteredPosts, `tags/${tag}/feed.xml`);
+  const rss = generateRss(
+    filteredPosts,
+    `tags/${tag}/feed.xml`,
+    `${siteMetadata.title} - ${tag}`,
+  );
   const rssPath = path.join(root, 'public', 'tags', tag);
   fs.mkdirSync(rssPath, { recursive: true });
   fs.writeFileSync(path.join(rssPath, 'feed.xml'), rss);

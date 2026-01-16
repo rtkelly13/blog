@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import globby from 'globby';
+import { globby } from 'globby';
 import matter from 'gray-matter';
 import { show_drafts } from '../lib/utils/showDrafts.mjs';
 

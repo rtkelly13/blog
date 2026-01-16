@@ -161,7 +161,7 @@ export async function getAllFilesFrontMatter(folder: 'blog') {
     }
     const source = fs.readFileSync(file, 'utf8');
     const matterFile = matter(source);
-    const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter;
+    const frontmatter = matterFile.data as PostFrontMatter;
     if (
       ('draft' in frontmatter && frontmatter.draft !== true) ||
       show_drafts()
@@ -172,6 +172,7 @@ export async function getAllFilesFrontMatter(folder: 'blog') {
         date: frontmatter.date
           ? new Date(frontmatter.date).toISOString()
           : null,
+        fileName,
       });
     }
   });
