@@ -24,5 +24,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "lib/img-to-jsx.js"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "REFERENCE_TempLayout.tsx"]
 }

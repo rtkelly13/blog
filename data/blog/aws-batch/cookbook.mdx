@@ -1,15 +1,13 @@
 ---
 title: AWS Batch - Cookbook
-date: '2022-08-19'
-tags: ['aws', 'aws-batch', 'docker']
+date: "2022-08-19"
+tags: ["aws", "aws-batch", "docker"]
 draft: false
 summary: Ways to use AWS batch, focusing on problems and solutions with technical information appended
-images: ['/static/batch/headers/cookbook-light.png']
+images: ["/static/batch/headers/cookbook-light.png"]
 layout: PostLayout
-authors: ['default']
+authors: ["default"]
 ---
-
-<TOCInline toc={props.toc} indentDepth={2} />
 
 # Batch Intro
 
@@ -27,78 +25,110 @@ If you wish for one or more jobs to be linked together and be dependent on the f
 Letting you build solutions using the Fan In / Fan Out model.
 This is called _Job Dependencies_ in AWS Batch
 
-<Diagram type="mermaid" caption="Job Dependencies - Fan In/Fan Out Pattern">
-  {`graph LR
-    subgraph Primary
-        P[Primary Job]
-    end
-    subgraph Secondary
-        S1[Secondary Job 1]
-        S2[Secondary Job 2]
-    end
-    subgraph Tertiary
-        T[Tertiary Job]
-    end
+<div
+  style={{
+    backgroundImage: `
+      linear-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 211, 238, 0.1) 1px, transparent 1px)
+    `,
+    backgroundSize: "30px 30px",
+    padding: "1.5rem",
+    borderRadius: "0.5rem",
+  }}
+>
+  <Diagram
+    type="mermaid"
+    caption="Job Dependencies - Fan In/Fan Out Pattern (Interactive)"
+  >
+    {`graph LR
+    P[Primary Job]
+    S1[Secondary Job 1]
+    S2[Secondary Job 2]
+    T[Tertiary Job]
     P --> S1
     P --> S2
     S1 --> T
     S2 --> T
-    style P fill:#8b5cf6,stroke:#6d28d9,color:#fff
-    style S1 fill:#3b82f6,stroke:#2563eb,color:#fff
-    style S2 fill:#10b981,stroke:#059669,color:#fff
-    style T fill:#ef4444,stroke:#dc2626,color:#fff`}
-</Diagram>
-
-<div
-  className="bg-primary-100 border-t-8 border-primary-500 rounded-b text-primary-900 px-3 py-1 shadow-md"
-  role="alert"
->
-  <div className="flex">
-    <div>
-      <p class="font-bold">Note</p>
-      <p className="text-sm">
-        If any of jobs in the map phase fail the subsequent phase will not run, it's best to track
-        individual job status in a seperate location and process that in the last phase. Explaining
-        the above is that if the primary job succeeds both secondary jobs are queued up to run
-        simultanously. If both the secondary jobs succeed the ternary jobs is queued up.
-      </p>
-    </div>
-  </div>
+    style P fill:#000,stroke:#22d3ee,stroke-width:3px,stroke-dasharray:8 4,color:#22d3ee,rx:0,ry:0
+    style S1 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
+    style S2 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
+    style T fill:#000,stroke:#facc15,stroke-width:3px,stroke-dasharray:8 4,color:#facc15,rx:0,ry:0
+    linkStyle default stroke:#fff,stroke-width:2px`}
+  </Diagram>
 </div>
+
+<NoteBlock>
+  If any of jobs in the map phase fail the subsequent phase will not run, it's
+  best to track individual job status in a seperate location and process that in
+  the last phase. Explaining the above is that if the primary job succeeds both
+  secondary jobs are queued up to run simultanously. If both the secondary jobs
+  succeed the ternary jobs is queued up.
+</NoteBlock>
 
 ## Array Job
 
 An array job lets you take a single type of job and run it in parallel or sequentially. You specify the number of number of jobs to be ran,
 read an environment variable to determine which element is needed to be run and process that.
 
+<pre className="font-mono text-sm text-brutalist-cyan bg-black border-2 border-white p-6 my-6 overflow-x-auto">
+  {`
+┌──────────────────────┐
+│   ARRAY_JOB[0..N]    │
+├──────────────────────┤
+│ ┌────────────────┐   │  // Each instance reads
+│ │ Instance [0]   │   │  // AWS_BATCH_JOB_ARRAY_INDEX
+│ └────────────────┘   │  // and processes its portion
+│ ┌────────────────┐   │
+│ │ Instance [1]   │   │  // All run in parallel
+│ └────────────────┘   │
+│ ┌────────────────┐   │
+│ │ Instance [2]   │   │  // Example: process file_0.csv,
+│ └────────────────┘   │  //          file_1.csv, etc.
+│       ...            │
+│ ┌────────────────┐   │
+│ │ Instance [N]   │   │
+│ └────────────────┘   │
+└──────────────────────┘
+`}
+</pre>
+
 <Diagram
   type="svg"
   src="/static/batch/diagrams/array-themed.svg"
-  caption="Array Job - Multiple parallel instances"
+  caption="Array Job - Multiple parallel instances (Interactive)"
 />
 
 # Potential Use Cases
 
 ## Map/ Reduce
 
-<Diagram type="mermaid" caption="Map/Reduce Pattern">
-  {`graph LR
-    subgraph Map[Map Phase]
-        M1[Map Job 1]
-        M2[Map Job 2]
-        M3[Map Job 3]
-    end
-    subgraph Reduce[Reduce Phase]
-        R[Reduce Job]
-    end
+<div
+  style={{
+    backgroundImage: `
+      linear-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 211, 238, 0.1) 1px, transparent 1px)
+    `,
+    backgroundSize: "30px 30px",
+    padding: "1.5rem",
+    borderRadius: "0.5rem",
+  }}
+>
+  <Diagram type="mermaid" caption="Map/Reduce Pattern (Interactive)">
+    {`graph LR
+    M1[Map Job 1]
+    M2[Map Job 2]
+    M3[Map Job 3]
+    R[Reduce Job]
     M1 --> R
     M2 --> R
     M3 --> R
-    style M1 fill:#10b981,stroke:#059669,color:#fff
-    style M2 fill:#10b981,stroke:#059669,color:#fff
-    style M3 fill:#10b981,stroke:#059669,color:#fff
-    style R fill:#f59e0b,stroke:#d97706,color:#fff`}
-</Diagram>
+    style M1 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
+    style M2 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
+    style M3 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
+    style R fill:#000,stroke:#facc15,stroke-width:3px,stroke-dasharray:8 4,color:#facc15,rx:0,ry:0
+    linkStyle default stroke:#fff,stroke-width:2px`}
+  </Diagram>
+</div>
 
 [Map Reduce](https://en.wikipedia.org/wiki/MapReduce) is a programming model for processing of large data sets or performing large computations over a distributed cluster of computers.
 The definition shifts based on where you look but it typically involves at least these two steps

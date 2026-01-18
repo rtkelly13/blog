@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <style>
+    .bg { fill: #000000; }
+    .border { stroke: #ffffff; stroke-width: 4; fill: none; }
+    .text { 
+      fill: #ffffff; 
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace; 
+      font-weight: bold;
+    }
+    .logo { 
+      fill: #22d3ee; 
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace; 
+      font-size: 28px;
+      font-weight: bold;
+      line-height: 1.1;
+    }
+    .accent-cyan { fill: #22d3ee; }
+    .accent-pink { fill: #ec4899; }
+    .accent-yellow { fill: #facc15; }
+    .grid-line { stroke: rgba(34, 211, 238, 0.1); stroke-width: 1; }
+  </style>
+  
+  <!-- Background -->
+  <rect class="bg" width="1200" height="630"/>
+  
+  <!-- Grid pattern -->
+  <defs>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" class="grid-line"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  
+  <!-- Main border -->
+  <rect class="border" x="40" y="40" width="1120" height="550"/>
+  
+  <!-- ASCII Logo using foreignObject for better rendering -->
+  <foreignObject x="80" y="140" width="400" height="200">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Courier New', 'Courier', monospace; font-size: 24px; line-height: 1.0; color: #22d3ee; font-weight: bold; white-space: pre;">██████╗ ██╗  ██╗
+██╔══██╗██║ ██╔╝
+██████╔╝█████╔╝ 
+██╔══██╗██╔═██╗ 
+██║  ██║██║  ██╗
+╚═╝  ╚═╝╚═╝  ╚═╝</div>
+  </foreignObject>
+  
+  <!-- Title -->
+  <text class="text" font-size="48" font-weight="bold" x="550" y="220">
+    RYAN_KELLY.DEV
+  </text>
+  
+  <!-- Subtitle -->
+  <text class="text accent-cyan" font-size="24" x="550" y="270">
+    &gt; Software Engineering Blog
+  </text>
+  
+  <!-- Terminal-style decorations -->
+  <text class="text accent-yellow" font-size="18" x="550" y="340">
+    $ topics --list
+  </text>
+  
+  <!-- Tags -->
+  <g transform="translate(550, 370)">
+    <rect class="accent-cyan" width="12" height="12" x="0" y="0"/>
+    <text class="text" font-size="16" x="20" y="12">AWS</text>
+    
+    <rect class="accent-pink" width="12" height="12" x="100" y="0"/>
+    <text class="text" font-size="16" x="120" y="12">Next.js</text>
+    
+    <rect class="accent-yellow" width="12" height="12" x="230" y="0"/>
+    <text class="text" font-size="16" x="250" y="12">TypeScript</text>
+    
+    <rect class="accent-cyan" width="12" height="12" x="400" y="0"/>
+    <text class="text" font-size="16" x="420" y="12">Docker</text>
+  </g>
+  
+  <!-- Bottom terminal line -->
+  <text class="text accent-yellow" font-size="16" x="550" y="480">
+    // Technical guides, patterns, and insights
+  </text>
+  
+  <!-- URL -->
+  <text class="text accent-pink" font-size="20" font-weight="bold" x="550" y="520">
+    https://ryankelly.dev
+  </text>
+</svg>

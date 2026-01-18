@@ -9,9 +9,9 @@ const Tag = ({ text }: Props) => {
   return (
     <Link
       href={`/tags/${kebabCase(text)}`}
-      className="mr-3 text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+      className="font-mono text-xs font-bold uppercase text-black bg-brutalist-yellow border-2 border-white px-2 py-1 hover:bg-brutalist-pink hover:shadow-hard-sm transition-all"
     >
-      {text.split(' ').join('-')}
+      #{text.split(' ').join('-')}
     </Link>
   );
 };

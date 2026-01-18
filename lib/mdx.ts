@@ -12,7 +12,6 @@ import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import remarkMath from 'remark-math';
-import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
 import type { Toc } from 'types/Toc';
 import type { Pluggable } from 'unified';
@@ -20,6 +19,7 @@ import { visit } from 'unist-util-visit';
 import remarkCodeTitles from './remark-code-title';
 import remarkTocHeadings from './remark-toc-headings';
 import getAllFilesRecursively from './utils/files';
+import { show_drafts } from './utils/showDrafts';
 
 const root = process.cwd();
 
@@ -54,6 +54,25 @@ export function dateSortDesc(a: string, b: string) {
   if (a > b) return -1;
   if (a < b) return 1;
   return 0;
+}
+
+export function sortPosts(a: PostFrontMatter, b: PostFrontMatter) {
+  const dateCompare = dateSortDesc(a.date, b.date);
+
+  // If dates are different, sort by date
+  if (dateCompare !== 0) return dateCompare;
+
+  // If dates are the same and both have series info, sort by series order
+  if (a.series && b.series && a.series.name === b.series.name) {
+    return a.series.order - b.series.order;
+  }
+
+  // If only one has series info, prioritize series posts
+  if (a.series && !b.series) return -1;
+  if (!a.series && b.series) return 1;
+
+  // Default to alphabetical by title
+  return a.title.localeCompare(b.title);
 }
 
 export async function getFileBySlug<_T>(
@@ -160,17 +179,22 @@ export async function getAllFilesFrontMatter(folder: 'blog') {
     }
     const source = fs.readFileSync(file, 'utf8');
     const matterFile = matter(source);
-    const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter;
-    if ('draft' in frontmatter && frontmatter.draft !== true) {
+    const frontmatter = matterFile.data as PostFrontMatter;
+    if (
+      ('draft' in frontmatter && frontmatter.draft !== true) ||
+      show_drafts()
+    ) {
       allFrontMatter.push({
         ...frontmatter,
         slug: formatSlug(fileName),
         date: frontmatter.date
           ? new Date(frontmatter.date).toISOString()
           : null,
+        fileName,
+        readingTime: readingTime(matterFile.content),
       });
     }
   });
 
-  return allFrontMatter.sort((a, b) => dateSortDesc(a.date, b.date));
+  return allFrontMatter.sort(sortPosts);
 }

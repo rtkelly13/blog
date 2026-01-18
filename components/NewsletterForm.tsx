@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import siteMetadata from '@/data/siteMetadata';
 
 interface NewsletterFormProps {
   title?: string;

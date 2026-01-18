@@ -53,30 +53,26 @@ export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
 
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center w-full h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse">
-        <span className="text-gray-400 dark:text-gray-500">
-          Loading diagram...
-        </span>
+      <div className="flex items-center justify-center w-full h-32 bg-zinc-900 border-2 border-white animate-pulse">
+        <span className="text-zinc-500 font-mono">LOADING_DIAGRAM...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-        <p className="font-medium">Failed to load diagram</p>
+      <div className="p-4 text-brutalist-pink bg-zinc-900 border-2 border-brutalist-pink font-mono">
+        <p className="font-bold uppercase">[ DIAGRAM_LOAD_ERROR ]</p>
         <p className="text-sm mt-1">{error}</p>
-        <p className="text-xs mt-2 text-gray-500">Source: {src}</p>
+        <p className="text-xs mt-2 text-zinc-500">Source: {src}</p>
       </div>
     );
   }
 
   if (!svgContent) {
     return (
-      <div className="flex items-center justify-center w-full h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse">
-        <span className="text-gray-400 dark:text-gray-500">
-          Loading diagram...
-        </span>
+      <div className="flex items-center justify-center w-full h-32 bg-zinc-900 border-2 border-white animate-pulse">
+        <span className="text-zinc-500 font-mono">LOADING_DIAGRAM...</span>
       </div>
     );
   }

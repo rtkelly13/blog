@@ -1,0 +1,218 @@
+---
+title: "Reviving My Blog After 3 Years: Discovering AI-Assisted Development (Part 1)"
+date: "2026-01-15"
+tags: ["ai", "opencode", "gemini", "developer-tools", "blog", "productivity"]
+draft: false
+summary: "My first experiments with OpenCode and Gemini CLI for code assistance—discovering how AI could help me tackle 3 years of accumulated technical debt in my dormant blog."
+images: []
+layout: PostLayout
+authors: ["default"]
+series:
+  name: "Blog Revival 2026"
+  order: 1
+---
+
+# The Dormant Project Problem
+
+I created this blog in 2023 with React 17, Next.js 13, Tailwind 3, and Webpack. Then I wrote two AWS Batch posts and... stopped. Life happened, side projects got abandoned, and the blog sat untouched for 3 years.
+
+When I finally returned in January 2026, the repository was a time capsule:
+
+```bash
+$ npm outdated
+Package                  Current   Wanted   Latest
+react                    17.0.2    17.0.2   19.2.3
+next                     13.0.6    13.5.7   16.1.2
+tailwindcss              3.0.24    3.4.17   4.1.18
+@playwright/test         —         —        1.57.0
+biome                    —         —        1.9.4
+```
+
+Every dependency was 2-3 major versions behind. No tests. ESLint + Prettier instead of modern unified tooling. CommonJS build scripts. The kind of technical debt that makes you consider "maybe I'll just start fresh."
+
+But I didn't want to start fresh. This blog had content, SEO history, and a foundation I liked. I just needed to modernize it without spending weeks reading changelogs.
+
+# Discovering OpenCode
+
+A friend mentioned they'd been using OpenCode (a Gemini-powered CLI tool for code assistance) to help with refactoring work. I was skeptical—AI tools felt like glorified autocomplete that would suggest outdated patterns or introduce bugs.
+
+But with 3 years of dependency drift staring me down, I figured: worst case, I waste an afternoon. Best case, this actually helps.
+
+## First Experiment: "Just Fix the Build"
+
+I started with the simplest possible prompt:
+
+```bash
+$ opencode "Fix the build errors and upgrade to latest versions"
+```
+
+What happened next surprised me.
+
+The AI didn't just blindly run `npm update`. It:
+
+1. **Read the entire codebase** (package.json, tsconfig.json, build scripts)
+2. **Checked current versions** against latest stable releases
+3. **Identified breaking changes** in React 19, Next.js 16, Tailwind 4
+4. **Proposed a migration plan** with phases:
+   - Phase 1: Update package manager (npm → pnpm)
+   - Phase 2: Update tooling (ESLint/Prettier → Biome)
+   - Phase 3: Update React + Next.js
+   - Phase 4: Update Tailwind CSS
+   - Phase 5: Add test infrastructure
+
+5. **Asked for confirmation** before proceeding
+
+I wasn't expecting a plan. I was expecting it to run `npm install` and hope for the best.
+
+## The Workflow That Clicked
+
+Once I approved the plan, the workflow became:
+
+1. **AI executes one phase** (e.g., "Upgrade React to 19")
+2. **AI runs build/tests** to verify nothing broke
+3. **AI shows me the changes** (via git diff)
+4. **I review and approve or request tweaks**
+5. Repeat for next phase
+
+The AI didn't make decisions for me—it surfaced options and tradeoffs. When it encountered ambiguity (like "Should we migrate to App Router or stay with Pages?"), it explained the pros/cons and asked what I wanted.
+
+This felt less like "AI writes my code" and more like "AI is a very thorough junior developer who reads all the docs I don't want to."
+
+# What AI Was Actually Good At
+
+After a few days of experimenting, patterns emerged:
+
+## ✅ AI Excelled At:
+
+**Mechanical, well-documented work:**
+
+- Reading changelogs and finding breaking changes
+- Converting file formats (CommonJS → ESM)
+- Running codemods for API migrations
+- Updating import paths after file moves
+- Writing test boilerplate
+
+**Example:** Tailwind v4 changed CSS syntax from `@tailwind base` to `@import "tailwindcss"`. The AI:
+
+1. Found the migration guide
+2. Updated `tailwind.css`
+3. Updated `postcss.config.js`
+4. Fixed plugin imports (`@tailwindcss/typography`)
+5. Ran the build to verify
+
+I didn't touch any of those files manually.
+
+**Following established patterns:**
+
+- "Add Playwright tests for all pages" → AI saw existing test structure and matched the style
+- "Generate RSS feeds for each tag" → AI saw the main RSS generator and created tag-specific versions
+
+**Debugging build failures:**
+
+- TypeScript errors from React 19's stricter types? AI traced the errors back to component prop definitions and fixed them.
+- Missing peer dependencies? AI installed them and verified compatibility.
+
+## ❌ AI Struggled With:
+
+**Design decisions:**
+
+- "Does this neon pink work here?" (No taste, just suggests defaults)
+- "Should this button have hard shadows?" (Doesn't understand design systems)
+
+**Architectural choices:**
+
+- App Router vs Pages Router → I had to decide based on project complexity
+- Which features to keep vs remove → AI can't prioritize for my use case
+
+**Visual refinement:**
+
+- Spacing, hierarchy, polish → I adjusted manually
+- Color contrast, readability → I tested by eye
+
+**Novel patterns:**
+
+- If the codebase didn't have examples, AI defaulted to generic solutions
+- Custom build scripts or workflows needed human oversight
+
+# The Turning Point
+
+Around day 3, I realized something: **I wasn't reading any documentation.**
+
+Normally, upgrading React would mean:
+
+1. Open React 19 migration guide
+2. Skim 40+ breaking changes
+3. Search codebase for affected patterns
+4. Fix issues one by one
+5. Test everything
+6. Repeat for Next.js, Tailwind, etc.
+
+With OpenCode, I just prompted: "Upgrade React to 19 and fix any breaking changes."
+
+The AI read the migration guides, searched the codebase, applied fixes, ran tests, and showed me a summary. I reviewed the diff, approved it, moved on.
+
+**Time saved:** Easily 80%. What would have taken 2-3 weeks took 4 days.
+
+# Key Lessons from Week 1
+
+## 1. AI is a Force Multiplier for Mechanical Work
+
+If a task is well-documented and repetitive (dependency updates, file conversions, test boilerplate), AI crushes it. If it requires taste or context-specific decisions, you still need human judgment.
+
+## 2. Prompt Quality Matters
+
+Vague prompts got vague results:
+
+- ❌ "Make it better" → Random suggestions
+- ✅ "Upgrade Tailwind to v4 following the official migration guide" → Precise execution
+
+Specific prompts with context got precise results:
+
+- "Add Playwright tests for homepage, blog list, and blog post pages. Match the style of existing tests in `tests/` directory."
+
+## 3. Review is Non-Negotiable
+
+I reviewed every change before committing. The AI made mistakes:
+
+- Occasionally suggested deprecated patterns
+- Missed edge cases in component logic
+- Over-engineered simple solutions
+
+But because it showed me diffs and explained changes, I caught issues before they shipped.
+
+## 4. The Best Workflow: Phase-by-Phase
+
+Breaking work into phases (tooling → React → Next.js → Tailwind → tests) meant:
+
+- Smaller, reviewable changes
+- Easier to rollback if something broke
+- Clear progress tracking
+
+The AI naturally worked this way, which made collaboration smooth.
+
+# What's Next in This Series
+
+By the end of week 1, I had:
+
+- ✅ Upgraded all dependencies to latest stable versions
+- ✅ Migrated from npm to pnpm
+- ✅ Replaced ESLint + Prettier with Biome
+- ✅ Added 39 Playwright tests
+- ✅ Fixed all build errors
+
+But the blog still looked like the default template. That's when I decided to redesign it.
+
+---
+
+**Continue to Part 2:** [Upgrading Dependencies and Tools](/blog/blog-upgrade-2026-part-2) — The technical details of migrating React 17→19, Tailwind 3→4, and Webpack→Turbopack with AI assistance.
+
+**Or jump to Part 3:** [Design System Implementation](/blog/blog-upgrade-2026-part-3) — Deep dive into the retro-brutalist terminal design, color systems, and lessons learned.
+
+---
+
+**Tools mentioned:**
+
+- [OpenCode](https://github.com/ohmymedia/opencode) - Gemini-powered CLI for code assistance
+- [Gemini 2.0](https://deepmind.google/technologies/gemini/) - Google's latest AI model
+- [Biome](https://biomejs.dev/) - Fast unified tooling (linter + formatter)
+- [pnpm](https://pnpm.io/) - Fast, disk-efficient package manager

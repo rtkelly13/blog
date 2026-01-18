@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { globby } from 'globby';
 import matter from 'gray-matter';
+import { show_drafts } from '../lib/utils/showDrafts.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,7 +18,7 @@ async function generateSearchIndex() {
       const source = fs.readFileSync(path.join(blogDir, file), 'utf8');
       const { data } = matter(source);
 
-      if (data.draft === true) return null;
+      if (data.draft === true && !show_drafts()) return null;
 
       return {
         slug: file.replace(/\.(mdx|md)$/, ''),

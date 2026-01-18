@@ -4,6 +4,7 @@ import matter from 'gray-matter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
 import { getFiles } from './mdx';
 import kebabCase from './utils/kebabCase';
+import { show_drafts } from './utils/showDrafts';
 
 const root = process.cwd();
 
@@ -16,7 +17,7 @@ export async function getAllTags(type: 'blog' | 'authors') {
     const source = fs.readFileSync(path.join(root, 'data', type, file), 'utf8');
     const matterFile = matter(source);
     const data = matterFile.data as PostFrontMatter;
-    if (data.tags && data.draft !== true) {
+    if (data.tags && (data.draft !== true || show_drafts())) {
       data.tags.forEach((tag) => {
         const formattedTag = kebabCase(tag);
         if (formattedTag in tagCount) {

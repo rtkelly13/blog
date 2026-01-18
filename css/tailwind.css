@@ -23,14 +23,31 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+
+  * {
+    border-radius: 0px;
+  }
+
+  body {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    border-radius: 0px;
+  }
 }
 
 .remark-code-title {
-  @apply px-5 py-3 font-mono text-sm font-bold text-gray-200 bg-gray-700 rounded-t;
+  @apply px-5 py-3 font-mono text-sm font-bold text-white bg-black border-2 border-white border-b-0;
 }
 
 .remark-code-title + div > pre {
-  @apply mt-0 rounded-t-none;
+  @apply mt-0 border-t-0;
 }
 
 .task-list-item:before {
@@ -38,11 +55,11 @@
 }
 
 .code-line {
-  @apply pl-4 -mx-4 border-l-4 border-gray-800;
+  @apply pl-4 -mx-4 border-l-4 border-zinc-900;
 }
 
 .highlight-line {
-  @apply -mx-4 bg-gray-700/50 border-l-4 border-primary-500;
+  @apply -mx-4 bg-brutalist-cyan/20 border-l-4 border-brutalist-cyan;
 }
 
 .line-number::before {
@@ -56,29 +73,29 @@ html {
 
 /* Diagram theming with CSS variables */
 :root {
-  --diagram-bg: #ffffff;
-  --diagram-bg-secondary: #f9fafb;
-  --diagram-stroke: #6b7280;
-  --diagram-stroke-light: #d1d5db;
-  --diagram-fill-primary: #3b82f6;
-  --diagram-fill-secondary: #10b981;
-  --diagram-fill-tertiary: #f59e0b;
-  --diagram-fill-quaternary: #8b5cf6;
-  --diagram-text: #1f2937;
-  --diagram-text-light: #6b7280;
+  --diagram-bg: #000000;
+  --diagram-bg-secondary: #18181b;
+  --diagram-stroke: #ffffff;
+  --diagram-stroke-light: #71717a;
+  --diagram-fill-primary: #22d3ee;
+  --diagram-fill-secondary: #ec4899;
+  --diagram-fill-tertiary: #facc15;
+  --diagram-fill-quaternary: #ffffff;
+  --diagram-text: #ffffff;
+  --diagram-text-light: #a1a1aa;
 }
 
 .dark {
-  --diagram-bg: #1f2937;
-  --diagram-bg-secondary: #111827;
-  --diagram-stroke: #9ca3af;
-  --diagram-stroke-light: #4b5563;
-  --diagram-fill-primary: #60a5fa;
-  --diagram-fill-secondary: #34d399;
-  --diagram-fill-tertiary: #fbbf24;
-  --diagram-fill-quaternary: #a78bfa;
-  --diagram-text: #f3f4f6;
-  --diagram-text-light: #9ca3af;
+  --diagram-bg: #000000;
+  --diagram-bg-secondary: #18181b;
+  --diagram-stroke: #ffffff;
+  --diagram-stroke-light: #71717a;
+  --diagram-fill-primary: #22d3ee;
+  --diagram-fill-secondary: #ec4899;
+  --diagram-fill-tertiary: #facc15;
+  --diagram-fill-quaternary: #ffffff;
+  --diagram-text: #ffffff;
+  --diagram-text-light: #a1a1aa;
 }
 
 /* SVG diagrams using CSS variables */
@@ -107,4 +124,62 @@ html {
 .mermaid-diagram svg {
   max-width: 100%;
   height: auto;
+}
+
+/* Brutalist Utilities */
+@layer utilities {
+  .brutalist-border {
+    border: 2px solid #ffffff;
+    border-radius: 0px;
+  }
+
+  .brutalist-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 1);
+  }
+
+  .brutalist-shadow-sm {
+    box-shadow: 2px 2px 0px 0px rgba(255, 255, 255, 1);
+  }
+
+  .brutalist-shadow-lg {
+    box-shadow: 6px 6px 0px 0px rgba(255, 255, 255, 1);
+  }
+
+  .brutalist-shadow-cyan {
+    box-shadow: 4px 4px 0px 0px rgba(34, 211, 238, 1);
+  }
+
+  .brutalist-shadow-pink {
+    box-shadow: 4px 4px 0px 0px rgba(236, 72, 153, 1);
+  }
+
+  .brutalist-shadow-yellow {
+    box-shadow: 4px 4px 0px 0px rgba(250, 204, 21, 1);
+  }
+
+  .brutalist-btn-press {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+  }
+
+  .ascii-divider::after {
+    content: "//========================================//";
+    display: block;
+    font-family: "Courier New", Courier, monospace;
+    color: #ffffff;
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  .terminal-prompt::before {
+    content: "> ";
+    color: #22d3ee;
+    font-weight: bold;
+  }
+
+  .file-extension::after {
+    content: ".md";
+    color: #facc15;
+    font-weight: normal;
+  }
 }

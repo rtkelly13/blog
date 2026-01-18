@@ -1,12 +1,14 @@
 import NextImage from 'next/image';
 import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Toc } from 'types/Toc';
+import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import NewsletterForm from '@/components/NewsletterForm';
 import PageTitle from '@/components/PageTitle';
-import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import Tag from '@/components/Tag';
@@ -32,6 +34,7 @@ interface Props {
   next?: { slug: string; title: string };
   prev?: { slug: string; title: string };
   children: ReactNode;
+  toc?: Toc;
 }
 
 export default function PostLayout({
@@ -40,8 +43,45 @@ export default function PostLayout({
   next,
   prev,
   children,
+  toc,
 }: Props) {
   const { slug, fileName, date, title, tags } = frontMatter;
+  const [activeId, setActiveId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!toc || toc.length === 0) return;
+
+    const headingIds = toc.map((item) => item.url.slice(1));
+    const headingElements = headingIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (headingElements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        }
+      },
+      {
+        rootMargin: '0px 0px -80% 0px',
+        threshold: 0,
+      },
+    );
+
+    for (const element of headingElements) {
+      observer.observe(element);
+    }
+
+    return () => {
+      for (const element of headingElements) {
+        observer.unobserve(element);
+      }
+    };
+  }, [toc]);
 
   return (
     <SectionContainer>
@@ -72,14 +112,11 @@ export default function PostLayout({
               </div>
             </div>
           </header>
-          <div
-            className="pb-8 divide-y divide-gray-200 xl:divide-y-0 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6"
-            style={{ gridTemplateRows: 'auto 1fr' }}
-          >
-            <dl className="pt-6 pb-10 xl:pt-11 xl:border-b xl:border-gray-200 xl:dark:border-gray-700">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <dl className="pt-6 pb-10">
               <dt className="sr-only">Authors</dt>
               <dd>
-                <ul className="flex justify-center space-x-8 xl:block sm:space-x-12 xl:space-x-0 xl:space-y-8">
+                <ul className="flex justify-center space-x-8 sm:space-x-12">
                   {authorDetails.map((author) => (
                     <li
                       className="flex items-center space-x-2"
@@ -119,64 +156,69 @@ export default function PostLayout({
                 </ul>
               </dd>
             </dl>
-            <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:pb-0 xl:col-span-3 xl:row-span-2">
-              <div className="pt-10 pb-8 prose dark:prose-dark max-w-none">
-                {children}
+
+            <div className="pt-10 pb-8 prose dark:prose-dark max-w-none">
+              {children}
+            </div>
+
+            <div className="pt-6 pb-6 text-sm text-gray-700 dark:text-gray-300">
+              <Link href={discussUrl(slug)} rel="nofollow">
+                {'Discuss on Twitter'}
+              </Link>
+              {` • `}
+              <Link href={editUrl(fileName)}>{'View on GitHub'}</Link>
+            </div>
+
+            {siteMetadata.newsletter?.enabled && (
+              <div className="pt-6 pb-6">
+                <NewsletterForm />
               </div>
-              <div className="pt-6 pb-6 text-sm text-gray-700 dark:text-gray-300">
-                <Link href={discussUrl(slug)} rel="nofollow">
-                  {'Discuss on Twitter'}
-                </Link>
-                {` • `}
-                <Link href={editUrl(fileName)}>{'View on GitHub'}</Link>
-              </div>
-              {siteMetadata.newsletter?.enabled && (
-                <div className="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-                  <NewsletterForm />
+            )}
+
+            <Comments frontMatter={frontMatter} />
+
+            <footer className="pt-6 pb-6">
+              {tags && (
+                <div className="py-4">
+                  <h2 className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400 mb-3">
+                    Tags
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <Tag key={tag} text={tag} />
+                    ))}
+                  </div>
                 </div>
               )}
-              <Comments frontMatter={frontMatter} />
-            </div>
-            <footer>
-              <div className="text-sm font-medium leading-5 divide-gray-200 xl:divide-y dark:divide-gray-700 xl:col-start-1 xl:row-start-2">
-                {tags && (
-                  <div className="py-4 xl:py-8">
-                    <h2 className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                      Tags
-                    </h2>
-                    <div className="flex flex-wrap">
-                      {tags.map((tag) => (
-                        <Tag key={tag} text={tag} />
-                      ))}
+
+              {(next || prev) && (
+                <div className="flex justify-between py-4 space-x-4">
+                  {prev ? (
+                    <div className="flex-1">
+                      <h2 className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400 mb-2">
+                        Previous Article
+                      </h2>
+                      <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <Link href={`/blog/${prev.slug}`}>{prev.title}</Link>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {(next || prev) && (
-                  <div className="flex justify-between py-4 xl:block xl:space-y-8 xl:py-8">
-                    {prev && (
-                      <div>
-                        <h2 className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                          Previous Article
-                        </h2>
-                        <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
-                          <Link href={`/blog/${prev.slug}`}>{prev.title}</Link>
-                        </div>
+                  ) : (
+                    <div className="flex-1" />
+                  )}
+                  {next && (
+                    <div className="flex-1 text-right">
+                      <h2 className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400 mb-2">
+                        Next Article
+                      </h2>
+                      <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <Link href={`/blog/${next.slug}`}>{next.title}</Link>
                       </div>
-                    )}
-                    {next && (
-                      <div>
-                        <h2 className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                          Next Article
-                        </h2>
-                        <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
-                          <Link href={`/blog/${next.slug}`}>{next.title}</Link>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="pt-4 xl:pt-8">
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="pt-4">
                 <Link
                   href="/blog"
                   className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
@@ -188,7 +230,7 @@ export default function PostLayout({
           </div>
         </div>
       </article>
-      <ScrollTopAndComment />
+      <BlogActions toc={toc} activeId={activeId} />
     </SectionContainer>
   );
 }

@@ -18,15 +18,14 @@ test.describe('Homepage', () => {
   test('navigation links are present', async ({ page }) => {
     await page.goto('/');
 
-    // Use exact: true to avoid matching "Ryan Kelly Blog" text
     await expect(
-      page.getByRole('link', { name: 'Blog', exact: true }),
+      page.getByRole('link', { name: '[ Blog ]', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: 'Tags', exact: true }),
+      page.getByRole('link', { name: '[ Tags ]', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: 'About', exact: true }),
+      page.getByRole('link', { name: '[ About ]', exact: true }),
     ).toBeVisible();
   });
 });
@@ -47,7 +46,7 @@ test.describe('Blog', () => {
     await page.locator('h3 > a').first().click();
 
     // Should be on a blog post page with article content
-    await expect(page.locator('article')).toBeVisible();
+    await expect(page.locator('article').first()).toBeVisible();
     // Post should have a title
     await expect(page.locator('article h1').first()).toBeVisible();
   });
@@ -105,35 +104,13 @@ test.describe('404 Page', () => {
 });
 
 test.describe('Dark Mode', () => {
-  test('can toggle dark mode', async ({ page }) => {
+  test('is always in dark mode', async ({ page }) => {
     await page.goto('/');
 
-    // Find the dark mode toggle button
-    const toggleButton = page.getByRole('button', {
-      name: /toggle dark mode/i,
-    });
-    await expect(toggleButton).toBeVisible();
-
-    // Get initial state
     const html = page.locator('html');
+    const htmlClass = await html.getAttribute('class');
 
-    // Click to toggle
-    await toggleButton.click();
-
-    // Wait for theme to be applied (next-themes uses class on html element)
-    await page.waitForTimeout(100);
-
-    // Verify the class changed (either added or removed 'dark')
-    const classAfterClick = await html.getAttribute('class');
-
-    // Click again to toggle back
-    await toggleButton.click();
-    await page.waitForTimeout(100);
-
-    const classAfterSecondClick = await html.getAttribute('class');
-
-    // The class should be different after each toggle
-    expect(classAfterClick).not.toBe(classAfterSecondClick);
+    expect(htmlClass).toContain('dark');
   });
 });
 
@@ -141,19 +118,15 @@ test.describe('Navigation', () => {
   test('can navigate to all main pages', async ({ page }) => {
     await page.goto('/');
 
-    // Navigate to Blog (use exact: true to avoid matching "Ryan Kelly Blog")
-    await page.getByRole('link', { name: 'Blog', exact: true }).click();
+    await page.getByRole('link', { name: '[ Blog ]', exact: true }).click();
     await expect(page).toHaveURL(/\/blog/);
 
-    // Navigate to Tags
-    await page.getByRole('link', { name: 'Tags', exact: true }).click();
+    await page.getByRole('link', { name: '[ Tags ]', exact: true }).click();
     await expect(page).toHaveURL(/\/tags/);
 
-    // Navigate to About
-    await page.getByRole('link', { name: 'About', exact: true }).click();
+    await page.getByRole('link', { name: '[ About ]', exact: true }).click();
     await expect(page).toHaveURL(/\/about/);
 
-    // Navigate back to Home (click the site title/logo)
     await page.locator('header a').first().click();
     await expect(page).toHaveURL('/');
   });

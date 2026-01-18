@@ -11,14 +11,22 @@
     "build": "next build && node ./scripts/generate-sitemap.mjs && node ./scripts/generate-search.mjs && node ./scripts/generate-tag-rss.mjs",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build",
+    "test": "vitest",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:watch": "playwright test --reporter=list",
     "test:update-snapshots": "playwright test --update-snapshots",
+    "test:snapshots:remote": "node scripts/update-snapshots.mjs",
+    "post:create": "node scripts/create-post.mjs",
+    "post:wizard": "node scripts/compose.mjs",
+    "check:seo": "node scripts/audit-seo.mjs",
+    "check:deploy": "node scripts/verify-deployment.mjs",
     "lint": "biome check .",
     "format": "biome format --write .",
     "prepare": "husky install"
   },
   "dependencies": {
+    "@rtkelly/mermaid-toolkit": "file:../mermaid-toolkit",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
     "autoprefixer": "^10.4.23",
@@ -26,6 +34,7 @@
     "gray-matter": "^4.0.2",
     "image-size": "2.0.2",
     "kbar": "0.1.0-beta.48",
+    "lucide-react": "^0.562.0",
     "mdast-util-to-string": "^4.0.0",
     "mdx-bundler": "^10.1.1",
     "mermaid": "^11.12.2",
@@ -56,6 +65,7 @@
     "@types/node": "^25.0.6",
     "@types/react": "^19.2.8",
     "@types/unist": "^3.0.3",
+    "@vitest/ui": "^4.0.17",
     "cross-env": "^10.1.0",
     "dedent": "^1.7.1",
     "fast-xml-parser": "^5.3.3",
@@ -66,7 +76,8 @@
     "next-remote-watch": "^2.0.0",
     "prettier": "^3.8.0",
     "typescript": "^5.9.3",
-    "unified": "^11.0.5"
+    "unified": "^11.0.5",
+    "vitest": "^4.0.17"
   },
   "lint-staged": {
     "*.+(js|jsx|ts|tsx|json|css)": [

@@ -10,7 +10,7 @@ import SearchProvider from '@/components/search/SearchProvider';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ThemeProvider attribute="class">
+    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
       <SearchProvider>
         <Head>
           <meta content="width=device-width, initial-scale=1" name="viewport" />

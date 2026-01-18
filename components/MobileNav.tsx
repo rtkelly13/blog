@@ -10,7 +10,6 @@ const MobileNav = () => {
       if (status) {
         document.body.style.overflow = 'auto';
       } else {
-        // Prevent scrolling
         document.body.style.overflow = 'hidden';
       }
       return !status;
@@ -21,7 +20,7 @@ const MobileNav = () => {
     <div className="sm:hidden">
       <button
         type="button"
-        className="w-8 h-8 ml-1 mr-1 rounded-sm"
+        className="w-8 h-8 ml-1 mr-1 border-2 border-white hover:bg-white hover:text-black transition-colors"
         aria-label="Toggle Menu"
         onClick={onToggleNav}
       >
@@ -29,7 +28,7 @@ const MobileNav = () => {
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className="text-gray-900 dark:text-gray-100"
+          className="text-current"
         >
           {navShow ? (
             <path
@@ -47,7 +46,7 @@ const MobileNav = () => {
         </svg>
       </button>
       <div
-        className={`fixed w-full h-full top-24 right-0 bg-gray-200 dark:bg-gray-800 opacity-95 z-10 transform ease-in-out duration-300 ${
+        className={`fixed w-full h-full top-24 right-0 bg-black border-l-2 border-white z-10 transform ease-in-out duration-300 ${
           navShow ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -57,12 +56,15 @@ const MobileNav = () => {
           className="fixed w-full h-full cursor-auto focus:outline-hidden"
           onClick={onToggleNav}
         ></button>
-        <nav className="fixed h-full mt-8">
+        <nav className="fixed h-full mt-8 bg-black">
           {headerNavLinks.map((link) => (
-            <div key={link.title} className="px-12 py-4">
+            <div
+              key={link.title}
+              className="px-12 py-4 border-b-2 border-white"
+            >
               <Link
                 href={link.href}
-                className="text-2xl font-bold tracking-widest text-gray-900 dark:text-gray-100"
+                className="text-2xl font-mono font-bold tracking-widest text-white hover:text-brutalist-cyan transition-colors uppercase terminal-prompt"
                 onClick={onToggleNav}
               >
                 {link.title}

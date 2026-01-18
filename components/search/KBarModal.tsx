@@ -19,13 +19,13 @@ export default function KBarModal({ actions, isLoading }: Props) {
 
   return (
     <KBarPortal>
-      <KBarPositioner className="z-50 bg-gray-300/50 p-4 backdrop-blur-xs dark:bg-black/50">
+      <KBarPositioner className="z-50 bg-black/80 p-4 backdrop-blur-sm">
         <KBarAnimator className="w-full max-w-xl">
-          <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex items-center space-x-4 p-4">
-              <span className="block w-5">
+          <div className="overflow-hidden border-2 border-white bg-black font-mono">
+            <div className="flex items-center space-x-4 p-4 border-b-2 border-white">
+              <span className="block w-5 text-brutalist-cyan">
                 <svg
-                  className="text-gray-400 dark:text-gray-300"
+                  className="text-brutalist-cyan"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -40,16 +40,16 @@ export default function KBarModal({ actions, isLoading }: Props) {
                 </svg>
               </span>
               <KBarSearch
-                defaultPlaceholder="Search..."
-                className="h-8 w-full bg-transparent text-gray-600 placeholder-gray-400 focus:outline-hidden dark:text-gray-200 dark:placeholder-gray-500"
+                defaultPlaceholder="> Search..."
+                className="h-8 w-full bg-transparent text-white placeholder-zinc-500 focus:outline-hidden"
               />
-              <kbd className="inline-block whitespace-nowrap rounded-sm border border-gray-400 px-1.5 align-middle text-xs font-medium leading-4 tracking-wide text-gray-400">
+              <kbd className="inline-block whitespace-nowrap border border-white px-1.5 align-middle text-xs font-medium leading-4 tracking-wide text-white bg-zinc-900">
                 ESC
               </kbd>
             </div>
             {!isLoading && <RenderResults />}
             {isLoading && (
-              <div className="block border-t border-gray-100 px-4 py-6 text-center text-gray-400 dark:border-gray-800">
+              <div className="block border-t-2 border-white px-4 py-6 text-center text-zinc-500">
                 Loading...
               </div>
             )}
@@ -65,7 +65,7 @@ function RenderResults() {
 
   if (results.length === 0) {
     return (
-      <div className="block border-t border-gray-100 px-4 py-6 text-center text-gray-400 dark:border-gray-800">
+      <div className="block border-t-2 border-white px-4 py-6 text-center text-zinc-500">
         No results found.
       </div>
     );
@@ -77,21 +77,21 @@ function RenderResults() {
       onRender={({ item, active }) => (
         <div>
           {typeof item === 'string' ? (
-            <div className="block border-t border-gray-100 px-4 pb-2 pt-6 text-xs font-semibold uppercase text-primary-600 dark:border-gray-800">
+            <div className="block border-t-2 border-white px-4 pb-2 pt-6 text-xs font-semibold uppercase text-brutalist-cyan">
               {item}
             </div>
           ) : (
             <div
-              className={`flex cursor-pointer justify-between px-4 py-2 ${
+              className={`flex cursor-pointer justify-between px-4 py-2 border-l-2 ${
                 active
-                  ? 'bg-primary-600 text-gray-100'
-                  : 'bg-transparent text-gray-700 dark:text-gray-100'
+                  ? 'bg-brutalist-cyan text-black border-brutalist-cyan'
+                  : 'bg-transparent text-white border-transparent'
               }`}
             >
               <div className="flex items-center space-x-2">
                 <span>{item.name}</span>
                 {item.subtitle && (
-                  <span className="text-xs text-gray-400">{item.subtitle}</span>
+                  <span className="text-xs text-zinc-500">{item.subtitle}</span>
                 )}
               </div>
               {item.shortcut?.length && (
@@ -99,10 +99,10 @@ function RenderResults() {
                   {item.shortcut.map((sc) => (
                     <kbd
                       key={sc}
-                      className={`flex h-6 w-6 items-center justify-center rounded-sm border text-xs font-medium ${
+                      className={`flex h-6 w-6 items-center justify-center border text-xs font-medium ${
                         active
-                          ? 'border-gray-200 text-gray-200'
-                          : 'border-gray-400 text-gray-400'
+                          ? 'border-black text-black'
+                          : 'border-white text-white'
                       }`}
                     >
                       {sc}

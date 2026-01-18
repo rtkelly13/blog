@@ -22,10 +22,8 @@ const ReactFlowDiagram = dynamic(() => import('./ReactFlowDiagram'), {
  */
 function DiagramSkeleton() {
   return (
-    <div className="flex items-center justify-center w-full h-48 my-4 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse">
-      <span className="text-gray-400 dark:text-gray-500">
-        Loading diagram...
-      </span>
+    <div className="flex items-center justify-center w-full h-48 my-4 bg-zinc-900 border-2 border-white animate-pulse">
+      <span className="text-zinc-500 font-mono">LOADING_DIAGRAM...</span>
     </div>
   );
 }
@@ -44,12 +42,12 @@ function DiagramWrapper({
 }) {
   return (
     <figure className={`my-6 ${className}`}>
-      <div className="flex justify-center w-full overflow-x-auto">
+      <div className="flex justify-center w-full overflow-x-auto border-2 border-white bg-zinc-900 p-4">
         {children}
       </div>
       {caption && (
-        <figcaption className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-          {caption}
+        <figcaption className="mt-2 text-center text-sm text-zinc-400 font-mono">
+          {`// ${caption}`}
         </figcaption>
       )}
     </figure>
@@ -95,8 +93,8 @@ export default function Diagram(props: DiagramProps) {
       break;
     default:
       content = (
-        <div className="p-4 text-red-500 bg-red-100 dark:bg-red-900/20 rounded-lg">
-          Unknown diagram type: {(props as any).type}
+        <div className="p-4 text-brutalist-pink bg-zinc-900 border-2 border-brutalist-pink font-mono">
+          ERROR: Unknown diagram type: {(props as any).type}
         </div>
       );
   }

@@ -18,10 +18,14 @@ const generateRssItem = (post: PostFrontMatter) => `
   </item>
 `;
 
-const generateRss = (posts: PostFrontMatter[], page = 'feed.xml') => `
+const generateRss = (
+  posts: PostFrontMatter[],
+  page = 'feed.xml',
+  title = siteMetadata.title,
+) => `
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title>${escape(siteMetadata.title)}</title>
+      <title>${escape(title)}</title>
       <link>${siteUrl}/blog</link>
       <description>${escape(siteMetadata.description)}</description>
       <language>${siteMetadata.language}</language>

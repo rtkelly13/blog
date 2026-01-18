@@ -1,0 +1,414 @@
+---
+title: "Reviving My Blog After 3 Years: Upgrading Dependencies and Tools (Part 2)"
+date: "2026-01-15"
+tags:
+  [
+    "nextjs",
+    "react",
+    "tailwind",
+    "turbopack",
+    "webpack",
+    "pnpm",
+    "biome",
+    "playwright",
+    "migration",
+    "ai",
+  ]
+draft: false
+summary: "The technical journey of upgrading React 17→19, Next.js 13→16, Tailwind 3→4, switching from Webpack to Turbopack, npm to pnpm, and ESLint+Prettier to Biome—all with AI assistance."
+images: []
+layout: PostLayout
+authors: ["default"]
+series:
+  name: "Blog Revival 2026"
+  order: 2
+---
+
+_This is Part 2 of a three-part series. [Read Part 1](/blog/blog-upgrade-2026-part-1) for the AI discovery story, or skip to [Part 3](/blog/blog-upgrade-2026-part-3) for the design system deep dive._
+
+---
+
+After discovering that OpenCode could actually help tackle my 3-year-old blog's dependency drift ([Part 1](/blog/blog-upgrade-2026-part-1)), I needed a systematic approach to upgrade everything without breaking the site.
+
+This post covers the technical upgrade process, what broke, how AI helped, and what I still had to review myself.
+
+# The Upgrade Strategy
+
+Rather than a "big bang" approach (upgrade everything at once and pray), I took an incremental path:
+
+1. **Foundation first**: Build tools and package manager
+2. **Core dependencies**: React, Next.js, Tailwind
+3. **Quality infrastructure**: Testing, linting, formatting
+4. **Bug fixes**: Things that broke along the way
+
+Each upgrade followed the same AI-assisted workflow:
+
+```
+1. Me: "Upgrade X to latest version"
+2. AI: Reads changelog, identifies breaking changes
+3. AI: Proposes migration plan with specific file changes
+4. Me: Reviews plan, approves or adjusts
+5. AI: Implements changes
+6. Me: Tests, validates, requests fixes if needed
+```
+
+# Phase 1: Foundation Upgrades
+
+## npm → pnpm
+
+**Why:** Faster installs, better monorepo support, strict dependency resolution.
+
+**AI Workflow:**
+
+```bash
+Me: "Switch from npm to pnpm, keep lockfile equivalent"
+
+AI:
+1. Analyzed package.json dependencies
+2. Generated pnpm-workspace.yaml for future monorepo support
+3. Created .npmrc with strict settings
+4. Migrated npm scripts (no changes needed)
+5. Generated pnpm-lock.yaml from package-lock.json
+```
+
+**What I reviewed:** The `.npmrc` settings (phantom dependencies, hoisting behavior).
+
+**Result:** Install time dropped from ~45s to ~12s.
+
+---
+
+## ESLint + Prettier → Biome
+
+**Why:** One tool instead of two, faster linting (Rust-based), zero config conflicts.
+
+**AI Workflow:**
+
+```bash
+Me: "Migrate from ESLint + Prettier to Biome, keep same formatting rules"
+
+AI:
+1. Read .eslintrc.json and .prettierrc
+2. Generated biome.json with equivalent rules
+3. Updated package.json scripts (lint, format)
+4. Removed 14 ESLint plugin dependencies
+5. Added pre-commit hook via lint-staged
+```
+
+**What I reviewed:** Custom rules I wanted to keep (e.g., `no-console` in production).
+
+**What broke:** Biome's import sorting differed from Prettier's. Had to choose: keep new order or customize. I kept Biome's default (simpler maintenance).
+
+**Result:** Linting 2.3x faster, 14 fewer dependencies.
+
+---
+
+## CommonJS → ESM (Build Scripts)
+
+**Why:** Modern Node.js supports native ESM, no transpilation needed.
+
+**AI Workflow:**
+
+```bash
+Me: "Convert build scripts (generate-sitemap, generate-rss) to ESM"
+
+AI:
+1. Renamed .js → .mjs
+2. Changed require() → import
+3. Updated __dirname usage (ESM has no __dirname)
+4. Fixed package.json "scripts" entries
+```
+
+**What I reviewed:** The `import.meta.url` workaround for `__dirname`.
+
+**What broke:** One script used `require.resolve()` for dynamic imports. AI suggested `await import()`, which worked.
+
+---
+
+# Phase 2: Core Dependency Upgrades
+
+## React 17 → 19
+
+**Why:** New concurrent features, improved performance, React Compiler support (future).
+
+**Breaking changes:**
+
+- Automatic batching (behavioral change, no code changes needed)
+- `ReactDOM.render()` deprecated → use `createRoot()`
+- Some deprecated lifecycle methods removed (I wasn't using them)
+
+**AI Workflow:**
+
+```bash
+Me: "Upgrade React 17 to 19, handle all breaking changes"
+
+AI:
+1. Read React 19 changelog
+2. Scanned codebase for deprecated APIs (none found)
+3. Updated pages/_app.tsx and pages/_document.tsx
+4. Verified no class components with old lifecycle methods
+5. Updated @types/react and @types/react-dom
+```
+
+**What I reviewed:** The automatic batching behavior in state updates (read React blog post).
+
+**What broke:** Nothing! The codebase was simple enough that React 18/19's improvements "just worked."
+
+---
+
+## Next.js 13 → 16
+
+**Why:** Turbopack (faster builds), improved caching, better image optimization.
+
+**Breaking changes:**
+
+- Webpack → Turbopack (opt-in via `next dev --turbopack`)
+- `next.config.js` format changes (minor)
+- Image optimization changes (new default formats)
+
+**AI Workflow:**
+
+```bash
+Me: "Upgrade Next.js 13 to 16, migrate to Turbopack"
+
+AI:
+1. Read Next.js 16 upgrade guide
+2. Updated next.config.js (reactStrictMode, images config)
+3. Changed package.json dev script to use --turbopack
+4. Verified no usage of removed webpack-specific features
+5. Tested image optimization (Sharp dependency)
+```
+
+**What I reviewed:** Turbopack vs Webpack behavior differences (mostly compatible).
+
+**What broke:**
+
+- Initial dev server startup slower (Turbopack one-time setup)
+- Hot reload occasionally required manual refresh (Turbopack beta quirk)
+
+**Result:** Dev rebuild time dropped from ~800ms to ~150ms after initial startup.
+
+---
+
+## Tailwind CSS 3 → 4
+
+**Why:** New CSS engine, better performance, modern `@import` syntax.
+
+**Breaking changes (MAJOR):**
+
+- `@tailwind` directives → `@import "tailwindcss"`
+- Plugin syntax changed → `@plugin "@tailwindcss/typography"`
+- PostCSS config requires new `@tailwindcss/postcss` package
+- Some utility classes renamed
+
+**AI Workflow:**
+
+```bash
+Me: "Upgrade Tailwind 3 to 4, handle new CSS syntax and plugin changes"
+
+AI:
+1. Read Tailwind 4 migration guide (very long changelog)
+2. Updated css/tailwind.css:
+   - Changed @tailwind directives to @import
+   - Added @plugin for typography, forms
+3. Updated postcss.config.js (new @tailwindcss/postcss)
+4. Updated tailwind.config.js (new format)
+5. Scanned components for removed utility classes
+6. Generated list of 12 components needing updates
+```
+
+**What I reviewed:** Every component change (AI flagged 12, I manually checked all 40+).
+
+**What broke:**
+
+- `prose` class styling changed (typography plugin v4 differences)
+- Some color opacity syntax needed updates (`bg-black/50` → `bg-black/50`)
+- Custom plugin I wrote for ASCII borders needed rewrite
+
+**Custom Plugin Fix (I wrote this part manually):**
+
+The AI proposed a fix for my ASCII border plugin, but the new v4 plugin API was too new (docs incomplete). I read the Tailwind v4 source code and rewrote it myself:
+
+```js
+// Old (Tailwind v3)
+plugin(function ({ addUtilities }) {
+  addUtilities({
+    ".ascii-border": {
+      border: "2px solid white",
+      boxShadow: "4px 4px 0px 0px #ffffff",
+    },
+  });
+});
+
+// New (Tailwind v4)
+import plugin from "tailwindcss/plugin";
+
+export default plugin(({ addUtilities }) => {
+  addUtilities({
+    ".ascii-border": {
+      border: "2px solid white",
+      "box-shadow": "4px 4px 0px 0px #ffffff",
+    },
+  });
+});
+```
+
+This was the ONLY upgrade step where AI wasn't helpful (v4 too new).
+
+---
+
+# Phase 3: Quality Infrastructure
+
+## Adding Playwright (E2E + Visual Regression)
+
+**Why:** No existing tests. Wanted confidence that upgrades didn't break anything.
+
+**AI Workflow:**
+
+```bash
+Me: "Add Playwright with e2e tests and visual regression tests"
+
+AI:
+1. Installed @playwright/test
+2. Generated playwright.config.ts
+3. Created tests/ directory structure
+4. Wrote 12 e2e tests (navigation, links, blog post rendering)
+5. Wrote 12 visual regression tests (homepage, blog, dark mode)
+6. Wrote 15 responsive tests (mobile, tablet, desktop)
+7. Added npm scripts (test:e2e, test:update-snapshots)
+```
+
+**What I reviewed:** Test coverage (were we testing the right things?).
+
+**What I added manually:**
+
+- CI/CD workflow (`.github/workflows/playwright.yml`)
+- Integration with Vercel deployments (tests run after deploy succeeds)
+
+**Result:** 39 total tests, ~2min runtime, caught 3 regressions during development.
+
+---
+
+## CI/CD with GitHub Actions + Vercel
+
+**AI Workflow:**
+
+```bash
+Me: "Create GitHub Actions workflow to run Playwright tests after Vercel deployment"
+
+AI:
+1. Generated .github/workflows/playwright.yml
+2. Used deployment_status event trigger
+3. Added conditional to run only on successful Vercel deploys
+4. Added workflow_dispatch for manual runs with snapshot updates
+5. Configured artifact uploads (screenshots on failure)
+```
+
+**What I reviewed:** Trigger conditions (only run on preview deploys? or production too?).
+
+**What I changed:** Added separate jobs for e2e vs visual tests (parallel execution).
+
+---
+
+# Phase 4: Bug Fixes Discovered During Upgrades
+
+## RSS Feed URL Double-Slashes
+
+**Problem:** RSS feed URLs had double slashes (`https://ryankelly.dev//blog/post-slug`).
+
+**Root cause:** `siteMetadata.siteUrl` had trailing slash, concatenation added another.
+
+**AI Fix:**
+
+```js
+// Before
+const url = `${siteMetadata.siteUrl}/${slug}`;
+
+// After
+const url = `${siteMetadata.siteUrl}${slug.startsWith("/") ? "" : "/"}${slug}`;
+```
+
+I asked AI to simplify:
+
+```js
+// Final
+const url = new URL(slug, siteMetadata.siteUrl).href;
+```
+
+Cleaner, handles edge cases.
+
+---
+
+## Sitemap Generation for Nested Posts
+
+**Problem:** Blog posts in subdirectories (`data/blog/aws-batch/cookbook.mdx`) weren't in sitemap.
+
+**Root cause:** Sitemap script only checked `data/blog/*.mdx`, not `data/blog/**/*.mdx`.
+
+**AI Fix:**
+
+```js
+// Before
+const posts = fs.readdirSync("data/blog").filter((f) => f.endsWith(".mdx"));
+
+// After
+const posts = glob.sync("data/blog/**/*.mdx");
+```
+
+---
+
+## Per-Tag RSS Feeds
+
+**Problem:** No RSS feeds for individual tags (e.g., `/feed/tailwind.xml`).
+
+**AI Workflow:**
+
+```bash
+Me: "Generate per-tag RSS feeds like /feed/tailwind.xml"
+
+AI:
+1. Created scripts/generate-tag-rss.mjs
+2. Read all posts, extract tags
+3. Generated one RSS file per tag
+4. Updated build script to run after generate-rss
+```
+
+**What I reviewed:** Feed format (Atom vs RSS 2.0).
+
+**Result:** 12 new tag-specific RSS feeds.
+
+---
+
+# What AI Was Good At
+
+✅ **Reading changelogs** - Parsed massive Next.js/Tailwind upgrade guides faster than I could.  
+✅ **Proposing migration plans** - Broke down complex upgrades into step-by-step changes.  
+✅ **Batch refactoring** - Updated 40+ components with new Tailwind classes.  
+✅ **Catching edge cases** - Found nested blog posts missing from sitemap.  
+✅ **Writing boilerplate** - Generated test files, CI configs, build scripts.
+
+# What AI Was Bad At
+
+❌ **Brand new APIs** - Tailwind v4 plugin API (released 2 weeks prior) had incomplete docs. AI hallucinated syntax.  
+❌ **Design decisions** - Couldn't decide "should we keep Prettier's import order or switch to Biome's?" (subjective choice).  
+❌ **Performance profiling** - Suggested fixes for slow builds, but didn't measure impact.  
+❌ **Debugging visual issues** - When dark mode toggle broke, AI suggested CSS fixes blindly without inspecting browser DevTools.
+
+# Lessons Learned
+
+**1. AI as a changelog reader:** I would have spent hours reading React 19, Next.js 16, and Tailwind 4 docs. AI digested them in seconds and proposed actionable changes.
+
+**2. Still need to review everything:** AI proposed 200+ lines of changes across 12 files for the Tailwind upgrade. I reviewed every single one. Found 3 cases where AI misunderstood the new API.
+
+**3. Incremental upgrades > big bang:** Upgrading React first, testing, then Next.js, testing, then Tailwind was WAY better than "upgrade everything and debug for 3 days."
+
+**4. Tests saved me:** The 39 Playwright tests caught regressions I would have missed. Visual tests caught broken dark mode styles.
+
+**5. AI can't replace understanding:** When Tailwind v4 plugin API was too new, I had to read the source code myself. No amount of AI prompting would have worked.
+
+---
+
+**Next:** [Part 3: Design System Implementation](/blog/blog-upgrade-2026-part-3) - The retro-brutalist terminal aesthetic breakdown.
+
+**Previous:** [Part 1: Discovering AI-Assisted Development](/blog/blog-upgrade-2026-part-1)
+
+**Index:** [Blog Upgrade Series Overview](/blog/blog-upgrade-2026)

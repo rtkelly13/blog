@@ -9,6 +9,7 @@ import generateRss from '@/lib/generate-rss';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
 import { getAllTags } from '@/lib/tags';
 import kebabCase from '@/lib/utils/kebabCase';
+import { show_drafts } from '@/lib/utils/showDrafts';
 
 const root = process.cwd();
 
@@ -33,11 +34,16 @@ export const getStaticProps: GetStaticProps<{
   const allPosts = await getAllFilesFrontMatter('blog');
   const filteredPosts = allPosts.filter(
     (post) =>
-      post.draft !== true && post.tags.map((t) => kebabCase(t)).includes(tag),
+      (post.draft !== true || show_drafts()) &&
+      post.tags.map((t) => kebabCase(t)).includes(tag),
   );
 
   // rss
-  const rss = generateRss(filteredPosts, `tags/${tag}/feed.xml`);
+  const rss = generateRss(
+    filteredPosts,
+    `tags/${tag}/feed.xml`,
+    `${siteMetadata.title} - ${tag}`,
+  );
   const rssPath = path.join(root, 'public', 'tags', tag);
   fs.mkdirSync(rssPath, { recursive: true });
   fs.writeFileSync(path.join(rssPath, 'feed.xml'), rss);

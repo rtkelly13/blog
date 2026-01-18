@@ -1,10 +1,10 @@
 import NextImage from 'next/image';
 import type { ReactNode } from 'react';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
-import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
@@ -32,7 +32,7 @@ export default function PostBanner({
   return (
     <>
       <BlogSEO url={`${siteMetadata.siteUrl}/blog/${slug}`} {...frontMatter} />
-      <ScrollTopAndComment />
+      <BlogActions />
 
       {/* Full-width banner - breaks out of container */}
       <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">

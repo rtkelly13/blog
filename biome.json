@@ -28,7 +28,11 @@
         "noUnknownAtRules": "off",
         "noShadowRestrictedNames": "off",
         "useIterableCallbackReturn": "off",
-        "noAssignInExpressions": "off"
+        "noAssignInExpressions": "off",
+        "noArrayIndexKey": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
       },
       "security": {
         "noDangerouslySetInnerHtml": "off"
@@ -37,7 +41,8 @@
         "noCommaOperator": "off"
       },
       "performance": {
-        "noAccumulatingSpread": "off"
+        "noAccumulatingSpread": "off",
+        "noImgElement": "off"
       },
       "correctness": {
         "noUnusedFunctionParameters": "off"
