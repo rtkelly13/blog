@@ -1,0 +1,62 @@
+{
+  "name": "@rtkelly/mermaid-toolkit",
+  "version": "0.1.0",
+  "description": "Comprehensive toolkit for Mermaid diagrams: ASCII rendering, theme engine, and diagram collection",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "mermaid",
+    "ascii",
+    "ascii-art",
+    "diagram",
+    "flowchart",
+    "sequence-diagram",
+    "theme",
+    "theming",
+    "toolkit",
+    "text-diagram",
+    "cli",
+    "markdown",
+    "llms.txt"
+  ],
+  "author": "Ryan Kelly",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rtkelly13/blog",
+    "directory": "packages/mermaid-toolkit"
+  },
+  "peerDependencies": {
+    "mermaid": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "mermaid": "^11.12.2",
+    "tsup": "^8.3.5",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.17"
+  }
+}

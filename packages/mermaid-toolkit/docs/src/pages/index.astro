@@ -1,0 +1,281 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Mermaid Toolkit - Theme Engine & ASCII Renderer">
+  <div class="container">
+    <header>
+      <h1>MERMAID TOOLKIT</h1>
+      <p class="subtitle">Theme Engine + ASCII Renderer for Mermaid Diagrams</p>
+    </header>
+
+    <div class="install-box">
+      <code>pnpm add @rtkelly/mermaid-toolkit mermaid</code>
+    </div>
+
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-title">🎨 6 Theme Presets</div>
+        <p>Retro-brutalist, terminal, high-contrast, pastel, dark, default</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">📐 ASCII Renderer</div>
+        <p>Convert flowcharts to Unicode/ASCII box-drawing art</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">🔧 Type-Safe API</div>
+        <p>Full TypeScript coverage for 50+ theme variables</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">⚡ Zero Dependencies</div>
+        <p>Pure TypeScript, only peer dependency on mermaid</p>
+      </div>
+    </section>
+
+    <h2>▸ INTERACTIVE THEME DEMO</h2>
+    <p class="demo-intro">
+      Click a theme to see it applied in real-time
+    </p>
+
+    <div class="theme-selector" id="themeSelector">
+      <button class="theme-button active" data-theme="retro-brutalist">RETRO-BRUTALIST</button>
+      <button class="theme-button" data-theme="terminal">TERMINAL</button>
+      <button class="theme-button" data-theme="high-contrast">HIGH-CONTRAST</button>
+      <button class="theme-button" data-theme="pastel">PASTEL</button>
+      <button class="theme-button" data-theme="dark">DARK</button>
+      <button class="theme-button" data-theme="default">DEFAULT</button>
+    </div>
+
+    <div class="demo-section">
+      <div class="demo-box">
+        <div class="demo-label">▸ Themed Diagram (SVG)</div>
+        <div class="mermaid" id="diagramOutput" set:html={`graph LR
+  A[Start] --> B[Decision]
+  B -->|Yes| C[Process]
+  B -->|No| D[End]
+  C --> D`}>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-label">▸ ASCII Version</div>
+        <pre id="asciiOutput">Loading...</pre>
+      </div>
+    </div>
+
+    <h2>▸ QUICK START</h2>
+    <pre><code>import &#123; ThemeEngine &#125; from '@rtkelly/mermaid-toolkit';
+
+const engine = new ThemeEngine(&#123; preset: 'retro-brutalist' &#125;);
+
+mermaid.initialize(engine.getConfig());</code></pre>
+
+    <h2>▸ LINKS</h2>
+    <p>
+      <a href="https://github.com/rtkelly13/blog/tree/main/packages/mermaid-toolkit" target="_blank">GitHub</a> · 
+      <a href="https://www.npmjs.com/package/@rtkelly/mermaid-toolkit" target="_blank">NPM</a> · 
+      <a href="https://github.com/rtkelly13/blog/blob/main/packages/mermaid-toolkit/README.md" target="_blank">Documentation</a>
+    </p>
+  </div>
+
+  <script>
+    import mermaid from 'mermaid';
+
+    const THEME_CONFIGS = {
+      'retro-brutalist': {
+        theme: 'base',
+        themeVariables: {
+          primaryColor: '#00ff00',
+          primaryTextColor: '#000000',
+          primaryBorderColor: '#00ff00',
+          lineColor: '#00ff00',
+          secondaryColor: '#33ff33',
+          tertiaryColor: '#ff3333',
+          background: '#0c0c0c',
+          mainBkg: '#0c0c0c',
+          secondBkg: '#1c1c1c',
+          mainContrastColor: '#33ff33',
+          darkMode: true,
+          fontFamily: '"Courier New", Courier, monospace',
+          fontSize: '14px'
+        }
+      },
+      'terminal': {
+        theme: 'base',
+        themeVariables: {
+          primaryColor: '#33ff33',
+          primaryTextColor: '#0a0a0a',
+          primaryBorderColor: '#33ff33',
+          lineColor: '#33ff33',
+          secondaryColor: '#66ff66',
+          tertiaryColor: '#ff3333',
+          background: '#0c0c0c',
+          mainBkg: '#0c0c0c',
+          secondBkg: '#1c1c1c',
+          mainContrastColor: '#33ff33',
+          darkMode: true,
+          fontFamily: '"IBM Plex Mono", "Consolas", monospace',
+          fontSize: '14px'
+        }
+      },
+      'high-contrast': {
+        theme: 'base',
+        themeVariables: {
+          primaryColor: '#ffffff',
+          primaryTextColor: '#000000',
+          primaryBorderColor: '#000000',
+          lineColor: '#000000',
+          secondaryColor: '#ffff00',
+          tertiaryColor: '#00ffff',
+          background: '#ffffff',
+          mainBkg: '#ffffff',
+          secondBkg: '#f0f0f0',
+          darkMode: false,
+          fontFamily: 'Arial, sans-serif',
+          fontSize: '18px'
+        }
+      },
+      'pastel': {
+        theme: 'base',
+        themeVariables: {
+          primaryColor: '#b8e6d5',
+          primaryTextColor: '#2c5f4f',
+          primaryBorderColor: '#6ba894',
+          lineColor: '#6ba894',
+          secondaryColor: '#e6b8d5',
+          tertiaryColor: '#d5e6b8',
+          background: '#fafafa',
+          mainBkg: '#ffffff',
+          secondBkg: '#f0f0f5',
+          darkMode: false,
+          fontFamily: '"Inter", "Helvetica Neue", sans-serif',
+          fontSize: '14px'
+        }
+      },
+      'dark': {
+        theme: 'dark'
+      },
+      'default': {
+        theme: 'default'
+      }
+    };
+
+    const diagramCode = `graph LR
+  A[Start] --> B{Decision}
+  B -->|Yes| C[Process]
+  B -->|No| D[End]
+  C --> D`;
+
+    const asciiVersions = {
+      'retro-brutalist': `┌───────┐     ┌──────────┐
+│ Start ├────►│ Decision │
+└───────┘     └────┬─────┘
+                   │
+        ┌──────────┼──────────┐
+        │                     │
+        ▼                     ▼
+   ┌─────────┐           ┌─────┐
+   │ Process │           │ End │
+   └────┬────┘           └─────┘
+        │
+        └───────────────────►`,
+      'terminal': `┌───────┐     ┌──────────┐
+│ Start ├────►│ Decision │
+└───────┘     └────┬─────┘
+                   │
+        ┌──────────┼──────────┐
+        │                     │
+        ▼                     ▼
+   ┌─────────┐           ┌─────┐
+   │ Process │           │ End │
+   └────┬────┘           └─────┘
+        │
+        └───────────────────►`,
+      'high-contrast': `+-------+     +----------+
+| Start |---->| Decision |
++-------+     +----+-----+
+                   |
+        +----------+----------+
+        |                     |
+        v                     v
+   +---------+           +-----+
+   | Process |           | End |
+   +----+----+           +-----+
+        |
+        +--------------------->`,
+      'pastel': `┌───────┐     ┌──────────┐
+│ Start ├────►│ Decision │
+└───────┘     └────┬─────┘
+                   │
+        ┌──────────┼──────────┐
+        │                     │
+        ▼                     ▼
+   ┌─────────┐           ┌─────┐
+   │ Process │           │ End │
+   └────┬────┘           └─────┘
+        │
+        └───────────────────►`,
+      'dark': `┌───────┐     ┌──────────┐
+│ Start ├────►│ Decision │
+└───────┘     └────┬─────┘
+                   │
+        ┌──────────┼──────────┐
+        │                     │
+        ▼                     ▼
+   ┌─────────┐           ┌─────┐
+   │ Process │           │ End │
+   └────┬────┘           └─────┘
+        │
+        └───────────────────►`,
+      'default': `┌───────┐     ┌──────────┐
+│ Start ├────►│ Decision │
+└───────┘     └────┬─────┘
+                   │
+        ┌──────────┼──────────┐
+        │                     │
+        ▼                     ▼
+   ┌─────────┐           ┌─────┐
+   │ Process │           │ End │
+   └────┬────┘           └─────┘
+        │
+        └───────────────────►`
+    };
+
+    function applyTheme(themeName) {
+      const config = THEME_CONFIGS[themeName];
+      
+      mermaid.initialize(config);
+      
+      const diagramEl = document.getElementById('diagramOutput');
+      if (diagramEl) {
+        diagramEl.innerHTML = diagramCode;
+        diagramEl.removeAttribute('data-processed');
+        mermaid.run({ nodes: [diagramEl] });
+      }
+      
+      const asciiEl = document.getElementById('asciiOutput');
+      if (asciiEl) {
+        asciiEl.textContent = asciiVersions[themeName] || asciiVersions['retro-brutalist'];
+      }
+    }
+
+    mermaid.initialize(THEME_CONFIGS['retro-brutalist']);
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTheme('retro-brutalist');
+      
+      const buttons = document.querySelectorAll('.theme-button');
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          buttons.forEach(b => b.classList.remove('active'));
+          button.classList.add('active');
+          
+          const theme = button.getAttribute('data-theme');
+          if (theme) {
+            applyTheme(theme);
+          }
+        });
+      });
+    });
+  </script>
+</Layout>
