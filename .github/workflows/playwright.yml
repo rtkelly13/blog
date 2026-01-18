@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       update_snapshots:
-        description: 'Update visual regression snapshots'
+        description: "Update visual regression snapshots"
         required: false
         default: false
         type: boolean
@@ -21,6 +21,14 @@ jobs:
       (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success')
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: blog
+
+      - name: Checkout mermaid-toolkit
+        uses: actions/checkout@v4
+        with:
+          repository: rtkelly13/mermaid-toolkit
+          path: mermaid-toolkit
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -30,12 +38,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'pnpm'
+          cache: "pnpm"
+          cache-dependency-path: "blog/pnpm-lock.yaml"
+
+      - name: Build mermaid-toolkit
+        working-directory: mermaid-toolkit
+        run: pnpm install && pnpm build
 
       - name: Install dependencies
+        working-directory: blog
         run: pnpm install --frozen-lockfile
 
       - name: Configure Draft Visibility
+        working-directory: blog
         run: |
           REF_NAME="${{ github.event.deployment.ref || github.ref_name }}"
           echo "Checking ref: $REF_NAME"
@@ -47,13 +62,16 @@ jobs:
           fi
 
       - name: Build the site
+        working-directory: blog
         run: pnpm run build
 
       - name: Install Playwright Browsers
+        working-directory: blog
         run: pnpm exec playwright install --with-deps
 
       - name: Check if snapshots exist
         id: snapshots
+        working-directory: blog
         run: |
           if [ -d "tests/__snapshots__" ] && [ "$(ls -A tests/__snapshots__ 2>/dev/null)" ]; then
             echo "exist=true" >> $GITHUB_OUTPUT
@@ -63,21 +81,32 @@ jobs:
 
       - name: Run Playwright tests
         if: ${{ !inputs.update_snapshots && steps.snapshots.outputs.exist == 'true' }}
+        working-directory: blog
         run: pnpm exec playwright test
 
       - name: Run Playwright tests (no snapshots yet - update mode)
         if: ${{ !inputs.update_snapshots && steps.snapshots.outputs.exist == 'false' }}
+        working-directory: blog
         run: pnpm exec playwright test --update-snapshots
 
       - name: Update snapshots
         if: ${{ inputs.update_snapshots }}
+        working-directory: blog
         run: pnpm exec playwright test --update-snapshots
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: blog/playwright-report/
+          retention-days: 30
+
+      - name: Upload snapshots
+        uses: actions/upload-artifact@v4
+        if: ${{ (inputs.update_snapshots || steps.snapshots.outputs.exist == 'false') && !cancelled() }}
+        with:
+          name: playwright-snapshots
+          path: blog/tests/__snapshots__/
           retention-days: 30
 
       - name: Upload snapshots
