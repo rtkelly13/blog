@@ -143,18 +143,19 @@ export default function ListLayout({
           isInSeries ? 'pl-6' : ''
         }`}
       >
-        <article className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-baseline px-6">
+        <article className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-start px-6">
           <dl>
             <dt className="sr-only">Published on</dt>
-            <dd className="font-mono text-sm leading-6 text-brutalist-yellow">
-              <span className="text-brutalist-cyan">&gt;</span>{' '}
-              <time dateTime={date}>{formatDate(date)}</time>
+            <dd className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
+              <div>
+                <span className="text-brutalist-cyan">&gt;</span>{' '}
+                <time dateTime={date}>{formatDate(date)}</time>
+              </div>
               {readingTime && (
-                <>
-                  {' '}
+                <div>
                   <span className="text-brutalist-cyan">||</span>{' '}
                   <span className="text-white">{readingTime.text}</span>
-                </>
+                </div>
               )}
             </dd>
           </dl>
@@ -248,41 +249,50 @@ export default function ListLayout({
                 key={`series-${seriesGroup.name}-${idx}`}
                 className="py-6 border-b-2 border-white last:border-b-0 hover:bg-zinc-900 transition-colors"
               >
-                <article className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-baseline px-6">
+                <article className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-start px-6">
                   <dl>
                     <dt className="sr-only">Published on</dt>
-                    <dd className="font-mono text-sm leading-6 text-brutalist-yellow">
-                      <span className="text-brutalist-cyan">&gt;</span>{' '}
-                      <time dateTime={seriesGroup.latestDate}>
-                        {formatDate(seriesGroup.latestDate)}
-                      </time>
-                      <br />
-                      <span className="text-brutalist-cyan">||</span>{' '}
-                      <span className="text-white">
-                        {seriesGroup.posts.length} part
-                        {seriesGroup.posts.length > 1 ? 's' : ''}
-                      </span>
+                    <dd className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
+                      <div>
+                        <span className="text-brutalist-cyan">&gt;</span>{' '}
+                        <time dateTime={seriesGroup.latestDate}>
+                          {formatDate(seriesGroup.latestDate)}
+                        </time>
+                      </div>
+                      <div>
+                        <span className="text-brutalist-cyan">||</span>{' '}
+                        <span className="text-white">
+                          {seriesGroup.posts.length} part
+                          {seriesGroup.posts.length > 1 ? 's' : ''}
+                        </span>
+                      </div>
                     </dd>
                   </dl>
                   <div className="space-y-3 xl:col-span-3">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-3 mb-2">
                         <span className="inline-block bg-brutalist-pink text-black font-mono font-bold text-xs px-2 py-1 uppercase">
                           SERIES
                         </span>
                         <button
                           type="button"
                           onClick={() => toggleSeries(seriesGroup.name)}
-                          className="text-brutalist-cyan hover:text-brutalist-pink transition-colors"
+                          className="border-2 border-brutalist-cyan text-brutalist-cyan hover:bg-brutalist-cyan hover:text-black transition-all px-3 py-1.5 font-mono font-bold text-xs uppercase flex items-center gap-1.5"
                           aria-expanded={isExpanded}
                           aria-label={
                             isExpanded ? 'Collapse series' : 'Expand series'
                           }
                         >
                           {isExpanded ? (
-                            <ChevronDown className="w-5 h-5" />
+                            <>
+                              <ChevronDown className="w-4 h-4" />
+                              <span>COLLAPSE</span>
+                            </>
                           ) : (
-                            <ChevronRight className="w-5 h-5" />
+                            <>
+                              <ChevronRight className="w-4 h-4" />
+                              <span>EXPAND</span>
+                            </>
                           )}
                         </button>
                       </div>
