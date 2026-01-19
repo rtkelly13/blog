@@ -13,6 +13,7 @@ interface Props {
   initialDisplayPosts?: PostFrontMatter[];
   pagination?: ComponentProps<typeof Pagination>;
   seriesMap?: Map<string, SeriesMetadata>;
+  tagCounts?: Record<string, number>;
 }
 
 type SeriesGroup = {
@@ -27,6 +28,17 @@ type SeriesGroup = {
 type PostOrGroup =
   | { type: 'post'; post: PostFrontMatter }
   | { type: 'series'; group: SeriesGroup };
+
+function sortTagsByPopularity(
+  tags: string[],
+  tagCounts: Record<string, number> = {},
+): string[] {
+  return [...tags].sort((a, b) => {
+    const countA = tagCounts[a.toLowerCase()] || 0;
+    const countB = tagCounts[b.toLowerCase()] || 0;
+    return countB - countA;
+  });
+}
 
 function mergeUniqueTags(seriesTags: string[], postTags: string[]): string[] {
   const seen = new Set(seriesTags.map((t) => t.toLowerCase()));
@@ -104,6 +116,7 @@ export default function ListLayout({
   initialDisplayPosts = [],
   pagination,
   seriesMap,
+  tagCounts = {},
 }: Props) {
   const [searchValue, setSearchValue] = useState('');
   const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
@@ -131,6 +144,25 @@ export default function ListLayout({
       }
       return next;
     });
+  };
+
+  const renderTags = (tags: string[], maxVisible = 5) => {
+    const sortedTags = sortTagsByPopularity(tags, tagCounts);
+    const visibleTags = sortedTags.slice(0, maxVisible);
+    const hiddenCount = sortedTags.length - maxVisible;
+
+    return (
+      <div className="flex flex-wrap gap-2 mt-2">
+        {visibleTags.map((tag) => (
+          <Tag key={tag} text={tag} />
+        ))}
+        {hiddenCount > 0 && (
+          <span className="inline-block px-2 py-1 font-mono text-xs text-gray-400 border border-gray-600">
+            +{hiddenCount} more
+          </span>
+        )}
+      </div>
+    );
   };
 
   const renderPost = (frontMatter: PostFrontMatter, isInSeries = false) => {
@@ -174,11 +206,7 @@ export default function ListLayout({
                   [ {title} ]
                 </Link>
               </h3>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {tags.map((tag) => (
-                  <Tag key={tag} text={tag} />
-                ))}
-              </div>
+              {renderTags(tags)}
             </div>
             <div className="font-mono text-sm text-gray-200">{summary}</div>
             <div className="font-mono text-sm">
@@ -310,11 +338,7 @@ export default function ListLayout({
                           </span>
                         )}
                       </h3>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {seriesGroup.tags.map((tag) => (
-                          <Tag key={tag} text={tag} />
-                        ))}
-                      </div>
+                      {renderTags(seriesGroup.tags)}
                     </div>
                     {seriesGroup.series?.summary && (
                       <div className="font-mono text-sm text-gray-200">

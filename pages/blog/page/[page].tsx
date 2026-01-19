@@ -4,10 +4,13 @@ import type {
   InferGetStaticPropsType,
 } from 'next';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { SeriesMetadata } from 'types/Series';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 import ListLayout from '@/layouts/ListLayout';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
+import { getAllSeries } from '@/lib/series';
+import { getAllTags } from '@/lib/tags';
 import { POSTS_PER_PAGE } from '../../blog';
 
 export const getStaticPaths: GetStaticPaths<{ page: string }> = async () => {
@@ -27,6 +30,8 @@ export const getStaticProps: GetStaticProps<{
   posts: PostFrontMatter[];
   initialDisplayPosts: PostFrontMatter[];
   pagination: { currentPage: number; totalPages: number };
+  seriesData: Record<string, SeriesMetadata>;
+  tagCounts: Record<string, number>;
 }> = async (context) => {
   const {
     params: { page },
@@ -42,11 +47,17 @@ export const getStaticProps: GetStaticProps<{
     totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
   };
 
+  const allSeries = getAllSeries();
+  const seriesData = Object.fromEntries(allSeries.map((s) => [s.title, s]));
+  const tagCounts = await getAllTags('blog');
+
   return {
     props: {
       posts,
       initialDisplayPosts,
       pagination,
+      seriesData,
+      tagCounts,
     },
   };
 };
@@ -55,7 +66,11 @@ export default function PostPage({
   posts,
   initialDisplayPosts,
   pagination,
+  seriesData,
+  tagCounts,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const seriesMap = new Map(Object.entries(seriesData));
+
   return (
     <>
       <PageSEO
@@ -67,6 +82,8 @@ export default function PostPage({
         initialDisplayPosts={initialDisplayPosts}
         pagination={pagination}
         title="All Posts"
+        seriesMap={seriesMap}
+        tagCounts={tagCounts}
       />
     </>
   );

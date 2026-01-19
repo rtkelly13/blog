@@ -6,6 +6,7 @@ import siteMetadata from '@/data/siteMetadata';
 import ListLayout from '@/layouts/ListLayout';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
 import { getAllSeries } from '@/lib/series';
+import { getAllTags } from '@/lib/tags';
 
 export const POSTS_PER_PAGE = 5;
 
@@ -14,6 +15,7 @@ export const getStaticProps: GetStaticProps<{
   initialDisplayPosts: ComponentProps<typeof ListLayout>['initialDisplayPosts'];
   pagination: ComponentProps<typeof ListLayout>['pagination'];
   seriesData: Record<string, SeriesMetadata>;
+  tagCounts: Record<string, number>;
 }> = async () => {
   const posts = await getAllFilesFrontMatter('blog');
   const initialDisplayPosts = posts.slice(0, POSTS_PER_PAGE);
@@ -24,8 +26,11 @@ export const getStaticProps: GetStaticProps<{
 
   const allSeries = getAllSeries();
   const seriesData = Object.fromEntries(allSeries.map((s) => [s.title, s]));
+  const tagCounts = await getAllTags('blog');
 
-  return { props: { initialDisplayPosts, posts, pagination, seriesData } };
+  return {
+    props: { initialDisplayPosts, posts, pagination, seriesData, tagCounts },
+  };
 };
 
 export default function Blog({
@@ -33,6 +38,7 @@ export default function Blog({
   initialDisplayPosts,
   pagination,
   seriesData,
+  tagCounts,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const seriesMap = new Map(Object.entries(seriesData));
 
@@ -48,6 +54,7 @@ export default function Blog({
         pagination={pagination}
         title="All Posts"
         seriesMap={seriesMap}
+        tagCounts={tagCounts}
       />
     </>
   );
