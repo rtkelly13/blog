@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { type ComponentProps, useState } from 'react';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { SeriesMetadata } from 'types/Series';
 import Link from '@/components/Link';
 import Pagination from '@/components/Pagination';
 import Tag from '@/components/Tag';
@@ -11,56 +12,90 @@ interface Props {
   title: string;
   initialDisplayPosts?: PostFrontMatter[];
   pagination?: ComponentProps<typeof Pagination>;
+  seriesMap?: Map<string, SeriesMetadata>;
 }
 
 type SeriesGroup = {
   name: string;
+  slug?: string;
   posts: PostFrontMatter[];
   latestDate: string;
+  series?: SeriesMetadata;
+  tags: string[];
 };
 
-function groupPostsBySeries(posts: PostFrontMatter[]): {
-  series: SeriesGroup[];
-  standalone: PostFrontMatter[];
-} {
-  const seriesMap = new Map<string, PostFrontMatter[]>();
-  const standalone: PostFrontMatter[] = [];
+type PostOrGroup =
+  | { type: 'post'; post: PostFrontMatter }
+  | { type: 'series'; group: SeriesGroup };
 
-  for (const post of posts) {
-    if (post.series) {
-      const existing = seriesMap.get(post.series.name) || [];
-      existing.push(post);
-      seriesMap.set(post.series.name, existing);
-    } else {
-      standalone.push(post);
+function mergeUniqueTags(seriesTags: string[], postTags: string[]): string[] {
+  const seen = new Set(seriesTags.map((t) => t.toLowerCase()));
+  const result = [...seriesTags];
+
+  for (const tag of postTags) {
+    if (!seen.has(tag.toLowerCase())) {
+      result.push(tag);
+      seen.add(tag.toLowerCase());
     }
   }
 
-  const series: SeriesGroup[] = [];
+  return result;
+}
 
-  for (const [name, seriesPosts] of seriesMap.entries()) {
-    const sortedPosts = seriesPosts.sort((a, b) => {
-      if (a.series && b.series) {
-        return a.series.order - b.series.order;
-      }
-      return 0;
-    });
+function groupContiguousSeriesPosts(
+  posts: PostFrontMatter[],
+  seriesMap?: Map<string, SeriesMetadata>,
+): PostOrGroup[] {
+  const result: PostOrGroup[] = [];
+  let i = 0;
 
-    const latestDate = sortedPosts.reduce(
+  while (i < posts.length) {
+    const currentPost = posts[i];
+
+    if (!currentPost.series) {
+      result.push({ type: 'post', post: currentPost });
+      i++;
+      continue;
+    }
+
+    const seriesName = currentPost.series.name;
+    const seriesPosts: PostFrontMatter[] = [currentPost];
+    let j = i + 1;
+
+    while (j < posts.length && posts[j].series?.name === seriesName) {
+      seriesPosts.push(posts[j]);
+      j++;
+    }
+
+    const latestDate = seriesPosts.reduce(
       (latest, post) => (post.date > latest ? post.date : latest),
-      sortedPosts[0].date,
+      seriesPosts[0].date,
     );
 
-    series.push({
-      name,
-      posts: sortedPosts,
-      latestDate,
+    const seriesMeta = seriesMap?.get(seriesName);
+    const seriesTags = seriesMeta?.tags || [];
+
+    const allPostTags = seriesPosts.flatMap((p) => p.tags);
+    const uniqueTags = mergeUniqueTags(seriesTags, allPostTags);
+
+    result.push({
+      type: 'series',
+      group: {
+        name: seriesName,
+        slug: seriesMeta?.slug,
+        posts: seriesPosts.sort(
+          (a, b) => (a.series?.order ?? 0) - (b.series?.order ?? 0),
+        ),
+        latestDate,
+        series: seriesMeta,
+        tags: uniqueTags,
+      },
     });
+
+    i = j;
   }
 
-  series.sort((a, b) => (a.latestDate > b.latestDate ? -1 : 1));
-
-  return { series, standalone };
+  return result;
 }
 
 export default function ListLayout({
@@ -68,6 +103,7 @@ export default function ListLayout({
   title,
   initialDisplayPosts = [],
   pagination,
+  seriesMap,
 }: Props) {
   const [searchValue, setSearchValue] = useState('');
   const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
@@ -83,7 +119,7 @@ export default function ListLayout({
       ? initialDisplayPosts
       : filteredBlogPosts;
 
-  const { series, standalone } = groupPostsBySeries(displayPosts);
+  const groupedPosts = groupContiguousSeriesPosts(displayPosts, seriesMap);
 
   const toggleSeries = (seriesName: string) => {
     setExpandedSeries((prev) => {
@@ -99,6 +135,7 @@ export default function ListLayout({
 
   const renderPost = (frontMatter: PostFrontMatter, isInSeries = false) => {
     const { slug, date, title, summary, tags, readingTime } = frontMatter;
+
     return (
       <li
         key={slug}
@@ -123,6 +160,11 @@ export default function ListLayout({
           </dl>
           <div className="space-y-3 xl:col-span-3">
             <div>
+              {isInSeries && frontMatter.series && (
+                <div className="font-mono text-xs text-brutalist-cyan mb-1">
+                  Part {frontMatter.series.order}
+                </div>
+              )}
               <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
                 <Link
                   href={`/blog/${slug}`}
@@ -193,18 +235,17 @@ export default function ListLayout({
             </li>
           )}
 
-          {series.map((seriesGroup) => {
+          {groupedPosts.map((item, idx) => {
+            if (item.type === 'post') {
+              return renderPost(item.post);
+            }
+
+            const seriesGroup = item.group;
             const isExpanded = expandedSeries.has(seriesGroup.name);
-            const indexPost = seriesGroup.posts.find(
-              (p) => p.series?.order === 0,
-            );
-            const _parts = seriesGroup.posts.filter(
-              (p) => p.series && p.series.order > 0,
-            );
 
             return (
               <li
-                key={seriesGroup.name}
+                key={`series-${seriesGroup.name}-${idx}`}
                 className="border-b-2 border-white last:border-b-0"
               >
                 <button
@@ -221,9 +262,19 @@ export default function ListLayout({
                         ) : (
                           <ChevronRight className="w-5 h-5 text-brutalist-cyan flex-shrink-0" />
                         )}
-                        <h2 className="text-2xl font-mono font-bold uppercase text-white">
-                          [ SERIES: {seriesGroup.name} ]
-                        </h2>
+                        {seriesGroup.slug ? (
+                          <Link
+                            href={`/series/${seriesGroup.slug}`}
+                            className="text-2xl font-mono font-bold uppercase text-white hover:text-brutalist-cyan transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            [ SERIES: {seriesGroup.name} ]
+                          </Link>
+                        ) : (
+                          <h2 className="text-2xl font-mono font-bold uppercase text-white">
+                            [ SERIES: {seriesGroup.name} ]
+                          </h2>
+                        )}
                       </div>
                       <div className="pl-7">
                         <p className="font-mono text-sm text-brutalist-yellow">
@@ -232,11 +283,16 @@ export default function ListLayout({
                           {seriesGroup.posts.length} part
                           {seriesGroup.posts.length > 1 ? 's' : ''}
                         </p>
-                        {indexPost && (
+                        {seriesGroup.series?.summary && (
                           <p className="font-mono text-sm text-gray-200 mt-2">
-                            {indexPost.summary}
+                            {seriesGroup.series.summary}
                           </p>
                         )}
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {seriesGroup.tags.map((tag) => (
+                            <Tag key={tag} text={tag} />
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -250,8 +306,6 @@ export default function ListLayout({
               </li>
             );
           })}
-
-          {standalone.map((post) => renderPost(post))}
         </ul>
       </div>
       {pagination && pagination.totalPages > 1 && !searchValue && (

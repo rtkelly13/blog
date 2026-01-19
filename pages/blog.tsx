@@ -1,9 +1,11 @@
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { ComponentProps } from 'react';
+import type { SeriesMetadata } from 'types/Series';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 import ListLayout from '@/layouts/ListLayout';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
+import { getAllSeries } from '@/lib/series';
 
 export const POSTS_PER_PAGE = 5;
 
@@ -11,6 +13,7 @@ export const getStaticProps: GetStaticProps<{
   posts: ComponentProps<typeof ListLayout>['posts'];
   initialDisplayPosts: ComponentProps<typeof ListLayout>['initialDisplayPosts'];
   pagination: ComponentProps<typeof ListLayout>['pagination'];
+  seriesData: Record<string, SeriesMetadata>;
 }> = async () => {
   const posts = await getAllFilesFrontMatter('blog');
   const initialDisplayPosts = posts.slice(0, POSTS_PER_PAGE);
@@ -19,14 +22,20 @@ export const getStaticProps: GetStaticProps<{
     totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
   };
 
-  return { props: { initialDisplayPosts, posts, pagination } };
+  const allSeries = getAllSeries();
+  const seriesData = Object.fromEntries(allSeries.map((s) => [s.title, s]));
+
+  return { props: { initialDisplayPosts, posts, pagination, seriesData } };
 };
 
 export default function Blog({
   posts,
   initialDisplayPosts,
   pagination,
+  seriesData,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const seriesMap = new Map(Object.entries(seriesData));
+
   return (
     <>
       <PageSEO
@@ -38,6 +47,7 @@ export default function Blog({
         initialDisplayPosts={initialDisplayPosts}
         pagination={pagination}
         title="All Posts"
+        seriesMap={seriesMap}
       />
     </>
   );
