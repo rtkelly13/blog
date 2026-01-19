@@ -11,6 +11,7 @@ import NewsletterForm from '@/components/NewsletterForm';
 import PageTitle from '@/components/PageTitle';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
+import SeriesNavigation from '@/components/SeriesNavigation';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 
@@ -35,6 +36,19 @@ interface Props {
   prev?: { slug: string; title: string };
   children: ReactNode;
   toc?: Toc;
+  seriesData?: {
+    prev: { slug: string; title: string; order: number } | null;
+    next: { slug: string; title: string; order: number } | null;
+    series: {
+      slug: string;
+      title: string;
+      description: string;
+      tags: string[];
+      status: 'planned' | 'in-progress' | 'completed';
+      summary: string;
+    };
+    allInSeries: { slug: string; title: string; order: number }[];
+  };
 }
 
 export default function PostLayout({
@@ -44,6 +58,7 @@ export default function PostLayout({
   prev,
   children,
   toc,
+  seriesData,
 }: Props) {
   const { slug, fileName, date, title, tags } = frontMatter;
   const [activeId, setActiveId] = useState<string | undefined>(undefined);
@@ -160,6 +175,16 @@ export default function PostLayout({
             <div className="pt-10 pb-8 prose dark:prose-dark max-w-none">
               {children}
             </div>
+
+            {seriesData && (
+              <SeriesNavigation
+                series={seriesData.series}
+                allInSeries={seriesData.allInSeries}
+                currentSlug={slug}
+                prev={seriesData.prev}
+                next={seriesData.next}
+              />
+            )}
 
             <div className="pt-6 pb-6 text-sm text-gray-700 dark:text-gray-300">
               <Link href={discussUrl(slug)} rel="nofollow">

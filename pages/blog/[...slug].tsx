@@ -12,6 +12,7 @@ import {
   getFileBySlug,
   getFiles,
 } from '@/lib/mdx';
+import { getSeriesNavigation } from '@/lib/series';
 import { show_drafts } from '@/lib/utils/showDrafts';
 
 const DEFAULT_LAYOUT = 'PostLayout';
@@ -34,6 +35,19 @@ export const getStaticProps: GetStaticProps<{
   authorDetails: AuthorFrontMatter[];
   prev?: { slug: string; title: string };
   next?: { slug: string; title: string };
+  seriesData?: {
+    prev: { slug: string; title: string; order: number } | null;
+    next: { slug: string; title: string; order: number } | null;
+    series: {
+      slug: string;
+      title: string;
+      description: string;
+      tags: string[];
+      status: 'planned' | 'in-progress' | 'completed';
+      summary: string;
+    };
+    allInSeries: { slug: string; title: string; order: number }[];
+  };
 }> = async ({ params }) => {
   const slug = (params.slug as string[]).join('/');
   const allPosts = await getAllFilesFrontMatter('blog');
@@ -53,6 +67,11 @@ export const getStaticProps: GetStaticProps<{
   });
   const authorDetails = await Promise.all(authorPromise);
 
+  const seriesNav = getSeriesNavigation(
+    post.frontMatter as PostFrontMatter,
+    allPosts,
+  );
+
   // rss
   const rss = generateRss(allPosts);
   fs.writeFileSync('./public/feed.xml', rss);
@@ -63,6 +82,21 @@ export const getStaticProps: GetStaticProps<{
       authorDetails,
       prev,
       next,
+      seriesData: seriesNav
+        ? {
+            prev: seriesNav.prev,
+            next: seriesNav.next,
+            series: {
+              slug: seriesNav.series.slug,
+              title: seriesNav.series.title,
+              description: seriesNav.series.description,
+              tags: seriesNav.series.tags,
+              status: seriesNav.series.status,
+              summary: seriesNav.series.summary,
+            },
+            allInSeries: seriesNav.allInSeries,
+          }
+        : null,
     },
   };
 };
@@ -72,6 +106,7 @@ export default function Blog({
   authorDetails,
   prev,
   next,
+  seriesData,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const { mdxSource, toc, frontMatter } = post;
 
@@ -87,6 +122,7 @@ export default function Blog({
           authorDetails={authorDetails}
           prev={prev}
           next={next}
+          seriesData={seriesData}
         />
       ) : (
         <div className="mt-24 text-center">
