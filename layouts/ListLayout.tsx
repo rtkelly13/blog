@@ -246,62 +246,90 @@ export default function ListLayout({
             return (
               <li
                 key={`series-${seriesGroup.name}-${idx}`}
-                className="border-b-2 border-white last:border-b-0"
+                className="py-6 border-b-2 border-white last:border-b-0 hover:bg-zinc-900 transition-colors"
               >
-                <button
-                  type="button"
-                  className="w-full py-6 px-6 hover:bg-zinc-900 transition-colors bg-zinc-950 text-left"
-                  onClick={() => toggleSeries(seriesGroup.name)}
-                  aria-expanded={isExpanded}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        {isExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-brutalist-cyan flex-shrink-0" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-brutalist-cyan flex-shrink-0" />
-                        )}
+                <article className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-baseline px-6">
+                  <dl>
+                    <dt className="sr-only">Published on</dt>
+                    <dd className="font-mono text-sm leading-6 text-brutalist-yellow">
+                      <span className="text-brutalist-cyan">&gt;</span>{' '}
+                      <time dateTime={seriesGroup.latestDate}>
+                        {formatDate(seriesGroup.latestDate)}
+                      </time>
+                      <br />
+                      <span className="text-brutalist-cyan">||</span>{' '}
+                      <span className="text-white">
+                        {seriesGroup.posts.length} part
+                        {seriesGroup.posts.length > 1 ? 's' : ''}
+                      </span>
+                    </dd>
+                  </dl>
+                  <div className="space-y-3 xl:col-span-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="inline-block bg-brutalist-pink text-black font-mono font-bold text-xs px-2 py-1 uppercase">
+                          SERIES
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleSeries(seriesGroup.name)}
+                          className="text-brutalist-cyan hover:text-brutalist-pink transition-colors"
+                          aria-expanded={isExpanded}
+                          aria-label={
+                            isExpanded ? 'Collapse series' : 'Expand series'
+                          }
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-5 h-5" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
                         {seriesGroup.slug ? (
                           <Link
                             href={`/series/${seriesGroup.slug}`}
-                            className="text-2xl font-mono font-bold uppercase text-white hover:text-brutalist-cyan transition-colors"
-                            onClick={(e) => e.stopPropagation()}
+                            className="text-white hover:text-brutalist-cyan transition-colors"
                           >
-                            [ SERIES: {seriesGroup.name} ]
+                            [ {seriesGroup.name} ]
                           </Link>
                         ) : (
-                          <h2 className="text-2xl font-mono font-bold uppercase text-white">
-                            [ SERIES: {seriesGroup.name} ]
-                          </h2>
+                          <span className="text-white">
+                            [ {seriesGroup.name} ]
+                          </span>
                         )}
-                      </div>
-                      <div className="pl-7">
-                        <p className="font-mono text-sm text-brutalist-yellow">
-                          <span className="text-brutalist-cyan">&gt;</span>{' '}
-                          {formatDate(seriesGroup.latestDate)} |{' '}
-                          {seriesGroup.posts.length} part
-                          {seriesGroup.posts.length > 1 ? 's' : ''}
-                        </p>
-                        {seriesGroup.series?.summary && (
-                          <p className="font-mono text-sm text-gray-200 mt-2">
-                            {seriesGroup.series.summary}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {seriesGroup.tags.map((tag) => (
-                            <Tag key={tag} text={tag} />
-                          ))}
-                        </div>
+                      </h3>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {seriesGroup.tags.map((tag) => (
+                          <Tag key={tag} text={tag} />
+                        ))}
                       </div>
                     </div>
+                    {seriesGroup.series?.summary && (
+                      <div className="font-mono text-sm text-gray-200">
+                        {seriesGroup.series.summary}
+                      </div>
+                    )}
+                    {seriesGroup.slug && (
+                      <div className="font-mono text-sm">
+                        <Link
+                          href={`/series/${seriesGroup.slug}`}
+                          className="text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink font-bold"
+                        >
+                          VIEW_SERIES &gt;&gt;
+                        </Link>
+                      </div>
+                    )}
                   </div>
-                </button>
+                </article>
 
                 {isExpanded && (
-                  <ul className="bg-black">
-                    {seriesGroup.posts.map((post) => renderPost(post, true))}
-                  </ul>
+                  <div className="mt-4 border-t-2 border-brutalist-cyan/30">
+                    <ul className="bg-black">
+                      {seriesGroup.posts.map((post) => renderPost(post, true))}
+                    </ul>
+                  </div>
                 )}
               </li>
             );
