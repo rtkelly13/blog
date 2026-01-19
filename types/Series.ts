@@ -8,6 +8,8 @@ export type SeriesMetadata = {
   startDate?: string;
   endDate?: string;
   summary: string;
+  draft?: boolean;
+  fileName?: string;
 };
 
 export type SeriesWithPosts = SeriesMetadata & {

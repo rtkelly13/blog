@@ -1,14 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import matter from 'gray-matter';
 import type { PostFrontMatter } from '../types/PostFrontMatter';
 import type { SeriesMetadata, SeriesWithPosts } from '../types/Series';
+import { show_drafts } from './utils/showDrafts';
 
 const root = process.cwd();
 const seriesPath = path.join(root, 'data', 'series');
 
-/**
- * Get all series metadata
- */
 export function getAllSeries(): SeriesMetadata[] {
   if (!fs.existsSync(seriesPath)) {
     return [];
@@ -18,46 +17,64 @@ export function getAllSeries(): SeriesMetadata[] {
   const allSeries: SeriesMetadata[] = [];
 
   for (const file of files) {
-    if (path.extname(file) !== '.json') continue;
+    if (path.extname(file) !== '.mdx' && path.extname(file) !== '.md') continue;
 
     const filePath = path.join(seriesPath, file);
     const content = fs.readFileSync(filePath, 'utf8');
-    const series = JSON.parse(content) as SeriesMetadata;
-    allSeries.push(series);
+    const { data } = matter(content);
+    const frontmatter = data as SeriesMetadata;
+
+    if (
+      ('draft' in frontmatter && frontmatter.draft !== true) ||
+      show_drafts()
+    ) {
+      allSeries.push({
+        ...frontmatter,
+        fileName: file,
+      });
+    }
   }
 
   return allSeries.sort((a, b) => {
     const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
     const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
-    return dateB - dateA; // Most recent first
+    return dateB - dateA;
   });
 }
 
-/**
- * Get series metadata by slug
- */
 export function getSeriesBySlug(slug: string): SeriesMetadata | null {
-  const filePath = path.join(seriesPath, `${slug}.json`);
+  const mdxPath = path.join(seriesPath, `${slug}.mdx`);
+  const mdPath = path.join(seriesPath, `${slug}.md`);
 
-  if (!fs.existsSync(filePath)) {
+  const filePath = fs.existsSync(mdxPath)
+    ? mdxPath
+    : fs.existsSync(mdPath)
+      ? mdPath
+      : null;
+
+  if (!filePath) {
     return null;
   }
 
   const content = fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(content) as SeriesMetadata;
+  const { data } = matter(content);
+  const frontmatter = data as SeriesMetadata;
+
+  if ('draft' in frontmatter && frontmatter.draft === true && !show_drafts()) {
+    return null;
+  }
+
+  return {
+    ...frontmatter,
+    fileName: path.basename(filePath),
+  };
 }
 
-/**
- * Get series metadata by name
- */
 export function getSeriesByName(name: string): SeriesMetadata | null {
   const allSeries = getAllSeries();
   return allSeries.find((series) => series.title === name) || null;
 }
 
-/**
- * Get series with all its posts
- */
 export function getSeriesWithPosts(
   slug: string,
   allPosts: PostFrontMatter[],
@@ -83,9 +100,6 @@ export function getSeriesWithPosts(
   };
 }
 
-/**
- * Get all series with their posts
- */
 export function getAllSeriesWithPosts(
   allPosts: PostFrontMatter[],
 ): SeriesWithPosts[] {
@@ -95,9 +109,6 @@ export function getAllSeriesWithPosts(
     .filter((series): series is SeriesWithPosts => series !== null);
 }
 
-/**
- * Get navigation data for a post in a series (prev/next within series)
- */
 export function getSeriesNavigation(
   currentPost: PostFrontMatter,
   allPosts: PostFrontMatter[],
