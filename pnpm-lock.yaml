@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@rtkelly/mermaid-toolkit':
-        specifier: file:../mermaid-toolkit
-        version: file:../mermaid-toolkit(mermaid@11.12.2)
+        specifier: github:rtkelly13/mermaid-toolkit#a91c9d3
+        version: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.12.2)
       '@tailwindcss/forms':
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.1.18)
@@ -977,8 +977,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@rtkelly/mermaid-toolkit@file:../mermaid-toolkit':
-    resolution: {directory: ../mermaid-toolkit, type: directory}
+  '@rtkelly/mermaid-toolkit@https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58':
+    resolution: {tarball: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58}
+    version: 0.0.1
     peerDependencies:
       mermaid: ^11.0.0
 
@@ -3876,7 +3877,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.55.1':
     optional: true
 
-  '@rtkelly/mermaid-toolkit@file:../mermaid-toolkit(mermaid@11.12.2)':
+  '@rtkelly/mermaid-toolkit@https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.12.2)':
     dependencies:
       mermaid: 11.12.2
 
