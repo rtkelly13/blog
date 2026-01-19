@@ -89,6 +89,7 @@ export function getSeriesWithPosts(
       title: post.title,
       date: post.date,
       summary: post.summary,
+      tags: post.tags,
       order: post.series?.order ?? 0,
     }))
     .sort((a, b) => a.order - b.order);

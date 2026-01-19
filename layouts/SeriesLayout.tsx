@@ -120,7 +120,7 @@ export default function SeriesLayout({ frontMatter, children, posts }: Props) {
                                 </p>
                               )}
                               <div className="mt-2 flex flex-wrap gap-2">
-                                {post.tags.slice(0, 3).map((tag) => (
+                                {post.tags?.slice(0, 3).map((tag) => (
                                   <span
                                     key={tag}
                                     className="text-xs text-gray-500 dark:text-gray-400"

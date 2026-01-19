@@ -18,6 +18,7 @@ export type SeriesWithPosts = SeriesMetadata & {
     title: string;
     date: string;
     summary?: string;
+    tags?: string[];
     order: number;
   }[];
   postCount: number;
