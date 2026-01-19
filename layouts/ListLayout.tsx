@@ -175,48 +175,43 @@ export default function ListLayout({
           isInSeries ? 'pl-6' : ''
         }`}
       >
-        <article className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-start px-6">
-          <dl>
-            <dt className="sr-only">Published on</dt>
-            <dd className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
-              <div>
-                <span className="text-brutalist-cyan">&gt;</span>{' '}
-                <time dateTime={date}>{formatDate(date)}</time>
-              </div>
-              {readingTime && (
-                <div>
-                  <span className="text-brutalist-cyan">||</span>{' '}
-                  <span className="text-white">{readingTime.text}</span>
-                </div>
-              )}
-            </dd>
-          </dl>
-          <div className="space-y-3 xl:col-span-3">
+        <article className="space-y-3 px-6">
+          <div className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
             <div>
-              {isInSeries && frontMatter.series && (
-                <div className="font-mono text-xs text-brutalist-cyan mb-1">
-                  Part {frontMatter.series.order}
-                </div>
-              )}
-              <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
-                <Link
-                  href={`/blog/${slug}`}
-                  className="text-white hover:text-brutalist-cyan transition-colors"
-                >
-                  [ {title} ]
-                </Link>
-              </h3>
-              {renderTags(tags)}
+              <span className="text-brutalist-cyan">&gt;</span>{' '}
+              <time dateTime={date}>{formatDate(date)}</time>
             </div>
-            <div className="font-mono text-sm text-gray-200">{summary}</div>
-            <div className="font-mono text-sm">
+            {readingTime && (
+              <div>
+                <span className="text-brutalist-cyan">||</span>{' '}
+                <span className="text-white">{readingTime.text}</span>
+              </div>
+            )}
+          </div>
+          <div>
+            {isInSeries && frontMatter.series && (
+              <div className="font-mono text-xs text-brutalist-cyan mb-1">
+                Part {frontMatter.series.order}
+              </div>
+            )}
+            <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
               <Link
                 href={`/blog/${slug}`}
-                className="text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink font-bold"
+                className="text-white hover:text-brutalist-cyan transition-colors"
               >
-                READ_MORE &gt;&gt;
+                [ {title} ]
               </Link>
-            </div>
+            </h3>
+            {renderTags(tags)}
+          </div>
+          <div className="font-mono text-sm text-gray-200">{summary}</div>
+          <div className="font-mono text-sm">
+            <Link
+              href={`/blog/${slug}`}
+              className="text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink font-bold"
+            >
+              READ_MORE &gt;&gt;
+            </Link>
           </div>
         </article>
       </li>
@@ -277,85 +272,80 @@ export default function ListLayout({
                 key={`series-${seriesGroup.name}-${idx}`}
                 className="py-6 border-b-2 border-white last:border-b-0 hover:bg-zinc-900 transition-colors"
               >
-                <article className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-start px-6">
-                  <dl>
-                    <dt className="sr-only">Published on</dt>
-                    <dd className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
-                      <div>
-                        <span className="text-brutalist-cyan">&gt;</span>{' '}
-                        <time dateTime={seriesGroup.latestDate}>
-                          {formatDate(seriesGroup.latestDate)}
-                        </time>
-                      </div>
-                      <div>
-                        <span className="text-brutalist-cyan">||</span>{' '}
-                        <span className="text-white">
-                          {seriesGroup.posts.length} part
-                          {seriesGroup.posts.length > 1 ? 's' : ''}
-                        </span>
-                      </div>
-                    </dd>
-                  </dl>
-                  <div className="space-y-3 xl:col-span-3">
+                <article className="space-y-3 px-6">
+                  <div className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="inline-block bg-brutalist-pink text-black font-mono font-bold text-xs px-2 py-1 uppercase">
-                          SERIES
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => toggleSeries(seriesGroup.name)}
-                          className="border-2 border-brutalist-cyan text-brutalist-cyan hover:bg-brutalist-cyan hover:text-black transition-all px-3 py-1.5 font-mono font-bold text-xs uppercase flex items-center gap-1.5"
-                          aria-expanded={isExpanded}
-                          aria-label={
-                            isExpanded ? 'Collapse series' : 'Expand series'
-                          }
-                        >
-                          {isExpanded ? (
-                            <>
-                              <ChevronDown className="w-4 h-4" />
-                              <span>COLLAPSE</span>
-                            </>
-                          ) : (
-                            <>
-                              <ChevronRight className="w-4 h-4" />
-                              <span>EXPAND</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                      <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
-                        {seriesGroup.slug ? (
-                          <Link
-                            href={`/series/${seriesGroup.slug}`}
-                            className="text-white hover:text-brutalist-cyan transition-colors"
-                          >
-                            [ {seriesGroup.name} ]
-                          </Link>
-                        ) : (
-                          <span className="text-white">
-                            [ {seriesGroup.name} ]
-                          </span>
-                        )}
-                      </h3>
-                      {renderTags(seriesGroup.tags)}
+                      <span className="text-brutalist-cyan">&gt;</span>{' '}
+                      <time dateTime={seriesGroup.latestDate}>
+                        {formatDate(seriesGroup.latestDate)}
+                      </time>
                     </div>
-                    {seriesGroup.series?.summary && (
-                      <div className="font-mono text-sm text-gray-200">
-                        {seriesGroup.series.summary}
-                      </div>
-                    )}
-                    {seriesGroup.slug && (
-                      <div className="font-mono text-sm">
+                    <div>
+                      <span className="text-brutalist-cyan">||</span>{' '}
+                      <span className="text-white">
+                        {seriesGroup.posts.length} part
+                        {seriesGroup.posts.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="inline-block bg-brutalist-pink text-black font-mono font-bold text-xs px-2 py-1 uppercase">
+                        SERIES
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleSeries(seriesGroup.name)}
+                        className="border-2 border-brutalist-cyan text-brutalist-cyan hover:bg-brutalist-cyan hover:text-black transition-all px-3 py-1.5 font-mono font-bold text-xs uppercase flex items-center gap-1.5"
+                        aria-expanded={isExpanded}
+                        aria-label={
+                          isExpanded ? 'Collapse series' : 'Expand series'
+                        }
+                      >
+                        {isExpanded ? (
+                          <>
+                            <ChevronDown className="w-4 h-4" />
+                            <span>COLLAPSE</span>
+                          </>
+                        ) : (
+                          <>
+                            <ChevronRight className="w-4 h-4" />
+                            <span>EXPAND</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
+                      {seriesGroup.slug ? (
                         <Link
                           href={`/series/${seriesGroup.slug}`}
-                          className="text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink font-bold"
+                          className="text-white hover:text-brutalist-cyan transition-colors"
                         >
-                          VIEW_SERIES &gt;&gt;
+                          [ {seriesGroup.name} ]
                         </Link>
-                      </div>
-                    )}
+                      ) : (
+                        <span className="text-white">
+                          [ {seriesGroup.name} ]
+                        </span>
+                      )}
+                    </h3>
+                    {renderTags(seriesGroup.tags)}
                   </div>
+                  {seriesGroup.series?.summary && (
+                    <div className="font-mono text-sm text-gray-200">
+                      {seriesGroup.series.summary}
+                    </div>
+                  )}
+                  {seriesGroup.slug && (
+                    <div className="font-mono text-sm">
+                      <Link
+                        href={`/series/${seriesGroup.slug}`}
+                        className="text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink font-bold"
+                      >
+                        VIEW_SERIES &gt;&gt;
+                      </Link>
+                    </div>
+                  )}
                 </article>
 
                 {isExpanded && (
