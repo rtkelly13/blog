@@ -66,7 +66,7 @@ test.describe('Tag Validation', () => {
     const posts = getAllBlogPosts();
     const tagMap = new Map<string, Set<string>>();
 
-    for (const { file, frontmatter } of posts) {
+    for (const { frontmatter } of posts) {
       if (!frontmatter.tags) continue;
 
       for (const tag of frontmatter.tags) {

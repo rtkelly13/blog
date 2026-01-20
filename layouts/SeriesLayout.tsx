@@ -33,8 +33,7 @@ interface Props {
 }
 
 export default function SeriesLayout({ frontMatter, children, posts }: Props) {
-  const { title, slug, description, tags, status, startDate, endDate } =
-    frontMatter;
+  const { title, description, tags, status, startDate, endDate } = frontMatter;
 
   return (
     <SectionContainer>

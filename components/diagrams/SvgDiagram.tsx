@@ -80,7 +80,6 @@ export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
   return (
     <div
       className="svg-diagram w-full max-w-full overflow-x-auto flex justify-center"
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: Loading trusted SVG files
       dangerouslySetInnerHTML={{ __html: svgContent }}
     />
   );

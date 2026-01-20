@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 import matter from 'gray-matter';
 
 const BLOG_DIR = path.join(process.cwd(), 'data', 'blog');
@@ -107,7 +107,6 @@ test.describe('Blog Frontmatter Validation', () => {
       if (data.series && data.title) {
         const seriesName = data.series.name;
         const title = data.title.toLowerCase();
-        const seriesNameLower = seriesName.toLowerCase();
 
         if (title.includes(seriesName.toLowerCase())) {
           errors.push(

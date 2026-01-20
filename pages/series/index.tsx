@@ -5,7 +5,6 @@ import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
 import { getAllSeriesWithPosts } from '@/lib/series';
-import formatDate from '@/lib/utils/formatDate';
 
 export const getStaticProps: GetStaticProps = async () => {
   const allPosts = await getAllFilesFrontMatter('blog');

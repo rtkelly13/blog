@@ -81,7 +81,6 @@ export default function MermaidDiagram({ children }: MermaidDiagramProps) {
   return (
     <div
       className="mermaid-diagram w-full max-w-full overflow-x-auto"
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: Mermaid generates safe SVG
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
