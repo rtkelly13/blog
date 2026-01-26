@@ -35,8 +35,8 @@ export default function Series({
 
         <ul className="divide-y divide-white">
           {!allSeries.length && (
-            <li className="py-8 px-6 font-mono text-brutalist-pink text-center">
-              ERROR: No series found.
+            <li className="py-8 px-6 font-mono text-zinc-400 text-center">
+              No series found.
             </li>
           )}
           {allSeries.map((series) => (
