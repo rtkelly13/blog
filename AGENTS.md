@@ -1,598 +1,173 @@
-# AGENTS.md
+# PROJECT KNOWLEDGE BASE
 
-> Comprehensive guide for AI agents working on this blog project.
+**Generated:** 2026-01-26
+**Commit:** e6620e1
+**Branch:** main
 
-## Project Overview
+## OVERVIEW
 
-| Property       | Value                             |
-| -------------- | --------------------------------- |
-| **Project**    | Personal blog for Ryan Kelly      |
-| **Live URL**   | https://ryankelly.dev             |
-| **Repository** | https://github.com/rtkelly13/blog |
-| **Framework**  | Next.js 16.x with React 19        |
-| **Language**   | TypeScript                        |
-| **Styling**    | Tailwind CSS v4                   |
-| **Content**    | MDX (Markdown + React components) |
-| **Hosting**    | Vercel (automatic deployments)    |
-| **Comments**   | Giscus (GitHub Discussions)       |
+Personal blog for Ryan Kelly (ryankelly.dev). Next.js 16 + React 19, Tailwind CSS v4, MDX content, brutalist design system.
 
-## Tech Stack
-
-### Core Dependencies
-
-- **Next.js** `^16.1.1` - React framework with SSG/SSR
-- **React** `^19.2.3` - UI library
-- **Tailwind CSS** `^4.1.18` - Utility-first CSS (v4 with new `@import` syntax)
-- **MDX Bundler** `^10.1.1` - MDX processing
-- **KBar** `0.1.0-beta.48` - Command palette (Cmd+K)
-
-### Development Tools
-
-- **Package Manager:** pnpm (v10+)
-- **Linting/Formatting:** Biome
-- **Testing:** Playwright (e2e + visual regression)
-- **Git Hooks:** Husky + lint-staged
-- **CI/CD:** GitHub Actions + Vercel
-
-### Key Configuration Files
-
-| File                   | Purpose                                                  |
-| ---------------------- | -------------------------------------------------------- |
-| `tailwind.config.js`   | Tailwind theme and plugins                               |
-| `postcss.config.js`    | PostCSS with `@tailwindcss/postcss`                      |
-| `css/tailwind.css`     | Main CSS with `@import`, `@plugin`, `@config` directives |
-| `data/siteMetadata.js` | Site configuration (title, socials, analytics, comments) |
-| `next.config.js`       | Next.js configuration                                    |
-| `biome.json`           | Linting and formatting rules                             |
-| `playwright.config.ts` | E2E test configuration                                   |
-
-## Development Commands
-
-### Setup
-
-```bash
-pnpm install              # Install dependencies
-```
-
-### Daily Development
-
-```bash
-pnpm dev                  # Start dev server (http://localhost:3000)
-pnpm build                # Production build (includes sitemap, search index, tag RSS)
-pnpm serve                # Serve production build locally
-```
-
-### Testing
-
-```bash
-pnpm test:e2e             # Run all Playwright tests
-pnpm test:e2e:watch       # Run tests in watch mode
-pnpm test:update-snapshots # Update visual regression snapshots
-```
-
-### Code Quality
-
-```bash
-pnpm lint                 # Run Biome linter
-pnpm format               # Format code with Biome
-```
-
-### Analysis
-
-```bash
-pnpm analyze              # Analyze bundle size
-```
-
-## Complete Development Workflow
-
-The standard workflow for any feature or fix follows these steps:
-
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Branch    │───▶│    Plan     │───▶│   Develop   │───▶│    Build    │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-                                                                │
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐           ▼
-│   Rebase    │◀───│   Verify    │◀───│   Deploy    │◀───┌─────────────┐
-└─────────────┘    └─────────────┘    └─────────────┘    │    Test     │
-       │                                                  └─────────────┘
-       ▼
-┌─────────────┐
-│    Merge    │
-└─────────────┘
-```
-
----
-
-### Step 1: Branch Creation
-
-Create a feature branch from `main`:
-
-```bash
-git checkout main
-git pull origin main
-git checkout -b <branch-name>
-```
-
-**Branch Naming Conventions:**
-| Pattern | Use Case | Example |
-|---------|----------|---------|
-| `feature/<name>` | New features | `feature/dark-mode-toggle` |
-| `fix/<name>` | Bug fixes | `fix/mobile-nav-overflow` |
-| `chore/<name>` | Maintenance tasks | `chore/update-dependencies` |
-| `<type>-<description>` | General pattern | `tailwind-v4-upgrade` |
-
----
-
-### Step 2: Planning
-
-For complex tasks, break down the work before starting:
-
-- Create a task breakdown if implementing multiple changes
-- For upgrades/migrations, list all files requiring changes and note breaking changes
-- Consider writing tests first (TDD approach)
-
----
-
-### Step 3: Feature Development
-
-Follow Test-Driven Development (TDD) when applicable:
-
-1. **Write failing tests** (Red phase)
-2. **Implement minimum code** to pass tests (Green phase)
-3. **Refactor** while keeping tests green
-
-**Commit frequently with conventional commits:**
-
-```bash
-git commit -m "feat: Add scroll to top button"
-git commit -m "fix: Correct border color in dark mode"
-git commit -m "chore: Update Tailwind to v4"
-git commit -m "test: Add visual regression tests for homepage"
-git commit -m "ci: Trigger tests after Vercel deployment"
-```
-
-**Commit Message Format:**
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-[optional footer]
-```
-
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`
-
----
-
-### Step 4: Local Build
-
-Run the full production build:
-
-```bash
-pnpm run build
-```
-
-This command:
-
-1. Runs `next build` (Turbopack)
-2. Generates sitemap (`scripts/generate-sitemap.mjs`)
-3. Generates search index (`scripts/generate-search.mjs`)
-4. Generates per-tag RSS feeds (`scripts/generate-tag-rss.mjs`)
-
-**Expected output:**
-
-```
-✓ Compiled successfully
-✓ Generating static pages
-Route (pages)
-├ ● /
-├ ● /about
-├ ● /blog
-├ ● /blog/[...slug]
-├ ● /tags
-└ ● /tags/[tag]
-Search index generated: X posts
-Generated N tag RSS feeds
-```
-
----
-
-### Step 5: Local Testing
-
-Run the full test suite:
-
-```bash
-pnpm test:e2e
-```
-
-**Test Structure:**
-
-- `tests/e2e.spec.ts` - Functional tests (12 tests)
-- `tests/visual.spec.ts` - Visual regression tests (12 tests)
-- `tests/__snapshots__/` - Baseline screenshots
-
-**Expected output:**
-
-```
-Running 24 tests using 4 workers
-✓ [chromium] › tests/e2e.spec.ts - Homepage, Blog, Tags, etc.
-✓ [chromium] › tests/visual.spec.ts - Visual snapshots (light/dark)
-24 passed
-```
-
-**If visual tests fail due to intentional changes:**
-
-```bash
-pnpm test:update-snapshots
-```
-
----
-
-### Step 6: Push & Deploy
-
-Push the branch to trigger Vercel preview deployment:
-
-```bash
-git push -u origin <branch-name>
-```
-
-Vercel automatically:
-
-1. Detects the push
-2. Builds the site
-3. Deploys to a preview URL
-4. Reports status back to GitHub
-
----
-
-### Step 7: Verify Deployment
-
-Check deployment status using GitHub CLI:
-
-```bash
-# Check commit status (includes Vercel deployment)
-gh api repos/rtkelly13/blog/commits/<branch>/status \
-  --jq '{state: .state, statuses: [.statuses[] | {context, state}]}'
-
-# Expected successful response:
-# {"state":"success","statuses":[{"context":"Vercel","state":"success"}]}
-```
-
-**Wait for deployment if pending:**
-
-```bash
-# Poll until success
-sleep 30 && gh api repos/rtkelly13/blog/commits/<branch>/status --jq '.state'
-```
-
----
-
-### Step 8: CI Tests
-
-The Playwright workflow triggers automatically after Vercel deployment succeeds.
-
-**Monitor the CI run:**
-
-```bash
-# List recent runs
-gh run list --workflow=playwright.yml --limit 5
-
-# Watch a specific run
-gh run watch <run-id> --exit-status
-```
-
-**Workflow triggers:**
-| Event | Condition | Action |
-|-------|-----------|--------|
-| `deployment_status` | `state == 'success'` | Run tests |
-| `workflow_dispatch` | Manual trigger | Run tests (optionally update snapshots) |
-
-**If visual tests fail in CI:**
-
-```bash
-# Trigger snapshot update via workflow_dispatch
-gh workflow run playwright.yml --ref <branch> -f update_snapshots=true
-
-# Wait for completion, then download updated snapshots
-gh run download <run-id> -n playwright-snapshots -D /tmp/snapshots
-
-# Copy to project and commit
-cp -r /tmp/snapshots/visual.spec.ts/* tests/__snapshots__/visual.spec.ts/
-git add tests/__snapshots__/
-git commit -m "test: Update visual snapshots"
-git push
-```
-
----
-
-### Step 9: Rebase onto Main
-
-Before merging, rebase to incorporate any changes to main:
-
-```bash
-git checkout main
-git pull origin main
-git checkout <branch-name>
-git rebase main
-```
-
-**If conflicts occur:**
-
-1. Resolve conflicts in each file
-2. `git add <resolved-files>`
-3. `git rebase --continue`
-4. Re-run build and tests after rebase
-
----
-
-### Step 10: Merge to Main
-
-Once CI passes and rebase is complete:
-
-```bash
-git checkout main
-git merge <branch-name>
-git push origin main
-```
-
-This triggers:
-
-1. Vercel production deployment
-2. CI tests on main branch
-
-**Verify production:**
-
-```bash
-# Check deployment status
-gh api repos/rtkelly13/blog/commits/main/status --jq '.state'
-
-# Check the live site
-open https://ryankelly.dev
-```
-
----
-
-## CI/CD Architecture
-
-```
-Push to Branch
-      │
-      ▼
-┌─────────────────┐
-│  Vercel Build   │ (automatic)
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Preview Deploy  │
-└────────┬────────┘
-         │ deployment_status: success
-         ▼
-┌─────────────────┐
-│ GitHub Actions  │ (playwright.yml)
-│  - Build        │
-│  - E2E Tests    │
-│  - Visual Tests │
-└────────┬────────┘
-         │
-         ▼
-   ┌───────────┐
-   │  Results  │
-   └───────────┘
-```
-
-**Key File:** `.github/workflows/playwright.yml`
-
----
-
-## Quality Gates
-
-Before merging, ensure:
-
-- [ ] `pnpm build` succeeds
-- [ ] `pnpm test:e2e` passes (24 tests: 12 functional + 12 visual)
-- [ ] `pnpm lint` reports no errors
-- [ ] Vercel preview deployment succeeds
-- [ ] CI workflow passes after deployment
-- [ ] No security vulnerabilities (avoid committing `.env`, credentials)
-
----
-
-## Common Operations
-
-### Adding a New Blog Post
-
-1. Create MDX file in `data/blog/<slug>.mdx` or `data/blog/<folder>/index.mdx`
-2. Add frontmatter:
-   ```yaml
-   ---
-   title: "Post Title"
-   date: "2026-01-15"
-   tags: ["tag1", "tag2"]
-   draft: false
-   summary: "Brief description"
-   ---
-   ```
-3. Write content using MDX (Markdown + React components)
-4. Run `pnpm build` to generate search index and tag feeds
-5. Test locally with `pnpm dev`
-
-### Updating Site Metadata
-
-Edit `data/siteMetadata.js`:
-
-- `title`, `author`, `description` - Basic info
-- `siteUrl` - Production URL
-- `socialBanner` - OpenGraph image
-- `analytics` - Google Analytics, Plausible, etc.
-- `comment` - Giscus/Utterances/Disqus config
-- `newsletter` - Buttondown config (disabled by default)
-- `stickyNav` - Enable/disable sticky navigation
-
-### Updating Visual Snapshots
-
-When UI changes are intentional:
-
-```bash
-# Locally
-pnpm test:update-snapshots
-git add tests/__snapshots__/
-git commit -m "test: Update visual snapshots for <change>"
-
-# Or via CI
-gh workflow run playwright.yml --ref <branch> -f update_snapshots=true
-# Then download and commit as shown in Step 8
-```
-
-### Checking GitHub Actions Status
-
-```bash
-# List recent workflow runs
-gh run list --limit 10
-
-# View specific run
-gh run view <run-id>
-
-# View failed logs
-gh run view <run-id> --log-failed
-
-# Watch run in real-time
-gh run watch <run-id>
-```
-
-### Checking Vercel Deployments
-
-```bash
-# Via commit status
-gh api repos/rtkelly13/blog/commits/<ref>/status
-
-# Via deployments API
-gh api repos/rtkelly13/blog/deployments --jq '.[0:3]'
-```
-
----
-
-## Project Structure
+## STRUCTURE
 
 ```
 blog/
-├── .github/workflows/     # CI workflows
-│   └── playwright.yml     # E2E tests (triggered by Vercel)
-├── components/            # React components
-├── css/
-│   └── tailwind.css       # Main CSS (Tailwind v4 imports)
-├── data/
-│   ├── blog/              # MDX blog posts
-│   ├── authors/           # Author profiles
-│   ├── headerNavLinks.ts  # Navigation config
-│   └── siteMetadata.js    # Site configuration
-├── layouts/               # Page layouts (PostLayout, ListLayout, etc.)
-├── lib/                   # Utility functions
-├── pages/                 # Next.js pages
-├── public/                # Static assets
-├── scripts/               # Build scripts (sitemap, search, RSS)
-├── tests/
-│   ├── e2e.spec.ts        # Functional tests
-│   ├── visual.spec.ts     # Visual regression tests
-│   └── __snapshots__/     # Baseline screenshots
-├── AGENTS.md              # This file
-├── package.json           # Dependencies and scripts
-├── tailwind.config.js     # Tailwind configuration
-└── tsconfig.json          # TypeScript configuration
+├── components/       # React components (see components/AGENTS.md)
+├── lib/              # MDX pipeline, utilities (see lib/AGENTS.md)
+├── tests/            # Playwright + Vitest (see tests/AGENTS.md)
+├── layouts/          # 6 MDX layouts (PostLayout, ListLayout, SeriesLayout, etc.)
+├── pages/            # Next.js pages router
+├── data/             # MDX content + siteMetadata.js
+├── scripts/          # Build scripts (sitemap, search, RSS)
+├── stories/          # Storybook CSF 3.0 stories
+└── .storybook/       # Storybook config (Vite adapter)
 ```
 
----
+## WHERE TO LOOK
 
-## Troubleshooting
+| Task               | Location               | Notes                                        |
+| ------------------ | ---------------------- | -------------------------------------------- |
+| Add blog post      | `data/blog/<slug>.mdx` | Frontmatter: title, date, tags, summary      |
+| Edit site config   | `data/siteMetadata.js` | Title, socials, analytics, comments          |
+| Add/edit component | `components/`          | See components/AGENTS.md                     |
+| MDX processing     | `lib/mdx.ts`           | bundleMDX, remark/rehype plugins             |
+| Page layouts       | `layouts/*.tsx`        | PostLayout, ListLayout, SeriesLayout         |
+| Remark plugins     | `lib/remark-*.ts`      | Custom: code-title, toc-headings, img-to-jsx |
+| Design tokens      | `tailwind.config.js`   | Brutalist colors, shadows, typography        |
+| Global CSS         | `css/tailwind.css`     | Tailwind v4 imports, CSS vars, utilities     |
+| Tests              | `tests/*.spec.ts`      | See tests/AGENTS.md                          |
+| Build scripts      | `scripts/*.mjs`        | sitemap, search, tag-rss, create-post        |
 
-### Build Fails
+## CONVENTIONS
+
+### Tailwind v4 (Non-Standard)
+
+```css
+/* css/tailwind.css - NOT @tailwind directives */
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@config "../tailwind.config.js";
+```
+
+PostCSS uses `@tailwindcss/postcss` (not `tailwindcss`).
+
+### Brutalist Design System
+
+| Token              | Value             | Usage               |
+| ------------------ | ----------------- | ------------------- |
+| `brutalist-cyan`   | #22d3ee           | Links, accents      |
+| `brutalist-pink`   | #ec4899           | Hover, highlights   |
+| `brutalist-yellow` | #facc15           | Warnings, emphasis  |
+| Borders            | 2px solid white   | All borders, always |
+| Border-radius      | 0px               | Globally enforced   |
+| Shadows            | `hard-*`          | 4px offset, no blur |
+| Font               | Courier New, mono | Body and headings   |
+
+### MDX Content
+
+Frontmatter schema (`types/PostFrontMatter.ts`):
+
+```yaml
+title: string # Required
+date: string # Required (YYYY-MM-DD)
+tags: string[] # Required
+summary: string # For SEO/cards
+draft: boolean # Hide from production
+layout: string # Optional (default: PostLayout)
+series: # Optional multi-part posts
+  name: string
+  order: number
+```
+
+### Pages Router (Not App Router)
+
+- Uses `pages/` directory with `_app.tsx`, `_document.tsx`
+- Dynamic routes: `[...slug].tsx`, `[tag].tsx`, `[page].tsx`
+- API routes: `pages/api/newsletter.ts`
+- Layouts via `layouts/` + MDXLayoutRenderer wrapper
+
+### Theme
+
+Dark mode forced (`forcedTheme="dark"` in \_app.tsx). ThemeProvider uses class-based switching.
+
+## ANTI-PATTERNS (THIS PROJECT)
+
+- **No rounded corners**: `borderRadius: 0` enforced globally
+- **No subtle shadows**: Use `hard-*` shadows only (offset, no blur)
+- **No soft colors**: Stick to brutalist palette (cyan, pink, yellow, white on black)
+- **No @tailwind directives**: Use `@import "tailwindcss"` (v4 syntax)
+- **Visual snapshots**: Update via CI only (`pnpm test:update-snapshots` triggers GitHub Actions)
+
+## COMMANDS
 
 ```bash
-# Clear Next.js cache and rebuild
-rm -rf .next
+# Development
+pnpm dev                  # Start dev server (Turbopack)
+pnpm storybook            # Design system at :6006
+
+# Build
+pnpm build                # next build + sitemap + search + tag-rss
+
+# Testing
+pnpm test:e2e             # Playwright tests
+pnpm test                 # Vitest unit tests
+pnpm test:update-snapshots # Update visual snapshots via CI
+
+# Quality
+pnpm lint                 # Biome check
+pnpm format               # Biome format
+```
+
+## BUILD PIPELINE
+
+```
 pnpm build
+├── next build (Turbopack)
+├── scripts/generate-sitemap.mjs
+├── scripts/generate-search.mjs
+└── scripts/generate-tag-rss.mjs
 ```
 
-### Tests Fail Locally but Pass in CI (or vice versa)
+Custom: requires building external `@rtkelly/mermaid-toolkit` first in CI.
 
-- Visual tests are platform-dependent (fonts, rendering)
-- Always update snapshots in CI environment for consistency
-- Use `gh workflow run` with `update_snapshots=true`
+## CI/CD
 
-### Vercel Deployment Pending Too Long
-
-```bash
-# Check Vercel status
-gh api repos/rtkelly13/blog/commits/<ref>/statuses \
-  --jq '.[] | select(.context == "Vercel") | {state, description}'
+```
+Push → Vercel Preview → deployment_status: success → GitHub Actions (playwright.yml)
 ```
 
-### CI Workflow Not Triggering
+- Tests run AFTER Vercel deploys (triggered by `deployment_status`)
+- Draft branches (`drafts/*`) enable `SHOW_DRAFTS=true`
+- Snapshots auto-update if none exist; manual update via `workflow_dispatch`
 
-- Ensure `deployment_status` event is enabled in workflow
-- Check that Vercel GitHub integration is connected
-- Verify branch is pushed to remote
+## DEPENDENCIES (KEY)
 
-### Tailwind CSS v4 Issues
+| Package          | Version       | Purpose                 |
+| ---------------- | ------------- | ----------------------- |
+| next             | ^16.1.3       | Framework               |
+| react            | ^19.2.3       | UI                      |
+| tailwindcss      | ^4.1.18       | Styling                 |
+| mdx-bundler      | ^10.1.1       | MDX processing          |
+| kbar             | 0.1.0-beta.48 | Command palette (Cmd+K) |
+| @playwright/test | ^1.57.0       | E2E + visual tests      |
+| storybook        | ^10.2.0       | Component docs          |
 
-- Uses `@import "tailwindcss"` instead of `@tailwind` directives
-- Plugins via `@plugin "@tailwindcss/typography"`
-- Config via `@config "../tailwind.config.js"`
-- PostCSS uses `@tailwindcss/postcss` instead of `tailwindcss`
+## ENGINE REQUIREMENTS
+
+```json
+"engines": {
+  "node": ">=22.0.0",
+  "pnpm": ">=9.0.0"
+}
+```
+
+## NOTES
+
+- `preact` in deps is legacy (unused, safe to remove)
+- `next-remote-watch` used in `start` script for content hot-reload
+- Mixed JS/TS in data layer (`siteMetadata.js` vs `headerNavLinks.ts`)
+- Storybook uses Vite adapter (`@storybook/nextjs-vite`)
 
 ---
 
-## Example Workflow: Feature Implementation
-
-Here's a complete example implementing a new feature:
-
-```bash
-# 1. Branch
-git checkout main && git pull
-git checkout -b feature/reading-progress-bar
-
-# 2. Develop (with tests)
-# ... write tests in tests/e2e.spec.ts
-# ... implement in components/ReadingProgress.tsx
-# ... add to layouts/PostLayout.tsx
-
-# 3. Build & Test Locally
-pnpm build
-pnpm test:e2e
-
-# 4. Commit
-git add .
-git commit -m "feat: Add reading progress bar to blog posts"
-
-# 5. Push
-git push -u origin feature/reading-progress-bar
-
-# 6. Wait for Vercel
-sleep 45
-gh api repos/rtkelly13/blog/commits/feature/reading-progress-bar/status --jq '.state'
-# → "success"
-
-# 7. Monitor CI
-gh run list --workflow=playwright.yml --limit 1
-gh run watch <run-id> --exit-status
-# → ✓ All tests passed
-
-# 8. Rebase
-git checkout main && git pull
-git checkout feature/reading-progress-bar
-git rebase main
-
-# 9. Merge
-git checkout main
-git merge feature/reading-progress-bar
-git push
-
-# 10. Verify Production
-gh api repos/rtkelly13/blog/commits/main/status --jq '.state'
-open https://ryankelly.dev
-```
-
----
-
-_Last updated: January 2026_
+_See also: [components/AGENTS.md](./components/AGENTS.md), [lib/AGENTS.md](./lib/AGENTS.md), [tests/AGENTS.md](./tests/AGENTS.md)_

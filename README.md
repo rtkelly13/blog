@@ -19,9 +19,24 @@ Based on [tailwind-nextjs-starter-blog](https://github.com/timlrx/tailwind-nextj
 ```bash
 pnpm install    # Install dependencies
 pnpm dev        # Start dev server at http://localhost:3000
+pnpm storybook  # View design system at http://localhost:6006
 pnpm build      # Production build
 pnpm test:e2e   # Run tests
 ```
+
+## Design System
+
+The brutalist design system is documented in Storybook. View component variations, typography styles, and usage examples:
+
+```bash
+pnpm storybook
+```
+
+Stories are located in `stories/` and include:
+
+- Button variations (colors, sizes, shadows)
+- Card layouts (basic, with images, with ASCII art)
+- Typography system (headings, code blocks, terminal prompts)
 
 ## Writing Content
 
