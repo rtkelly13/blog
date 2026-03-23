@@ -1,3 +1,5 @@
+import '@fontsource/vt323';
+import '@fontsource/share-tech-mono';
 import '@/css/tailwind.css';
 
 import type { AppProps } from 'next/app';

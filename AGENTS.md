@@ -20,6 +20,7 @@ blog/
 ├── data/             # MDX content + siteMetadata.js
 ├── scripts/          # Build scripts (sitemap, search, RSS)
 ├── stories/          # Storybook CSF 3.0 stories
+├── temp/             # Ignored folder for visual snapshots or temporary outputs
 └── .storybook/       # Storybook config (Vite adapter)
 ```
 

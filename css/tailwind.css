@@ -29,7 +29,7 @@
   }
 
   body {
-    font-family: "Courier New", Courier, monospace;
+    font-family: "Share Tech Mono", "Courier New", Courier, monospace;
     background-color: #000000;
     color: #ffffff;
   }
@@ -73,29 +73,29 @@ html {
 
 /* Diagram theming with CSS variables */
 :root {
-  --diagram-bg: #000000;
-  --diagram-bg-secondary: #18181b;
-  --diagram-stroke: #ffffff;
-  --diagram-stroke-light: #71717a;
-  --diagram-fill-primary: #22d3ee;
-  --diagram-fill-secondary: #ec4899;
-  --diagram-fill-tertiary: #facc15;
-  --diagram-fill-quaternary: #ffffff;
-  --diagram-text: #ffffff;
-  --diagram-text-light: #a1a1aa;
+  --diagram-bg: theme('colors.black');
+  --diagram-bg-secondary: theme('colors.zinc.900');
+  --diagram-stroke: theme('colors.white');
+  --diagram-stroke-light: theme('colors.zinc.500');
+  --diagram-fill-primary: theme('colors.brutalist.cyan');
+  --diagram-fill-secondary: theme('colors.brutalist.pink');
+  --diagram-fill-tertiary: theme('colors.brutalist.yellow');
+  --diagram-fill-quaternary: theme('colors.white');
+  --diagram-text: theme('colors.white');
+  --diagram-text-light: theme('colors.zinc.400');
 }
 
 .dark {
-  --diagram-bg: #000000;
-  --diagram-bg-secondary: #18181b;
-  --diagram-stroke: #ffffff;
-  --diagram-stroke-light: #71717a;
-  --diagram-fill-primary: #22d3ee;
-  --diagram-fill-secondary: #ec4899;
-  --diagram-fill-tertiary: #facc15;
-  --diagram-fill-quaternary: #ffffff;
-  --diagram-text: #ffffff;
-  --diagram-text-light: #a1a1aa;
+  --diagram-bg: theme('colors.black');
+  --diagram-bg-secondary: theme('colors.zinc.900');
+  --diagram-stroke: theme('colors.white');
+  --diagram-stroke-light: theme('colors.zinc.500');
+  --diagram-fill-primary: theme('colors.brutalist.cyan');
+  --diagram-fill-secondary: theme('colors.brutalist.pink');
+  --diagram-fill-tertiary: theme('colors.brutalist.yellow');
+  --diagram-fill-quaternary: theme('colors.white');
+  --diagram-text: theme('colors.white');
+  --diagram-text-light: theme('colors.zinc.400');
 }
 
 /* SVG diagrams using CSS variables */
@@ -129,7 +129,7 @@ html {
 /* Brutalist Utilities */
 @layer utilities {
   .brutalist-border {
-    border: 2px solid #ffffff;
+    border: 2px solid theme('colors.white');
     border-radius: 0px;
   }
 
@@ -165,21 +165,21 @@ html {
   .ascii-divider::after {
     content: "//========================================//";
     display: block;
-    font-family: "Courier New", Courier, monospace;
-    color: #ffffff;
+    font-family: "Share Tech Mono", "Courier New", Courier, monospace;
+    color: theme('colors.white');
     text-align: center;
     margin: 1rem 0;
   }
 
   .terminal-prompt::before {
     content: "> ";
-    color: #22d3ee;
+    color: theme('colors.brutalist.cyan');
     font-weight: bold;
   }
 
   .file-extension::after {
     content: ".md";
-    color: #facc15;
+    color: theme('colors.brutalist.yellow');
     font-weight: normal;
   }
 }

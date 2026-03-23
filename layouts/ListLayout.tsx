@@ -4,7 +4,6 @@ import type { PostFrontMatter } from 'types/PostFrontMatter';
 import type { SeriesMetadata } from 'types/Series';
 import Link from '@/components/Link';
 import Pagination from '@/components/Pagination';
-import Tag from '@/components/Tag';
 import formatDate from '@/lib/utils/formatDate';
 
 interface Props {
@@ -152,9 +151,15 @@ export default function ListLayout({
     const hiddenCount = sortedTags.length - maxVisible;
 
     return (
-      <div className="flex flex-wrap gap-2 mt-2">
+      <div className="flex flex-wrap gap-2 mt-3 mb-2">
         {visibleTags.map((tag) => (
-          <Tag key={tag} text={tag} />
+          <Link
+            key={tag}
+            href={`/tags/${tag.toLowerCase().replace(/ /g, '-')}`}
+            className="text-xs font-mono font-bold bg-brutalist-yellow text-black px-2 py-1 uppercase"
+          >
+            #{tag}
+          </Link>
         ))}
         {hiddenCount > 0 && (
           <span className="inline-block px-2 py-1 font-mono text-xs text-gray-400 border border-gray-600">
@@ -171,26 +176,26 @@ export default function ListLayout({
     return (
       <li
         key={slug}
-        className={`py-6 border-b-2 border-white last:border-b-0 hover:bg-zinc-900 transition-colors ${
-          isInSeries ? 'pl-6' : ''
+        className={`my-6 rounded-md border-2 border-brutalist-cyan bg-black/80 shadow-glow-cyan transition-all hover:shadow-[0_0_15px_rgba(34,211,238,0.7),0_0_30px_rgba(34,211,238,0.5)] ${
+          isInSeries ? 'ml-6 border-l-4 border-l-brutalist-pink' : ''
         }`}
       >
-        <article className="space-y-3 px-6">
-          <div className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
+        <article className="space-y-2 p-5">
+          <div className="font-mono text-sm leading-6 text-brutalist-cyberOrange flex items-center gap-2">
             <div>
-              <span className="text-brutalist-cyan">&gt;</span>{' '}
+              <span className="text-brutalist-cyberOrange font-bold">&gt;</span>{' '}
               <time dateTime={date}>{formatDate(date)}</time>
             </div>
             {readingTime && (
-              <div>
-                <span className="text-brutalist-cyan">||</span>{' '}
-                <span className="text-white">{readingTime.text}</span>
-              </div>
+              <>
+                <span className="text-white opacity-50">||</span>
+                <span className="text-gray-300">{readingTime.text}</span>
+              </>
             )}
           </div>
           <div>
             {isInSeries && frontMatter.series && (
-              <div className="font-mono text-xs text-brutalist-cyan mb-1">
+              <div className="font-mono text-xs text-brutalist-pink mb-1">
                 Part {frontMatter.series.order}
               </div>
             )}
@@ -204,11 +209,11 @@ export default function ListLayout({
             </h3>
             {renderTags(tags)}
           </div>
-          <div className="font-mono text-sm text-gray-200">{summary}</div>
-          <div className="font-mono text-sm">
+          <div className="font-mono text-sm text-gray-300">{summary}</div>
+          <div className="font-mono text-sm pt-2 text-right">
             <Link
               href={`/blog/${slug}`}
-              className="text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink font-bold"
+              className="text-brutalist-cyan hover:text-brutalist-pink font-bold inline-flex items-center gap-1"
             >
               READ_MORE &gt;&gt;
             </Link>
@@ -220,24 +225,27 @@ export default function ListLayout({
 
   return (
     <>
-      <div className="divide-y divide-white border-2 border-white bg-black">
-        <div className="pt-6 pb-8 space-y-4 md:space-y-6 bg-zinc-900 px-6">
-          <h1 className="text-3xl font-mono font-bold leading-9 tracking-tight text-white uppercase sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 border-b-4 border-double border-brutalist-cyan pb-4">
-            [ {title} ]
-          </h1>
-          <div className="relative max-w-lg">
-            <span className="absolute left-3 top-3 font-mono text-brutalist-cyan font-bold">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 xl:max-w-5xl xl:px-0">
+        <div className="pt-6 pb-8 space-y-8">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-pixel font-bold leading-9 tracking-widest text-white uppercase sm:text-5xl sm:leading-10 md:text-7xl md:leading-14 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] pb-4 inline-block relative">
+              [ {title} ]
+              <div className="absolute bottom-0 left-0 w-full h-[4px] bg-brutalist-cyan shadow-glow-cyan" />
+            </h1>
+          </div>
+          <div className="relative max-w-full mx-auto">
+            <span className="absolute left-4 top-3.5 font-mono text-brutalist-cyan font-bold">
               &gt;
             </span>
             <input
               aria-label="Search articles"
               type="text"
               onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="search_articles..."
-              className="block w-full pl-8 pr-4 py-3 font-mono text-white bg-black border-2 border-white focus:ring-2 focus:ring-brutalist-cyan focus:border-brutalist-cyan placeholder-gray-500"
+              placeholder="search_articles...|"
+              className="block w-full pl-10 pr-12 py-3 rounded-md font-mono text-white bg-black/50 border-2 border-brutalist-cyan focus:ring-2 focus:ring-brutalist-cyan focus:border-brutalist-cyan placeholder-gray-500 shadow-glow-cyan"
             />
             <svg
-              className="absolute w-5 h-5 text-brutalist-yellow right-3 top-3.5"
+              className="absolute w-5 h-5 text-gray-400 right-4 top-4"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -252,10 +260,10 @@ export default function ListLayout({
             </svg>
           </div>
         </div>
-        <ul>
+        <ul className="space-y-6">
           {!filteredBlogPosts.length && (
-            <li className="py-8 px-6 font-mono text-brutalist-pink text-center">
-              ERROR: No posts found.
+            <li className="py-8 px-6 font-mono text-brutalist-pink text-center border-2 border-brutalist-pink rounded-md bg-black/80 shadow-glow-pink">
+              &gt; ERROR: No posts found.
             </li>
           )}
 
@@ -270,19 +278,19 @@ export default function ListLayout({
             return (
               <li
                 key={`series-${seriesGroup.name}-${idx}`}
-                className="py-6 border-b-2 border-white last:border-b-0 hover:bg-zinc-900 transition-colors"
+                className="my-6 rounded-md border-2 border-brutalist-pink bg-black/80 shadow-[0_0_10px_rgba(236,72,153,0.5),0_0_20px_rgba(236,72,153,0.3)] transition-all"
               >
-                <article className="space-y-3 px-6">
-                  <div className="font-mono text-sm leading-6 text-brutalist-yellow space-y-1">
+                <article className="space-y-2 p-5">
+                  <div className="font-mono text-sm leading-6 text-brutalist-cyberOrange flex items-center gap-2">
                     <div>
-                      <span className="text-brutalist-cyan">&gt;</span>{' '}
+                      <span className="text-brutalist-cyberOrange font-bold">&gt;</span>{' '}
                       <time dateTime={seriesGroup.latestDate}>
                         {formatDate(seriesGroup.latestDate)}
                       </time>
                     </div>
                     <div>
-                      <span className="text-brutalist-cyan">||</span>{' '}
-                      <span className="text-white">
+                      <span className="text-white opacity-50">||</span>{' '}
+                      <span className="text-gray-300">
                         {seriesGroup.posts.length} part
                         {seriesGroup.posts.length > 1 ? 's' : ''}
                       </span>
@@ -296,7 +304,7 @@ export default function ListLayout({
                       <button
                         type="button"
                         onClick={() => toggleSeries(seriesGroup.name)}
-                        className="border-2 border-brutalist-cyan text-brutalist-cyan hover:bg-brutalist-cyan hover:text-black transition-all px-3 py-1.5 font-mono font-bold text-xs uppercase flex items-center gap-1.5"
+                        className="text-brutalist-pink hover:text-white transition-colors font-mono font-bold text-xs uppercase flex items-center gap-1"
                         aria-expanded={isExpanded}
                         aria-label={
                           isExpanded ? 'Collapse series' : 'Expand series'
@@ -319,7 +327,7 @@ export default function ListLayout({
                       {seriesGroup.slug ? (
                         <Link
                           href={`/series/${seriesGroup.slug}`}
-                          className="text-white hover:text-brutalist-cyan transition-colors"
+                          className="text-white hover:text-brutalist-pink transition-colors"
                         >
                           [ {seriesGroup.name} ]
                         </Link>
@@ -332,15 +340,15 @@ export default function ListLayout({
                     {renderTags(seriesGroup.tags)}
                   </div>
                   {seriesGroup.series?.summary && (
-                    <div className="font-mono text-sm text-gray-200">
+                    <div className="font-mono text-sm text-gray-300">
                       {seriesGroup.series.summary}
                     </div>
                   )}
                   {seriesGroup.slug && (
-                    <div className="font-mono text-sm">
+                    <div className="font-mono text-sm pt-2 text-right">
                       <Link
                         href={`/series/${seriesGroup.slug}`}
-                        className="text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink font-bold"
+                        className="text-brutalist-pink hover:text-white font-bold inline-flex items-center gap-1"
                       >
                         VIEW_SERIES &gt;&gt;
                       </Link>
@@ -349,8 +357,8 @@ export default function ListLayout({
                 </article>
 
                 {isExpanded && (
-                  <div className="mt-4 border-t-2 border-brutalist-cyan/30">
-                    <ul className="bg-black">
+                  <div className="mt-2 border-t border-brutalist-pink/30 p-5 bg-black/40">
+                    <ul className="space-y-4">
                       {seriesGroup.posts.map((post) => renderPost(post, true))}
                     </ul>
                   </div>
@@ -361,10 +369,12 @@ export default function ListLayout({
         </ul>
       </div>
       {pagination && pagination.totalPages > 1 && !searchValue && (
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-        />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 xl:max-w-5xl xl:px-0 mt-8">
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+          />
+        </div>
       )}
     </>
   );

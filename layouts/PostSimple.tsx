@@ -30,26 +30,27 @@ export default function PostLayout({
       <article>
         <div>
           <header>
-            <div className="pb-10 space-y-1 text-center border-b border-gray-200 dark:border-gray-700">
+            <div className="pb-10 space-y-1 text-center border-b-2 border-zinc-800">
               <dl>
                 <div>
                   <dt className="sr-only">Published on</dt>
-                  <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                  <dd className="text-base font-mono font-medium leading-6 text-brutalist-cyberOrange">
+                    <span className="font-bold">&gt;</span>{' '}
                     <time dateTime={date}>{formatDate(date)}</time>
                   </dd>
                 </div>
               </dl>
-              <div>
+              <div className="py-4">
                 <PageTitle>{title}</PageTitle>
               </div>
             </div>
           </header>
           <div
-            className="pb-8 divide-y divide-gray-200 xl:divide-y-0 dark:divide-gray-700 "
+            className="pb-8 border-b-2 border-zinc-800 font-mono"
             style={{ gridTemplateRows: 'auto 1fr' }}
           >
-            <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:pb-0 xl:col-span-3 xl:row-span-2">
-              <div className="pt-10 pb-8 prose dark:prose-dark max-w-none">
+            <div className="xl:pb-0 xl:col-span-3 xl:row-span-2">
+              <div className="pt-10 pb-8 prose prose-invert max-w-none">
                 {children}
               </div>
             </div>
@@ -60,7 +61,7 @@ export default function PostLayout({
                   <div className="pt-4 xl:pt-8">
                     <Link
                       href={`/blog/${prev.slug}`}
-                      className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                      className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase"
                     >
                       &larr; {prev.title}
                     </Link>
@@ -70,7 +71,7 @@ export default function PostLayout({
                   <div className="pt-4 xl:pt-8">
                     <Link
                       href={`/blog/${next.slug}`}
-                      className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                      className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase"
                     >
                       {next.title} &rarr;
                     </Link>

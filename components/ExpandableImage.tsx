@@ -45,7 +45,7 @@ export default function ExpandableImage({
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex-1 flex items-center justify-center gap-2 bg-brutalist-cyan text-black px-4 py-2 border-2 border-white font-mono text-sm font-bold uppercase shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[6px_6px_0px_0px_#ffffff] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all"
+              className="flex-1 flex items-center justify-center gap-2 bg-brutalist-cyan text-black px-4 py-2 border-2 border-white font-mono text-sm font-bold uppercase shadow-hard-md hover:shadow-hard-lg hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all"
             >
               {isExpanded ? (
                 <>
@@ -63,7 +63,7 @@ export default function ExpandableImage({
             <button
               type="button"
               onClick={() => setIsFullscreen(true)}
-              className="flex items-center justify-center gap-2 bg-brutalist-pink text-black px-4 py-2 border-2 border-white font-mono text-sm font-bold uppercase shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[6px_6px_0px_0px_#ffffff] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all"
+              className="flex items-center justify-center gap-2 bg-brutalist-pink text-black px-4 py-2 border-2 border-white font-mono text-sm font-bold uppercase shadow-hard-md hover:shadow-hard-lg hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all"
               aria-label="View fullscreen"
             >
               <Maximize2 className="w-4 h-4" />
@@ -88,7 +88,7 @@ export default function ExpandableImage({
           <button
             type="button"
             onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 bg-brutalist-cyan text-black px-4 py-2 border-2 border-white font-mono text-sm font-bold uppercase shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[6px_6px_0px_0px_#ffffff] z-10"
+            className="absolute top-4 right-4 bg-brutalist-cyan text-black px-4 py-2 border-2 border-white font-mono text-sm font-bold uppercase shadow-hard-md hover:shadow-hard-lg z-10"
           >
             Close [ESC]
           </button>
