@@ -14,33 +14,28 @@ interface Props {
 const LayoutWrapper = ({ children }: Props) => {
   return (
     <SectionContainer>
-      <div className="flex flex-col justify-between min-h-screen bg-black">
+      <div className="flex flex-col justify-between min-h-screen bg-black" style={{
+        backgroundImage: `linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px)`,
+        backgroundSize: '100% 4px',
+      }}>
         <header
-          className={`flex items-center justify-between py-6 px-4 border-b-2 border-white ${
-            siteMetadata.stickyNav ? 'sticky top-0 z-50 bg-black' : ''
+          className={`flex items-center justify-between py-6 px-4 border-b border-gray-800 ${
+            siteMetadata.stickyNav ? 'sticky top-0 z-50 bg-black/90 backdrop-blur' : ''
           } text-white`}
         >
           <div>
             <Link href="/" aria-label="Ryan Kelly Blog">
-              <div className="flex items-center gap-3">
-                <pre className="font-mono text-[8px] leading-none text-white hover:text-brutalist-pink transition-colors hidden sm:block">
-                  {`██████╗ ██╗  ██╗
-██╔══██╗██║ ██╔╝
-██████╔╝█████╔╝ 
-██╔══██╗██╔═██╗ 
-██║  ██║██║  ██╗
-╚═╝  ╚═╝╚═╝  ╚═╝`}
-                </pre>
-                <div className="bg-white text-black font-bold px-2 py-1 text-xl border-2 border-white hover:border-brutalist-pink hover:bg-black hover:text-brutalist-pink transition-colors sm:hidden">
-                  R_K
+              <div className="flex items-center gap-4">
+                <div className="font-pixel text-4xl leading-none text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">
+                  RK
                 </div>
-                <span className="font-bold text-lg tracking-tighter hidden md:block">
+                <span className="font-bold font-mono text-xl tracking-widest hidden md:block mt-1">
                   RYAN_KELLY.DEV
                 </span>
               </div>
             </Link>
           </div>
-          <div className="flex items-center text-base leading-5">
+          <div className="flex items-center text-base leading-5 gap-4">
             <div className="hidden sm:block">
               {headerNavLinks.map((link) => (
                 <Link
@@ -56,7 +51,7 @@ const LayoutWrapper = ({ children }: Props) => {
             <MobileNav />
           </div>
         </header>
-        <main className="mb-auto">{children}</main>
+        <main className="mb-auto relative z-10">{children}</main>
         <Footer />
       </div>
     </SectionContainer>

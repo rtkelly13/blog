@@ -21,36 +21,23 @@ export default function KBarModal({ actions, isLoading }: Props) {
     <KBarPortal>
       <KBarPositioner className="z-50 bg-black/80 p-4 backdrop-blur-sm">
         <KBarAnimator className="w-full max-w-xl">
-          <div className="overflow-hidden border-2 border-white bg-black font-mono">
-            <div className="flex items-center space-x-4 p-4 border-b-2 border-white">
-              <span className="block w-5 text-brutalist-cyan">
-                <svg
-                  className="text-brutalist-cyan"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
+          <div className="overflow-hidden border-2 border-brutalist-cyan shadow-glow-cyan bg-black font-mono">
+            <div className="flex items-center space-x-4 p-4 border-b-2 border-brutalist-cyan">
+              <span className="block w-5 text-brutalist-cyan font-bold text-xl">
+                &gt;
               </span>
               <KBarSearch
-                defaultPlaceholder="> Search..."
+                defaultPlaceholder="search_system...|"
                 className="h-8 w-full bg-transparent text-white placeholder-zinc-500 focus:outline-hidden"
               />
-              <kbd className="inline-block whitespace-nowrap border border-white px-1.5 align-middle text-xs font-medium leading-4 tracking-wide text-white bg-zinc-900">
+              <kbd className="inline-block whitespace-nowrap border-2 border-brutalist-pink px-2 py-1 align-middle text-xs font-bold leading-4 tracking-wide text-brutalist-pink bg-black uppercase">
                 ESC
               </kbd>
             </div>
             {!isLoading && <RenderResults />}
             {isLoading && (
-              <div className="block border-t-2 border-white px-4 py-6 text-center text-zinc-500">
-                Loading...
+              <div className="block px-4 py-6 text-center text-brutalist-cyan animate-pulse">
+                [ LOADING_DATA... ]
               </div>
             )}
           </div>
@@ -65,8 +52,8 @@ function RenderResults() {
 
   if (results.length === 0) {
     return (
-      <div className="block border-t-2 border-white px-4 py-6 text-center text-zinc-500">
-        No results found.
+      <div className="block px-4 py-6 text-center text-brutalist-pink">
+        [ ERROR: NO_RESULTS_FOUND ]
       </div>
     );
   }
@@ -77,32 +64,32 @@ function RenderResults() {
       onRender={({ item, active }) => (
         <div>
           {typeof item === 'string' ? (
-            <div className="block border-t-2 border-white px-4 pb-2 pt-6 text-xs font-semibold uppercase text-brutalist-cyan">
-              {item}
+            <div className="block px-4 pb-2 pt-6 text-xs font-bold uppercase text-brutalist-cyberOrange tracking-widest border-t-2 border-zinc-800 mt-2">
+              // {item}
             </div>
           ) : (
             <div
-              className={`flex cursor-pointer justify-between px-4 py-2 border-l-2 ${
+              className={`flex cursor-pointer justify-between px-4 py-3 border-l-4 transition-colors ${
                 active
-                  ? 'bg-brutalist-cyan text-black border-brutalist-cyan'
-                  : 'bg-transparent text-white border-transparent'
+                  ? 'bg-brutalist-cyan/20 text-brutalist-cyan border-brutalist-cyan'
+                  : 'bg-transparent text-zinc-300 border-transparent hover:bg-zinc-900'
               }`}
             >
-              <div className="flex items-center space-x-2">
-                <span>{item.name}</span>
+              <div className="flex flex-col">
+                <span className="font-bold">{item.name}</span>
                 {item.subtitle && (
                   <span className="text-xs text-zinc-500">{item.subtitle}</span>
                 )}
               </div>
               {item.shortcut?.length && (
-                <div className="flex gap-1">
+                <div className="flex gap-1 items-center">
                   {item.shortcut.map((sc) => (
                     <kbd
                       key={sc}
-                      className={`flex h-6 w-6 items-center justify-center border text-xs font-medium ${
+                      className={`flex h-6 w-6 items-center justify-center border-2 text-xs font-bold ${
                         active
-                          ? 'border-black text-black'
-                          : 'border-white text-white'
+                          ? 'border-brutalist-cyan text-brutalist-cyan'
+                          : 'border-zinc-500 text-zinc-500'
                       }`}
                     >
                       {sc}

@@ -1,7 +1,7 @@
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { ComponentProps } from 'react';
 import type { SeriesMetadata } from 'types/Series';
-import MountainHero from '@/components/MountainHero';
+import CyberHero from '@/components/CyberHero';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 import ListLayout from '@/layouts/ListLayout';
@@ -35,11 +35,11 @@ export default function Home({
         title={siteMetadata.title}
         description={siteMetadata.description}
       />
-      <MountainHero />
+      <CyberHero />
       <div className="mt-12">
         <ListLayout
           posts={posts}
-          title="Latest Posts"
+          title="LATEST POSTS"
           seriesMap={seriesMap}
           initialDisplayPosts={posts}
           tagCounts={tagCounts}

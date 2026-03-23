@@ -25,13 +25,15 @@ module.exports = {
         14: '3.5rem',
       },
       fontFamily: {
-        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        sans: ['"Share Tech Mono"', ...defaultTheme.fontFamily.sans],
         mono: [
+          '"Share Tech Mono"',
           'Courier New',
           'Courier',
           'monospace',
           ...defaultTheme.fontFamily.mono,
         ],
+        pixel: ['"VT323"', 'monospace'],
       },
       colors: {
         primary: colors.teal,
@@ -50,10 +52,13 @@ module.exports = {
           yellow: '#facc15',
           neonGreen: '#39ff14',
           neonCyan: '#00ffff',
+          cyberOrange: '#ff8c00',
+          darkBg: '#0a0a1a',
         },
       },
       borderRadius: {
         none: '0px',
+        md: '0.375rem',
       },
       boxShadow: {
         'hard-sm': '2px 2px 0px 0px rgba(255, 255, 255, 1)',
@@ -62,6 +67,8 @@ module.exports = {
         'hard-cyan': '4px 4px 0px 0px rgba(34, 211, 238, 1)',
         'hard-pink': '4px 4px 0px 0px rgba(236, 72, 153, 1)',
         'hard-yellow': '4px 4px 0px 0px rgba(250, 204, 21, 1)',
+        'glow-cyan': '0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.3)',
+        'glow-orange': '0 0 20px rgba(255, 140, 0, 0.8), 0 0 40px rgba(255, 140, 0, 0.5)',
       },
       typography: (theme) => ({
         DEFAULT: {

@@ -36,46 +36,50 @@ export default function PostBanner({
 
       {/* Full-width banner - breaks out of container */}
       <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
-        <div className="relative aspect-[2/1] w-full">
+        <div className="relative aspect-[2/1] w-full border-y-2 border-brutalist-cyan shadow-glow-cyan">
           <NextImage
             src={displayImage}
             alt={title}
             fill
-            className="object-cover"
+            className="object-cover opacity-80 mix-blend-screen"
             priority
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
         </div>
       </div>
 
       <SectionContainer>
-        <article>
-          <header className="pt-6 pb-8 text-center">
+        <article className="relative -mt-24 z-10 bg-black/80 backdrop-blur border border-zinc-800 p-8 rounded-md">
+          <header className="pt-6 pb-8 text-center border-b-2 border-zinc-800">
             <div className="space-y-1">
               <dl>
                 <dt className="sr-only">Published on</dt>
-                <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                <dd className="text-base font-mono font-medium leading-6 text-brutalist-cyberOrange">
+                  <span className="font-bold">&gt;</span>{' '}
                   <time dateTime={date}>{formatDate(date)}</time>
                 </dd>
               </dl>
-              <PageTitle>{title}</PageTitle>
+              <div className="py-4">
+                <PageTitle>{title}</PageTitle>
+              </div>
             </div>
           </header>
 
-          <div className="pb-8 prose dark:prose-dark max-w-none">
+          <div className="pb-8 pt-8 prose prose-invert max-w-none font-mono">
             {children}
           </div>
 
           <Comments frontMatter={frontMatter} />
 
-          <footer className="pt-8">
+          <footer className="pt-8 border-t-2 border-zinc-800">
             <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
               {prev && (
                 <div className="pt-4 xl:pt-8">
                   <Link
                     href={`/blog/${prev.slug}`}
-                    className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                    className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase inline-flex items-center gap-2"
                   >
-                    &larr; {prev.title}
+                    <span>&larr;</span> [ {prev.title} ]
                   </Link>
                 </div>
               )}
@@ -83,9 +87,9 @@ export default function PostBanner({
                 <div className="pt-4 xl:pt-8">
                   <Link
                     href={`/blog/${next.slug}`}
-                    className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                    className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase inline-flex items-center gap-2"
                   >
-                    {next.title} &rarr;
+                    [ {next.title} ] <span>&rarr;</span>
                   </Link>
                 </div>
               )}

@@ -4,31 +4,24 @@ import Link from './Link';
 
 export default function Footer() {
   return (
-    <footer>
-      <div className="flex flex-col items-center mt-16">
-        <div className="flex mb-3 space-x-4">
+    <footer className="relative z-10 bg-black/80 backdrop-blur border-t border-gray-800">
+      <div className="flex flex-col items-center mt-8 mb-8">
+        <div className="flex mb-4 space-x-6">
           <SocialIcon
             kind="mail"
             href={`mailto:${siteMetadata.email}`}
-            size={6}
+            size={8}
           />
-          <SocialIcon kind="github" href={siteMetadata.github} size={6} />
-          <SocialIcon kind="facebook" href={siteMetadata.facebook} size={6} />
-          <SocialIcon kind="youtube" href={siteMetadata.youtube} size={6} />
-          <SocialIcon kind="linkedin" href={siteMetadata.linkedin} size={6} />
-          <SocialIcon kind="x" href={siteMetadata.x} size={6} />
+          <SocialIcon kind="github" href={siteMetadata.github} size={8} />
+          <SocialIcon kind="linkedin" href={siteMetadata.linkedin} size={8} />
+          <SocialIcon kind="twitter" href={siteMetadata.x || siteMetadata.twitter} size={8} />
         </div>
-        <div className="flex mb-2 space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex space-x-2 text-sm font-mono text-white">
           <div>{siteMetadata.author}</div>
           <div>{` • `}</div>
           <div>{`© ${new Date().getFullYear()}`}</div>
           <div>{` • `}</div>
-          <Link href="/">{siteMetadata.title}</Link>
-        </div>
-        <div className="mb-8 text-sm text-gray-500 dark:text-gray-400">
-          <Link href="https://github.com/timlrx/tailwind-nextjs-starter-blog">
-            Tailwind Nextjs Theme
-          </Link>
+          <Link href="/" className="hover:text-brutalist-cyan transition-colors">{siteMetadata.title}</Link>
         </div>
       </div>
     </footer>

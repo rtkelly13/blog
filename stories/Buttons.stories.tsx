@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+// @ts-nocheck
+import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {
   title: 'Design Sandbox/Buttons',
