@@ -111,10 +111,12 @@ pnpm build                # next build + sitemap + search + tag-rss
 # Testing
 pnpm test:e2e             # Playwright tests
 pnpm test                 # Vitest unit tests
+pnpm test:coverage        # Vitest unit tests + coverage (./coverage)
 pnpm test:update-snapshots # Update visual snapshots via CI
 
 # Quality
 pnpm lint                 # Biome check
+pnpm typecheck            # tsc --noEmit
 pnpm format               # Biome format
 ```
 
@@ -132,13 +134,34 @@ Custom: requires building external `@rtkelly/mermaid-toolkit` first in CI.
 
 ## CI/CD
 
+Consolidated PR gate — every check runs as its own parallel job, all feed one
+required status check (`PR checks`). Modelled on the data-platform pattern, minus
+the Sentric composite actions and the `gh aw` agentic comment layer.
+
 ```
-Push → Vercel Preview → deployment_status: success → GitHub Actions (playwright.yml)
+PR → .github/workflows/pr-checks.yml
+      ├── lint        (biome)            blocking ─┐
+      ├── typecheck   (tsc --noEmit)     blocking  │
+      ├── unit        (vitest +coverage) blocking  ├─► conclusion = "PR checks"
+      ├── build       (next build)       blocking  │     • job summary + sticky comment
+      └── e2e-visual  (playwright)       advisory ─┘     • coverage delta vs main
+                                                          • fails on blocking failures
+
+push main → .github/workflows/ci.yml   # full suite + uploads `coverage-main` baseline
+workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapshots
 ```
 
-- Tests run AFTER Vercel deploys (triggered by `deployment_status`)
-- Draft branches (`drafts/*`) enable `SHOW_DRAFTS=true`
-- Snapshots auto-update if none exist; manual update via `workflow_dispatch`
+- Each feeder job runs its command with `continue-on-error` and exports its
+  outcome; the `conclusion` job aggregates them and is the only merge-blocking check.
+- Visual regression (`visual.spec.ts` / `visual-responsive.spec.ts`) runs inside
+  `e2e-visual` against a locally built site (no Vercel dependency). Advisory by
+  default since visual diffs are often intentional.
+- Coverage delta is computed deterministically by `scripts/ci/coverage-delta.mjs`
+  against the `coverage-main` artifact published by `ci.yml` on each main push.
+- Shared setup (mermaid-toolkit checkout + build, pnpm/node install) lives in the
+  repo-local composite action `.github/actions/setup-blog`.
+- Snapshots must be (re)generated on the CI runner via `playwright.yml`
+  (`workflow_dispatch`) so they match what `e2e-visual` compares against.
 
 ## DEPENDENCIES (KEY)
 
