@@ -132,7 +132,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
             <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-white">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-brutalist-cyan" />
-                <h2 className="font-mono text-sm font-bold uppercase text-brutalist-yellow">
+                <h2 className="font-display text-sm font-bold uppercase text-brutalist-yellow">
                   [ CONTENTS ]
                 </h2>
               </div>

@@ -56,7 +56,7 @@ const Card = ({
       )}
 
       <div className="p-6">
-        <h2 className="mb-3 text-2xl font-mono font-bold leading-8 tracking-tight uppercase text-white">
+        <h2 className="mb-3 text-2xl font-display font-bold leading-8 tracking-tight uppercase text-white">
           {href ? (
             <Link
               href={href}

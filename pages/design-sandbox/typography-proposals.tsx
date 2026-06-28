@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from '@/components/Link';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
@@ -16,10 +16,11 @@ import siteMetadata from '@/data/siteMetadata';
  *   2. `sans` and `mono` both resolve to Share Tech Mono, so there is no
  *      typeface pairing and no display/body contrast anywhere.
  *
- * Each proposal below pairs a display face with a body/code face and uses
- * a typeface that has a REAL weight axis, so the hierarchy is genuine.
- * Fonts are loaded from Google Fonts on this page only (no global change)
- * so you can compare before committing anything to the design tokens.
+ * Every section below is rendered in the actual fonts it proposes. The
+ * webfonts are LAZY-LOADED per section (IntersectionObserver + the CSS
+ * Font Loading API) so a proposal's fonts only hit the network when you
+ * scroll its section into view — nothing is loaded up front, and no
+ * global design tokens are changed.
  */
 
 type Role = {
@@ -47,6 +48,9 @@ type System = {
   cons: string[];
   tokens: string; // tailwind.config fontFamily snippet
   install: string;
+  // lazy loading: stylesheet href + the font faces to await (null = global)
+  fontHref: string | null;
+  fontFaces: string[];
 };
 
 const JETBRAINS = '"JetBrains Mono", "Courier New", monospace';
@@ -54,6 +58,11 @@ const SPACE_GROTESK = '"Space Grotesk", system-ui, sans-serif';
 const INTER = 'Inter, system-ui, sans-serif';
 const PLEX_MONO = '"IBM Plex Mono", "Courier New", monospace';
 const SHARE_TECH = '"Share Tech Mono", "Courier New", monospace';
+
+const GF = 'https://fonts.googleapis.com/css2';
+const HREF_A = `${GF}?family=JetBrains+Mono:wght@400;500;700;800&display=swap`;
+const HREF_B = `${GF}?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap`;
+const HREF_C = `${GF}?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap`;
 
 const CURRENT: System = {
   id: 'current',
@@ -90,6 +99,8 @@ const CURRENT: System = {
 sans: ['"Share Tech Mono"', ...],
 mono: ['"Share Tech Mono"', 'Courier New', ...],`,
   install: 'already installed (@fontsource/share-tech-mono)',
+  fontHref: null, // loaded globally, nothing to lazy-load
+  fontFaces: [],
 };
 
 const PROPOSALS: System[] = [
@@ -138,6 +149,8 @@ const PROPOSALS: System[] = [
 mono: ['"JetBrains Mono"', 'Courier New', ...defaultTheme.fontFamily.mono],
 // display weight 800 available via font-extrabold`,
     install: 'pnpm add @fontsource/jetbrains-mono',
+    fontHref: HREF_A,
+    fontFaces: ["400 1em 'JetBrains Mono'", "800 1em 'JetBrains Mono'"],
   },
   {
     id: 'b',
@@ -184,6 +197,8 @@ mono: ['"JetBrains Mono"', 'Courier New', ...defaultTheme.fontFamily.mono],
 mono: ['"JetBrains Mono"', 'Courier New', ...defaultTheme.fontFamily.mono], // body/code
 // headings switch from font-mono -> font-sans`,
     install: 'pnpm add @fontsource/space-grotesk @fontsource/jetbrains-mono',
+    fontHref: HREF_B,
+    fontFaces: ["700 1em 'Space Grotesk'", "400 1em 'JetBrains Mono'"],
   },
   {
     id: 'c',
@@ -232,8 +247,88 @@ serif: ['Inter', ...],          // (used for body via prose)
 mono: ['"IBM Plex Mono"', ...], // code + metadata only`,
     install:
       'pnpm add @fontsource/space-grotesk @fontsource/inter @fontsource/ibm-plex-mono',
+    fontHref: HREF_C,
+    fontFaces: [
+      "700 1em 'Space Grotesk'",
+      "400 1em 'Inter'",
+      "500 1em 'IBM Plex Mono'",
+    ],
   },
 ];
+
+// Inject a Google Fonts stylesheet at most once per href.
+const injectedHrefs = new Set<string>();
+function injectFontStylesheet(href: string) {
+  if (typeof document === 'undefined' || injectedHrefs.has(href)) return;
+  injectedHrefs.add(href);
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
+type LoadStatus = 'idle' | 'loading' | 'ready';
+
+/**
+ * Lazy-loads a proposal's webfonts the first time its section scrolls near
+ * the viewport, then resolves once the actual font faces are ready.
+ */
+function useLazyFonts(href: string | null, faces: string[]) {
+  const ref = useRef<HTMLElement>(null);
+  const [status, setStatus] = useState<LoadStatus>(href ? 'idle' : 'ready');
+
+  useEffect(() => {
+    if (!href) return; // global font (current) — nothing to lazy-load
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        observer.disconnect();
+        setStatus('loading');
+        injectFontStylesheet(href);
+
+        const fonts = document.fonts;
+        if (fonts?.load) {
+          Promise.all(faces.map((f) => fonts.load(f)))
+            .then(() => setStatus('ready'))
+            .catch(() => setStatus('ready'));
+        } else {
+          setStatus('ready');
+        }
+      },
+      { rootMargin: '300px' },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [href, faces]);
+
+  return { ref, status };
+}
+
+const StatusPill = ({ status }: { status: LoadStatus }) => {
+  const map: Record<LoadStatus, { label: string; cls: string }> = {
+    idle: { label: 'FONTS ▸ NOT LOADED', cls: 'border-zinc-600 text-zinc-500' },
+    loading: {
+      label: 'FONTS ▸ LOADING…',
+      cls: 'border-brutalist-yellow text-brutalist-yellow animate-pulse',
+    },
+    ready: {
+      label: 'FONTS ▸ READY',
+      cls: 'border-brutalist-neonGreen text-brutalist-neonGreen',
+    },
+  };
+  const { label, cls } = map[status];
+  return (
+    <span
+      className={`font-mono text-[10px] font-bold px-2 py-1 border-2 uppercase ${cls}`}
+    >
+      {label}
+    </span>
+  );
+};
 
 const Specimen = ({ s }: { s: System }) => (
   <div className="bg-black border-2 border-white p-6 space-y-6">
@@ -243,17 +338,17 @@ const Specimen = ({ s }: { s: System }) => (
     </p>
 
     {/* display */}
-    <h1
+    <h2
       className="text-4xl md:text-5xl text-white leading-none"
       style={s.display}
     >
       Rebuilding the type system
-    </h1>
+    </h2>
 
     {/* heading */}
-    <h2 className="text-2xl text-white" style={s.heading}>
+    <h3 className="text-2xl text-white" style={s.heading}>
       {'>'} Why weight matters
-    </h2>
+    </h3>
 
     {/* body */}
     <p className="text-base text-zinc-200 leading-relaxed" style={s.body}>
@@ -270,9 +365,9 @@ const Specimen = ({ s }: { s: System }) => (
     </p>
 
     {/* subheading */}
-    <h3 className="text-lg text-white" style={s.subheading}>
+    <h4 className="text-lg text-white" style={s.subheading}>
       {'// secondary heading'}
-    </h3>
+    </h4>
 
     <p className="text-sm text-zinc-400 leading-relaxed" style={s.body}>
       Secondary copy sits a step down in weight and colour. Good systems give
@@ -327,10 +422,95 @@ const Specimen = ({ s }: { s: System }) => (
   </div>
 );
 
-export default function TypographyProposals() {
-  const [selected, setSelected] = useState<System>(PROPOSALS[1]); // default: B
-  const [compare, setCompare] = useState(true);
+const SystemSection = ({ s }: { s: System }) => {
+  const { ref, status } = useLazyFonts(s.fontHref, s.fontFaces);
 
+  return (
+    <section
+      id={s.id}
+      ref={ref}
+      className="container py-12 scroll-mt-24 space-y-6"
+    >
+      {/* section header */}
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className={`font-mono font-bold text-2xl uppercase ${s.accent}`}>
+          {s.name}
+        </h2>
+        <span
+          className={`font-mono text-xs font-bold px-2 py-1 border-2 uppercase border-current ${s.accent}`}
+        >
+          {s.badge}
+        </span>
+        <span className="ml-auto">
+          <StatusPill status={status} />
+        </span>
+      </div>
+      <p className="font-mono text-sm text-zinc-400">{s.tagline}</p>
+
+      {/* pros / cons */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <p className="font-mono text-xs text-brutalist-cyan uppercase mb-1">
+            + Strengths
+          </p>
+          <ul className="space-y-1 font-mono text-xs text-zinc-300">
+            {s.pros.map((x) => (
+              <li key={x}>
+                <span className="text-brutalist-cyan mr-1">{'>'}</span>
+                {x}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="font-mono text-xs text-brutalist-pink uppercase mb-1">
+            - Trade-offs
+          </p>
+          <ul className="space-y-1 font-mono text-xs text-zinc-300">
+            {s.cons.map((x) => (
+              <li key={x}>
+                <span className="text-brutalist-pink mr-1">!</span>
+                {x}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* live specimen, rendered in this proposal's fonts */}
+      <Specimen s={s} />
+
+      {/* adoption (skip for current) */}
+      {s.fontHref && (
+        <div className="border-2 border-brutalist-cyan bg-zinc-900 p-6 space-y-4">
+          <h3 className="font-mono font-bold text-lg text-brutalist-cyan uppercase">
+            [ HOW_TO_ADOPT ]
+          </h3>
+          <div>
+            <p className="font-mono text-xs text-zinc-500 uppercase mb-1">
+              1. install
+            </p>
+            <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-brutalist-neonGreen overflow-x-auto">
+              {s.install}
+            </pre>
+          </div>
+          <div>
+            <p className="font-mono text-xs text-zinc-500 uppercase mb-1">
+              2. tailwind.config.js → fontFamily
+            </p>
+            <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-brutalist-cyan overflow-x-auto">
+              {s.tokens}
+            </pre>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
+
+const ALL: System[] = [CURRENT, ...PROPOSALS];
+
+export default function TypographyProposals() {
   return (
     <>
       <PageSEO
@@ -338,15 +518,12 @@ export default function TypographyProposals() {
         description="Evaluate font-pairing and weight-system proposals for the blog"
       />
       <Head>
+        {/* Only preconnect up front — actual stylesheets are injected lazily. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
         />
       </Head>
 
@@ -362,8 +539,8 @@ export default function TypographyProposals() {
             [ TYPOGRAPHY_PROPOSALS ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
-            {'>'} Pick a direction for font pairing + weight. Rendered live, no
-            tokens changed yet.
+            {'>'} Every section is rendered in its own fonts. Fonts lazy-load as
+            you scroll — no tokens changed yet.
           </p>
         </div>
 
@@ -400,130 +577,26 @@ export default function TypographyProposals() {
           </div>
         </div>
 
-        {/* controls */}
-        <div className="container py-8 space-y-6">
-          <div className="flex flex-wrap items-center gap-3">
-            {PROPOSALS.map((p) => {
-              const active = selected.id === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setSelected(p)}
-                  className={`font-mono text-sm font-bold px-4 py-2 border-2 uppercase transition-colors ${
-                    active
-                      ? 'bg-white text-black border-white'
-                      : 'bg-black text-white border-white hover:border-brutalist-cyan hover:text-brutalist-cyan'
-                  }`}
-                >
-                  {p.name}
-                </button>
-              );
-            })}
-            <label className="ml-auto flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={compare}
-                onChange={(e) => setCompare(e.target.checked)}
-                className="accent-brutalist-cyan"
-              />
-              Compare vs. current
-            </label>
-          </div>
-
-          {/* proposal summary */}
-          <div className="border-2 border-white bg-zinc-900 p-6">
-            <div className="flex flex-wrap items-center gap-3 mb-3">
-              <h3
-                className={`font-mono font-bold text-2xl uppercase ${selected.accent}`}
+        {/* jump nav */}
+        <div className="container py-4">
+          <div className="flex flex-wrap items-center gap-3 font-mono text-xs uppercase">
+            <span className="text-zinc-500">jump:</span>
+            {ALL.map((s) => (
+              <Link
+                key={s.id}
+                href={`#${s.id}`}
+                className={`border-2 border-current px-2 py-1 hover:bg-white hover:text-black transition-colors ${s.accent}`}
               >
-                {selected.name}
-              </h3>
-              <span
-                className={`font-mono text-xs font-bold px-2 py-1 border-2 uppercase ${selected.accent} border-current`}
-              >
-                {selected.badge}
-              </span>
-            </div>
-            <p className="font-mono text-sm text-zinc-400 mb-4">
-              {selected.tagline}
-            </p>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <p className="font-mono text-xs text-brutalist-cyan uppercase mb-1">
-                  + Strengths
-                </p>
-                <ul className="space-y-1 font-mono text-xs text-zinc-300">
-                  {selected.pros.map((x) => (
-                    <li key={x}>
-                      <span className="text-brutalist-cyan mr-1">{'>'}</span>
-                      {x}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="font-mono text-xs text-brutalist-pink uppercase mb-1">
-                  - Trade-offs
-                </p>
-                <ul className="space-y-1 font-mono text-xs text-zinc-300">
-                  {selected.cons.map((x) => (
-                    <li key={x}>
-                      <span className="text-brutalist-pink mr-1">!</span>
-                      {x}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* specimens */}
-          <div className={`grid gap-6 ${compare ? 'lg:grid-cols-2' : ''}`}>
-            {compare && (
-              <div className="space-y-2">
-                <p className="font-mono text-xs text-zinc-500 uppercase">
-                  ▾ current (share tech mono)
-                </p>
-                <Specimen s={CURRENT} />
-              </div>
-            )}
-            <div className="space-y-2">
-              <p className={`font-mono text-xs uppercase ${selected.accent}`}>
-                ▾ {selected.name}
-              </p>
-              <Specimen s={selected} />
-            </div>
-          </div>
-
-          {/* adoption */}
-          <div className="border-2 border-brutalist-cyan bg-zinc-900 p-6 space-y-4">
-            <h3 className="font-mono font-bold text-xl text-brutalist-cyan uppercase">
-              [ HOW_TO_ADOPT — {selected.name} ]
-            </h3>
-            <div>
-              <p className="font-mono text-xs text-zinc-500 uppercase mb-1">
-                1. install
-              </p>
-              <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-brutalist-neonGreen overflow-x-auto">
-                {selected.install}
-              </pre>
-            </div>
-            <div>
-              <p className="font-mono text-xs text-zinc-500 uppercase mb-1">
-                2. tailwind.config.js → fontFamily
-              </p>
-              <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-brutalist-cyan overflow-x-auto">
-                {selected.tokens}
-              </pre>
-            </div>
-            <p className="font-mono text-xs text-zinc-400">
-              {'>'} Then import the @fontsource packages in{' '}
-              <code className="text-brutalist-neonGreen">pages/_app.tsx</code>{' '}
-              (same place Share Tech Mono / VT323 are imported today).
-            </p>
+                {s.id === 'current' ? 'current' : s.id.toUpperCase()}
+              </Link>
+            ))}
           </div>
         </div>
+
+        {/* one section per system, each lazy-loading its own fonts */}
+        {ALL.map((s) => (
+          <SystemSection key={s.id} s={s} />
+        ))}
       </div>
     </>
   );

@@ -62,7 +62,10 @@ PostCSS uses `@tailwindcss/postcss` (not `tailwindcss`).
 | Borders            | 2px solid white   | All borders, always |
 | Border-radius      | 0px               | Globally enforced   |
 | Shadows            | `hard-*`          | 4px offset, no blur |
-| Font               | Courier New, mono | Body and headings   |
+| Display font       | Space Grotesk (`font-display`) | Headings / page titles |
+| Body font          | Inter (default `font-sans`)    | Body / reading copy    |
+| Mono font          | IBM Plex Mono (`font-mono`)    | Code + UI / metadata   |
+| Pixel font         | VT323 (`font-pixel`)           | Logo + hero accents    |
 
 ### MDX Content
 

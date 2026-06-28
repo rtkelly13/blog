@@ -68,7 +68,7 @@ export default function DesignSandbox() {
       />
       <div className="divide-y divide-white">
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-mono uppercase border-2 border-white inline-block px-4 py-2">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
             [ DESIGN_SANDBOX ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
@@ -82,7 +82,7 @@ export default function DesignSandbox() {
               <Link key={component.path} href={component.path}>
                 <div className="bg-zinc-900 border-2 border-white p-6 hover:border-brutalist-cyan transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 h-full cursor-pointer group">
                   <div className="text-4xl mb-4">{component.icon}</div>
-                  <h3 className="font-mono font-bold text-xl text-white mb-2 uppercase group-hover:text-brutalist-cyan transition-colors">
+                  <h3 className="font-display font-bold text-xl text-white mb-2 uppercase group-hover:text-brutalist-cyan transition-colors">
                     {component.name}
                   </h3>
                   <p className="text-zinc-400 font-mono text-sm">
@@ -94,7 +94,7 @@ export default function DesignSandbox() {
           </div>
 
           <div className="mt-12 border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-mono font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
               [ SANDBOX_INFO ]
             </h2>
             <p className="text-white font-mono text-sm leading-relaxed mb-4">

@@ -199,7 +199,7 @@ export default function ListLayout({
                 Part {frontMatter.series.order}
               </div>
             )}
-            <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
+            <h3 className="text-2xl font-display font-bold leading-8 tracking-tight uppercase">
               <Link
                 href={`/blog/${slug}`}
                 className="text-white hover:text-brutalist-cyan transition-colors"
@@ -228,7 +228,7 @@ export default function ListLayout({
       <div className="max-w-3xl mx-auto px-4 sm:px-6 xl:max-w-5xl xl:px-0">
         <div className="pt-6 pb-8 space-y-8">
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-pixel font-bold leading-9 tracking-widest text-white uppercase sm:text-5xl sm:leading-10 md:text-7xl md:leading-14 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] pb-4 inline-block relative">
+            <h1 className="text-4xl font-display font-bold leading-9 tracking-widest text-white uppercase sm:text-5xl sm:leading-10 md:text-7xl md:leading-14 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] pb-4 inline-block relative">
               [ {title} ]
               <div className="absolute bottom-0 left-0 w-full h-[4px] bg-brutalist-cyan shadow-glow-cyan" />
             </h1>
@@ -283,7 +283,9 @@ export default function ListLayout({
                 <article className="space-y-2 p-5">
                   <div className="font-mono text-sm leading-6 text-brutalist-cyberOrange flex items-center gap-2">
                     <div>
-                      <span className="text-brutalist-cyberOrange font-bold">&gt;</span>{' '}
+                      <span className="text-brutalist-cyberOrange font-bold">
+                        &gt;
+                      </span>{' '}
                       <time dateTime={seriesGroup.latestDate}>
                         {formatDate(seriesGroup.latestDate)}
                       </time>
@@ -323,7 +325,7 @@ export default function ListLayout({
                         )}
                       </button>
                     </div>
-                    <h3 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase">
+                    <h3 className="text-2xl font-display font-bold leading-8 tracking-tight uppercase">
                       {seriesGroup.slug ? (
                         <Link
                           href={`/series/${seriesGroup.slug}`}

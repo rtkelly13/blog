@@ -14,13 +14,18 @@ interface Props {
 const LayoutWrapper = ({ children }: Props) => {
   return (
     <SectionContainer>
-      <div className="flex flex-col justify-between min-h-screen bg-black" style={{
-        backgroundImage: `linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px)`,
-        backgroundSize: '100% 4px',
-      }}>
+      <div
+        className="flex flex-col justify-between min-h-screen bg-black"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px)`,
+          backgroundSize: '100% 4px',
+        }}
+      >
         <header
           className={`flex items-center justify-between py-6 px-4 border-b border-gray-800 ${
-            siteMetadata.stickyNav ? 'sticky top-0 z-50 bg-black/90 backdrop-blur' : ''
+            siteMetadata.stickyNav
+              ? 'sticky top-0 z-50 bg-black/90 backdrop-blur'
+              : ''
           } text-white`}
         >
           <div>

@@ -83,7 +83,7 @@ const DemoContainer = ({
     <div className="bg-zinc-900 border-2 border-white p-6 flex flex-col h-full">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="font-mono font-bold text-lg text-white uppercase">
+          <h3 className="font-display font-bold text-lg text-white uppercase">
             {title}
           </h3>
           <p className="text-zinc-400 text-sm font-mono mt-1">{description}</p>
@@ -264,7 +264,7 @@ export default function NavigationSandbox() {
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-mono uppercase border-2 border-white inline-block px-4 py-2">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
             [ NAVIGATION_FAB ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
@@ -347,7 +347,7 @@ export default function NavigationSandbox() {
           </div>
 
           <div className="mt-12 border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-mono font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
               [ DESIGN_NOTES ]
             </h2>
             <ul className="text-white font-mono text-sm space-y-2">

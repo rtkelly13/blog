@@ -8,7 +8,7 @@ const HeroMinimal = () => (
       <div className="inline-block bg-brutalist-cyan text-black font-bold px-2 py-1 mb-4 text-xs font-mono">
         STATUS: ONLINE
       </div>
-      <h1 className="text-4xl md:text-6xl font-bold font-mono mb-6 text-white uppercase">
+      <h1 className="text-4xl md:text-6xl font-bold font-display mb-6 text-white uppercase">
         RYAN_KELLY.DEV
       </h1>
       <p className="text-lg md:text-xl font-mono text-zinc-400">
@@ -33,7 +33,7 @@ const HeroGrid = () => (
         <div className="inline-block bg-brutalist-cyan text-black font-bold px-2 py-1 mb-4 text-xs font-mono">
           STATUS: ONLINE
         </div>
-        <h1 className="text-3xl md:text-5xl font-bold font-mono mb-6 leading-tight text-white">
+        <h1 className="text-3xl md:text-5xl font-bold font-display mb-6 leading-tight text-white">
           HELLO_WORLD.
           <br />I BUILD{' '}
           <span className="text-brutalist-pink bg-brutalist-pink/10 px-1">
@@ -89,7 +89,7 @@ export default function ArticleHeroes() {
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-mono uppercase border-2 border-white inline-block px-4 py-2">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
             [ ARTICLE_HEROES ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
@@ -99,7 +99,7 @@ export default function ArticleHeroes() {
 
         <div className="py-12 space-y-16">
           <div>
-            <h2 className="font-mono font-bold text-2xl text-white mb-2 uppercase">
+            <h2 className="font-display font-bold text-2xl text-white mb-2 uppercase">
               01. MINIMAL_CENTERED
             </h2>
             <p className="text-zinc-400 font-mono text-sm mb-6">
@@ -111,7 +111,7 @@ export default function ArticleHeroes() {
           </div>
 
           <div>
-            <h2 className="font-mono font-bold text-2xl text-white mb-2 uppercase">
+            <h2 className="font-display font-bold text-2xl text-white mb-2 uppercase">
               02. GRID_BACKGROUND
             </h2>
             <p className="text-zinc-400 font-mono text-sm mb-6">
@@ -123,7 +123,7 @@ export default function ArticleHeroes() {
           </div>
 
           <div>
-            <h2 className="font-mono font-bold text-2xl text-white mb-2 uppercase">
+            <h2 className="font-display font-bold text-2xl text-white mb-2 uppercase">
               03. TERMINAL_INTERFACE
             </h2>
             <p className="text-zinc-400 font-mono text-sm mb-6">

@@ -25,15 +25,17 @@ module.exports = {
         14: '3.5rem',
       },
       fontFamily: {
-        sans: ['"Share Tech Mono"', ...defaultTheme.fontFamily.sans],
+        // Proposal C — Editorial Three-Role
+        sans: ['Inter', ...defaultTheme.fontFamily.sans], // body / reading
+        display: ['"Space Grotesk"', ...defaultTheme.fontFamily.sans], // headings / display
         mono: [
-          '"Share Tech Mono"',
+          '"IBM Plex Mono"',
           'Courier New',
           'Courier',
           'monospace',
           ...defaultTheme.fontFamily.mono,
-        ],
-        pixel: ['"VT323"', 'monospace'],
+        ], // code + UI / metadata
+        pixel: ['"VT323"', 'monospace'], // decorative accent (hero/logo)
       },
       colors: {
         primary: colors.teal,
@@ -67,13 +69,15 @@ module.exports = {
         'hard-cyan': '4px 4px 0px 0px rgba(34, 211, 238, 1)',
         'hard-pink': '4px 4px 0px 0px rgba(236, 72, 153, 1)',
         'hard-yellow': '4px 4px 0px 0px rgba(250, 204, 21, 1)',
-        'glow-cyan': '0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.3)',
-        'glow-orange': '0 0 20px rgba(255, 140, 0, 0.8), 0 0 40px rgba(255, 140, 0, 0.5)',
+        'glow-cyan':
+          '0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.3)',
+        'glow-orange':
+          '0 0 20px rgba(255, 140, 0, 0.8), 0 0 40px rgba(255, 140, 0, 0.5)',
       },
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            fontFamily: theme('fontFamily.mono'),
+            fontFamily: theme('fontFamily.sans'),
             color: theme('colors.gray.200'),
             a: {
               color: theme('colors.brutalist.cyan'),
@@ -85,27 +89,27 @@ module.exports = {
               code: { color: theme('colors.brutalist.cyan') },
             },
             h1: {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               letterSpacing: theme('letterSpacing.tight'),
               color: theme('colors.white'),
             },
             h2: {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               letterSpacing: theme('letterSpacing.tight'),
               color: theme('colors.white'),
             },
             h3: {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               color: theme('colors.white'),
             },
             'h4,h5,h6': {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               color: theme('colors.white'),
@@ -164,7 +168,7 @@ module.exports = {
         },
         dark: {
           css: {
-            fontFamily: theme('fontFamily.mono'),
+            fontFamily: theme('fontFamily.sans'),
             color: theme('colors.gray.200'),
             a: {
               color: theme('colors.brutalist.cyan'),
@@ -176,27 +180,27 @@ module.exports = {
               code: { color: theme('colors.brutalist.cyan') },
             },
             h1: {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               letterSpacing: theme('letterSpacing.tight'),
               color: theme('colors.white'),
             },
             h2: {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               letterSpacing: theme('letterSpacing.tight'),
               color: theme('colors.white'),
             },
             h3: {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               color: theme('colors.white'),
             },
             'h4,h5,h6': {
-              fontFamily: theme('fontFamily.mono'),
+              fontFamily: theme('fontFamily.display'),
               fontWeight: '700',
               textTransform: 'uppercase',
               color: theme('colors.white'),
