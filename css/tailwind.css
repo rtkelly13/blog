@@ -42,6 +42,13 @@
   }
 }
 
+/* Proposal C: MDX/prose headings use the display face (Space Grotesk).
+   The @tailwindcss/typography plugin does not emit a per-heading
+   font-family, so headings would otherwise inherit the Inter body font. */
+.prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"] *)) {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
 .remark-code-title {
   @apply px-5 py-3 font-mono text-sm font-bold text-white bg-black border-2 border-white border-b-0;
 }

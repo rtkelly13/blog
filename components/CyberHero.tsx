@@ -87,7 +87,7 @@ const CyberHero = () => {
           transform: `translateY(calc(-50% + ${scrollY * 0.2}px))`,
         }}
       >
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-sans text-white mb-2 tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-display text-white mb-2 tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
           RYAN KELLY
         </h1>
         <p className="text-lg md:text-2xl font-mono text-brutalist-neonGreen bg-black/50 px-4 py-1 drop-shadow-[0_0_8px_rgba(57,255,20,1)]">
