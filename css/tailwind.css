@@ -142,6 +142,37 @@ html {
   height: auto;
 }
 
+/* Talk slide decks: print / PDF export */
+.print-deck .print-slide {
+  break-after: page;
+  page-break-after: always;
+}
+
+.print-deck .print-slide:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+
+@media print {
+  /* Hide site chrome and interactive deck controls when exporting to PDF */
+  header,
+  footer,
+  .slideshow-chrome {
+    display: none !important;
+  }
+
+  .print-deck .print-slide {
+    min-height: auto;
+    height: 100vh;
+    padding: 3rem;
+  }
+
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+}
+
 /* Brutalist Utilities */
 @layer utilities {
   .brutalist-border {

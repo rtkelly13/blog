@@ -20,13 +20,26 @@ import { ConvexProvider } from 'convex/react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { ThemeProvider } from 'next-themes';
+import type { ReactElement, ReactNode } from 'react';
 
 import Analytics from '@/components/analytics';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import SearchProvider from '@/components/search/SearchProvider';
 import { convex } from '@/lib/convexClient';
 
+type NextPageWithLayout = AppProps['Component'] & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
 export default function App({ Component, pageProps }: AppProps) {
+  // Pages can opt out of the global header/footer chrome (e.g. the fullscreen
+  // talk presentation view) by exporting a `getLayout` that returns the page
+  // as-is. Everything else falls through to the default LayoutWrapper.
+  const ComponentWithLayout = Component as NextPageWithLayout;
+  const getLayout =
+    ComponentWithLayout.getLayout ??
+    ((page: ReactElement) => <LayoutWrapper>{page}</LayoutWrapper>);
+
   const tree = (
     <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
       <SearchProvider>
@@ -34,9 +47,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <meta content="width=device-width, initial-scale=1" name="viewport" />
         </Head>
         <Analytics />
-        <LayoutWrapper>
-          <Component {...pageProps} />
-        </LayoutWrapper>
+        {getLayout(<Component {...pageProps} />)}
       </SearchProvider>
     </ThemeProvider>
   );
