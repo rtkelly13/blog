@@ -137,6 +137,10 @@ export const NoLink: Story = {
 };
 
 export const AllVariations: Story = {
+  args: {
+    title: 'All Variations',
+    description: 'Showcase of all card component variations.',
+  },
   render: () => (
     <div className="space-y-8 p-8">
       <div className="border-b-2 border-white pb-4">
