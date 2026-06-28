@@ -1,4 +1,4 @@
-import '@fontsource/vt323';
+import '@fontsource/vt323/400.css';
 // Proposal C — Editorial Three-Role typography
 // Display: Space Grotesk · Body: Inter · Code/UI: IBM Plex Mono
 import '@fontsource/space-grotesk/400.css';

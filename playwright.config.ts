@@ -14,7 +14,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   testMatch: /.*\.spec\.ts$/,
-  testIgnore: /.*theme-engine\.test\.ts$/,
+  /* theme-engine is a Vitest unit test; visual-vs-deployed has its own config. */
+  testIgnore: /(theme-engine\.test|visual-vs-deployed\.spec)\.ts$/,
   /* Snapshot path template for organized storage */
   snapshotPathTemplate: '{testDir}/__snapshots__/{testFilePath}/{arg}{ext}',
   /* Run tests in files in parallel */

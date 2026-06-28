@@ -16,7 +16,7 @@ tests/
 ├── feeds.spec.ts           # RSS feed validation
 ├── frontmatter.spec.ts     # MDX frontmatter validation
 ├── tag-validation.spec.ts  # Tag consistency checks
-├── blog-upgrade.spec.ts    # Migration tests
+├── blog-upgrade.spec.ts    # Reading-time tests
 ├── experiments.spec.ts     # Experiments page tests
 ├── theme-engine.test.ts    # Vitest unit test
 └── __snapshots__/          # Visual baseline images
@@ -53,6 +53,41 @@ git add tests/__snapshots__ && git commit
 ```
 tests/__snapshots__/{testFilePath}/{arg}-{projectName}{ext}
 ```
+
+## REGRESSION VS DEPLOYED MAIN
+
+**File:** `visual-vs-deployed.spec.ts` · **Config:** `playwright.regression.config.ts` · **Command:** `pnpm test:regression`
+
+Use this to verify a change (e.g. a dependency/Tailwind upgrade) does **not** alter
+rendered output compared to what is live on `main`.
+
+**How it differs from `visual.spec.ts`:** the snapshot suite diffs against committed
+Linux baselines, so it only runs in CI. This suite renders **both** the local build and
+the **live production site** in the same browser on the same machine, then pixel-diffs
+the two. Because both sides share a renderer, platform/font differences cancel out — so
+it runs locally on macOS and any remaining diff is a genuine styling change.
+
+```bash
+pnpm build              # build the version you want to check
+pnpm test:regression    # boots `pnpm serve`, diffs local vs https://ryankelly.dev
+```
+
+**Page tiers:**
+
+| Tier             | Pages                          | Tolerance | Runs by default            |
+| ---------------- | ------------------------------ | --------- | -------------------------- |
+| Content-stable   | `/about`, `/404`, a published post | 1%    | yes — any diff = regression |
+| Content-dependent | `/`, `/blog`, `/tags`         | 10%       | only with `REGRESSION_ALL=1` |
+
+Content-dependent pages differ legitimately (drafts hidden locally, fewer posts), so
+they are opt-in and given a looser tolerance.
+
+**Env overrides:** `REGRESSION_BASE_URL` (deployed target, default `https://ryankelly.dev`),
+`REGRESSION_LOCAL_URL` (default `http://localhost:3000`), `REGRESSION_ALL=1` (include
+content-dependent pages).
+
+Each test attaches `deployed-main`, `local-build`, and `diff` PNGs to the HTML report
+(`pnpm exec playwright show-report`) so any failure is visually diagnosable.
 
 ## KEY TEST PATTERNS
 

@@ -14,6 +14,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    // `baseUrl` powers bare module aliases (e.g. `types/Toc`). TS 6.0 deprecates
+    // it ahead of removal in 7.0; silence until those imports are migrated.
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["components/*"],
