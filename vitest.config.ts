@@ -12,6 +12,14 @@ const dirname =
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   test: {
+    coverage: {
+      provider: 'v8',
+      // json-summary feeds scripts/ci/coverage-delta.mjs; lcov is for external
+      // viewers; text prints the table in the CI log.
+      reporter: ['text', 'json-summary', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['components/**', 'lib/**', 'layouts/**'],
+    },
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

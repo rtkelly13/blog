@@ -1,53 +1,57 @@
 name: CI
 
+# Main-branch baseline. Runs the full suite on every push to main and publishes
+# the coverage summary as the `coverage-main` artifact that PR runs diff against
+# (see pr-checks.yml → conclusion → "Find latest main coverage baseline").
+
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build-lint-audit:
+  baseline:
+    name: Build, test & publish coverage baseline
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           path: blog
-
-      - name: Checkout mermaid-toolkit
-        uses: actions/checkout@v4
+      - uses: ./blog/.github/actions/setup-blog
         with:
-          repository: rtkelly13/mermaid-toolkit
-          path: mermaid-toolkit
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: "pnpm"
-          cache-dependency-path: "blog/pnpm-lock.yaml"
-
-      - name: Build mermaid-toolkit
-        working-directory: mermaid-toolkit
-        run: pnpm install && pnpm build
-
-      - name: Install dependencies
-        working-directory: blog
-        run: pnpm install --frozen-lockfile
+          install-playwright: "true"
 
       - name: Lint
         working-directory: blog
-        run: pnpm run lint
+        run: pnpm lint
+
+      - name: Type check
+        working-directory: blog
+        run: pnpm typecheck
+
+      - name: Unit tests with coverage
+        working-directory: blog
+        run: pnpm test:coverage
 
       - name: Build
         working-directory: blog
-        run: pnpm run build
+        run: pnpm build
 
-      - name: SEO Audit
+      - name: SEO audit
         working-directory: blog
-        run: pnpm run check:seo
+        run: pnpm check:seo
+
+      # Stable baseline for the PR coverage-diff. retention-days is the GitHub
+      # Actions maximum (400) to approximate indefinite retention — every main
+      # push overwrites it, so it never expires in practice.
+      - name: Upload coverage baseline (main only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-main
+          path: blog/coverage/
+          retention-days: 400
+          overwrite: true
+          if-no-files-found: warn

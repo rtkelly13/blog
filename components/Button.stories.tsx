@@ -94,7 +94,8 @@ export const Disabled: Story = {
   },
 };
 
-export const AllVariants: Story = {
+// Render-only showcase: composes its own markup, so it doesn't drive component args.
+export const AllVariants: StoryObj = {
   render: () => (
     <div className="flex flex-col gap-4 items-center">
       <div className="flex gap-4 flex-wrap justify-center">

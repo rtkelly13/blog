@@ -136,7 +136,8 @@ export const NoLink: Story = {
   },
 };
 
-export const AllVariations: Story = {
+// Render-only showcase: composes its own markup, so it doesn't drive component args.
+export const AllVariations: StoryObj = {
   render: () => (
     <div className="space-y-8 p-8">
       <div className="border-b-2 border-white pb-4">
