@@ -50,3 +50,6 @@ node_modules/
 
 *storybook.log
 storybook-static
+
+# temporary working files
+/temp/
