@@ -59,7 +59,9 @@ const NewsletterForm = ({
               id="email-input"
               name="email"
               placeholder={
-                subscribed ? "subscribed_successfully" : 'enter_email_address...|'
+                subscribed
+                  ? 'subscribed_successfully'
+                  : 'enter_email_address...|'
               }
               ref={inputEl}
               required
@@ -85,9 +87,7 @@ const NewsletterForm = ({
       {(message || error) && (
         <div
           className={`pt-2 text-sm uppercase ${
-            error
-              ? 'text-brutalist-pink'
-              : 'text-brutalist-neonGreen'
+            error ? 'text-brutalist-pink' : 'text-brutalist-neonGreen'
           }`}
         >
           {error ? `[ERROR]: ${message}` : `[SUCCESS]: ${message}`}

@@ -29,7 +29,7 @@
   }
 
   body {
-    font-family: "Share Tech Mono", "Courier New", Courier, monospace;
+    font-family: Inter, system-ui, sans-serif;
     background-color: #000000;
     color: #ffffff;
   }
@@ -40,6 +40,13 @@
   textarea {
     border-radius: 0px;
   }
+}
+
+/* Proposal C: MDX/prose headings use the display face (Space Grotesk).
+   The @tailwindcss/typography plugin does not emit a per-heading
+   font-family, so headings would otherwise inherit the Inter body font. */
+.prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"] *)) {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 .remark-code-title {
@@ -73,29 +80,29 @@ html {
 
 /* Diagram theming with CSS variables */
 :root {
-  --diagram-bg: theme('colors.black');
-  --diagram-bg-secondary: theme('colors.zinc.900');
-  --diagram-stroke: theme('colors.white');
-  --diagram-stroke-light: theme('colors.zinc.500');
-  --diagram-fill-primary: theme('colors.brutalist.cyan');
-  --diagram-fill-secondary: theme('colors.brutalist.pink');
-  --diagram-fill-tertiary: theme('colors.brutalist.yellow');
-  --diagram-fill-quaternary: theme('colors.white');
-  --diagram-text: theme('colors.white');
-  --diagram-text-light: theme('colors.zinc.400');
+  --diagram-bg: #000000;
+  --diagram-bg-secondary: #18181b;
+  --diagram-stroke: #ffffff;
+  --diagram-stroke-light: #71717a;
+  --diagram-fill-primary: #22d3ee;
+  --diagram-fill-secondary: #ec4899;
+  --diagram-fill-tertiary: #facc15;
+  --diagram-fill-quaternary: #ffffff;
+  --diagram-text: #ffffff;
+  --diagram-text-light: #a1a1aa;
 }
 
 .dark {
-  --diagram-bg: theme('colors.black');
-  --diagram-bg-secondary: theme('colors.zinc.900');
-  --diagram-stroke: theme('colors.white');
-  --diagram-stroke-light: theme('colors.zinc.500');
-  --diagram-fill-primary: theme('colors.brutalist.cyan');
-  --diagram-fill-secondary: theme('colors.brutalist.pink');
-  --diagram-fill-tertiary: theme('colors.brutalist.yellow');
-  --diagram-fill-quaternary: theme('colors.white');
-  --diagram-text: theme('colors.white');
-  --diagram-text-light: theme('colors.zinc.400');
+  --diagram-bg: #000000;
+  --diagram-bg-secondary: #18181b;
+  --diagram-stroke: #ffffff;
+  --diagram-stroke-light: #71717a;
+  --diagram-fill-primary: #22d3ee;
+  --diagram-fill-secondary: #ec4899;
+  --diagram-fill-tertiary: #facc15;
+  --diagram-fill-quaternary: #ffffff;
+  --diagram-text: #ffffff;
+  --diagram-text-light: #a1a1aa;
 }
 
 /* SVG diagrams using CSS variables */
@@ -129,7 +136,7 @@ html {
 /* Brutalist Utilities */
 @layer utilities {
   .brutalist-border {
-    border: 2px solid theme('colors.white');
+    border: 2px solid #ffffff;
     border-radius: 0px;
   }
 
@@ -165,21 +172,21 @@ html {
   .ascii-divider::after {
     content: "//========================================//";
     display: block;
-    font-family: "Share Tech Mono", "Courier New", Courier, monospace;
-    color: theme('colors.white');
+    font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+    color: #ffffff;
     text-align: center;
     margin: 1rem 0;
   }
 
   .terminal-prompt::before {
     content: "> ";
-    color: theme('colors.brutalist.cyan');
+    color: #22d3ee;
     font-weight: bold;
   }
 
   .file-extension::after {
     content: ".md";
-    color: theme('colors.brutalist.yellow');
+    color: #facc15;
     font-weight: normal;
   }
 }

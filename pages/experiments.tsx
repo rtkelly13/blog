@@ -1,4 +1,4 @@
-import { Beaker, Palette, Terminal } from 'lucide-react';
+import { Beaker, Palette, Terminal, Type } from 'lucide-react';
 import Link from '@/components/Link';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
@@ -10,7 +10,16 @@ const experiments = [
     description: 'Component variations and design system playground',
     icon: <Palette className="w-12 h-12" />,
     status: 'active',
-    components: 7,
+    components: 9,
+  },
+  {
+    name: 'Typography Proposals',
+    path: '/design-sandbox/typography-proposals',
+    description:
+      'Font pairing + weight-system proposals to fix the design system',
+    icon: <Type className="w-12 h-12" />,
+    status: 'active',
+    components: 3,
   },
 ];
 
@@ -25,7 +34,7 @@ export default function ExperimentsPage() {
         <div className="pt-8 pb-10 px-6 bg-zinc-900">
           <div className="flex items-center gap-4 mb-4">
             <Beaker className="w-10 h-10 text-brutalist-cyan" />
-            <h1 className="text-4xl font-mono font-bold uppercase text-white md:text-6xl">
+            <h1 className="text-4xl font-display font-bold uppercase text-white md:text-6xl">
               [ EXPERIMENTS ]
             </h1>
           </div>
@@ -46,7 +55,7 @@ export default function ExperimentsPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-mono font-bold text-2xl text-white uppercase group-hover:text-brutalist-cyan transition-colors">
+                        <h3 className="font-display font-bold text-2xl text-white uppercase group-hover:text-brutalist-cyan transition-colors">
                           {experiment.name}
                         </h3>
                         <span
@@ -77,7 +86,7 @@ export default function ExperimentsPage() {
           </div>
 
           <div className="mt-12 max-w-4xl mx-auto border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-mono font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
               [ ABOUT_EXPERIMENTS ]
             </h2>
             <div className="space-y-3 text-white font-mono text-sm">

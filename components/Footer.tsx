@@ -14,14 +14,23 @@ export default function Footer() {
           />
           <SocialIcon kind="github" href={siteMetadata.github} size={8} />
           <SocialIcon kind="linkedin" href={siteMetadata.linkedin} size={8} />
-          <SocialIcon kind="twitter" href={siteMetadata.x || siteMetadata.twitter} size={8} />
+          <SocialIcon
+            kind="twitter"
+            href={siteMetadata.x || siteMetadata.twitter}
+            size={8}
+          />
         </div>
         <div className="flex space-x-2 text-sm font-mono text-white">
           <div>{siteMetadata.author}</div>
           <div>{` • `}</div>
           <div>{`© ${new Date().getFullYear()}`}</div>
           <div>{` • `}</div>
-          <Link href="/" className="hover:text-brutalist-cyan transition-colors">{siteMetadata.title}</Link>
+          <Link
+            href="/"
+            className="hover:text-brutalist-cyan transition-colors"
+          >
+            {siteMetadata.title}
+          </Link>
         </div>
       </div>
     </footer>

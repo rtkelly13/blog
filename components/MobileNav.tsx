@@ -33,9 +33,17 @@ const MobileNav = () => {
           className="text-current w-6 h-6 m-auto"
         >
           {navShow ? (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
           ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 6h18M3 18h18" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 12h18M3 6h18M3 18h18"
+            />
           )}
         </svg>
       </button>

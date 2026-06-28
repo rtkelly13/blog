@@ -36,7 +36,7 @@ export default function Typography() {
       />
       <div className="divide-y divide-white">
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-mono uppercase border-2 border-white inline-block px-4 py-2">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
             [ TYPOGRAPHY_SYSTEM ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
@@ -48,46 +48,46 @@ export default function Typography() {
         <div className="container py-12 space-y-16">
           <section className="space-y-4">
             <div className="border-l-4 border-brutalist-cyan pl-4">
-              <h2 className="text-2xl font-mono font-bold text-white uppercase">
+              <h2 className="text-2xl font-display font-bold text-white uppercase">
                 01. HEADINGS
               </h2>
             </div>
 
             <div className="bg-black border-2 border-white p-8 space-y-6">
-              <h1 className="text-3xl md:text-6xl font-mono font-bold uppercase text-white border-2 border-white inline-block px-4 py-2">
+              <h1 className="text-3xl md:text-6xl font-display font-bold uppercase text-white border-2 border-white inline-block px-4 py-2">
                 [ H1_HEADING ]
               </h1>
-              <h2 className="text-2xl md:text-4xl font-mono font-bold uppercase text-white">
+              <h2 className="text-2xl md:text-4xl font-display font-bold uppercase text-white">
                 {'>'} H2_HEADING
               </h2>
-              <h3 className="text-xl md:text-3xl font-mono font-bold uppercase text-white border-b-2 border-white/20 pb-2">
+              <h3 className="text-xl md:text-3xl font-display font-bold uppercase text-white border-b-2 border-white/20 pb-2">
                 {'// H3_HEADING'}
               </h3>
-              <h4 className="text-lg md:text-2xl font-mono font-bold uppercase text-brutalist-cyan">
+              <h4 className="text-lg md:text-2xl font-display font-bold uppercase text-brutalist-cyan">
                 $ H4_HEADING
               </h4>
-              <h5 className="text-base md:text-xl font-mono font-bold uppercase text-brutalist-pink">
+              <h5 className="text-base md:text-xl font-display font-bold uppercase text-brutalist-pink">
                 * H5_HEADING
               </h5>
-              <h6 className="text-sm md:text-lg font-mono font-bold uppercase text-brutalist-yellow">
+              <h6 className="text-sm md:text-lg font-display font-bold uppercase text-brutalist-yellow">
                 # H6_HEADING
               </h6>
             </div>
 
             <CodePreview
-              code={`<h1 className="text-3xl md:text-6xl font-mono font-bold uppercase text-white border-2 border-white inline-block px-4 py-2">
+              code={`<h1 className="text-3xl md:text-6xl font-display font-bold uppercase text-white border-2 border-white inline-block px-4 py-2">
   [ H1_HEADING ]
 </h1>
 
-<h2 className="text-2xl md:text-4xl font-mono font-bold uppercase text-white">
+<h2 className="text-2xl md:text-4xl font-display font-bold uppercase text-white">
   {'>'} H2_HEADING
 </h2>
 
-<h3 className="text-xl md:text-3xl font-mono font-bold uppercase text-white border-b-2 border-white/20 pb-2">
+<h3 className="text-xl md:text-3xl font-display font-bold uppercase text-white border-b-2 border-white/20 pb-2">
   {'// H3_HEADING'}
 </h3>
 
-<h4 className="text-lg md:text-2xl font-mono font-bold uppercase text-brutalist-cyan">
+<h4 className="text-lg md:text-2xl font-display font-bold uppercase text-brutalist-cyan">
   $ H4_HEADING
 </h4>`}
             />
@@ -95,7 +95,7 @@ export default function Typography() {
 
           <section className="space-y-4">
             <div className="border-l-4 border-brutalist-pink pl-4">
-              <h2 className="text-2xl font-mono font-bold text-white uppercase">
+              <h2 className="text-2xl font-display font-bold text-white uppercase">
                 02. BODY_TEXT
               </h2>
             </div>
@@ -134,7 +134,7 @@ export default function Typography() {
 
           <section className="space-y-4">
             <div className="border-l-4 border-brutalist-yellow pl-4">
-              <h2 className="text-2xl font-mono font-bold text-white uppercase">
+              <h2 className="text-2xl font-display font-bold text-white uppercase">
                 03. TERMINAL_PROMPTS
               </h2>
             </div>
@@ -190,7 +190,7 @@ export default function Typography() {
 
           <section className="space-y-4">
             <div className="border-l-4 border-brutalist-cyan pl-4">
-              <h2 className="text-2xl font-mono font-bold text-white uppercase">
+              <h2 className="text-2xl font-display font-bold text-white uppercase">
                 04. CODE_BLOCKS
               </h2>
             </div>
@@ -234,7 +234,7 @@ greet('WORLD');`}
 
           <section className="space-y-4">
             <div className="border-l-4 border-brutalist-pink pl-4">
-              <h2 className="text-2xl font-mono font-bold text-white uppercase">
+              <h2 className="text-2xl font-display font-bold text-white uppercase">
                 05. LINKS
               </h2>
             </div>
@@ -285,7 +285,7 @@ greet('WORLD');`}
 
           <section className="space-y-4">
             <div className="border-l-4 border-brutalist-yellow pl-4">
-              <h2 className="text-2xl font-mono font-bold text-white uppercase">
+              <h2 className="text-2xl font-display font-bold text-white uppercase">
                 06. TAGS_AND_BADGES
               </h2>
             </div>
@@ -322,29 +322,31 @@ greet('WORLD');`}
           </section>
 
           <div className="border-2 border-brutalist-cyan bg-zinc-900 p-6 mt-12">
-            <h3 className="font-mono font-bold text-xl text-brutalist-cyan uppercase mb-4">
+            <h3 className="font-display font-bold text-xl text-brutalist-cyan uppercase mb-4">
               [ TYPOGRAPHY_RULES ]
             </h3>
             <ul className="space-y-2 font-mono text-sm text-zinc-300">
               <li className="flex items-start">
                 <span className="text-brutalist-cyan mr-2">{'>'}</span>
                 <span>
-                  <strong className="text-white">Font:</strong> Always use
-                  monospace (font-mono)
+                  <strong className="text-white">Three roles:</strong> Space
+                  Grotesk for display/headings (font-display), Inter for body
+                  (default sans), IBM Plex Mono for code + UI/metadata
+                  (font-mono)
                 </span>
               </li>
               <li className="flex items-start">
                 <span className="text-brutalist-cyan mr-2">{'>'}</span>
                 <span>
-                  <strong className="text-white">Headings:</strong> Always
-                  uppercase, bold, with terminal prefixes
+                  <strong className="text-white">Headings:</strong>{' '}
+                  font-display, uppercase, bold (700) — real weight, never faux
                 </span>
               </li>
               <li className="flex items-start">
                 <span className="text-brutalist-cyan mr-2">{'>'}</span>
                 <span>
-                  <strong className="text-white">Code:</strong> Neon green
-                  (#39ff14) on black background
+                  <strong className="text-white">Code:</strong> IBM Plex Mono,
+                  neon green (#39ff14) on black background
                 </span>
               </li>
               <li className="flex items-start">

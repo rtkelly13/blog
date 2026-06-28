@@ -149,9 +149,7 @@ export default function PostLayout({
                       )}
                       <dl className="text-sm font-mono font-bold leading-5 whitespace-nowrap px-2">
                         <dt className="sr-only">Name</dt>
-                        <dd className="text-white uppercase">
-                          {author.name}
-                        </dd>
+                        <dd className="text-white uppercase">{author.name}</dd>
                         <dt className="sr-only">Twitter</dt>
                         <dd>
                           {author.twitter && (
@@ -188,11 +186,20 @@ export default function PostLayout({
             )}
 
             <div className="pt-6 pb-6 font-mono text-sm text-zinc-400">
-              <Link href={discussUrl(slug)} rel="nofollow" className="hover:text-white transition-colors">
+              <Link
+                href={discussUrl(slug)}
+                rel="nofollow"
+                className="hover:text-white transition-colors"
+              >
                 {'Discuss on Twitter'}
               </Link>
               {` • `}
-              <Link href={editUrl(fileName)} className="hover:text-white transition-colors">{'View on GitHub'}</Link>
+              <Link
+                href={editUrl(fileName)}
+                className="hover:text-white transition-colors"
+              >
+                {'View on GitHub'}
+              </Link>
             </div>
 
             {siteMetadata.newsletter?.enabled && (
@@ -225,7 +232,9 @@ export default function PostLayout({
                         &lt; Previous Article
                       </h2>
                       <div className="text-brutalist-cyan hover:text-brutalist-pink font-bold transition-colors">
-                        <Link href={`/blog/${prev.slug}`}>[ {prev.title} ]</Link>
+                        <Link href={`/blog/${prev.slug}`}>
+                          [ {prev.title} ]
+                        </Link>
                       </div>
                     </div>
                   ) : (
@@ -237,7 +246,9 @@ export default function PostLayout({
                         Next Article &gt;
                       </h2>
                       <div className="text-brutalist-cyan hover:text-brutalist-pink font-bold transition-colors">
-                        <Link href={`/blog/${next.slug}`}>[ {next.title} ]</Link>
+                        <Link href={`/blog/${next.slug}`}>
+                          [ {next.title} ]
+                        </Link>
                       </div>
                     </div>
                   )}

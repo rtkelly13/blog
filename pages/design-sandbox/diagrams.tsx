@@ -260,7 +260,7 @@ export default function DiagramsPage() {
               <ChevronLeft className="h-4 w-4" />
               Back to Sandbox
             </Link>
-            <h1 className="mt-4 font-mono text-4xl font-bold uppercase text-white">
+            <h1 className="mt-4 font-display text-4xl font-bold uppercase text-white">
               [DIAGRAMS]
             </h1>
             <p className="mt-2 font-mono text-zinc-400">
@@ -271,7 +271,7 @@ export default function DiagramsPage() {
 
         <div className="mx-auto max-w-7xl px-4 py-12">
           <div className="mb-8">
-            <h2 className="mb-4 font-mono text-xl font-bold uppercase text-brutalist-cyan">
+            <h2 className="mb-4 font-display text-xl font-bold uppercase text-brutalist-cyan">
               &gt; SELECT VARIANT
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -304,7 +304,7 @@ export default function DiagramsPage() {
           <div className="border-2 border-white bg-black p-8">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <h2 className="font-mono text-2xl font-bold uppercase text-white">
+                <h2 className="font-display text-2xl font-bold uppercase text-white">
                   {variants[activeVariant].name}
                 </h2>
                 <p className="mt-1 font-mono text-sm text-zinc-400">
@@ -329,7 +329,7 @@ export default function DiagramsPage() {
             </div>
 
             <div className="mt-8">
-              <h3 className="mb-3 font-mono text-sm font-bold uppercase text-brutalist-yellow">
+              <h3 className="mb-3 font-display text-sm font-bold uppercase text-brutalist-yellow">
                 $ CODE
               </h3>
               <pre className="overflow-x-auto border-2 border-zinc-800 bg-black p-4 font-mono text-xs text-brutalist-green">

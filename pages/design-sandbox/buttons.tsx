@@ -149,7 +149,7 @@ export default function Buttons() {
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-mono uppercase border-2 border-white inline-block px-4 py-2">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
             [ BUTTON_VARIATIONS ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
@@ -165,7 +165,7 @@ export default function Buttons() {
                 className="bg-zinc-900 border-2 border-white p-6"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-mono font-bold text-lg text-white uppercase">
+                  <h3 className="font-display font-bold text-lg text-white uppercase">
                     {String(index + 1).padStart(2, '0')}. {variant.name}
                   </h3>
                   <button
@@ -190,7 +190,7 @@ export default function Buttons() {
           </div>
 
           <div className="mt-12 border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-mono font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
               [ USAGE_NOTES ]
             </h2>
             <ul className="text-white font-mono text-sm space-y-2">

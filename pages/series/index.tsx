@@ -24,7 +24,7 @@ export default function Series({
       />
       <div className="divide-y divide-white border-2 border-white bg-black">
         <div className="pt-6 pb-8 space-y-4 md:space-y-6 bg-zinc-900 px-6">
-          <h1 className="text-3xl font-mono font-bold leading-9 tracking-tight text-white uppercase sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 border-4 border-double border-brutalist-cyan inline-block px-8 py-4">
+          <h1 className="text-3xl font-display font-bold leading-9 tracking-tight text-white uppercase sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 border-4 border-double border-brutalist-cyan inline-block px-8 py-4">
             &gt; SERIES
           </h1>
           <p className="font-mono text-lg leading-7 text-gray-200 border-l-4 border-brutalist-pink pl-4">
@@ -64,7 +64,7 @@ export default function Series({
                         {series.postCount === 1 ? 'part' : 'parts'}
                       </span>
                     </div>
-                    <h2 className="text-2xl font-mono font-bold leading-8 tracking-tight uppercase border-l-4 border-brutalist-cyan pl-4">
+                    <h2 className="text-2xl font-display font-bold leading-8 tracking-tight uppercase border-l-4 border-brutalist-cyan pl-4">
                       <Link
                         href={`/series/${series.slug}`}
                         className="text-white hover:text-brutalist-cyan transition-colors"
@@ -83,7 +83,7 @@ export default function Series({
                   </div>
                   {series.posts.length > 0 && (
                     <div className="pl-4">
-                      <h3 className="font-mono text-xs uppercase text-brutalist-yellow tracking-wider mb-2">
+                      <h3 className="font-display text-xs uppercase text-brutalist-yellow tracking-wider mb-2">
                         Posts in Series:
                       </h3>
                       <ol className="space-y-1">

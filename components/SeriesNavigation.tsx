@@ -25,7 +25,7 @@ export default function SeriesNavigation({
           </span>
           <div className="flex-1 h-px bg-brutalist-cyan" />
         </div>
-        <h3 className="font-mono font-bold text-xl text-white uppercase">
+        <h3 className="font-display font-bold text-xl text-white uppercase">
           <Link
             href={`/series/${series.slug}`}
             className="text-brutalist-cyan hover:text-brutalist-pink transition-colors"
@@ -39,7 +39,7 @@ export default function SeriesNavigation({
       </div>
 
       <div className="space-y-2">
-        <h4 className="font-mono text-xs uppercase text-brutalist-yellow tracking-wider">
+        <h4 className="font-display text-xs uppercase text-brutalist-yellow tracking-wider">
           All Parts ({allInSeries.length})
         </h4>
         <ol className="space-y-2">
