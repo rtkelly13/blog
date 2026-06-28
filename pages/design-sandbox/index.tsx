@@ -40,6 +40,12 @@ const components = [
     icon: '📝',
   },
   {
+    name: 'Typography Proposals',
+    path: '/design-sandbox/typography-proposals',
+    description: 'Font pairing + weight proposals to evaluate',
+    icon: '🔤',
+  },
+  {
     name: 'Logos',
     path: '/design-sandbox/logos',
     description: 'ASCII art logo variations',

@@ -1,4 +1,4 @@
-import { Beaker, Palette, Terminal } from 'lucide-react';
+import { Beaker, Palette, Terminal, Type } from 'lucide-react';
 import Link from '@/components/Link';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
@@ -10,7 +10,16 @@ const experiments = [
     description: 'Component variations and design system playground',
     icon: <Palette className="w-12 h-12" />,
     status: 'active',
-    components: 7,
+    components: 9,
+  },
+  {
+    name: 'Typography Proposals',
+    path: '/design-sandbox/typography-proposals',
+    description:
+      'Font pairing + weight-system proposals to fix the design system',
+    icon: <Type className="w-12 h-12" />,
+    status: 'active',
+    components: 3,
   },
 ];
 
