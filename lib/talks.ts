@@ -92,9 +92,11 @@ async function compileSlide(source: string): Promise<string> {
   return code;
 }
 
+export type TalkSlide = { code: string; notes: string | null };
+
 export async function getTalkBySlug(
   slug: string,
-): Promise<{ frontMatter: TalkFrontMatter; slides: string[] } | null> {
+): Promise<{ frontMatter: TalkFrontMatter; slides: TalkSlide[] } | null> {
   const filePath = resolveTalkFile(slug);
   if (!filePath) return null;
 
@@ -102,13 +104,21 @@ export async function getTalkBySlug(
   const frontmatter = data as TalkFrontMatter;
 
   // Split the (frontmatter-stripped) body into individual slides on a line
-  // containing only `---`, then compile each chunk independently.
+  // containing only `---`. Within a slide, an optional `???` line separates the
+  // slide body from speaker notes (shown in Spectacle's presenter mode).
   const chunks = content
     .split(/^---$/m)
     .map((chunk) => chunk.trim())
     .filter(Boolean);
 
-  const slides = await Promise.all(chunks.map(compileSlide));
+  const slides: TalkSlide[] = await Promise.all(
+    chunks.map(async (chunk) => {
+      const [body, ...noteParts] = chunk.split(/^\?\?\?$/m);
+      const notes = noteParts.join('\n').trim();
+      const code = await compileSlide(body.trim());
+      return { code, notes: notes || null };
+    }),
+  );
 
   return {
     frontMatter: {

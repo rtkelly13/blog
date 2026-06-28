@@ -103,7 +103,7 @@ export default function TalkLanding({
             <Play className="h-4 w-4" /> Present
           </Link>
           <Link
-            href={`/talks/${slug}/present?pdf=1`}
+            href={`/talks/${slug}/present?exportMode=true`}
             target="_blank"
             rel="noopener noreferrer"
             className="border-2 border-white bg-white px-6 py-3 font-mono font-bold uppercase text-black shadow-hard-md transition-all hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none"

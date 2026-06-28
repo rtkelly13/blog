@@ -6,22 +6,21 @@ import { MDXComponents } from '@/components/MDXComponents';
 // component (which would try to require `../layouts/<layout>` and crash).
 const { wrapper: _wrapper, ...slideComponents } = MDXComponents;
 
-interface SlideProps {
+interface SlideBodyProps {
   /** Compiled MDX code string for a single slide. */
   code: string;
 }
 
 /**
- * Renders one compiled slide. Each slide is its own component instance so that
- * `getMDXComponent` is called exactly once per render (Rules of Hooks). Slides
- * share the same component map as blog posts, so <Diagram>, <NoteBlock> etc.
- * work inside a deck.
+ * Renders one compiled slide's MDX body with the shared component map, so
+ * <Diagram>, <NoteBlock>, code highlighting etc. work inside a Spectacle slide.
+ * Each instance calls `getMDXComponent` exactly once (Rules of Hooks).
  */
-export default function Slide({ code }: SlideProps) {
+export default function SlideBody({ code }: SlideBodyProps) {
   const MDXContent = useMemo(() => getMDXComponent(code), [code]);
 
   return (
-    <div className="slide-content prose prose-invert max-w-none font-mono">
+    <div className="prose prose-invert prose-lg max-w-none font-mono">
       <MDXContent components={slideComponents} />
     </div>
   );
