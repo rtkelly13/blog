@@ -1,0 +1,55 @@
+name: Setup blog
+description: >-
+  Shared prelude for blog CI jobs — checks out the mermaid-toolkit sibling repo,
+  installs pnpm + Node, builds the toolkit, and installs blog dependencies.
+  Repo-local composite action (no third-party/Sentric actions). The caller must
+  check out the blog itself first (default into `blog/`) so this action file is
+  available, then `uses: ./blog/.github/actions/setup-blog`.
+
+inputs:
+  blog-path:
+    description: Path the blog repo was checked out to.
+    required: false
+    default: blog
+  install-playwright:
+    description: >-
+      When "true", install the Chromium browser Playwright needs (used by the
+      vitest/Storybook browser-mode unit tests and the e2e/visual specs).
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout mermaid-toolkit
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      with:
+        repository: rtkelly13/mermaid-toolkit
+        path: mermaid-toolkit
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      with:
+        version: 10
+
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version-file: ${{ inputs.blog-path }}/.nvmrc
+        cache: pnpm
+        cache-dependency-path: ${{ inputs.blog-path }}/pnpm-lock.yaml
+
+    - name: Build mermaid-toolkit
+      working-directory: mermaid-toolkit
+      shell: bash
+      run: pnpm install && pnpm build
+
+    - name: Install dependencies
+      working-directory: ${{ inputs.blog-path }}
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Install Playwright Chromium
+      if: inputs.install-playwright == 'true'
+      working-directory: ${{ inputs.blog-path }}
+      shell: bash
+      run: pnpm exec playwright install --with-deps chromium

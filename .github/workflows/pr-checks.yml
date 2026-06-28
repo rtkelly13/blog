@@ -1,0 +1,289 @@
+name: PR checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# ---------------------------------------------------------------------------
+# Consolidated PR gate.
+#
+# Every quality check runs as its own parallel job. Each runs its command in a
+# step marked `continue-on-error` and exports the step outcome as a job output,
+# so one failing check never short-circuits the others. The `conclusion` job
+# aggregates all outcomes into ONE report (job summary + a single sticky PR
+# comment) and is the single required status check ("PR checks") that blocks
+# merge — it fails only when a *blocking* check failed.
+#
+#   Blocking : lint, typecheck, unit (+coverage), build
+#   Advisory : e2e-visual (visual regression — diffs are often intentional)
+#
+# No Sentric composite actions, no `gh aw` agentic layer — the report is built
+# deterministically from the job outcomes.
+#
+# REQUIRED CHECK (branch protection): "PR checks" (the conclusion job).
+# ---------------------------------------------------------------------------
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (biome)
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.lint.outcome }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+      - id: lint
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm lint
+
+  typecheck:
+    name: Type check (tsc)
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.typecheck.outcome }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+      - id: typecheck
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm typecheck
+
+  unit:
+    name: Unit tests + coverage
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.unit.outcome }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+        with:
+          install-playwright: "true"
+      - id: unit
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm test:coverage
+      - name: Upload PR coverage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage-pr
+          path: blog/coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.build.outcome }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+      - id: build
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm build
+      - name: Upload build output
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: build-output
+          path: |
+            blog/.next/
+            blog/public/
+          retention-days: 1
+          include-hidden-files: true
+
+  e2e-visual:
+    name: E2E + visual regression
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      outcome: ${{ steps.e2e.outcome }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+        with:
+          install-playwright: "true"
+      - name: Download build output
+        if: needs.build.outputs.outcome == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: build-output
+          path: blog/
+      - id: e2e
+        # Only run if the build produced an artifact to serve.
+        if: needs.build.outputs.outcome == 'success'
+        continue-on-error: true
+        working-directory: blog
+        # Playwright's webServer config runs `pnpm run serve` (next start)
+        # against the downloaded build; this includes visual.spec.ts /
+        # visual-responsive.spec.ts regression specs.
+        run: pnpm exec playwright test
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: blog/playwright-report/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  conclusion:
+    name: PR checks
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, unit, build, e2e-visual]
+    if: always()
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: blog/.nvmrc
+
+      - name: Download PR coverage
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: coverage-pr
+          path: coverage-pr/
+
+      - name: Find latest main coverage baseline
+        id: baseline
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              branch: 'main',
+              status: 'success',
+              per_page: 1,
+            });
+            if (runs.data.workflow_runs.length) {
+              core.setOutput('found', 'true');
+              core.setOutput('run_id', String(runs.data.workflow_runs[0].id));
+            } else {
+              core.setOutput('found', 'false');
+            }
+
+      - name: Download main coverage baseline
+        if: steps.baseline.outputs.found == 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: coverage-main
+          path: coverage-main/
+          run-id: ${{ steps.baseline.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build consolidated report
+        env:
+          LINT: ${{ needs.lint.outputs.outcome }}
+          TYPECHECK: ${{ needs.typecheck.outputs.outcome }}
+          UNIT: ${{ needs.unit.outputs.outcome }}
+          BUILD: ${{ needs.build.outputs.outcome }}
+          E2E: ${{ needs.e2e-visual.outputs.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          icon() {
+            case "$1" in
+              success) echo "✅ Passed" ;;
+              failure) echo "❌ Failed" ;;
+              skipped) echo "⏭️ Skipped" ;;
+              *)       echo "⏭️ Skipped" ;;
+            esac
+          }
+
+          coverage_md=$(
+            node blog/scripts/ci/coverage-delta.mjs \
+              coverage-pr/coverage-summary.json \
+              coverage-main/coverage-summary.json 2>/dev/null \
+            || echo "> ⚠️ Coverage delta unavailable."
+          )
+
+          {
+            echo "<!-- pr-checks-summary -->"
+            echo "## PR checks"
+            echo ""
+            echo "| Check | Result | Gate |"
+            echo "| ----- | ------ | ---- |"
+            echo "| Lint (biome) | $(icon "$LINT") | blocking |"
+            echo "| Type check (tsc) | $(icon "$TYPECHECK") | blocking |"
+            echo "| Unit tests + coverage | $(icon "$UNIT") | blocking |"
+            echo "| Build | $(icon "$BUILD") | blocking |"
+            echo "| E2E + visual regression | $(icon "$E2E") | advisory |"
+            echo ""
+            echo "### Coverage (vs \`main\`)"
+            echo ""
+            echo "$coverage_md"
+          } > pr-summary.md
+
+          cat pr-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post sticky PR comment
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('pr-summary.md', 'utf8');
+            const marker = '<!-- pr-checks-summary -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Gate on blocking checks
+        env:
+          LINT: ${{ needs.lint.outputs.outcome }}
+          TYPECHECK: ${{ needs.typecheck.outputs.outcome }}
+          UNIT: ${{ needs.unit.outputs.outcome }}
+          BUILD: ${{ needs.build.outputs.outcome }}
+        shell: bash
+        run: |
+          failed=false
+          for check in LINT TYPECHECK UNIT BUILD; do
+            if [ "${!check}" = "failure" ]; then
+              echo "::error::${check} failed — blocking merge"
+              failed=true
+            fi
+          done
+          if [ "$failed" = "true" ]; then
+            exit 1
+          fi
+          echo "All blocking checks passed."

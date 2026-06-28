@@ -1,118 +1,55 @@
-name: Playwright Tests
+name: Update visual snapshots
+
+# Manual-only. Visual regression now runs inside the consolidated PR gate
+# (pr-checks.yml → e2e-visual) against a locally built site, so this workflow's
+# sole job is to (re)generate the committed Linux snapshots on demand. Snapshots
+# must be produced on the CI runner so they match what pr-checks compares against.
 on:
-  # Triggered by Vercel deployment completion
-  deployment_status:
-  # Manual trigger for updating snapshots
   workflow_dispatch:
     inputs:
       update_snapshots:
         description: "Update visual regression snapshots"
         required: false
-        default: false
+        default: true
         type: boolean
 
+permissions:
+  contents: read
+
 jobs:
-  test:
+  update-snapshots:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    # Only run when Vercel deployment succeeds, or on manual workflow_dispatch
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: blog
-
-      - name: Checkout mermaid-toolkit
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: ./blog/.github/actions/setup-blog
         with:
-          repository: rtkelly13/mermaid-toolkit
-          path: mermaid-toolkit
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: lts/*
-          cache: "pnpm"
-          cache-dependency-path: "blog/pnpm-lock.yaml"
-
-      - name: Build mermaid-toolkit
-        working-directory: mermaid-toolkit
-        run: pnpm install && pnpm build
-
-      - name: Install dependencies
-        working-directory: blog
-        run: pnpm install --frozen-lockfile
-
-      - name: Configure Draft Visibility
-        working-directory: blog
-        run: |
-          REF_NAME="${{ github.event.deployment.ref || github.ref_name }}"
-          echo "Checking ref: $REF_NAME"
-          if [[ "$REF_NAME" == drafts/* ]]; then
-            echo "Draft branch detected. Enabling drafts."
-            echo "SHOW_DRAFTS=true" >> $GITHUB_ENV
-          else
-            echo "Not a draft branch."
-          fi
+          install-playwright: "true"
 
       - name: Build the site
         working-directory: blog
-        run: pnpm run build
-
-      - name: Install Playwright Browsers
-        working-directory: blog
-        run: pnpm exec playwright install --with-deps
-
-      - name: Check if snapshots exist
-        id: snapshots
-        working-directory: blog
-        run: |
-          if [ -d "tests/__snapshots__" ] && [ "$(ls -A tests/__snapshots__ 2>/dev/null)" ]; then
-            echo "exist=true" >> $GITHUB_OUTPUT
-          else
-            echo "exist=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Run Playwright tests
-        if: ${{ !inputs.update_snapshots && steps.snapshots.outputs.exist == 'true' }}
-        working-directory: blog
-        run: pnpm exec playwright test
-
-      - name: Run Playwright tests (no snapshots yet - update mode)
-        if: ${{ !inputs.update_snapshots && steps.snapshots.outputs.exist == 'false' }}
-        working-directory: blog
-        run: pnpm exec playwright test --update-snapshots
+        run: pnpm build
 
       - name: Update snapshots
-        if: ${{ inputs.update_snapshots }}
         working-directory: blog
         run: pnpm exec playwright test --update-snapshots
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: blog/playwright-report/
           retention-days: 30
+          if-no-files-found: ignore
 
       - name: Upload snapshots
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: ${{ (inputs.update_snapshots || steps.snapshots.outputs.exist == 'false') && !cancelled() }}
+        if: ${{ !cancelled() }}
         with:
           name: playwright-snapshots
           path: blog/tests/__snapshots__/
           retention-days: 30
-
-      - name: Upload snapshots
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: ${{ (inputs.update_snapshots || steps.snapshots.outputs.exist == 'false') && !cancelled() }}
-        with:
-          name: playwright-snapshots
-          path: tests/__snapshots__/
-          retention-days: 30
+          if-no-files-found: ignore
