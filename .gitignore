@@ -53,3 +53,6 @@ storybook-static
 
 # temporary working files
 /temp/
+
+# git worktrees (scratch state for parallel branches)
+.worktrees/

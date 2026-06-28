@@ -17,7 +17,7 @@ jobs:
     name: Build, test & publish coverage baseline
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: blog
       - uses: ./blog/.github/actions/setup-blog
@@ -48,7 +48,7 @@ jobs:
       # Actions maximum (400) to approximate indefinite retention — every main
       # push overwrites it, so it never expires in practice.
       - name: Upload coverage baseline (main only)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage-main
           path: blog/coverage/
