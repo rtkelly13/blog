@@ -7,26 +7,35 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Least-privilege default token; jobs only read the repo.
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-lint-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: blog
 
       - name: Checkout mermaid-toolkit
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: rtkelly13/mermaid-toolkit
           path: mermaid-toolkit
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
           version: 10
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: lts/*
           cache: "pnpm"
@@ -44,6 +53,10 @@ jobs:
         working-directory: blog
         run: pnpm run lint
 
+      - name: Typecheck
+        working-directory: blog
+        run: pnpm run typecheck
+
       - name: Build
         working-directory: blog
         run: pnpm run build
@@ -51,3 +64,45 @@ jobs:
       - name: SEO Audit
         working-directory: blog
         run: pnpm run check:seo
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+
+      - name: Checkout mermaid-toolkit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: rtkelly13/mermaid-toolkit
+          path: mermaid-toolkit
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: lts/*
+          cache: "pnpm"
+          cache-dependency-path: "blog/pnpm-lock.yaml"
+
+      - name: Build mermaid-toolkit
+        working-directory: mermaid-toolkit
+        run: pnpm install && pnpm build
+
+      - name: Install dependencies
+        working-directory: blog
+        run: pnpm install --frozen-lockfile
+
+      # Vitest runs Storybook tests in a real headless Chromium via Playwright,
+      # so the browser must be installed before the unit suite can run.
+      - name: Install Playwright Chromium
+        working-directory: blog
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Unit tests
+        working-directory: blog
+        run: pnpm run test:unit
