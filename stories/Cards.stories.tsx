@@ -137,6 +137,11 @@ export const NoLink: Story = {
 };
 
 export const AllVariations: Story = {
+  // `render` controls the output; args satisfy the required-prop type contract.
+  args: {
+    title: 'Card',
+    description: 'Brutalist card component showcase.',
+  },
   render: () => (
     <div className="space-y-8 p-8">
       <div className="border-b-2 border-white pb-4">

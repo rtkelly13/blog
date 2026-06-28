@@ -95,6 +95,8 @@ export const Disabled: Story = {
 };
 
 export const AllVariants: Story = {
+  // `render` controls the output; args satisfy the required-prop type contract.
+  args: { children: 'BUTTON' },
   render: () => (
     <div className="flex flex-col gap-4 items-center">
       <div className="flex gap-4 flex-wrap justify-center">
