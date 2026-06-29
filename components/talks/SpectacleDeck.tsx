@@ -19,7 +19,7 @@ interface SpectacleDeckProps {
   slides: DeckSlide[];
 }
 
-const MONO = '"Courier New", Courier, monospace';
+const MONO = '"IBM Plex Mono", "Courier New", Courier, monospace';
 
 // Brutalist deck chrome: fullscreen toggle, progress dots, slide counter.
 const template = ({

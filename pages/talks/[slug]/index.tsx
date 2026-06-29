@@ -55,7 +55,7 @@ export default function TalkLanding({
           <p className="mb-3 font-mono text-xs uppercase text-brutalist-cyan">
             {event}
           </p>
-          <h1 className="font-mono text-3xl font-bold uppercase leading-9 tracking-tight text-white md:text-5xl">
+          <h1 className="font-display text-3xl font-bold uppercase leading-9 tracking-tight text-white md:text-5xl">
             [ {title} ]
           </h1>
 

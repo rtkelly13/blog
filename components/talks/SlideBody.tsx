@@ -20,7 +20,7 @@ export default function SlideBody({ code }: SlideBodyProps) {
   const MDXContent = useMemo(() => getMDXComponent(code), [code]);
 
   return (
-    <div className="prose prose-invert prose-lg max-w-none font-mono">
+    <div className="prose prose-invert prose-lg max-w-none">
       <MDXContent components={slideComponents} />
     </div>
   );

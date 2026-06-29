@@ -26,7 +26,7 @@ export default function TalksPage({
         <div className="bg-zinc-900 px-6 pt-8 pb-10">
           <div className="mb-4 flex items-center gap-4">
             <Presentation className="h-10 w-10 text-brutalist-cyan" />
-            <h1 className="font-mono text-4xl font-bold uppercase text-white md:text-6xl">
+            <h1 className="font-display text-4xl font-bold uppercase text-white md:text-6xl">
               [ TALKS ]
             </h1>
           </div>

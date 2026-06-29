@@ -25,7 +25,7 @@ export default function TalkCard({ talk }: TalkCardProps) {
       </div>
 
       <div className="p-6">
-        <h2 className="mb-2 font-mono text-2xl font-bold uppercase leading-8 tracking-tight text-white">
+        <h2 className="mb-2 font-display text-2xl font-bold uppercase leading-8 tracking-tight text-white">
           <Link href={href} className="hover:text-brutalist-pink">
             [ {title} ]
           </Link>

@@ -1,6 +1,9 @@
 import type { DeckProps } from 'spectacle';
 
-const MONO = '"Courier New", Courier, monospace';
+// Proposal C — Editorial Three-Role typography
+const DISPLAY = '"Space Grotesk", ui-sans-serif, system-ui, sans-serif';
+const BODY = 'Inter, system-ui, sans-serif';
+const MONO = '"IBM Plex Mono", "Courier New", Courier, monospace';
 
 /**
  * Brutalist Spectacle theme. Most slide styling comes from the MDX content's
@@ -17,8 +20,8 @@ export const brutalistTheme: DeckProps['theme'] = {
     quinary: '#facc15',
   },
   fonts: {
-    header: MONO,
-    text: MONO,
+    header: DISPLAY,
+    text: BODY,
     monospace: MONO,
   },
   backdropStyle: {
