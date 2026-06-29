@@ -148,7 +148,7 @@ PR → .github/workflows/pr-checks.yml
       ├── typecheck   (tsc --noEmit)     blocking  │
       ├── unit        (vitest +coverage) blocking  ├─► conclusion = "PR checks"
       ├── build       (next build)       blocking  │     • job summary + sticky comment
-      └── e2e-visual  (playwright)       advisory ─┘     • coverage delta vs main
+      └── e2e-visual  (playwright)       blocking ─┘     • coverage delta vs main
                                                           • fails on blocking failures
 
 push main → .github/workflows/ci.yml   # full suite + uploads `coverage-main` baseline
@@ -158,8 +158,9 @@ workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapsh
 - Each feeder job runs its command with `continue-on-error` and exports its
   outcome; the `conclusion` job aggregates them and is the only merge-blocking check.
 - Visual regression (`visual.spec.ts` / `visual-responsive.spec.ts`) runs inside
-  `e2e-visual` against a locally built site (no Vercel dependency). Advisory by
-  default since visual diffs are often intentional.
+  `e2e-visual` against a locally built site (no Vercel dependency). **Blocking** —
+  intentional visual changes must ship regenerated snapshots (via `playwright.yml`)
+  in the same PR.
 - Coverage delta is computed deterministically by `scripts/ci/coverage-delta.mjs`
   against the `coverage-main` artifact published by `ci.yml` on each main push.
 - Shared setup (mermaid-toolkit checkout + build, pnpm/node install) lives in the
