@@ -239,7 +239,7 @@ jobs:
             echo "| Type check (tsc) | $(icon "$TYPECHECK") | blocking |"
             echo "| Unit tests + coverage | $(icon "$UNIT") | blocking |"
             echo "| Build | $(icon "$BUILD") | blocking |"
-            echo "| E2E + visual regression | $(icon "$E2E") | advisory |"
+            echo "| E2E + visual regression | $(icon "$E2E") | blocking |"
             echo ""
             echo "### Coverage (vs \`main\`)"
             echo ""
@@ -274,10 +274,14 @@ jobs:
           TYPECHECK: ${{ needs.typecheck.outputs.outcome }}
           UNIT: ${{ needs.unit.outputs.outcome }}
           BUILD: ${{ needs.build.outputs.outcome }}
+          E2E: ${{ needs.e2e-visual.outputs.outcome }}
         shell: bash
         run: |
           failed=false
-          for check in LINT TYPECHECK UNIT BUILD; do
+          # E2E (incl. visual regression) is blocking. When build fails it is
+          # skipped (empty outcome), which is not treated as a failure here since
+          # the build failure already blocks.
+          for check in LINT TYPECHECK UNIT BUILD E2E; do
             if [ "${!check}" = "failure" ]; then
               echo "::error::${check} failed — blocking merge"
               failed=true
