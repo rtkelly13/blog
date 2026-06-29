@@ -32,6 +32,10 @@
     font-family: Inter, system-ui, sans-serif;
     background-color: #000000;
     color: #ffffff;
+    /* Off-canvas panels (mobile nav, TOC drawer) sit off-screen via
+       translate-x-full; clip horizontal overflow so they don't create a
+       horizontal scrollbar. overflow-y stays visible so sticky/scroll work. */
+    overflow-x: hidden;
   }
 
   button,
@@ -76,6 +80,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Clip horizontal overflow at the root so off-canvas fixed panels
+     (mobile nav / TOC drawer) don't create a horizontal scrollbar. */
+  overflow-x: hidden;
 }
 
 /* Diagram theming with CSS variables */

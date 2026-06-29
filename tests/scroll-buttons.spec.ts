@@ -8,7 +8,6 @@ test.describe('Scroll Buttons Animation', () => {
     await page.setViewportSize({ width: 390, height: 844 });
 
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
 
     const menuButton = page.locator('button[aria-label="Open actions menu"]');
     await expect(menuButton).toBeVisible();
@@ -17,27 +16,16 @@ test.describe('Scroll Buttons Animation', () => {
       'button[aria-label="Toggle table of contents"]',
     );
     const buttonContainer = tocButton.locator('..');
-    const initialOpacity = await buttonContainer.evaluate(
-      (el) => window.getComputedStyle(el).opacity,
-    );
-    expect(parseFloat(initialOpacity)).toBeLessThan(1);
+    // Closed: action container is faded out. Use auto-retrying toHaveCSS so we
+    // assert the settled value rather than racing the 300ms transition.
+    await expect(buttonContainer).toHaveCSS('opacity', '0');
 
     await menuButton.click();
-    await page.waitForTimeout(300);
-
-    const openOpacity = await buttonContainer.evaluate(
-      (el) => window.getComputedStyle(el).opacity,
-    );
-    expect(parseFloat(openOpacity)).toBe(1);
+    await expect(buttonContainer).toHaveCSS('opacity', '1');
 
     const closeButton = page.locator('button[aria-label="Close actions menu"]');
     await closeButton.click();
-    await page.waitForTimeout(300);
-
-    const closedOpacity = await buttonContainer.evaluate(
-      (el) => window.getComputedStyle(el).opacity,
-    );
-    expect(parseFloat(closedOpacity)).toBeLessThan(1);
+    await expect(buttonContainer).toHaveCSS('opacity', '0');
   });
 
   test('buttons have vertical slide animation classes', async ({ page }) => {

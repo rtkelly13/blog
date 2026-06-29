@@ -7,10 +7,12 @@ const MobileNav = () => {
 
   const onToggleNav = () => {
     setNavShow((status) => {
+      // Toggle only the vertical axis so the base `overflow-x: hidden`
+      // (which clips off-canvas panels) is preserved.
       if (status) {
-        document.body.style.overflow = 'auto';
+        document.body.style.overflowY = 'auto';
       } else {
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflowY = 'hidden';
       }
       return !status;
     });
