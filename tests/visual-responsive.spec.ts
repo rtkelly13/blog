@@ -7,6 +7,16 @@ async function waitForPageReady(page: import('@playwright/test').Page) {
   await page.waitForTimeout(1000);
 }
 
+// The TOC toggle lives inside the floating actions menu, which is collapsed
+// (opacity-0, pointer-events-none) until the menu button is opened. Open it
+// first, then toggle the TOC drawer and wait for the slide-in transition.
+async function openTocDrawer(page: import('@playwright/test').Page) {
+  await page.locator('button[aria-label="Open actions menu"]').click();
+  await page.waitForTimeout(300);
+  await page.locator('button[aria-label="Toggle table of contents"]').click();
+  await page.waitForTimeout(500);
+}
+
 test.describe('Visual Regression - Mobile (iPhone 12)', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -38,9 +48,7 @@ test.describe('Visual Regression - Mobile (iPhone 12)', () => {
     await page.goto('/blog/aws-batch/cookbook');
     await waitForPageReady(page);
 
-    const tocButton = page.locator('button[aria-label*="table of contents"]');
-    await tocButton.click();
-    await page.waitForTimeout(500);
+    await openTocDrawer(page);
 
     await expect(page).toHaveScreenshot('mobile-blog-post-toc-open.png', {
       fullPage: false,
@@ -103,9 +111,7 @@ test.describe('Visual Regression - Tablet (iPad)', () => {
     await page.goto('/blog/aws-batch/cookbook');
     await waitForPageReady(page);
 
-    const tocButton = page.locator('button[aria-label*="table of contents"]');
-    await tocButton.click();
-    await page.waitForTimeout(500);
+    await openTocDrawer(page);
 
     await expect(page).toHaveScreenshot('tablet-blog-post-toc-open.png', {
       fullPage: false,

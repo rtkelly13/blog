@@ -23,21 +23,25 @@ test.describe('Scroll Buttons Animation', () => {
     expect(parseFloat(initialOpacity)).toBeLessThan(1);
 
     await menuButton.click();
-    await page.waitForTimeout(300);
-
-    const openOpacity = await buttonContainer.evaluate(
-      (el) => window.getComputedStyle(el).opacity,
-    );
-    expect(parseFloat(openOpacity)).toBe(1);
+    // Poll until the open transition (duration-300) settles rather than reading
+    // opacity at a fixed timeout, which races with the animation.
+    await expect
+      .poll(() =>
+        buttonContainer.evaluate((el) =>
+          parseFloat(window.getComputedStyle(el).opacity),
+        ),
+      )
+      .toBeGreaterThan(0.99);
 
     const closeButton = page.locator('button[aria-label="Close actions menu"]');
     await closeButton.click();
-    await page.waitForTimeout(300);
-
-    const closedOpacity = await buttonContainer.evaluate(
-      (el) => window.getComputedStyle(el).opacity,
-    );
-    expect(parseFloat(closedOpacity)).toBeLessThan(1);
+    await expect
+      .poll(() =>
+        buttonContainer.evaluate((el) =>
+          parseFloat(window.getComputedStyle(el).opacity),
+        ),
+      )
+      .toBeLessThan(1);
   });
 
   test('buttons have vertical slide animation classes', async ({ page }) => {

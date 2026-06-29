@@ -28,10 +28,19 @@
     border-radius: 0px;
   }
 
+  html {
+    /* Clip the off-canvas mobile nav / TOC drawers (position: fixed,
+       translate-x-full) so they don't add horizontal scroll on small
+       viewports. `clip` (not `hidden`) avoids creating a scroll container,
+       so the sticky header keeps working. */
+    overflow-x: clip;
+  }
+
   body {
     font-family: Inter, system-ui, sans-serif;
     background-color: #000000;
     color: #ffffff;
+    overflow-x: clip;
   }
 
   button,

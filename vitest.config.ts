@@ -31,7 +31,7 @@ export default defineConfig({
       '**/responsive.spec.ts',
       '**/feeds.spec.ts',
       '**/scroll-buttons.spec.ts',
-      '**/blog-upgrade.spec.ts',
+      '**/reading-time.spec.ts',
       '**/experiments.spec.ts',
     ],
     projects: [
