@@ -14,7 +14,13 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   testMatch: /.*\.spec\.ts$/,
-  testIgnore: /.*theme-engine\.test\.ts$/,
+  // Visual specs produce platform-specific screenshots, so they only run on
+  // Linux CI (where the committed snapshots are generated). Skip them elsewhere
+  // at the config level — Playwright disallows a top-level in-file test.skip().
+  testIgnore:
+    process.platform === 'linux'
+      ? [/.*theme-engine\.test\.ts$/]
+      : [/.*theme-engine\.test\.ts$/, /.*visual(-responsive)?\.spec\.ts$/],
   /* Snapshot path template for organized storage */
   snapshotPathTemplate: '{testDir}/__snapshots__/{testFilePath}/{arg}{ext}',
   /* Run tests in files in parallel */

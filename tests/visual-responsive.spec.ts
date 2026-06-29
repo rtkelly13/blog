@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-test.skip(process.platform !== 'linux', 'Visual tests only run on Linux CI');
-
 async function waitForPageReady(page: import('@playwright/test').Page) {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(1000);

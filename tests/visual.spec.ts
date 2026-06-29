@@ -12,9 +12,6 @@ import { expect, test } from '@playwright/test';
  * 3. Extract to tests/__snapshots__/ and commit
  */
 
-// Skip visual tests on non-Linux platforms (local dev on macOS/Windows)
-test.skip(process.platform !== 'linux', 'Visual tests only run on Linux CI');
-
 // Helper to wait for page to be fully loaded
 async function waitForPageReady(page: import('@playwright/test').Page) {
   // Wait for DOM content to be loaded (more reliable than networkidle with broken images)
