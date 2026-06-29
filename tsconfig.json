@@ -20,6 +20,7 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["components/*"],
+      "@/convex/*": ["convex/*"],
       "@/data/*": ["data/*"],
       "@/layouts/*": ["layouts/*"],
       "@/lib/*": ["lib/*"],
@@ -27,5 +28,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "lib/img-to-jsx.js"],
-  "exclude": ["node_modules", "REFERENCE_TempLayout.tsx", ".claude"]
+  "exclude": ["node_modules", "REFERENCE_TempLayout.tsx", ".claude", "infra"]
 }

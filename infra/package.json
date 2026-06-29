@@ -1,0 +1,14 @@
+{
+  "name": "blog-infra",
+  "private": true,
+  "description": "Pulumi (Vercel provider) IaC for the blog. Isolated from the app.",
+  "main": "index.ts",
+  "dependencies": {
+    "@pulumi/pulumi": "^3.0.0",
+    "@pulumiverse/vercel": "^4.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}

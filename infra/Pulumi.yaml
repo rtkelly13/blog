@@ -1,0 +1,9 @@
+name: blog-infra
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+description: >-
+  Vercel project + environment variables for the blog, including the Convex
+  deployment URL used by the talks audience activity. The Convex backend itself
+  is managed by the Convex CLI, not Pulumi.

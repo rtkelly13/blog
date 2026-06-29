@@ -36,6 +36,17 @@ export default defineConfig({
     ],
     projects: [
       {
+        // Plain Node unit tests (lib + convex pure helpers). Because `projects`
+        // is defined, root-level tests don't run on their own — this project is
+        // what actually executes `tests/**/*.test.ts`.
+        extends: true,
+        test: {
+          name: 'unit',
+          environment: 'node',
+          include: ['tests/**/*.test.ts'],
+        },
+      },
+      {
         extends: true,
         plugins: [
           // The plugin will run tests for the stories defined in your Storybook config

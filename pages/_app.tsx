@@ -16,6 +16,7 @@ import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource/ibm-plex-mono/700.css';
 import '@/css/tailwind.css';
 
+import { ConvexProvider } from 'convex/react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { ThemeProvider } from 'next-themes';
@@ -23,9 +24,10 @@ import { ThemeProvider } from 'next-themes';
 import Analytics from '@/components/analytics';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import SearchProvider from '@/components/search/SearchProvider';
+import { convex } from '@/lib/convexClient';
 
 export default function App({ Component, pageProps }: AppProps) {
-  return (
+  const tree = (
     <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
       <SearchProvider>
         <Head>
@@ -38,4 +40,8 @@ export default function App({ Component, pageProps }: AppProps) {
       </SearchProvider>
     </ThemeProvider>
   );
+
+  // Only mount the Convex provider when a deployment is configured. Everything
+  // else renders unchanged when NEXT_PUBLIC_CONVEX_URL is unset.
+  return convex ? <ConvexProvider client={convex}>{tree}</ConvexProvider> : tree;
 }
