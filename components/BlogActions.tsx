@@ -1,5 +1,6 @@
 import { FileText, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Toc } from 'types/Toc';
 import siteMetadata from '@/data/siteMetadata';
 
@@ -12,6 +13,14 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
   const [show, setShow] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [tocOpen, setTocOpen] = useState(false);
+  // Portal the TOC drawer to <body> so it escapes the `relative z-10` stacking
+  // context of <main> and can render above the sticky header (z-50). Gated on
+  // mount so server render and first client render match.
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleWindowScroll = () => {
@@ -118,68 +127,72 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
         </button>
       </div>
 
-      {toc && toc.length > 0 && (
-        <>
-          <aside
-            className={`
+      {toc &&
+        toc.length > 0 &&
+        mounted &&
+        createPortal(
+          <>
+            <aside
+              className={`
               fixed top-0 right-0 h-full w-80 max-w-[90vw]
               border-l-2 border-white bg-zinc-900 p-6
               transition-transform duration-300 ease-in-out
-              z-50
+              z-[60]
               ${tocOpen ? 'translate-x-0' : 'translate-x-full'}
             `}
-          >
-            <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-white">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-brutalist-cyan" />
-                <h2 className="font-display text-sm font-bold uppercase text-brutalist-yellow">
-                  [ CONTENTS ]
-                </h2>
+            >
+              <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-white">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-brutalist-cyan" />
+                  <h2 className="font-display text-sm font-bold uppercase text-brutalist-yellow">
+                    [ CONTENTS ]
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setTocOpen(false)}
+                  className="text-brutalist-cyan hover:text-brutalist-pink transition-colors"
+                  aria-label="Close table of contents"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setTocOpen(false)}
-                className="text-brutalist-cyan hover:text-brutalist-pink transition-colors"
-                aria-label="Close table of contents"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <nav className="overflow-y-auto max-h-[calc(100vh-120px)]">
-              <ul className="space-y-3 font-mono text-sm">
-                {toc.map((heading) => (
-                  <li
-                    key={heading.url}
-                    style={{
-                      paddingLeft: `${(heading.depth - 1) * 1}rem`,
-                    }}
-                  >
-                    <a
-                      href={heading.url}
-                      onClick={handleTocLinkClick}
-                      className={`block hover:text-brutalist-pink transition-colors ${
-                        activeId === heading.url.slice(1)
-                          ? 'text-brutalist-cyan font-bold'
-                          : 'text-zinc-400'
-                      }`}
+              <nav className="overflow-y-auto max-h-[calc(100vh-120px)]">
+                <ul className="space-y-3 font-mono text-sm">
+                  {toc.map((heading) => (
+                    <li
+                      key={heading.url}
+                      style={{
+                        paddingLeft: `${(heading.depth - 1) * 1}rem`,
+                      }}
                     >
-                      <span className="text-brutalist-yellow">&gt;</span>{' '}
-                      {heading.value}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </aside>
+                      <a
+                        href={heading.url}
+                        onClick={handleTocLinkClick}
+                        className={`block hover:text-brutalist-pink transition-colors ${
+                          activeId === heading.url.slice(1)
+                            ? 'text-brutalist-cyan font-bold'
+                            : 'text-zinc-400'
+                        }`}
+                      >
+                        <span className="text-brutalist-yellow">&gt;</span>{' '}
+                        {heading.value}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </aside>
 
-          {tocOpen && (
-            <div
-              className="fixed inset-0 bg-black/50 z-40"
-              onClick={() => setTocOpen(false)}
-              aria-hidden="true"
-            />
-          )}
-        </>
-      )}
+            {tocOpen && (
+              <div
+                className="fixed inset-0 bg-black/50 z-[55]"
+                onClick={() => setTocOpen(false)}
+                aria-hidden="true"
+              />
+            )}
+          </>,
+          document.body,
+        )}
     </>
   );
 };
