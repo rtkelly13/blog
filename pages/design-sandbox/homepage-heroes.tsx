@@ -115,7 +115,7 @@ const Hero80sWaves = ({ textVariation = 0 }) => {
         className="absolute top-1/2 left-0 right-0 text-center z-10 -translate-y-1/2"
         style={{ textShadow: '0 0 20px #ff00ff, 0 0 40px #00ffff' }}
       >
-        <h1 className="text-3xl md:text-5xl font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-[#00ffff] via-[#ff00ff] to-[#ffff00] mb-3">
+        <h1 className="text-3xl md:text-5xl font-bold font-display text-transparent bg-clip-text bg-gradient-to-r from-[#00ffff] via-[#ff00ff] to-[#ffff00] mb-3">
           {currentText.name}
         </h1>
         <p
@@ -186,7 +186,7 @@ const Hero80sCompact = ({ textVariation = 0 }) => {
         className="absolute top-1/2 left-0 right-0 text-center z-10 -translate-y-1/2"
         style={{ textShadow: '0 0 20px #ff00ff, 0 0 40px #00ffff' }}
       >
-        <h1 className="text-4xl md:text-6xl font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-[#00ffff] via-[#ff00ff] to-[#ffff00] mb-3">
+        <h1 className="text-4xl md:text-6xl font-bold font-display text-transparent bg-clip-text bg-gradient-to-r from-[#00ffff] via-[#ff00ff] to-[#ffff00] mb-3">
           {currentText.name}
         </h1>
         <p
@@ -309,7 +309,7 @@ const Hero80sMinimal = ({ textVariation = 0 }) => {
         className="absolute top-1/2 left-0 right-0 text-center z-10 -translate-y-1/2"
         style={{ textShadow: '0 0 20px #00ffff' }}
       >
-        <h1 className="text-5xl md:text-7xl font-bold font-mono text-white mb-4 tracking-widest">
+        <h1 className="text-5xl md:text-7xl font-bold font-display text-white mb-4 tracking-widest">
           {currentText.name}
         </h1>
         <p className="text-xl md:text-2xl font-mono text-[#00ffff]">
@@ -358,7 +358,7 @@ export default function HomepageHeroes() {
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-mono uppercase border-2 border-white inline-block px-4 py-2">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
             [ HOMEPAGE_HEROES ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
@@ -370,7 +370,7 @@ export default function HomepageHeroes() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="font-mono font-bold text-2xl text-white mb-2 uppercase">
+                <h2 className="font-display font-bold text-2xl text-white mb-2 uppercase">
                   01. 80S_RETRO_WAVES
                 </h2>
                 <p className="text-zinc-400 font-mono text-sm">
@@ -412,7 +412,7 @@ export default function HomepageHeroes() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="font-mono font-bold text-2xl text-white mb-2 uppercase">
+                <h2 className="font-display font-bold text-2xl text-white mb-2 uppercase">
                   02. 80S_COMPACT
                 </h2>
                 <p className="text-zinc-400 font-mono text-sm">
@@ -442,7 +442,7 @@ export default function HomepageHeroes() {
           <div>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
               <div>
-                <h2 className="font-mono font-bold text-2xl text-white mb-2 uppercase">
+                <h2 className="font-display font-bold text-2xl text-white mb-2 uppercase">
                   03. 80S_SUNSET (PRODUCTION)
                 </h2>
                 <p className="text-zinc-400 font-mono text-sm">
@@ -523,7 +523,7 @@ export default function HomepageHeroes() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="font-mono font-bold text-2xl text-white mb-2 uppercase">
+                <h2 className="font-display font-bold text-2xl text-white mb-2 uppercase">
                   04. 80S_MINIMAL
                 </h2>
                 <p className="text-zinc-400 font-mono text-sm">

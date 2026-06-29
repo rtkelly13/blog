@@ -57,7 +57,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
               aria-label="Toggle table of contents"
               type="button"
               onClick={handleTocToggle}
-              className="border-2 border-white bg-brutalist-cyan text-black p-3 transition-all hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-1 active:translate-y-1"
+              className="border-2 border-white bg-brutalist-cyan text-black p-3 transition-all hover:shadow-hard-md active:translate-x-1 active:translate-y-1"
             >
               <FileText className="h-5 w-5" />
             </button>
@@ -112,7 +112,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
           aria-expanded={isOpen}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-1 active:translate-y-1"
+          className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black hover:shadow-hard-md active:translate-x-1 active:translate-y-1"
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -132,7 +132,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
             <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-white">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-brutalist-cyan" />
-                <h2 className="font-mono text-sm font-bold uppercase text-brutalist-yellow">
+                <h2 className="font-display text-sm font-bold uppercase text-brutalist-yellow">
                   [ CONTENTS ]
                 </h2>
               </div>

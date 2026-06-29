@@ -42,21 +42,26 @@ const NewsletterForm = ({
   };
 
   return (
-    <div>
-      <div className="pb-1 text-lg font-semibold text-gray-800 dark:text-gray-100">
-        {title}
+    <div className="font-mono">
+      <div className="pb-2 text-lg font-bold text-white uppercase tracking-widest">
+        {'>'} {title}
       </div>
-      <form className="flex flex-col sm:flex-row" onSubmit={subscribe}>
+      <form className="flex flex-col sm:flex-row gap-4" onSubmit={subscribe}>
         <div>
-          <label htmlFor="email-input">
+          <label htmlFor="email-input" className="relative block">
             <span className="sr-only">Email address</span>
+            <span className="absolute left-3 top-2 font-mono text-brutalist-cyan font-bold">
+              &gt;
+            </span>
             <input
               autoComplete="email"
-              className="w-72 rounded-md px-4 py-2 focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-primary-600 dark:bg-black"
+              className="w-72 rounded-sm px-8 py-2 font-mono focus:border-brutalist-cyan focus:outline-hidden focus:ring-2 focus:ring-brutalist-cyan bg-black border-2 border-zinc-700 placeholder-zinc-500 text-white"
               id="email-input"
               name="email"
               placeholder={
-                subscribed ? "You're subscribed!" : 'Enter your email'
+                subscribed
+                  ? 'subscribed_successfully'
+                  : 'enter_email_address...|'
               }
               ref={inputEl}
               required
@@ -65,29 +70,27 @@ const NewsletterForm = ({
             />
           </label>
         </div>
-        <div className="mt-2 flex w-full rounded-md shadow-xs sm:ml-3 sm:mt-0">
+        <div className="flex w-full sm:w-auto">
           <button
-            className={`w-full rounded-md bg-primary-500 px-4 py-2 font-medium text-white sm:py-0 ${
+            className={`w-full rounded-sm px-6 py-2 font-mono font-bold text-black border-2 transition-all uppercase ${
               subscribed
-                ? 'cursor-default'
-                : 'hover:bg-primary-700 dark:hover:bg-primary-400'
-            } focus:outline-hidden focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:ring-offset-black`}
+                ? 'cursor-default bg-zinc-500 border-zinc-500 text-white'
+                : 'bg-brutalist-cyan border-brutalist-cyan hover:bg-black hover:text-brutalist-cyan'
+            }`}
             type="submit"
             disabled={subscribed}
           >
-            {subscribed ? 'Thank you!' : 'Sign up'}
+            {subscribed ? 'VERIFIED' : 'EXECUTE'}
           </button>
         </div>
       </form>
       {(message || error) && (
         <div
-          className={`w-72 pt-2 text-sm ${
-            error
-              ? 'text-red-500 dark:text-red-400'
-              : 'text-green-500 dark:text-green-400'
-          } sm:w-96`}
+          className={`pt-2 text-sm uppercase ${
+            error ? 'text-brutalist-pink' : 'text-brutalist-neonGreen'
+          }`}
         >
-          {message}
+          {error ? `[ERROR]: ${message}` : `[SUCCESS]: ${message}`}
         </div>
       )}
     </div>

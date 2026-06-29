@@ -124,7 +124,7 @@ export default function Logos() {
       />
       <div className="divide-y divide-white">
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-mono uppercase border-2 border-white inline-block px-4 py-2">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
             [ LOGO_VARIATIONS ]
           </h1>
           <p className="text-lg leading-7 text-zinc-400 font-mono">
@@ -139,7 +139,7 @@ export default function Logos() {
                 className="bg-zinc-900 border-2 border-white p-6 hover:border-brutalist-cyan transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1"
               >
                 <div className="border-b-2 border-dashed border-white/20 pb-2 mb-4">
-                  <h3 className="font-mono font-bold text-lg text-white">
+                  <h3 className="font-display font-bold text-lg text-white">
                     {`0${logo.id}`.slice(-2)}. {logo.name.toUpperCase()}
                   </h3>
                 </div>

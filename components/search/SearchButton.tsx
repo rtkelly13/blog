@@ -7,13 +7,13 @@ export default function SearchButton() {
     <button
       aria-label="Search"
       onClick={() => query.toggle()}
-      className="ml-1 mr-1 h-8 w-8 rounded-sm p-1 sm:ml-4"
+      className="ml-1 mr-1 h-8 w-8 rounded-sm p-1 sm:ml-4 text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
+        strokeWidth={2}
         stroke="currentColor"
         className="h-6 w-6 text-current"
       >

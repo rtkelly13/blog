@@ -20,6 +20,7 @@ blog/
 ├── data/             # MDX content + siteMetadata.js
 ├── scripts/          # Build scripts (sitemap, search, RSS)
 ├── stories/          # Storybook CSF 3.0 stories
+├── temp/             # Ignored folder for visual snapshots or temporary outputs
 └── .storybook/       # Storybook config (Vite adapter)
 ```
 
@@ -61,7 +62,10 @@ PostCSS uses `@tailwindcss/postcss` (not `tailwindcss`).
 | Borders            | 2px solid white   | All borders, always |
 | Border-radius      | 0px               | Globally enforced   |
 | Shadows            | `hard-*`          | 4px offset, no blur |
-| Font               | Courier New, mono | Body and headings   |
+| Display font       | Space Grotesk (`font-display`) | Headings / page titles |
+| Body font          | Inter (default `font-sans`)    | Body / reading copy    |
+| Mono font          | IBM Plex Mono (`font-mono`)    | Code + UI / metadata   |
+| Pixel font         | VT323 (`font-pixel`)           | Logo + hero accents    |
 
 ### MDX Content
 
@@ -162,6 +166,13 @@ workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapsh
   repo-local composite action `.github/actions/setup-blog`.
 - Snapshots must be (re)generated on the CI runner via `playwright.yml`
   (`workflow_dispatch`) so they match what `e2e-visual` compares against.
+
+### Branch workflow
+
+- `main` enforces **linear history** (and merge commits are disabled on the repo).
+  Reconcile a feature branch by **rebasing onto `main`** — `git rebase origin/main`
+  (resolve conflicts, force-push with `--force-with-lease`) — never with a merge
+  commit. PRs land on `main` via **squash merge** only.
 
 ## DEPENDENCIES (KEY)
 

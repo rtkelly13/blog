@@ -20,33 +20,35 @@ const MobileNav = () => {
     <div className="sm:hidden">
       <button
         type="button"
-        className="w-8 h-8 ml-1 mr-1 border-2 border-white hover:bg-white hover:text-black transition-colors"
+        className="w-8 h-8 ml-1 mr-1 text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]"
         aria-label="Toggle Menu"
         onClick={onToggleNav}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="text-current"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="text-current w-6 h-6 m-auto"
         >
           {navShow ? (
             <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
             />
           ) : (
             <path
-              fillRule="evenodd"
-              d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clipRule="evenodd"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 12h18M3 6h18M3 18h18"
             />
           )}
         </svg>
       </button>
       <div
-        className={`fixed w-full h-full top-24 right-0 bg-black border-l-2 border-white z-10 transform ease-in-out duration-300 ${
+        className={`fixed w-full h-full top-24 right-0 bg-black/95 backdrop-blur border-l border-gray-800 z-10 transform ease-in-out duration-300 ${
           navShow ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -56,18 +58,18 @@ const MobileNav = () => {
           className="fixed w-full h-full cursor-auto focus:outline-hidden"
           onClick={onToggleNav}
         ></button>
-        <nav className="fixed h-full mt-8 bg-black">
+        <nav className="fixed h-full mt-8 w-full">
           {headerNavLinks.map((link) => (
             <div
               key={link.title}
-              className="px-12 py-4 border-b-2 border-white"
+              className="px-12 py-4 border-b border-gray-800"
             >
               <Link
                 href={link.href}
-                className="text-2xl font-mono font-bold tracking-widest text-white hover:text-brutalist-cyan transition-colors uppercase terminal-prompt"
+                className="text-2xl font-mono font-bold tracking-widest text-white hover:text-brutalist-neonGreen transition-colors uppercase"
                 onClick={onToggleNav}
               >
-                {link.title}
+                &gt; {link.title}
               </Link>
             </div>
           ))}

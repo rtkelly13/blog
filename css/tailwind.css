@@ -29,7 +29,7 @@
   }
 
   body {
-    font-family: "Courier New", Courier, monospace;
+    font-family: Inter, system-ui, sans-serif;
     background-color: #000000;
     color: #ffffff;
   }
@@ -40,6 +40,13 @@
   textarea {
     border-radius: 0px;
   }
+}
+
+/* Proposal C: MDX/prose headings use the display face (Space Grotesk).
+   The @tailwindcss/typography plugin does not emit a per-heading
+   font-family, so headings would otherwise inherit the Inter body font. */
+.prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"] *)) {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 .remark-code-title {
@@ -165,7 +172,7 @@ html {
   .ascii-divider::after {
     content: "//========================================//";
     display: block;
-    font-family: "Courier New", Courier, monospace;
+    font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
     color: #ffffff;
     text-align: center;
     margin: 1rem 0;
