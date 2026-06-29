@@ -65,7 +65,8 @@ function RenderResults() {
         <div>
           {typeof item === 'string' ? (
             <div className="block px-4 pb-2 pt-6 text-xs font-bold uppercase text-brutalist-cyberOrange tracking-widest border-t-2 border-zinc-800 mt-2">
-              // {item}
+              {'// '}
+              {item}
             </div>
           ) : (
             <div
