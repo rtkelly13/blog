@@ -167,6 +167,13 @@ workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapsh
 - Snapshots must be (re)generated on the CI runner via `playwright.yml`
   (`workflow_dispatch`) so they match what `e2e-visual` compares against.
 
+### Branch workflow
+
+- `main` enforces **linear history** (and merge commits are disabled on the repo).
+  Reconcile a feature branch by **rebasing onto `main`** — `git rebase origin/main`
+  (resolve conflicts, force-push with `--force-with-lease`) — never with a merge
+  commit. PRs land on `main` via **squash merge** only.
+
 ## DEPENDENCIES (KEY)
 
 | Package          | Version       | Purpose                 |
