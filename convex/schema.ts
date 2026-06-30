@@ -8,6 +8,13 @@ import { v } from 'convex/values';
 // flipped to `revealed: true` by a scheduled function ~5s later — unless the
 // presenter has `hidden` it first.
 export default defineSchema({
+  // Minimal "hello world" example: a single named counter, bumped by anyone,
+  // streamed live to every connected client. See convex/hello.ts.
+  counters: defineTable({
+    name: v.string(),
+    count: v.number(),
+  }).index('by_name', ['name']),
+
   toastSubmissions: defineTable({
     talkSlug: v.string(),
     nickname: v.optional(v.string()),

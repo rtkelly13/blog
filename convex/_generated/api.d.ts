@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as hello from "../hello.js";
 import type * as lib_profanity from "../lib/profanity.js";
 import type * as toast from "../toast.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  hello: typeof hello;
   "lib/profanity": typeof lib_profanity;
   toast: typeof toast;
 }>;
