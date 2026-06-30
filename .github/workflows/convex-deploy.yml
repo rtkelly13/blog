@@ -1,0 +1,42 @@
+name: Deploy Convex
+
+# Push Convex functions (schema + queries/mutations) to the PRODUCTION
+# deployment whenever they change on main. The frontend itself is deployed by
+# Vercel; this only handles the Convex backend.
+#
+# Requires the `CONVEX_DEPLOY_KEY` repo secret — a *Production* deploy key from
+# the Convex dashboard (Project Settings → Deploy Keys). The key both
+# authenticates and selects the target (prod) deployment, so no other config is
+# needed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'convex/**'
+      - '.github/workflows/convex-deploy.yml'
+  workflow_dispatch:
+
+# Avoid overlapping deploys racing each other on rapid merges.
+concurrency:
+  group: convex-deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy Convex functions (production)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+
+      - name: Deploy to Convex production
+        working-directory: blog
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: pnpm exec convex deploy
