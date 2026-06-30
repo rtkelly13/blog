@@ -8,6 +8,18 @@ import { v } from 'convex/values';
 // flipped to `revealed: true` by a scheduled function ~5s later — unless the
 // presenter has `hidden` it first.
 export default defineSchema({
+  // A live talk SESSION (distinct from the MDX talk content). The presenter
+  // "starts" one; audience joins whichever is currently `live` — that's the
+  // abstraction that lets presence/chat attach to "the current talk" without
+  // anyone needing a room id. Each start is a fresh session (its _id is the room).
+  talks: defineTable({
+    slug: v.string(),
+    title: v.string(),
+    status: v.union(v.literal('live'), v.literal('ended')),
+    startedAt: v.number(),
+    endedAt: v.optional(v.number()),
+  }).index('by_status', ['status']),
+
   // Minimal "hello world" example: a single named counter, bumped by anyone,
   // streamed live to every connected client. See convex/hello.ts.
   counters: defineTable({
