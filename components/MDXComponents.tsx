@@ -10,6 +10,7 @@ import CustomLink from './Link';
 import NoteBlock from './NoteBlock';
 import Pre from './Pre';
 import TOCInline from './TOCInline';
+import ActivityQR from './talks/ActivityQR';
 
 const Wrapper: React.ComponentType<{ layout: string }> = ({
   layout,
@@ -24,6 +25,7 @@ export const MDXComponents: MDXComponentsType = {
   TOCInline,
   Diagram,
   NoteBlock,
+  ActivityQR,
   a: CustomLink,
   pre: Pre,
   wrapper: Wrapper,
