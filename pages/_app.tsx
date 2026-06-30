@@ -43,5 +43,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
   // Only mount the Convex provider when a deployment is configured. Everything
   // else renders unchanged when NEXT_PUBLIC_CONVEX_URL is unset.
-  return convex ? <ConvexProvider client={convex}>{tree}</ConvexProvider> : tree;
+  return convex ? (
+    <ConvexProvider client={convex}>{tree}</ConvexProvider>
+  ) : (
+    tree
+  );
 }
