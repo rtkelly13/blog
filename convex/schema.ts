@@ -26,7 +26,21 @@ export default defineSchema({
     lastSeen: v.number(),
   })
     .index('by_room_lastSeen', ['room', 'lastSeen'])
-    .index('by_room_machine', ['room', 'machineId']),
+    .index('by_room_machine', ['room', 'machineId'])
+    // Global, room-agnostic range scan for the scheduled TTL reaper.
+    .index('by_lastSeen', ['lastSeen']),
+
+  // Persistent first-seen record per (room, machineId). Unlike `presence` this is
+  // never reaped — it's the memory that lets a machine fire a "joined" toast only
+  // the FIRST time it appears in a room. A machine that leaves (presence expires)
+  // and returns is already known here, so it doesn't re-trigger.
+  attendees: defineTable({
+    room: v.string(),
+    machineId: v.string(),
+    firstSeen: v.number(),
+  })
+    .index('by_room_machine', ['room', 'machineId'])
+    .index('by_room_firstSeen', ['room', 'firstSeen']),
 
   toastSubmissions: defineTable({
     talkSlug: v.string(),

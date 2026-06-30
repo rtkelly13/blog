@@ -23,14 +23,23 @@ function getMachineId(): string {
   }
 }
 
+export interface PresenceState {
+  /** Live, de-duplicated count of machines currently present. */
+  count: number | undefined;
+  /** First-time joins in the recent window — for one-shot "joined" toasts. */
+  joins: { id: string; at: number }[] | undefined;
+}
+
 /**
- * Heartbeat into a presence room and subscribe to its live, de-duplicated
- * head-count. Only call this where ConvexProvider is mounted (i.e. behind an
- * `isConvexConfigured` guard) — see PresenceBadge.
+ * Heartbeat into a presence room and subscribe to its live head-count plus the
+ * recent first-join feed. One heartbeat per caller — render a single <Presence>
+ * per room. Only call where ConvexProvider is mounted (behind an
+ * `isConvexConfigured` guard).
  */
-export function usePresence(room: string): number | undefined {
+export function usePresence(room: string): PresenceState {
   const heartbeat = useMutation(api.presence.heartbeat);
   const count = useQuery(api.presence.count, { room });
+  const joins = useQuery(api.presence.recentJoins, { room });
 
   useEffect(() => {
     const machineId = getMachineId();
@@ -50,5 +59,5 @@ export function usePresence(room: string): number | undefined {
     };
   }, [room, heartbeat]);
 
-  return count;
+  return { count, joins };
 }

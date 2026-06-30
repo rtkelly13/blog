@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
 import type * as hello from "../hello.js";
 import type * as lib_profanity from "../lib/profanity.js";
 import type * as presence from "../presence.js";
@@ -20,6 +21,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   hello: typeof hello;
   "lib/profanity": typeof lib_profanity;
   presence: typeof presence;
