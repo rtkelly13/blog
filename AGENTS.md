@@ -116,6 +116,7 @@ pnpm build                # next build + sitemap + search + tag-rss
 pnpm test:e2e             # Playwright tests
 pnpm test                 # Vitest unit tests
 pnpm test:coverage        # Vitest unit tests + coverage (./coverage)
+pnpm test:regression      # Diff local build vs deployed main (see tests/AGENTS.md)
 pnpm test:update-snapshots # Update visual snapshots via CI
 
 # Quality
@@ -179,13 +180,13 @@ workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapsh
 
 | Package          | Version       | Purpose                 |
 | ---------------- | ------------- | ----------------------- |
-| next             | ^16.1.3       | Framework               |
-| react            | ^19.2.3       | UI                      |
-| tailwindcss      | ^4.1.18       | Styling                 |
+| next             | ^16.2.9       | Framework               |
+| react            | ^19.2.7       | UI                      |
+| tailwindcss      | ^4.3.1        | Styling                 |
 | mdx-bundler      | ^10.1.1       | MDX processing          |
 | kbar             | 0.1.0-beta.48 | Command palette (Cmd+K) |
-| @playwright/test | ^1.57.0       | E2E + visual tests      |
-| storybook        | ^10.2.0       | Component docs          |
+| @playwright/test | ^1.61.1       | E2E + visual tests      |
+| storybook        | ^10.4.6       | Component docs          |
 
 ## ENGINE REQUIREMENTS
 

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Experiments Page', () => {
   test('experiments page renders correctly', async ({ page }) => {
-    await page.goto('/experiments', { waitUntil: 'networkidle' });
+    await page.goto('/experiments', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('h1').first()).toContainText('EXPERIMENTS');
 
@@ -11,14 +11,14 @@ test.describe('Experiments Page', () => {
   });
 
   test('navigation includes experiments link', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     const experimentsNav = page.locator('a[href="/experiments"]').first();
     await expect(experimentsNav).toBeAttached();
   });
 
   test('experiments page links to design sandbox', async ({ page }) => {
-    await page.goto('/experiments', { waitUntil: 'networkidle' });
+    await page.goto('/experiments', { waitUntil: 'domcontentloaded' });
 
     await page.click('a[href="/design-sandbox"]');
     await page.waitForURL('/design-sandbox');
@@ -29,7 +29,9 @@ test.describe('Experiments Page', () => {
 
 test.describe('Mermaid Diagrams', () => {
   test('mermaid diagram renders on diagrams page', async ({ page }) => {
-    await page.goto('/design-sandbox/diagrams', { waitUntil: 'networkidle' });
+    await page.goto('/design-sandbox/diagrams', {
+      waitUntil: 'domcontentloaded',
+    });
 
     await page.waitForTimeout(2000);
 
@@ -38,7 +40,9 @@ test.describe('Mermaid Diagrams', () => {
   });
 
   test('mermaid diagram renders in blog post', async ({ page }) => {
-    await page.goto('/blog/aws-batch/cookbook', { waitUntil: 'networkidle' });
+    await page.goto('/blog/aws-batch/cookbook', {
+      waitUntil: 'domcontentloaded',
+    });
 
     await page.waitForTimeout(2000);
 
