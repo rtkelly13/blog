@@ -5,7 +5,7 @@ test.describe('Reading time', () => {
   // post layout (PostLayout) does not render it, so there is nothing to assert
   // on a post page.
   test('reading time displays in blog listing', async ({ page }) => {
-    await page.goto('/blog', { waitUntil: 'networkidle' });
+    await page.goto('/blog', { waitUntil: 'domcontentloaded' });
 
     const readingTimes = page.locator('text=/\\d+ min read/');
     await expect(readingTimes.first()).toBeVisible();

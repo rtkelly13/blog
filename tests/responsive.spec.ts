@@ -40,7 +40,9 @@ test.describe('Mobile - iPhone 12 (390x844)', () => {
   });
 
   test('blog post TOC opens and closes', async ({ page }) => {
-    await page.goto('/blog/aws-batch/cookbook', { waitUntil: 'networkidle' });
+    await page.goto('/blog/aws-batch/cookbook', {
+      waitUntil: 'domcontentloaded',
+    });
 
     await page.evaluate(() => window.scrollBy(0, 100));
     await page.waitForTimeout(500);

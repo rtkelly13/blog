@@ -4,7 +4,9 @@ test.describe('Scroll Buttons Animation', () => {
   test('Menu button always visible, action buttons show when menu opens', async ({
     page,
   }) => {
-    await page.goto('/blog/aws-batch/cookbook', { waitUntil: 'networkidle' });
+    await page.goto('/blog/aws-batch/cookbook', {
+      waitUntil: 'domcontentloaded',
+    });
     await page.setViewportSize({ width: 390, height: 844 });
 
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -45,7 +47,9 @@ test.describe('Scroll Buttons Animation', () => {
   });
 
   test('buttons have vertical slide animation classes', async ({ page }) => {
-    await page.goto('/blog/aws-batch/cookbook', { waitUntil: 'networkidle' });
+    await page.goto('/blog/aws-batch/cookbook', {
+      waitUntil: 'domcontentloaded',
+    });
     await page.setViewportSize({ width: 390, height: 844 });
 
     await page.evaluate(() => window.scrollTo(0, 0));

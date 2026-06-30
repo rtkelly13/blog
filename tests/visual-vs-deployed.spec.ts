@@ -94,7 +94,7 @@ async function capture(
   });
   const page = await context.newPage();
   try {
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30_000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30_000 });
     // Settle fonts/animations before snapping.
     await page.waitForTimeout(1000);
     return await page.screenshot({ fullPage: true });
