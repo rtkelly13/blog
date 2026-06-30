@@ -10,6 +10,7 @@
 
 import type * as hello from "../hello.js";
 import type * as lib_profanity from "../lib/profanity.js";
+import type * as presence from "../presence.js";
 import type * as toast from "../toast.js";
 
 import type {
@@ -21,6 +22,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   hello: typeof hello;
   "lib/profanity": typeof lib_profanity;
+  presence: typeof presence;
   toast: typeof toast;
 }>;
 

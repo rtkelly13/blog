@@ -15,6 +15,19 @@ export default defineSchema({
     count: v.number(),
   }).index('by_name', ['name']),
 
+  // Pseudo-anonymous presence: one row per (room, machineId), refreshed by a
+  // client heartbeat. `machineId` is a random UUID the browser keeps in
+  // localStorage — no PII, and it de-duplicates a browser's tabs/reloads.
+  // Rows older than the liveness window are reaped on heartbeat. See
+  // convex/presence.ts.
+  presence: defineTable({
+    room: v.string(),
+    machineId: v.string(),
+    lastSeen: v.number(),
+  })
+    .index('by_room_lastSeen', ['room', 'lastSeen'])
+    .index('by_room_machine', ['room', 'machineId']),
+
   toastSubmissions: defineTable({
     talkSlug: v.string(),
     nickname: v.optional(v.string()),
