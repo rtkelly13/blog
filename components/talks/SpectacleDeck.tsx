@@ -64,11 +64,7 @@ export default function SpectacleDeck({ slides }: SpectacleDeckProps) {
   return (
     <Deck theme={brutalistTheme} template={template}>
       {slides.map((slide, i) => (
-        <Slide
-          // biome-ignore lint/suspicious/noArrayIndexKey: slides are a stable ordered list
-          key={i}
-          backgroundColor="#000000"
-        >
+        <Slide key={i} backgroundColor="#000000">
           <SlideBody code={slide.code} />
           {slide.notes ? <Notes>{slide.notes}</Notes> : null}
         </Slide>
