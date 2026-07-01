@@ -135,10 +135,13 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const showConsoleSidebar = mode === 'console' && isAdmin && Boolean(liveHere);
   const showPresenterHud = mode === 'presenter' && isAuthenticated && isAdmin;
 
-  // Heartbeat this presenter session while broadcasting, so concurrent
-  // presenters are detectable.
+  // Both the presenter deck (broadcasts via its own navigation) and the console
+  // (drives via Prev/Next) are "driving surfaces" — same admin identity — so both
+  // heartbeat a presenter session, and two connected at once surfaces a clash.
+  const driving = broadcasting || showConsoleSidebar;
+
   useEffect(() => {
-    if (!broadcasting || !room) return;
+    if (!driving || !room) return;
     const sessionId = sessionIdRef.current;
     const ping = () => {
       presenterPing({ room, sessionId }).catch(() => {});
@@ -146,7 +149,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     ping();
     const id = setInterval(ping, 5000);
     return () => clearInterval(id);
-  }, [broadcasting, room, presenterPing]);
+  }, [driving, room, presenterPing]);
 
   const presenterCount = useQuery(
     api.talks.presenterCount,
@@ -185,8 +188,16 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     showAttendeeSidebar && room ? (
       <AttendeeSidebar room={room} />
     ) : showConsoleSidebar && room ? (
-      <ConsoleSidebar room={room} />
+      <ConsoleSidebar
+        room={room}
+        slides={slides}
+        currentSlide={current?.currentSlide ?? 0}
+        setSlide={setSlide}
+      />
     ) : null;
+  // The console is a working cockpit (controls + notes + preview), so give it
+  // more room than the slim attendee reactions rail.
+  const sidebarWidth = showConsoleSidebar ? '34vw' : '20vw';
 
   // With a sidebar, the deck occupies the left ~4/5 (Spectacle scales into its
   // container) and the sidebar fills the right 1/5. Use dvh (dynamic viewport)
@@ -213,7 +224,13 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
         >
           {deckEl}
         </div>
-        <div style={{ height: '100dvh', flex: '0 0 20vw', width: '20vw' }}>
+        <div
+          style={{
+            height: '100dvh',
+            flex: `0 0 ${sidebarWidth}`,
+            width: sidebarWidth,
+          }}
+        >
           {sidebar}
         </div>
       </div>
