@@ -19,6 +19,7 @@ import type * as polls from "../polls.js";
 import type * as presence from "../presence.js";
 import type * as questions from "../questions.js";
 import type * as reactions from "../reactions.js";
+import type * as sessions from "../sessions.js";
 import type * as talkConfig from "../talkConfig.js";
 import type * as talks from "../talks.js";
 
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   presence: typeof presence;
   questions: typeof questions;
   reactions: typeof reactions;
+  sessions: typeof sessions;
   talkConfig: typeof talkConfig;
   talks: typeof talks;
 }>;
