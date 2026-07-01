@@ -37,6 +37,64 @@ const tokenClassNames = {
   comment: 'text-gray-400 italic',
 };
 
+export function setEsbuildBinaryPath() {
+  // https://github.com/kentcdodds/mdx-bundler#nextjs-esbuild-enoent
+  if (process.platform === 'win32') {
+    process.env.ESBUILD_BINARY_PATH = path.join(
+      process.cwd(),
+      'node_modules',
+      'esbuild',
+      'esbuild.exe',
+    );
+  } else {
+    process.env.ESBUILD_BINARY_PATH = path.join(
+      process.cwd(),
+      'node_modules',
+      'esbuild',
+      'bin',
+      'esbuild',
+    );
+  }
+}
+
+/**
+ * Remark plugins shared across all MDX compilation (blog posts and talk slides).
+ * Pass a `toc` ref to collect a table of contents; omit it for content that
+ * doesn't need one (e.g. individual slides).
+ */
+export function getRemarkPlugins(toc?: Toc): Pluggable[] {
+  return [
+    ...(toc ? [[remarkTocHeadings, { exportRef: toc }] as Pluggable] : []),
+    remarkGfm,
+    remarkCodeTitles,
+    remarkMath,
+    remarkAlert,
+  ];
+}
+
+/**
+ * Rehype plugins shared across all MDX compilation. Includes the Prism token
+ * class-name remapper that powers the brutalist code highlighting.
+ */
+export function getRehypePlugins(): Pluggable[] {
+  return [
+    rehypeSlug,
+    rehypeAutolinkHeadings,
+    rehypeKatex,
+    [rehypePrismPlus, { ignoreMissing: true }] as Pluggable,
+    (() => {
+      return (tree: any) => {
+        visit(tree, 'element', (node: any) => {
+          const [token, type] = node.properties.className || [];
+          if (token === 'token') {
+            node.properties.className = [tokenClassNames[type]];
+          }
+        });
+      };
+    }) as Pluggable,
+  ];
+}
+
 export function getFiles(type: 'blog' | 'authors' | 'series') {
   const prefixPaths = path.join(root, 'data', type);
   const files = getAllFilesRecursively(prefixPaths);
@@ -84,23 +142,7 @@ export async function getFileBySlug<_T>(
     ? fs.readFileSync(mdxPath, 'utf8')
     : fs.readFileSync(mdPath, 'utf8');
 
-  // https://github.com/kentcdodds/mdx-bundler#nextjs-esbuild-enoent
-  if (process.platform === 'win32') {
-    process.env.ESBUILD_BINARY_PATH = path.join(
-      process.cwd(),
-      'node_modules',
-      'esbuild',
-      'esbuild.exe',
-    );
-  } else {
-    process.env.ESBUILD_BINARY_PATH = path.join(
-      process.cwd(),
-      'node_modules',
-      'esbuild',
-      'bin',
-      'esbuild',
-    );
-  }
+  setEsbuildBinaryPath();
 
   const toc: Toc = [];
 
@@ -109,34 +151,13 @@ export async function getFileBySlug<_T>(
     // mdx imports can be automatically source from the components directory
     cwd: path.join(process.cwd(), 'components'),
     mdxOptions(options) {
-      // this is the recommended way to add custom remark/rehype plugins:
-      // The syntax might look weird, but it protects you in case we add/remove
-      // plugins in the future.
       options.remarkPlugins = [
         ...(options.remarkPlugins ?? []),
-        [remarkTocHeadings, { exportRef: toc }],
-        remarkGfm,
-        remarkCodeTitles,
-        remarkMath,
-        remarkAlert,
-        // remarkImgToJsx,
+        ...getRemarkPlugins(toc),
       ];
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
-        rehypeSlug,
-        rehypeAutolinkHeadings,
-        rehypeKatex,
-        [rehypePrismPlus, { ignoreMissing: true }] as Pluggable,
-        () => {
-          return (tree) => {
-            visit(tree, 'element', (node: any) => {
-              const [token, type] = node.properties.className || [];
-              if (token === 'token') {
-                node.properties.className = [tokenClassNames[type]];
-              }
-            });
-          };
-        },
+        ...getRehypePlugins(),
       ];
       return options;
     },

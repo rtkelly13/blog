@@ -41,12 +41,12 @@ const LayoutWrapper = ({ children }: Props) => {
             </Link>
           </div>
           <div className="flex items-center text-base leading-5 gap-4">
-            <div className="hidden sm:block">
+            <div className="hidden sm:flex sm:items-center">
               {headerNavLinks.map((link) => (
                 <Link
                   key={link.title}
                   href={link.href}
-                  className="p-1 font-mono font-bold sm:p-4 text-white hover:text-brutalist-cyan transition-colors uppercase"
+                  className="p-1 font-mono font-bold sm:px-3 whitespace-nowrap text-white hover:text-brutalist-cyan transition-colors uppercase"
                 >
                   [ {link.title} ]
                 </Link>
