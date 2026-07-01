@@ -8,20 +8,34 @@ interface TalkCardProps {
 }
 
 export default function TalkCard({ talk }: TalkCardProps) {
-  const { slug, title, date, event, location, audience, summary, tags } = talk;
+  const { slug, title, date, event, location, audience, summary, tags, draft } =
+    talk;
   const href = `/talks/${slug}`;
 
   return (
-    <div className="h-full bg-zinc-900 border-2 border-white transition-all duration-200 hover:border-brutalist-cyan hover:shadow-hard-cyan">
+    <div
+      className={`h-full bg-zinc-900 border-2 transition-all duration-200 hover:shadow-hard-cyan ${
+        draft
+          ? 'border-brutalist-pink hover:border-brutalist-pink'
+          : 'border-white hover:border-brutalist-cyan'
+      }`}
+    >
       <div className="flex items-center justify-between border-b-2 border-white bg-black px-4 py-2">
         <span className="font-mono text-sm font-bold uppercase text-brutalist-yellow">
           {`${slug}.deck`}
         </span>
-        {date && (
-          <span className="font-mono text-xs text-zinc-400">
-            {formatDate(date)}
-          </span>
-        )}
+        <span className="flex items-center gap-2">
+          {draft && (
+            <span className="border border-brutalist-pink px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-brutalist-pink">
+              Draft
+            </span>
+          )}
+          {date && (
+            <span className="font-mono text-xs text-zinc-400">
+              {formatDate(date)}
+            </span>
+          )}
+        </span>
       </div>
 
       <div className="p-6">

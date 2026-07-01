@@ -1,5 +1,6 @@
 import { Calendar, MapPin, Play, Users } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
+import Head from 'next/head';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import Link from '@/components/Link';
 import LiveTalkBanner from '@/components/LiveTalkBanner';
@@ -39,6 +40,7 @@ export default function TalkLanding({
     tags,
     videoUrl,
     pdf,
+    draft,
   } = frontMatter;
 
   return (
@@ -47,7 +49,18 @@ export default function TalkLanding({
         title={`${title} - ${siteMetadata.author}`}
         description={summary}
       />
+      {/* Drafts are reachable by URL for admins but shouldn't be indexed. */}
+      {draft && (
+        <Head>
+          <meta name="robots" content="noindex,nofollow" />
+        </Head>
+      )}
       <article className="mx-auto max-w-3xl py-10">
+        {draft && (
+          <p className="mb-6 border-2 border-brutalist-pink bg-black px-4 py-2 font-mono text-sm font-bold uppercase text-brutalist-pink">
+            ● Draft — unlisted; visible to you as an admin
+          </p>
+        )}
         <LiveTalkBanner
           slug={slug}
           className="mb-6 flex w-full items-center gap-3 border-2 border-white bg-black px-4 py-3 font-mono shadow-hard-md transition-shadow hover:shadow-hard-lg"

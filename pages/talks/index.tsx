@@ -5,17 +5,21 @@ import { PageSEO } from '@/components/SEO';
 import TalkCard from '@/components/talks/TalkCard';
 import siteMetadata from '@/data/siteMetadata';
 import { getAllTalksFrontMatter } from '@/lib/talks';
+import { useIsAdmin } from '@/lib/useIsAdmin';
 
 export const getStaticProps: GetStaticProps<{
   talks: TalkFrontMatter[];
 }> = async () => {
-  const talks = getAllTalksFrontMatter();
+  // Build drafts into the payload too; the page reveals them only to an admin.
+  const talks = getAllTalksFrontMatter(true);
   return { props: { talks } };
 };
 
 export default function TalksPage({
   talks,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const isAdmin = useIsAdmin();
+  const visible = talks.filter((t) => isAdmin || !t.draft);
   return (
     <>
       <PageSEO
@@ -37,14 +41,14 @@ export default function TalksPage({
         </div>
 
         <div className="px-6 py-12">
-          {talks.length === 0 ? (
+          {visible.length === 0 ? (
             <p className="font-mono text-zinc-400">
               <span className="text-brutalist-pink">&gt;</span> No talks yet.
               Check back soon.
             </p>
           ) : (
             <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
-              {talks.map((talk) => (
+              {visible.map((talk) => (
                 <TalkCard key={talk.slug} talk={talk} />
               ))}
             </div>
