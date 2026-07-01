@@ -1,12 +1,38 @@
 import { v } from 'convex/values';
-import type { MutationCtx } from './_generated/server';
+import type { Id } from './_generated/dataModel';
+import type { MutationCtx, QueryCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
+import {
+  DEFAULT_CONFIG,
+  type TalkConfig,
+  talkConfigValidator,
+} from './talkConfig';
 
-// Presenter actions (start/end) are gated by the shared moderation secret,
-// stored in the Convex deployment env (the same MODERATION_KEY used elsewhere).
+// Presenter actions (start/end/setSlide) are gated by the shared moderation
+// secret, stored in the Convex deployment env (the same MODERATION_KEY elsewhere).
 function keyOk(key: string): boolean {
   const expected = process.env.MODERATION_KEY;
   return Boolean(expected) && key === expected;
+}
+
+/** A talk's config, falling back to defaults for talks started before configs. */
+export function resolveConfig(talk: { config?: TalkConfig }): TalkConfig {
+  return talk.config ?? DEFAULT_CONFIG;
+}
+
+/**
+ * Resolve a room string to the talk it names, but only if that talk is currently
+ * live. Audience functions call this to enforce "must be a live talk" — a room
+ * that isn't a valid talk id (e.g. the old demo room) normalises to null and is
+ * rejected, and an ended talk is rejected too. This is the server-side gate that
+ * makes disabled/closed features actually closed, not merely hidden.
+ */
+export async function liveTalkForRoom(ctx: QueryCtx, room: string) {
+  const id = ctx.db.normalizeId('talks', room);
+  if (!id) return null;
+  const talk = await ctx.db.get(id as Id<'talks'>);
+  if (!talk || talk.status !== 'live') return null;
+  return talk;
 }
 
 async function endLiveTalks(ctx: MutationCtx): Promise<void> {
@@ -41,6 +67,8 @@ export const current = query({
       slug: live.slug,
       title: live.title,
       startedAt: live.startedAt,
+      config: resolveConfig(live),
+      currentSlide: live.currentSlide ?? 0,
     };
   },
 });
@@ -72,8 +100,13 @@ export const stats = query({
 
 /** Presenter: start a talk (ends any currently-live one first). */
 export const start = mutation({
-  args: { slug: v.string(), title: v.string(), key: v.string() },
-  handler: async (ctx, { slug, title, key }) => {
+  args: {
+    slug: v.string(),
+    title: v.string(),
+    key: v.string(),
+    config: talkConfigValidator,
+  },
+  handler: async (ctx, { slug, title, key, config }) => {
     if (!keyOk(key)) throw new Error('Unauthorized: invalid moderation key.');
     await endLiveTalks(ctx);
     const id = await ctx.db.insert('talks', {
@@ -81,6 +114,8 @@ export const start = mutation({
       title,
       status: 'live',
       startedAt: Date.now(),
+      config,
+      currentSlide: 0,
     });
     return { room: id };
   },
@@ -92,5 +127,22 @@ export const end = mutation({
   handler: async (ctx, { key }) => {
     if (!keyOk(key)) throw new Error('Unauthorized: invalid moderation key.');
     await endLiveTalks(ctx);
+  },
+});
+
+/**
+ * Presenter: broadcast the current slide index (follow-the-presenter). Key-gated
+ * and guarded to a live talk with `follow` enabled — so only a key-holder can
+ * move the room, and only while a follow-enabled talk is running.
+ */
+export const setSlide = mutation({
+  args: { room: v.string(), index: v.number(), key: v.string() },
+  handler: async (ctx, { room, index, key }) => {
+    if (!keyOk(key)) throw new Error('Unauthorized: invalid moderation key.');
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk || !resolveConfig(talk).follow) return;
+    await ctx.db.patch(talk._id, {
+      currentSlide: Math.max(0, Math.floor(index)),
+    });
   },
 });

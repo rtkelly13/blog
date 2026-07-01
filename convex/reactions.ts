@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { internalMutation, mutation, query } from './_generated/server';
+import { liveTalkForRoom, resolveConfig } from './talks';
 
 // Reactions only need to live long enough to animate on screen.
 const FEED_MS = 6_000;
@@ -15,6 +16,9 @@ export const send = mutation({
   args: { room: v.string(), emoji: v.string(), count: v.number() },
   handler: async (ctx, { room, emoji, count }) => {
     if (!ALLOWED.has(emoji)) return; // silently drop anything off the allow-list
+    // Server-side gate: reactions only land for a live talk with reactions on.
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk || !resolveConfig(talk).reactions) return;
     const n = Math.min(Math.max(Math.floor(count), 1), 20);
     await ctx.db.insert('reactions', { room, emoji, count: n, at: Date.now() });
 

@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { internalMutation, mutation, query } from './_generated/server';
+import { liveTalkForRoom, resolveConfig } from './talks';
 
 // Presence TTL: a client counts as "here" only if it pinged within this window.
 // Clients heartbeat well inside it (see usePresence ~10s), so a couple of missed
@@ -19,6 +20,11 @@ const JOIN_FEED_MS = 15_000;
 export const heartbeat = mutation({
   args: { room: v.string(), machineId: v.string() },
   handler: async (ctx, { room, machineId }) => {
+    // Server-side gate: only count presence for a live talk that has presence
+    // enabled. A stale/demo/ended room is dropped silently (no client error).
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk || !resolveConfig(talk).presence) return;
+
     const now = Date.now();
     const mine = await ctx.db
       .query('presence')

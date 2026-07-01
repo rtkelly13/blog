@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { talkConfigValidator } from './talkConfig';
 
 // One row per audience submission to the "how to make toast" activity.
 // `steps` is the ordered list (already profanity-masked on the way in).
@@ -18,6 +19,11 @@ export default defineSchema({
     status: v.union(v.literal('live'), v.literal('ended')),
     startedAt: v.number(),
     endedAt: v.optional(v.number()),
+    // Feature config chosen at start (optional: talks started before configs
+    // existed fall back to DEFAULT_CONFIG in code). See convex/talkConfig.ts.
+    config: v.optional(talkConfigValidator),
+    // Presenter's current slide index, published in follow mode via setSlide.
+    currentSlide: v.optional(v.number()),
   }).index('by_status', ['status']),
 
   // Minimal "hello world" example: a single named counter, bumped by anyone,

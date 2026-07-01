@@ -28,6 +28,9 @@ function LiveRoom() {
     );
   }
 
+  const { config } = talk;
+  const anyInteractive = config.presence || config.reactions || config.follow;
+
   return (
     <div className="border-2 border-white bg-zinc-900 p-8">
       <p className="font-mono text-sm uppercase text-brutalist-pink">
@@ -36,21 +39,61 @@ function LiveRoom() {
       <h2 className="mt-2 font-display text-3xl font-bold uppercase text-white">
         {talk.title}
       </h2>
-      <div className="mt-4">
-        <PresenceBadge room={talk.room} />
-      </div>
-      <p className="mt-6 mb-3 font-mono text-sm uppercase text-zinc-400">
-        React:
-      </p>
-      <Reactions room={talk.room} />
-      <p className="mt-8 mb-3 font-mono text-sm uppercase text-zinc-400">
-        This talk so far:
-      </p>
-      <TalkStatsChart room={talk.room} />
-      <p className="mt-6 font-mono text-sm text-zinc-400">
-        <span className="text-brutalist-yellow">&gt;</span> You're in. Keep this
-        tab open to stay counted.
-      </p>
+
+      {config.presence && (
+        <div className="mt-4">
+          <PresenceBadge room={talk.room} />
+        </div>
+      )}
+
+      {config.follow && (
+        <p className="mt-6 font-mono text-sm">
+          <a
+            href={`/talks/${talk.slug}/present?follow=live`}
+            className="border-2 border-white bg-brutalist-yellow px-4 py-2 font-bold uppercase text-black shadow-hard-md"
+          >
+            Follow the slides →
+          </a>
+        </p>
+      )}
+
+      {config.reactions && (
+        <>
+          <p className="mt-6 mb-3 font-mono text-sm uppercase text-zinc-400">
+            React:
+          </p>
+          <Reactions room={talk.room} />
+        </>
+      )}
+
+      {config.closingChart && (
+        <>
+          <p className="mt-8 mb-3 font-mono text-sm uppercase text-zinc-400">
+            This talk so far:
+          </p>
+          <TalkStatsChart room={talk.room} threshold={config.chartThreshold} />
+        </>
+      )}
+
+      {!anyInteractive && !config.closingChart && (
+        <p className="mt-6 font-mono text-sm text-zinc-400">
+          <span className="text-brutalist-yellow">&gt;</span> This talk is
+          running.{' '}
+          <a
+            href={`/talks/${talk.slug}`}
+            className="text-brutalist-cyan underline"
+          >
+            View the slides →
+          </a>
+        </p>
+      )}
+
+      {anyInteractive && (
+        <p className="mt-6 font-mono text-sm text-zinc-400">
+          <span className="text-brutalist-yellow">&gt;</span> You're in. Keep
+          this tab open to stay counted.
+        </p>
+      )}
     </div>
   );
 }
