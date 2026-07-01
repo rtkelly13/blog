@@ -8,16 +8,19 @@
  * @module
  */
 
+import type * as activities from "../activities.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as hello from "../hello.js";
 import type * as http from "../http.js";
+import type * as lib_admin from "../lib/admin.js";
 import type * as lib_profanity from "../lib/profanity.js";
+import type * as polls from "../polls.js";
 import type * as presence from "../presence.js";
+import type * as questions from "../questions.js";
 import type * as reactions from "../reactions.js";
 import type * as talkConfig from "../talkConfig.js";
 import type * as talks from "../talks.js";
-import type * as toast from "../toast.js";
 
 import type {
   ApiFromModules,
@@ -26,16 +29,19 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  activities: typeof activities;
   auth: typeof auth;
   crons: typeof crons;
   hello: typeof hello;
   http: typeof http;
+  "lib/admin": typeof lib_admin;
   "lib/profanity": typeof lib_profanity;
+  polls: typeof polls;
   presence: typeof presence;
+  questions: typeof questions;
   reactions: typeof reactions;
   talkConfig: typeof talkConfig;
   talks: typeof talks;
-  toast: typeof toast;
 }>;
 
 /**

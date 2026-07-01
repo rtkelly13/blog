@@ -11,6 +11,7 @@ import NoteBlock from './NoteBlock';
 import Pre from './Pre';
 import TalkStatsChart from './TalkStatsChart';
 import TOCInline from './TOCInline';
+import EmojiTop5 from './talks/EmojiTop5';
 
 const Wrapper: React.ComponentType<{ layout: string }> = ({
   layout,
@@ -25,6 +26,7 @@ export const MDXComponents: MDXComponentsType = {
   TOCInline,
   Diagram,
   NoteBlock,
+  EmojiTop5,
   TalkStatsChart,
   a: CustomLink,
   pre: Pre,
