@@ -49,7 +49,7 @@ function LiveRoom() {
       {config.follow && (
         <p className="mt-6 font-mono text-sm">
           <a
-            href={`/talks/${talk.slug}/present?follow=live`}
+            href={`/talks/${talk.slug}/present?mode=attendee`}
             className="border-2 border-white bg-brutalist-yellow px-4 py-2 font-bold uppercase text-black shadow-hard-md"
           >
             Watch along →

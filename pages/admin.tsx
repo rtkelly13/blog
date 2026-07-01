@@ -130,12 +130,20 @@ function Dashboard() {
               (top-right) to drive every follower's slides.
             </p>
             <a
-              href={`/talks/${slug}/present?presenter=true`}
+              href={`/talks/${slug}/present?mode=presenter`}
               target="_blank"
               rel="noreferrer"
               className="block border-2 border-white bg-brutalist-yellow px-4 py-2 text-center font-bold uppercase text-black shadow-hard-md"
             >
               Open deck to broadcast →
+            </a>
+            <a
+              href={`/talks/${slug}/present?mode=moderation`}
+              target="_blank"
+              rel="noreferrer"
+              className="block border-2 border-white bg-black px-4 py-2 text-center font-bold uppercase text-brutalist-pink shadow-hard-md"
+            >
+              Open moderation view (2nd screen) →
             </a>
             {!current?.config.follow && (
               <p className="text-xs text-zinc-500">
@@ -157,11 +165,11 @@ function Dashboard() {
             <li>
               <a
                 className="text-brutalist-cyan underline"
-                href={`/talks/${slug}/present?follow=live`}
+                href={`/talks/${slug}/present?mode=attendee`}
                 target="_blank"
                 rel="noreferrer"
               >
-                Follower view (what the audience sees)
+                Attendee view (what the audience sees)
               </a>
             </li>
             <li>

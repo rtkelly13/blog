@@ -13,6 +13,7 @@ import {
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 import { Broadcaster, Follower } from './DeckLive';
+import { AttendeeSidebar, ModerationSidebar } from './DeckSidebars';
 import SlideBody from './SlideBody';
 import { brutalistTheme } from './theme';
 
@@ -25,6 +26,8 @@ interface SpectacleDeckProps {
   slides: DeckSlide[];
   slug: string;
 }
+
+type Mode = 'attendee' | 'presenter' | 'moderation';
 
 const MONO = '"IBM Plex Mono", "Courier New", Courier, monospace';
 
@@ -80,17 +83,23 @@ function BaseDeck({ slides }: { slides: DeckSlide[] }) {
   );
 }
 
+function resolveMode(raw: unknown): Mode {
+  if (raw === 'presenter' || raw === 'moderation' || raw === 'attendee') {
+    return raw;
+  }
+  return 'attendee';
+}
+
 /**
- * Deck with the follow-the-presenter live layer.
+ * Deck with the follow-the-presenter live layer, driven by ?mode=:
  *
- * - `?presenter=true` + signed-in admin → BROADCAST: this deck's navigation
- *   drives the room (via the identity-gated setSlide), and it heartbeats a
- *   presenter session so we can warn if a second presenter is connected.
- * - otherwise → FOLLOW: mirror the presenter's slide (soft-follow). `?follow=live`
- *   is the clean audience view.
- *
- * Broadcaster/Follower live inside the deck template so they can read/drive
- * Spectacle's navigation.
+ * - `presenter` (admin) → BROADCAST: this deck drives the room (identity-gated
+ *   setSlide) and heartbeats a presenter session so clashes are detectable.
+ *   Full-screen, clean (projector view).
+ * - `attendee` (default) → WATCH ALONG: follows the presenter's slide and shows
+ *   a reactions sidebar (react + everyone's synced reactions).
+ * - `moderation` (admin) → follows + a moderator sidebar (presence, reactions,
+ *   live numbers, End talk) — the presenter's second screen.
  */
 function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const router = useRouter();
@@ -100,7 +109,6 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const { isAuthenticated } = useConvexAuth();
   const isAdmin = useQuery(api.talks.isAdmin) === true;
 
-  // Stable per-tab presenter session id (deck is client-only).
   const sessionIdRef = useRef('');
   if (!sessionIdRef.current) sessionIdRef.current = crypto.randomUUID();
 
@@ -112,18 +120,24 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   }, []);
   const onError = useCallback((message: string) => setPubError(message), []);
 
-  const isPresenterMode = router.query.presenter === 'true';
-  const isAudienceMode = router.query.follow === 'live';
-  const matches = current?.slug === slug && current?.config.follow === true;
-  // Broadcast only in explicit presenter mode, as an allowlisted admin, for the
-  // live follow-enabled talk. Everyone else follows.
-  const broadcasting = isPresenterMode && matches && isAdmin;
-  const followEnabled = matches && !broadcasting;
+  const mode = resolveMode(router.query.mode);
 
+  // Live state for THIS deck's talk.
+  const liveHere = current?.slug === slug;
+  const followOn = liveHere && current?.config.follow === true;
+  const reactionsOn = liveHere && current?.config.reactions === true;
   const room = current?.room;
 
-  // Heartbeat this presenter session while broadcasting, so concurrent presenters
-  // are detectable.
+  const broadcasting = mode === 'presenter' && followOn && isAdmin;
+  const followEnabled = followOn && !broadcasting;
+
+  const showAttendeeSidebar = mode === 'attendee' && Boolean(reactionsOn);
+  const showModerationSidebar =
+    mode === 'moderation' && isAdmin && Boolean(liveHere);
+  const showPresenterHud = mode === 'presenter' && isAuthenticated && isAdmin;
+
+  // Heartbeat this presenter session while broadcasting, so concurrent
+  // presenters are detectable.
   useEffect(() => {
     if (!broadcasting || !room) return;
     const sessionId = sessionIdRef.current;
@@ -162,16 +176,44 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     </>
   );
 
-  // Presenter status HUD — only for a signed-in admin who opened presenter mode.
-  const showPresenterHud =
-    isPresenterMode && isAuthenticated && isAdmin && !isAudienceMode;
+  const deckEl = (
+    <Deck theme={brutalistTheme} template={template}>
+      {renderSlides(slides)}
+    </Deck>
+  );
+
+  const sidebar =
+    showAttendeeSidebar && room ? (
+      <AttendeeSidebar room={room} />
+    ) : showModerationSidebar && room ? (
+      <ModerationSidebar room={room} />
+    ) : null;
+
+  // With a sidebar, the deck occupies the left ~4/5 (Spectacle scales into its
+  // container) and the sidebar fills the right 1/5.
+  if (sidebar) {
+    return (
+      <div style={{ display: 'flex', width: '100vw', height: '100vh' }}>
+        <div
+          style={{
+            position: 'relative',
+            height: '100vh',
+            flex: '1 1 0%',
+            minWidth: 0,
+          }}
+        >
+          {deckEl}
+        </div>
+        <div style={{ height: '100vh', flex: '0 0 20vw', width: '20vw' }}>
+          {sidebar}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <Deck theme={brutalistTheme} template={template}>
-        {renderSlides(slides)}
-      </Deck>
-
+      {deckEl}
       {showPresenterHud && (
         <div
           style={{
@@ -201,7 +243,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
                   : '#facc15',
             }}
           >
-            {!matches
+            {!followOn
               ? 'no live follow talk'
               : pubError
                 ? `broadcast error: ${pubError}`
@@ -231,7 +273,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
  * export modes (mod+shift+r / mod+shift+e, or ?printMode=true / ?exportMode=true).
  * Each slide's body is our MDX content, so markdown authoring + <Diagram> /
  * mermaid / brutalist theme are preserved. When Convex is configured the deck
- * gains an opt-in follow-the-presenter layer; otherwise it's the plain deck.
+ * gains the ?mode= live layer; otherwise it's the plain deck.
  */
 export default function SpectacleDeck({ slides, slug }: SpectacleDeckProps) {
   if (!isConvexConfigured) return <BaseDeck slides={slides} />;
