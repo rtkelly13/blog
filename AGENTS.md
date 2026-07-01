@@ -125,32 +125,48 @@ pnpm typecheck            # tsc --noEmit
 pnpm format               # Biome format
 ```
 
-## BROWSER CONTROL (agent-browser + your own Chrome)
+## BROWSER CONTROL (agent-browser)
 
 Some things can't be tested with a throwaway headless browser: the GitHub-gated
 presenter surfaces (`/admin`, and the deck's `?mode=presenter|console`) and
-anything behind Convex Auth need a **real, GitHub-logged-in session**. Reuse your
-own running Chrome (the `Default` profile = `94ryan.kelly@gmail.com`, already
-signed into GitHub) via **`--auto-connect`** — it discovers the running Chrome
-and reuses its cookies/localStorage, so no relaunch and no re-login:
+anything behind Convex Auth need a **real, GitHub-logged-in session**.
+
+### Preferred: a dedicated dev profile (`~/.agent-browser-profiles/dev`)
+
+agent-browser drives its **own** Chrome for Testing against a persistent profile
+you sign into once — isolated from your daily Chrome, so no attach banner, no
+input-hijacking, no tab drift.
 
 ```bash
-agent-browser --auto-connect open http://localhost:3002/admin  # reuses GitHub session
-agent-browser --auto-connect tab list                          # shows your REAL tabs
-agent-browser --auto-connect snapshot
+# One-time: sign in (headed window opens; click "Sign in with GitHub")
+agent-browser --profile ~/.agent-browser-profiles/dev --headed open http://localhost:3002/admin
+
+# Thereafter (headless or headed) — the GitHub/Convex session persists:
+agent-browser --profile ~/.agent-browser-profiles/dev open http://localhost:3002/admin
+agent-browser --profile ~/.agent-browser-profiles/dev --headed snapshot
 ```
 
-- Without `--auto-connect`, agent-browser spawns its own **headless Chrome for
-  Testing** with a temp profile that is NOT logged in — GitHub sign-in dead-ends
-  on `github.com/login`. (Tell-tale: `tab list` shows only `about:blank`.)
-- Prerequisite: Chrome must be running with remote debugging. Enable/inspect at
-  `chrome://inspect/#devices`, or launch with:
-  `open -na "Google Chrome" --args --remote-debugging-port=9222 --remote-allow-origins=*`
-  (Chrome 111+ needs `--remote-allow-origins` or it silently rejects CDP clients.)
-- Alternatives: `--profile Default` (launch reusing a profile's login state),
-  `--cdp <port>` / `connect <port>` (attach to a specific CDP port).
-- Related concept: Chrome DevTools MCP —
-  https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session
+Set `AGENT_BROWSER_PROFILE=~/.agent-browser-profiles/dev` to make it the default
+so you can drop the flag. Re-sign-in only if the session expires.
+
+### Fallback: `--auto-connect` to your daily Chrome (avoid)
+
+`--auto-connect` discovers a *running* Chrome (started with
+`--remote-debugging-port=9222 --remote-allow-origins=*`; Chrome 111+ needs the
+latter or it silently rejects CDP) and reuses its cookies. It works, but driving
+your **primary** profile is fragile and was a repeated foot-gun:
+
+- The live CDP attach shows an "allow remote debugging" state that can **hang and
+  block your clicks**. If Chrome freezes: `pkill -f agent-browser` (drops the
+  daemon), or quit Chrome (`osascript -e 'quit app "Google Chrome"'`).
+- Background tabs get their `setInterval` **throttled**, so presenter heartbeats
+  lapse and the clash count reads wrong (queries/effects still update — only
+  timers throttle).
+- Active-tab drift: you're using the browser, so the "active" target moves under
+  automation between calls.
+
+Prefer the dedicated profile above. Concept ref: Chrome DevTools MCP —
+https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session
 
 ## BUILD PIPELINE
 
