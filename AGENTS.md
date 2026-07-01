@@ -125,6 +125,52 @@ pnpm typecheck            # tsc --noEmit
 pnpm format               # Biome format
 ```
 
+## BROWSER CONTROL (agent-browser)
+
+For anything that needs a **real, logged-in session** (auth-gated pages, or live
+WebSocket features), don't use a throwaway headless browser — it isn't signed in.
+
+### Preferred: a dedicated dev profile (`~/.agent-browser-profiles/dev`)
+
+agent-browser drives its **own** Chrome for Testing against a persistent profile
+you sign into once — isolated from your daily Chrome, so no attach banner, no
+input-hijacking, no tab drift.
+
+```bash
+# One-time: sign in (a headed window opens; complete the login there)
+agent-browser --profile ~/.agent-browser-profiles/dev --headed open http://localhost:3000
+
+# Thereafter (headless or headed) — the session persists:
+agent-browser --profile ~/.agent-browser-profiles/dev open <url>
+```
+
+Set `AGENT_BROWSER_PROFILE=~/.agent-browser-profiles/dev` to make it the default
+and drop the flag. Re-sign-in only when the session expires.
+
+### Fallback: `--auto-connect` to your daily Chrome (avoid)
+
+`--auto-connect` discovers a *running* Chrome (launched with
+`--remote-debugging-port=9222 --remote-allow-origins=*`; Chrome 111+ needs the
+latter or it silently rejects CDP) and reuses its cookies. It works, but driving
+your **primary** profile is fragile:
+
+- The live CDP attach shows an "allow remote debugging" state that can **hang and
+  block your clicks**. Recover with `pkill -f agent-browser` (drops the daemon),
+  or quit Chrome (`osascript -e 'quit app "Google Chrome"'`).
+- Background tabs get their `setInterval` **throttled**, so timer-driven code
+  (heartbeats/polling) stalls in inactive tabs (WebSocket queries still update).
+- Active-tab drift: you're using the browser, so the "active" target moves under
+  automation between calls.
+
+### Gotcha: keep the tab count low
+
+Each open tab holds its own WebSocket/connection. Piling up tabs can **exhaust
+the connection pool and wedge new pages on "Connecting…"**. Keep it to the
+minimum you're testing (e.g. one driver + one viewer) and close stale tabs.
+
+Concept ref: Chrome DevTools MCP —
+https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session
+
 ## BUILD PIPELINE
 
 ```
