@@ -127,8 +127,9 @@ pnpm format               # Biome format
 
 ## BROWSER CONTROL (agent-browser)
 
-For anything that needs a **real, logged-in session** (auth-gated pages, or live
-WebSocket features), don't use a throwaway headless browser — it isn't signed in.
+Some things can't be tested with a throwaway headless browser: the GitHub-gated
+presenter surfaces (`/admin`, and the deck's `?mode=presenter|console`) and
+anything behind Convex Auth need a **real, GitHub-logged-in session**.
 
 ### Preferred: a dedicated dev profile (`~/.agent-browser-profiles/dev`)
 
@@ -137,10 +138,10 @@ you sign into once — isolated from your daily Chrome, so no attach banner, no
 input-hijacking, no tab drift.
 
 ```bash
-# One-time: sign in (a headed window opens; complete the login there)
-agent-browser --profile ~/.agent-browser-profiles/dev --headed open http://localhost:3000
+# One-time: sign in (a headed window opens; click "Sign in with GitHub")
+agent-browser --profile ~/.agent-browser-profiles/dev --headed open http://localhost:3002/admin
 
-# Thereafter (headless or headed) — the session persists:
+# Thereafter (headless or headed) — the GitHub/Convex session persists:
 agent-browser --profile ~/.agent-browser-profiles/dev open <url>
 ```
 
@@ -152,13 +153,14 @@ and drop the flag. Re-sign-in only when the session expires.
 `--auto-connect` discovers a *running* Chrome (launched with
 `--remote-debugging-port=9222 --remote-allow-origins=*`; Chrome 111+ needs the
 latter or it silently rejects CDP) and reuses its cookies. It works, but driving
-your **primary** profile is fragile:
+your **primary** profile is fragile and was a repeated foot-gun:
 
 - The live CDP attach shows an "allow remote debugging" state that can **hang and
   block your clicks**. Recover with `pkill -f agent-browser` (drops the daemon),
   or quit Chrome (`osascript -e 'quit app "Google Chrome"'`).
 - Background tabs get their `setInterval` **throttled**, so timer-driven code
-  (heartbeats/polling) stalls in inactive tabs (WebSocket queries still update).
+  (presenter heartbeats/polling) stalls in inactive tabs — the clash count reads
+  wrong, though WebSocket queries still update.
 - Active-tab drift: you're using the browser, so the "active" target moves under
   automation between calls.
 

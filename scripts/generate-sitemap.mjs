@@ -23,6 +23,8 @@ const siteUrl = siteMetadata.siteUrl.replace(/\/$/, '');
       'pages/*.js',
       'data/blog/**/*.mdx',
       'data/blog/**/*.md',
+      'data/talks/**/*.mdx',
+      'data/talks/**/*.md',
       'public/tags/**/*.xml',
       '!pages/_*.tsx',
       '!pages/_*.js',
@@ -39,6 +41,7 @@ const siteUrl = siteMetadata.siteUrl.replace(/\/$/, '');
                 const pagePath = page
                   .replace('pages/', '/')
                   .replace('data/blog', '/blog')
+                  .replace('data/talks', '/talks')
                   .replace('public/', '/')
                   .replace('.tsx', '')
                   .replace('.js', '')
