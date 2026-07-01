@@ -30,10 +30,37 @@ function isPublished(frontmatter: { draft?: boolean }): boolean {
   return frontmatter.draft !== true || show_drafts();
 }
 
+/**
+ * Fail the build on invalid talk metadata — especially the fields the presenter
+ * console's pacing timer depends on. `durationMins` sets the timer's target, so
+ * a bad value would silently break pacing; `date` must be parseable.
+ */
+export function validateTalkFrontMatter(
+  data: TalkFrontMatter,
+  slug: string,
+): void {
+  const where = `talk "${slug}"`;
+  if (!data.title || typeof data.title !== 'string') {
+    throw new Error(`${where}: missing/invalid \`title\``);
+  }
+  if (data.date != null && Number.isNaN(new Date(data.date).getTime())) {
+    throw new Error(`${where}: unparseable \`date\` (${String(data.date)})`);
+  }
+  if (data.durationMins != null) {
+    const d = data.durationMins;
+    if (typeof d !== 'number' || !Number.isFinite(d) || d <= 0 || d > 600) {
+      throw new Error(
+        `${where}: \`durationMins\` must be a positive number of minutes (0–600), got ${String(d)}`,
+      );
+    }
+  }
+}
+
 function normalizeFrontMatter(
   data: TalkFrontMatter,
   slug: string,
 ): TalkFrontMatter {
+  validateTalkFrontMatter(data, slug);
   return {
     ...data,
     slug,
