@@ -4,36 +4,67 @@ import { DeckContext } from 'spectacle';
 
 type SetSlide = ReturnType<typeof useMutation>;
 
+type NavRef = { current: { next: () => void; prev: () => void } | null };
+
 /**
- * Presenter side of follow-the-presenter. Rendered inside <Deck> (so it can read
- * the live navigation via DeckContext), it publishes the active slide index to
- * the talk whenever it changes. The mutation is identity-gated and server-guarded
- * to a live, follow-enabled talk, so a stray render simply no-ops.
+ * Driving surface (presenter deck OR console). Rendered inside <Deck> so it can
+ * read/drive Spectacle's navigation via DeckContext. Navigating the deck (arrows,
+ * or the console's Prev/Next through `navRef`) publishes the active slide to the
+ * room — the deck itself is the source of truth, so it never "detaches". On mount
+ * it aligns to the room's current slide (so opening a driver mid-talk doesn't
+ * reset everyone to the first slide), and only broadcasts once aligned.
  */
-export function Broadcaster({
-  enabled,
+export function DeckDriver({
   room,
-  slideIndex,
+  initialSlide,
   setSlide,
+  onIndex,
+  navRef,
   onPublished,
   onError,
 }: {
-  enabled: boolean;
   room?: string;
-  /** Current slide index, driven by the deck template's slideNumber (reliable). */
-  slideIndex: number;
+  initialSlide: number;
   setSlide: SetSlide;
+  onIndex?: (index: number) => void;
+  navRef?: NavRef;
   onPublished?: (index: number) => void;
   onError?: (message: string) => void;
 }) {
+  const { activeView, skipTo, advanceSlide, regressSlide } =
+    useContext(DeckContext);
+  const index = activeView.slideIndex;
+  const [ready, setReady] = useState(false);
+
+  // Expose deck navigation to out-of-deck controls (the console Prev/Next).
+  if (navRef) navRef.current = { next: advanceSlide, prev: regressSlide };
+
+  // Align to the room's current slide once, on mount.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only alignment
   useEffect(() => {
-    if (!enabled || !room) return;
-    setSlide({ room, index: slideIndex })
-      .then(() => onPublished?.(slideIndex))
+    if (index !== initialSlide)
+      skipTo({ slideIndex: initialSlide, stepIndex: 0 });
+  }, []);
+
+  // Ready once aligned — so we never broadcast the pre-alignment position.
+  useEffect(() => {
+    if (!ready && index === initialSlide) setReady(true);
+  }, [ready, index, initialSlide]);
+
+  // Report position for the console's notes/preview (always).
+  useEffect(() => {
+    onIndex?.(index);
+  }, [index, onIndex]);
+
+  // Broadcast position to the room (only after alignment).
+  useEffect(() => {
+    if (!ready || !room) return;
+    setSlide({ room, index })
+      .then(() => onPublished?.(index))
       .catch((e) =>
         onError?.(e instanceof Error ? e.message : 'broadcast failed'),
       );
-  }, [enabled, room, slideIndex, setSlide, onPublished, onError]);
+  }, [ready, index, room, setSlide, onPublished, onError]);
 
   return null;
 }

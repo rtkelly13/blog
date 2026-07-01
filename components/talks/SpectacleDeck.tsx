@@ -12,7 +12,7 @@ import {
 } from 'spectacle';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
-import { Broadcaster, Follower } from './DeckLive';
+import { DeckDriver, Follower } from './DeckLive';
 import { AttendeeSidebar, ConsoleSidebar } from './DeckSidebars';
 import SlideBody from './SlideBody';
 import { brutalistTheme } from './theme';
@@ -112,6 +112,11 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const sessionIdRef = useRef('');
   if (!sessionIdRef.current) sessionIdRef.current = crypto.randomUUID();
 
+  // The console's Prev/Next drive the embedded deck (which then broadcasts),
+  // and the deck reports its slide index up for the console's notes/preview.
+  const navRef = useRef<{ next: () => void; prev: () => void } | null>(null);
+  const [deckIndex, setDeckIndex] = useState(0);
+
   const [pubSlide, setPubSlide] = useState<number | null>(null);
   const [pubError, setPubError] = useState<string | null>(null);
   const onPublished = useCallback((index: number) => {
@@ -128,20 +133,19 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const reactionsOn = liveHere && current?.config.reactions === true;
   const room = current?.room;
 
-  const broadcasting = mode === 'presenter' && followOn && isAdmin;
+  // Both presenter and console DRIVE the deck (their navigation broadcasts);
+  // attendees follow. Same admin identity, so both heartbeat a presenter session
+  // and two connected at once surfaces a clash.
+  const broadcasting =
+    (mode === 'presenter' || mode === 'console') && followOn && isAdmin;
   const followEnabled = followOn && !broadcasting;
 
   const showAttendeeSidebar = mode === 'attendee' && Boolean(reactionsOn);
   const showConsoleSidebar = mode === 'console' && isAdmin && Boolean(liveHere);
   const showPresenterHud = mode === 'presenter' && isAuthenticated && isAdmin;
 
-  // Both the presenter deck (broadcasts via its own navigation) and the console
-  // (drives via Prev/Next) are "driving surfaces" — same admin identity — so both
-  // heartbeat a presenter session, and two connected at once surfaces a clash.
-  const driving = broadcasting || showConsoleSidebar;
-
   useEffect(() => {
-    if (!driving || !room) return;
+    if (!broadcasting || !room) return;
     const sessionId = sessionIdRef.current;
     const ping = () => {
       presenterPing({ room, sessionId }).catch(() => {});
@@ -149,7 +153,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     ping();
     const id = setInterval(ping, 5000);
     return () => clearInterval(id);
-  }, [driving, room, presenterPing]);
+  }, [broadcasting, room, presenterPing]);
 
   const presenterCount = useQuery(
     api.talks.presenterCount,
@@ -166,15 +170,22 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   }) => (
     <>
       <Chrome slideNumber={slideNumber} numberOfSlides={numberOfSlides} />
-      <Broadcaster
-        enabled={broadcasting}
-        room={room}
-        slideIndex={slideNumber - 1}
-        setSlide={setSlide}
-        onPublished={onPublished}
-        onError={onError}
-      />
-      <Follower enabled={followEnabled} currentSlide={current?.currentSlide} />
+      {broadcasting ? (
+        <DeckDriver
+          room={room}
+          initialSlide={current?.currentSlide ?? 0}
+          setSlide={setSlide}
+          onIndex={setDeckIndex}
+          navRef={navRef}
+          onPublished={onPublished}
+          onError={onError}
+        />
+      ) : (
+        <Follower
+          enabled={followEnabled}
+          currentSlide={current?.currentSlide}
+        />
+      )}
     </>
   );
 
@@ -191,8 +202,9 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
       <ConsoleSidebar
         room={room}
         slides={slides}
-        currentSlide={current?.currentSlide ?? 0}
-        setSlide={setSlide}
+        currentSlide={deckIndex}
+        onPrev={() => navRef.current?.prev()}
+        onNext={() => navRef.current?.next()}
       />
     ) : null;
   // The console is a working cockpit (controls + notes + preview), so give it

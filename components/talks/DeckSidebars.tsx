@@ -6,7 +6,6 @@ import { api } from '@/convex/_generated/api';
 import SlideBody from './SlideBody';
 
 type Slide = { code: string; notes: string | null };
-type SetSlide = (args: { room: string; index: number }) => Promise<unknown>;
 
 // Right-hand deck sidebar. The floating reaction bubbles (from <Reactions>) rise
 // in the viewport's right 20vw, i.e. within/near this panel.
@@ -68,12 +67,14 @@ export function ConsoleSidebar({
   room,
   slides,
   currentSlide,
-  setSlide,
+  onPrev,
+  onNext,
 }: {
   room: string;
   slides: Slide[];
   currentSlide: number;
-  setSlide: SetSlide;
+  onPrev: () => void;
+  onNext: () => void;
 }) {
   const presenters = useQuery(api.talks.presenterCount, { room });
   const end = useMutation(api.talks.end);
@@ -82,11 +83,6 @@ export function ConsoleSidebar({
   const idx = Math.min(Math.max(currentSlide, 0), Math.max(last, 0));
   const notes = slides[idx]?.notes;
   const next = slides[idx + 1];
-
-  const go = (i: number) => {
-    const target = Math.min(Math.max(i, 0), last);
-    setSlide({ room, index: target }).catch(() => {});
-  };
 
   const clash = typeof presenters === 'number' && presenters > 1;
   const noPresenter = presenters === 0;
@@ -111,7 +107,7 @@ export function ConsoleSidebar({
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => go(idx - 1)}
+            onClick={onPrev}
             disabled={idx <= 0}
             className={`${btn} bg-white`}
           >
@@ -119,7 +115,7 @@ export function ConsoleSidebar({
           </button>
           <button
             type="button"
-            onClick={() => go(idx + 1)}
+            onClick={onNext}
             disabled={idx >= last}
             className={`${btn} bg-brutalist-cyan`}
           >
