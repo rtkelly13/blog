@@ -12,6 +12,9 @@ import Pre from './Pre';
 import TalkStatsChart from './TalkStatsChart';
 import TOCInline from './TOCInline';
 import EmojiTop5 from './talks/EmojiTop5';
+import LivePoll from './talks/LivePoll';
+import OrderedActions from './talks/OrderedActions';
+import QuestionQueue from './talks/QuestionQueue';
 
 const Wrapper: React.ComponentType<{ layout: string }> = ({
   layout,
@@ -27,6 +30,9 @@ export const MDXComponents: MDXComponentsType = {
   Diagram,
   NoteBlock,
   EmojiTop5,
+  LivePoll,
+  OrderedActions,
+  QuestionQueue,
   TalkStatsChart,
   a: CustomLink,
   pre: Pre,

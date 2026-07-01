@@ -2,6 +2,7 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
 import type { ReactNode } from 'react';
 import AdminGate from '@/components/admin/AdminGate';
+import AudienceControls from '@/components/admin/AudienceControls';
 import TalkControls from '@/components/admin/TalkControls';
 import { PageSEO } from '@/components/SEO';
 import TalkStatsChart from '@/components/TalkStatsChart';
@@ -204,6 +205,13 @@ function Dashboard() {
           )}
         </Card>
       </div>
+
+      {/* Audience participation — poll, ordered-actions, Q&A + moderation */}
+      {isLive && current?.room && (
+        <Card title="Audience participation" accent="text-brutalist-yellow">
+          <AudienceControls room={current.room} />
+        </Card>
+      )}
     </div>
   );
 }
