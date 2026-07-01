@@ -56,3 +56,4 @@ storybook-static
 
 # git worktrees (scratch state for parallel branches)
 .worktrees/
+.claude/worktrees/

@@ -138,34 +138,39 @@ you sign into once — isolated from your daily Chrome, so no attach banner, no
 input-hijacking, no tab drift.
 
 ```bash
-# One-time: sign in (headed window opens; click "Sign in with GitHub")
+# One-time: sign in (a headed window opens; click "Sign in with GitHub")
 agent-browser --profile ~/.agent-browser-profiles/dev --headed open http://localhost:3002/admin
 
 # Thereafter (headless or headed) — the GitHub/Convex session persists:
-agent-browser --profile ~/.agent-browser-profiles/dev open http://localhost:3002/admin
-agent-browser --profile ~/.agent-browser-profiles/dev --headed snapshot
+agent-browser --profile ~/.agent-browser-profiles/dev open <url>
 ```
 
 Set `AGENT_BROWSER_PROFILE=~/.agent-browser-profiles/dev` to make it the default
-so you can drop the flag. Re-sign-in only if the session expires.
+and drop the flag. Re-sign-in only when the session expires.
 
 ### Fallback: `--auto-connect` to your daily Chrome (avoid)
 
-`--auto-connect` discovers a *running* Chrome (started with
+`--auto-connect` discovers a *running* Chrome (launched with
 `--remote-debugging-port=9222 --remote-allow-origins=*`; Chrome 111+ needs the
 latter or it silently rejects CDP) and reuses its cookies. It works, but driving
 your **primary** profile is fragile and was a repeated foot-gun:
 
 - The live CDP attach shows an "allow remote debugging" state that can **hang and
-  block your clicks**. If Chrome freezes: `pkill -f agent-browser` (drops the
-  daemon), or quit Chrome (`osascript -e 'quit app "Google Chrome"'`).
-- Background tabs get their `setInterval` **throttled**, so presenter heartbeats
-  lapse and the clash count reads wrong (queries/effects still update — only
-  timers throttle).
+  block your clicks**. Recover with `pkill -f agent-browser` (drops the daemon),
+  or quit Chrome (`osascript -e 'quit app "Google Chrome"'`).
+- Background tabs get their `setInterval` **throttled**, so timer-driven code
+  (presenter heartbeats/polling) stalls in inactive tabs — the clash count reads
+  wrong, though WebSocket queries still update.
 - Active-tab drift: you're using the browser, so the "active" target moves under
   automation between calls.
 
-Prefer the dedicated profile above. Concept ref: Chrome DevTools MCP —
+### Gotcha: keep the tab count low
+
+Each open tab holds its own WebSocket/connection. Piling up tabs can **exhaust
+the connection pool and wedge new pages on "Connecting…"**. Keep it to the
+minimum you're testing (e.g. one driver + one viewer) and close stale tabs.
+
+Concept ref: Chrome DevTools MCP —
 https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session
 
 ## BUILD PIPELINE
@@ -246,6 +251,20 @@ workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapsh
 - `next-remote-watch` used in `start` script for content hot-reload
 - Mixed JS/TS in data layer (`siteMetadata.js` vs `headerNavLinks.ts`)
 - Storybook uses Vite adapter (`@storybook/nextjs-vite`)
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs live as local markdown under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Uses the five canonical roles with default strings (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
 ---
 
