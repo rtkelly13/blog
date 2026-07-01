@@ -23,9 +23,19 @@ function resolveTalkFile(slug: string): string | null {
 
 export function getTalkSlugs(): string[] {
   if (!fs.existsSync(talksPath)) return [];
+  const showDrafts = show_drafts();
   return fs
     .readdirSync(talksPath)
     .filter((file) => /\.(mdx|md)$/.test(file))
+    .filter((file) => {
+      if (showDrafts) return true;
+      // Draft talks (e.g. the E2E debug deck) are only routable in debug mode
+      // (dev or SHOW_DRAFTS) — excluded from the production build entirely.
+      const { data } = matter(
+        fs.readFileSync(path.join(talksPath, file), 'utf8'),
+      );
+      return data.draft !== true;
+    })
     .map((file) => file.replace(/\.(mdx|md)$/, ''));
 }
 
@@ -102,6 +112,9 @@ export async function getTalkBySlug(
 
   const { data, content } = matter(fs.readFileSync(filePath, 'utf8'));
   const frontmatter = data as TalkFrontMatter;
+
+  // Draft talks are debug-only: unavailable unless dev / SHOW_DRAFTS.
+  if (frontmatter.draft === true && !show_drafts()) return null;
 
   // Split the (frontmatter-stripped) body into individual slides on a line
   // containing only `---`. Within a slide, an optional `???` line separates the
