@@ -1,3 +1,4 @@
+import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import { talkConfigValidator } from './talkConfig';
@@ -9,6 +10,22 @@ import { talkConfigValidator } from './talkConfig';
 // flipped to `revealed: true` by a scheduled function ~5s later — unless the
 // presenter has `hidden` it first.
 export default defineSchema({
+  // Convex Auth tables (users/sessions/accounts/etc). We override `users` to
+  // carry the GitHub `login` so mutations can allowlist admins by username.
+  ...authTables,
+  users: defineTable({
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    githubLogin: v.optional(v.string()),
+  })
+    .index('email', ['email'])
+    .index('phone', ['phone']),
+
   // A live talk SESSION (distinct from the MDX talk content). The presenter
   // "starts" one; audience joins whichever is currently `live` — that's the
   // abstraction that lets presence/chat attach to "the current talk" without

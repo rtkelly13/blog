@@ -1,17 +1,11 @@
-import { useMutation, useQuery } from 'convex/react';
-import { useEffect, useState } from 'react';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
+import { useState } from 'react';
 import { PageSEO } from '@/components/SEO';
 import { api } from '@/convex/_generated/api';
 import { TALK_PRESETS, type TalkConfig } from '@/convex/talkConfig';
 import siteMetadata from '@/data/siteMetadata';
 import { isConvexConfigured } from '@/lib/convexClient';
-
-// Kept in localStorage (not the URL) so the moderation key is never shown in the
-// address bar / projected screen or left in browser history, yet is shared with
-// the deck tab (opened via the Present link) and survives a refresh — enter it
-// once here and broadcasting on the deck already has it. Clear it by clearing
-// site data on the presenter's machine.
-const KEY_STORAGE = 'rk:moderation-key';
 
 const FEATURE_TOGGLES: { key: keyof TalkConfig; label: string }[] = [
   { key: 'presence', label: 'Live head-count' },
@@ -20,12 +14,49 @@ const FEATURE_TOGGLES: { key: keyof TalkConfig; label: string }[] = [
   { key: 'closingChart', label: 'Closing stats chart' },
 ];
 
+function SignIn() {
+  const { signIn } = useAuthActions();
+  return (
+    <div className="border-2 border-white bg-zinc-900 p-6 font-mono">
+      <p className="text-sm text-zinc-300">
+        Presenter controls are restricted. Sign in with the allowed GitHub
+        account to start and drive a talk.
+      </p>
+      <button
+        type="button"
+        onClick={() => void signIn('github')}
+        className="mt-4 border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md"
+      >
+        Sign in with GitHub
+      </button>
+    </div>
+  );
+}
+
+function NotAllowed() {
+  const { signOut } = useAuthActions();
+  return (
+    <div className="border-2 border-brutalist-pink bg-zinc-900 p-6 font-mono">
+      <p className="text-sm text-brutalist-pink">
+        Signed in, but this GitHub account isn't on the admin allowlist.
+      </p>
+      <button
+        type="button"
+        onClick={() => void signOut()}
+        className="mt-4 border-2 border-white bg-black px-4 py-2 text-sm font-bold uppercase text-white"
+      >
+        Sign out
+      </button>
+    </div>
+  );
+}
+
 function Manage() {
   const current = useQuery(api.talks.current);
   const start = useMutation(api.talks.start);
   const end = useMutation(api.talks.end);
+  const { signOut } = useAuthActions();
 
-  const [talkKey, setTalkKey] = useState('');
   const [slug, setSlug] = useState('so-you-want-to-build-software');
   const [title, setTitle] = useState('So You Want To Build Software?');
   const [presetId, setPresetId] = useState(TALK_PRESETS[0].id);
@@ -42,18 +73,10 @@ function Manage() {
   const setFlag = (key: keyof TalkConfig, value: boolean | number) =>
     setConfig((c) => ({ ...c, [key]: value }));
 
-  // Restore a previously-entered key (shared with the deck tab, not the URL).
-  useEffect(() => {
-    const saved = localStorage.getItem(KEY_STORAGE);
-    if (saved) setTalkKey(saved);
-  }, []);
-
   const run = async (fn: () => Promise<unknown>) => {
     setError(null);
     try {
       await fn();
-      // Only remember the key once it's proven to work (no error thrown).
-      localStorage.setItem(KEY_STORAGE, talkKey);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong');
     }
@@ -61,21 +84,18 @@ function Manage() {
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-6 font-mono">
-      <p className="text-sm uppercase text-brutalist-cyan">
-        {current ? `● Live: ${current.title}` : 'Nothing live'}
-      </p>
-
-      <label className="mt-6 block text-xs uppercase text-zinc-400">
-        Moderation key
-        <input
-          type="password"
-          value={talkKey}
-          onChange={(e) => setTalkKey(e.target.value)}
-          placeholder="enter moderation key"
-          autoComplete="off"
-          className="mt-1 w-full border-2 border-white bg-black px-3 py-2 text-white"
-        />
-      </label>
+      <div className="flex items-center justify-between">
+        <p className="text-sm uppercase text-brutalist-cyan">
+          {current ? `● Live: ${current.title}` : 'Nothing live'}
+        </p>
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="text-xs uppercase text-zinc-400 underline"
+        >
+          Sign out
+        </button>
+      </div>
 
       <div className="mt-4 space-y-3">
         <input
@@ -145,18 +165,15 @@ function Manage() {
         <div className="flex gap-3">
           <button
             type="button"
-            disabled={!talkKey}
-            onClick={() =>
-              run(() => start({ slug, title, key: talkKey, config }))
-            }
-            className="border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md disabled:opacity-50"
+            onClick={() => run(() => start({ slug, title, config }))}
+            className="border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md"
           >
             Start talk
           </button>
           <button
             type="button"
-            disabled={!talkKey || !current}
-            onClick={() => run(() => end({ key: talkKey }))}
+            disabled={!current}
+            onClick={() => run(() => end({}))}
             className="border-2 border-white bg-brutalist-pink px-5 py-2 font-bold uppercase text-black shadow-hard-md disabled:opacity-50"
           >
             End talk
@@ -178,6 +195,21 @@ function Manage() {
   );
 }
 
+function Gate() {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const isAdmin = useQuery(api.talks.isAdmin);
+
+  if (isLoading) {
+    return <p className="font-mono text-zinc-400">Connecting…</p>;
+  }
+  if (!isAuthenticated) return <SignIn />;
+  if (isAdmin === undefined) {
+    return <p className="font-mono text-zinc-400">Checking access…</p>;
+  }
+  if (!isAdmin) return <NotAllowed />;
+  return <Manage />;
+}
+
 export default function LiveManagePage() {
   return (
     <>
@@ -187,7 +219,7 @@ export default function LiveManagePage() {
           [ Presenter ]
         </h1>
         {isConvexConfigured ? (
-          <Manage />
+          <Gate />
         ) : (
           <p className="font-mono text-brutalist-pink">
             Convex not configured.

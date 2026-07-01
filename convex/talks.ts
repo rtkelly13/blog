@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
@@ -8,11 +9,35 @@ import {
   talkConfigValidator,
 } from './talkConfig';
 
-// Presenter actions (start/end/setSlide) are gated by the shared moderation
-// secret, stored in the Convex deployment env (the same MODERATION_KEY elsewhere).
-function keyOk(key: string): boolean {
-  const expected = process.env.MODERATION_KEY;
-  return Boolean(expected) && key === expected;
+// Comma-separated allowlist of GitHub logins permitted to run talks, set on the
+// deployment (e.g. ADMIN_GITHUB_LOGINS="rtkelly13").
+const ADMIN_GITHUB_LOGINS = (process.env.ADMIN_GITHUB_LOGINS ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+/** True if the signed-in user's GitHub login is on the admin allowlist. */
+async function isAdminUser(ctx: QueryCtx): Promise<boolean> {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) return false;
+  const user = await ctx.db.get(userId);
+  return Boolean(
+    user &&
+      'githubLogin' in user &&
+      typeof user.githubLogin === 'string' &&
+      ADMIN_GITHUB_LOGINS.includes(user.githubLogin),
+  );
+}
+
+/**
+ * Presenter actions (start/end/setSlide) require a signed-in GitHub user on the
+ * admin allowlist. This is the real security boundary — the audience functions
+ * are public, so identity is enforced here in the mutations, not just in the UI.
+ */
+async function requireAdmin(ctx: QueryCtx): Promise<void> {
+  if (!(await isAdminUser(ctx))) {
+    throw new Error('Unauthorized: sign in with an allowed GitHub account.');
+  }
 }
 
 /** A talk's config, falling back to defaults for talks started before configs. */
@@ -73,6 +98,12 @@ export const current = query({
   },
 });
 
+/** Public: is the current viewer a signed-in admin? Drives the presenter UI. */
+export const isAdmin = query({
+  args: {},
+  handler: async (ctx) => isAdminUser(ctx),
+});
+
 /**
  * Aggregated stats for a talk room — for the closing chart. Reactive, so the
  * chart animates as reactions land right up to the final slide.
@@ -98,16 +129,15 @@ export const stats = query({
   },
 });
 
-/** Presenter: start a talk (ends any currently-live one first). */
+/** Presenter: start a talk (ends any currently-live one first). Admin-only. */
 export const start = mutation({
   args: {
     slug: v.string(),
     title: v.string(),
-    key: v.string(),
     config: talkConfigValidator,
   },
-  handler: async (ctx, { slug, title, key, config }) => {
-    if (!keyOk(key)) throw new Error('Unauthorized: invalid moderation key.');
+  handler: async (ctx, { slug, title, config }) => {
+    await requireAdmin(ctx);
     await endLiveTalks(ctx);
     const id = await ctx.db.insert('talks', {
       slug,
@@ -121,24 +151,24 @@ export const start = mutation({
   },
 });
 
-/** Presenter: end the current talk. */
+/** Presenter: end the current talk. Admin-only. */
 export const end = mutation({
-  args: { key: v.string() },
-  handler: async (ctx, { key }) => {
-    if (!keyOk(key)) throw new Error('Unauthorized: invalid moderation key.');
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
     await endLiveTalks(ctx);
   },
 });
 
 /**
- * Presenter: broadcast the current slide index (follow-the-presenter). Key-gated
- * and guarded to a live talk with `follow` enabled — so only a key-holder can
- * move the room, and only while a follow-enabled talk is running.
+ * Presenter: broadcast the current slide index (follow-the-presenter). Admin-only
+ * and guarded to a live talk with `follow` enabled — so only an allowed GitHub
+ * user can move the room, and only while a follow-enabled talk is running.
  */
 export const setSlide = mutation({
-  args: { room: v.string(), index: v.number(), key: v.string() },
-  handler: async (ctx, { room, index, key }) => {
-    if (!keyOk(key)) throw new Error('Unauthorized: invalid moderation key.');
+  args: { room: v.string(), index: v.number() },
+  handler: async (ctx, { room, index }) => {
+    await requireAdmin(ctx);
     const talk = await liveTalkForRoom(ctx, room);
     if (!talk || !resolveConfig(talk).follow) return;
     await ctx.db.patch(talk._id, {

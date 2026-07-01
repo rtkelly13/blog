@@ -7,29 +7,27 @@ type SetSlide = ReturnType<typeof useMutation>;
 /**
  * Presenter side of follow-the-presenter. Rendered inside <Deck> (so it can read
  * the live navigation via DeckContext), it publishes the active slide index to
- * the talk whenever it changes. The mutation is key-gated and server-guarded to
- * a live, follow-enabled talk, so a stray render or a missing key simply no-ops.
+ * the talk whenever it changes. The mutation is identity-gated and server-guarded
+ * to a live, follow-enabled talk, so a stray render simply no-ops.
  */
 export function Broadcaster({
   enabled,
   room,
-  moderationKey,
   setSlide,
 }: {
   enabled: boolean;
   room?: string;
-  moderationKey: string;
   setSlide: SetSlide;
 }) {
   const { activeView } = useContext(DeckContext);
   const slideIndex = activeView.slideIndex;
 
   useEffect(() => {
-    if (!enabled || !room || !moderationKey) return;
-    setSlide({ room, index: slideIndex, key: moderationKey }).catch(() => {
+    if (!enabled || !room) return;
+    setSlide({ room, index: slideIndex }).catch(() => {
       // Ignore transient failures — the next slide change re-publishes.
     });
-  }, [enabled, room, moderationKey, slideIndex, setSlide]);
+  }, [enabled, room, slideIndex, setSlide]);
 
   return null;
 }

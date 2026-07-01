@@ -16,7 +16,7 @@ import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource/ibm-plex-mono/700.css';
 import '@/css/tailwind.css';
 
-import { ConvexProvider } from 'convex/react';
+import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { ThemeProvider } from 'next-themes';
@@ -53,9 +53,10 @@ export default function App({ Component, pageProps }: AppProps) {
   );
 
   // Only mount the Convex provider when a deployment is configured. Everything
-  // else renders unchanged when NEXT_PUBLIC_CONVEX_URL is unset.
+  // else renders unchanged when NEXT_PUBLIC_CONVEX_URL is unset. ConvexAuthProvider
+  // adds GitHub-session handling (tokens in localStorage) on top of ConvexProvider.
   return convex ? (
-    <ConvexProvider client={convex}>{tree}</ConvexProvider>
+    <ConvexAuthProvider client={convex}>{tree}</ConvexAuthProvider>
   ) : (
     tree
   );
