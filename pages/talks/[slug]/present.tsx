@@ -65,7 +65,7 @@ export default function Present({
       <Head>
         <title>{frontMatter.title}</title>
       </Head>
-      <SpectacleDeck slides={slides} />
+      <SpectacleDeck slides={slides} slug={frontMatter.slug} />
     </>
   );
 }

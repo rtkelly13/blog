@@ -2,6 +2,7 @@ import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { ComponentProps } from 'react';
 import type { SeriesMetadata } from 'types/Series';
 import CyberHero from '@/components/CyberHero';
+import LiveTalkBanner from '@/components/LiveTalkBanner';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 import ListLayout from '@/layouts/ListLayout';
@@ -35,7 +36,10 @@ export default function Home({
         title={siteMetadata.title}
         description={siteMetadata.description}
       />
-      <CyberHero />
+      <div className="relative">
+        <CyberHero />
+        <LiveTalkBanner />
+      </div>
       <div className="mt-12">
         <ListLayout
           posts={posts}
