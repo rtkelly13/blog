@@ -42,6 +42,30 @@ export default function TalkControls() {
     }
   };
 
+  if (current === undefined) {
+    return <p className="font-mono text-zinc-400">Connecting…</p>;
+  }
+
+  // While a talk is live, hide the start form entirely — the only action is to
+  // stop it.
+  if (current) {
+    return (
+      <div className="space-y-3 font-mono">
+        <p className="text-sm text-zinc-300">
+          A talk is running. Starting a new one isn't available until this ends.
+        </p>
+        <button
+          type="button"
+          onClick={() => run(() => end({}))}
+          className="border-2 border-white bg-brutalist-pink px-5 py-2 font-bold uppercase text-black shadow-hard-md"
+        >
+          End talk
+        </button>
+        {error && <p className="text-sm text-brutalist-pink">{error}</p>}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3 font-mono">
       <input
@@ -108,23 +132,13 @@ export default function TalkControls() {
         </div>
       </fieldset>
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => run(() => start({ slug, title, config }))}
-          className="border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md"
-        >
-          Start talk
-        </button>
-        <button
-          type="button"
-          disabled={!current}
-          onClick={() => run(() => end({}))}
-          className="border-2 border-white bg-brutalist-pink px-5 py-2 font-bold uppercase text-black shadow-hard-md disabled:opacity-50"
-        >
-          End talk
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => run(() => start({ slug, title, config }))}
+        className="border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md"
+      >
+        Start talk
+      </button>
 
       {error && <p className="text-sm text-brutalist-pink">{error}</p>}
     </div>
