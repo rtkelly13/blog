@@ -26,6 +26,8 @@ export interface DeckSlide {
 interface SpectacleDeckProps {
   slides: DeckSlide[];
   slug: string;
+  /** Target length (frontmatter durationMins) — drives the console pacing timer. */
+  durationMins?: number;
 }
 
 type Mode = 'attendee' | 'presenter' | 'console';
@@ -106,7 +108,7 @@ function resolveMode(raw: unknown): Mode {
  * - `console` (admin) → follows + a presenter console sidebar (connection status,
  *   presence, reactions, live numbers, End talk) — the presenter's second screen.
  */
-function LiveDeck({ slides, slug }: SpectacleDeckProps) {
+function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   const router = useRouter();
   const current = useQuery(api.talks.current);
   const setSlide = useMutation(api.talks.setSlide);
@@ -210,6 +212,8 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
         currentSlide={deckIndex}
         onPrev={() => navRef.current?.prev()}
         onNext={() => navRef.current?.next()}
+        startedAt={current?.startedAt}
+        durationMins={durationMins}
       />
     ) : null;
   // The console is a working cockpit (controls + notes + preview), so give it
@@ -318,7 +322,11 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
  * mermaid / brutalist theme are preserved. When Convex is configured the deck
  * gains the ?mode= live layer; otherwise it's the plain deck.
  */
-export default function SpectacleDeck({ slides, slug }: SpectacleDeckProps) {
+export default function SpectacleDeck({
+  slides,
+  slug,
+  durationMins,
+}: SpectacleDeckProps) {
   if (!isConvexConfigured) return <BaseDeck slides={slides} />;
-  return <LiveDeck slides={slides} slug={slug} />;
+  return <LiveDeck slides={slides} slug={slug} durationMins={durationMins} />;
 }

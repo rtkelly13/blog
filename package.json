@@ -60,6 +60,7 @@
     "preact": "^10.29.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-timer-hook": "^4.0.6",
     "reading-time": "1.5.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-katex": "^7.0.1",
