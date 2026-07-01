@@ -125,6 +125,33 @@ pnpm typecheck            # tsc --noEmit
 pnpm format               # Biome format
 ```
 
+## BROWSER CONTROL (agent-browser + your own Chrome)
+
+Some things can't be tested with a throwaway headless browser: the GitHub-gated
+presenter surfaces (`/admin`, and the deck's `?mode=presenter|console`) and
+anything behind Convex Auth need a **real, GitHub-logged-in session**. Reuse your
+own running Chrome (the `Default` profile = `94ryan.kelly@gmail.com`, already
+signed into GitHub) via **`--auto-connect`** — it discovers the running Chrome
+and reuses its cookies/localStorage, so no relaunch and no re-login:
+
+```bash
+agent-browser --auto-connect open http://localhost:3002/admin  # reuses GitHub session
+agent-browser --auto-connect tab list                          # shows your REAL tabs
+agent-browser --auto-connect snapshot
+```
+
+- Without `--auto-connect`, agent-browser spawns its own **headless Chrome for
+  Testing** with a temp profile that is NOT logged in — GitHub sign-in dead-ends
+  on `github.com/login`. (Tell-tale: `tab list` shows only `about:blank`.)
+- Prerequisite: Chrome must be running with remote debugging. Enable/inspect at
+  `chrome://inspect/#devices`, or launch with:
+  `open -na "Google Chrome" --args --remote-debugging-port=9222 --remote-allow-origins=*`
+  (Chrome 111+ needs `--remote-allow-origins` or it silently rejects CDP clients.)
+- Alternatives: `--profile Default` (launch reusing a profile's login state),
+  `--cdp <port>` / `connect <port>` (attach to a specific CDP port).
+- Related concept: Chrome DevTools MCP —
+  https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session
+
 ## BUILD PIPELINE
 
 ```
