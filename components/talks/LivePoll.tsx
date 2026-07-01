@@ -2,6 +2,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
+import { useDeckMode } from './DeckModeContext';
 
 const CLOUD_COLORS = [
   'text-brutalist-cyan',
@@ -16,7 +17,8 @@ function sizeFor(count: number, max: number): string {
   return `${(1 + ratio * 2).toFixed(2)}rem`;
 }
 
-function Poll({ room }: { room: string }) {
+function Poll({ room, display }: { room: string; display?: boolean }) {
+  const mode = useDeckMode();
   const poll = useQuery(api.polls.active, { room });
   const submit = useMutation(api.polls.submit);
   const [word, setWord] = useState('');
@@ -26,6 +28,9 @@ function Poll({ room }: { room: string }) {
   // No open poll → render nothing (embedded panels stay quiet until started).
   if (!poll) return null;
 
+  // Only the interactive audience surface gets the input; projected/console
+  // decks and any `display` embed show the cloud only.
+  const showForm = !display && mode === 'attendee';
   const max = Math.max(1, ...poll.words.map((w) => w.count));
 
   const send = async (e: React.FormEvent) => {
@@ -51,22 +56,26 @@ function Poll({ room }: { room: string }) {
         {poll.prompt}
       </h3>
 
-      <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row">
-        <input
-          value={word}
-          onChange={(e) => setWord(e.target.value)}
-          maxLength={32}
-          placeholder="One word…"
-          className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-pink focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={sending || !word.trim()}
-          className="border-2 border-white bg-brutalist-pink px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
-        >
-          {done ? 'Add another' : 'Send'}
-        </button>
-      </form>
+      {/* On the projected deck (display) we show the cloud only — no dead input
+          box on a big screen. Students still submit from /live. */}
+      {showForm && (
+        <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row">
+          <input
+            value={word}
+            onChange={(e) => setWord(e.target.value)}
+            maxLength={32}
+            placeholder="One word…"
+            className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-pink focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={sending || !word.trim()}
+            className="border-2 border-white bg-brutalist-pink px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
+          >
+            {done ? 'Add another' : 'Send'}
+          </button>
+        </form>
+      )}
 
       <div className="mt-5 flex min-h-[4rem] flex-wrap items-center gap-x-4 gap-y-1">
         {poll.words.length === 0 ? (
@@ -97,19 +106,26 @@ function Poll({ room }: { room: string }) {
   );
 }
 
-function Resolver({ room }: { room?: string }) {
+function Resolver({ room, display }: { room?: string; display?: boolean }) {
   const current = useQuery(api.talks.current, room ? 'skip' : {});
   const resolved = room ?? current?.room;
   if (!resolved) return null;
-  return <Poll room={resolved} />;
+  return <Poll room={resolved} display={display} />;
 }
 
 /**
  * Embedded live poll / word cloud. The presenter opens a prompt from the console;
  * the audience submits single words that grow in the cloud by frequency. Renders
  * nothing when no poll is open. Resolves the live room automatically or takes one.
+ * `display` (projected deck) shows the cloud only, hiding the submission form.
  */
-export default function LivePoll({ room }: { room?: string }) {
+export default function LivePoll({
+  room,
+  display,
+}: {
+  room?: string;
+  display?: boolean;
+}) {
   if (!isConvexConfigured) return null;
-  return <Resolver room={room} />;
+  return <Resolver room={room} display={display} />;
 }

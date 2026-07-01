@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { isConvexConfigured } from '@/lib/convexClient';
+import { useDeckMode } from './DeckModeContext';
 
 const VOTED_KEY = 'talk-qa-voted';
 
@@ -28,7 +29,8 @@ function useVoted() {
   return { voted, mark };
 }
 
-function Queue({ room }: { room: string }) {
+function Queue({ room, display }: { room: string; display?: boolean }) {
+  const mode = useDeckMode();
   const data = useQuery(api.questions.list, { room });
   const ask = useMutation(api.questions.ask);
   const upvote = useMutation(api.questions.upvote);
@@ -36,6 +38,10 @@ function Queue({ room }: { room: string }) {
 
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+
+  // Projected/console decks (and any `display` embed) are read-only: no ask box,
+  // votes shown as static badges. Students ask + upvote from /live.
+  const readOnly = display || mode !== 'attendee';
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,30 +62,34 @@ function Queue({ room }: { room: string }) {
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
       <p className="mb-3 font-mono text-sm uppercase text-brutalist-cyan">
-        Ask a question
+        {readOnly ? 'Top questions' : 'Ask a question'}
       </p>
 
-      <form onSubmit={submit} className="flex flex-col gap-3 sm:flex-row">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          maxLength={280}
-          placeholder="Type your question…"
-          className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-cyan focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={sending || !text.trim()}
-          className="border-2 border-white bg-brutalist-cyan px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
-        >
-          Ask
-        </button>
-      </form>
+      {!readOnly && (
+        <form onSubmit={submit} className="flex flex-col gap-3 sm:flex-row">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            maxLength={280}
+            placeholder="Type your question…"
+            className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-cyan focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={sending || !text.trim()}
+            className="border-2 border-white bg-brutalist-cyan px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
+          >
+            Ask
+          </button>
+        </form>
+      )}
 
-      <div className="mt-5 space-y-2">
+      <div className={`${readOnly ? '' : 'mt-5'} space-y-2`}>
         {questions.length === 0 ? (
           <p className="font-mono text-sm text-zinc-500">
-            No questions yet — be the first. Upvote others to push them up.
+            {readOnly
+              ? 'Questions from the room will appear here.'
+              : 'No questions yet — be the first. Upvote others to push them up.'}
           </p>
         ) : (
           questions.map((q) => {
@@ -93,23 +103,30 @@ function Queue({ room }: { room: string }) {
                     : 'border-white bg-black'
                 }`}
               >
-                <button
-                  type="button"
-                  disabled={hasVoted || q.answered}
-                  onClick={() => {
-                    upvote({ id: q._id as Id<'questions'> }).catch(() => {});
-                    mark(q._id);
-                  }}
-                  className={`flex w-12 shrink-0 flex-col items-center border-2 py-1 font-mono font-bold ${
-                    hasVoted
-                      ? 'border-brutalist-yellow bg-brutalist-yellow text-black'
-                      : 'border-white text-white hover:bg-white hover:text-black'
-                  } disabled:cursor-default`}
-                  aria-label="Upvote question"
-                >
-                  <span className="text-sm leading-none">▲</span>
-                  <span className="text-lg leading-tight">{q.votes}</span>
-                </button>
+                {readOnly ? (
+                  <div className="flex w-12 shrink-0 flex-col items-center border-2 border-brutalist-yellow py-1 font-mono font-bold text-brutalist-yellow">
+                    <span className="text-sm leading-none">▲</span>
+                    <span className="text-lg leading-tight">{q.votes}</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={hasVoted || q.answered}
+                    onClick={() => {
+                      upvote({ id: q._id as Id<'questions'> }).catch(() => {});
+                      mark(q._id);
+                    }}
+                    className={`flex w-12 shrink-0 flex-col items-center border-2 py-1 font-mono font-bold ${
+                      hasVoted
+                        ? 'border-brutalist-yellow bg-brutalist-yellow text-black'
+                        : 'border-white text-white hover:bg-white hover:text-black'
+                    } disabled:cursor-default`}
+                    aria-label="Upvote question"
+                  >
+                    <span className="text-sm leading-none">▲</span>
+                    <span className="text-lg leading-tight">{q.votes}</span>
+                  </button>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="font-mono text-base text-white">{q.text}</p>
                   {q.nickname && (
@@ -137,19 +154,26 @@ function Queue({ room }: { room: string }) {
   );
 }
 
-function Resolver({ room }: { room?: string }) {
+function Resolver({ room, display }: { room?: string; display?: boolean }) {
   const current = useQuery(api.talks.current, room ? 'skip' : {});
   const resolved = room ?? current?.room;
   if (!resolved) return null;
-  return <Queue room={resolved} />;
+  return <Queue room={resolved} display={display} />;
 }
 
 /**
  * Embedded live Q&A: anyone types a question, everyone upvotes to reorder the
  * queue, the presenter answers/rejects from the console. Rejected questions show
  * only as a "blocked" count. Resolves the live room automatically, or takes one.
+ * `display` (projected deck) is read-only — no ask box, votes as static badges.
  */
-export default function QuestionQueue({ room }: { room?: string }) {
+export default function QuestionQueue({
+  room,
+  display,
+}: {
+  room?: string;
+  display?: boolean;
+}) {
   if (!isConvexConfigured) return null;
-  return <Resolver room={room} />;
+  return <Resolver room={room} display={display} />;
 }
