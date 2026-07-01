@@ -6,6 +6,9 @@ import { isConvexConfigured } from '@/lib/convexClient';
 
 function SignIn() {
   const { signIn } = useAuthActions();
+  // Return to the page the sign-in was launched from (default is SITE_URL = "/").
+  const redirectTo =
+    typeof window !== 'undefined' ? window.location.pathname : '/admin';
   return (
     <div className="border-2 border-white bg-zinc-900 p-6 font-mono">
       <p className="text-sm text-zinc-300">
@@ -13,7 +16,7 @@ function SignIn() {
       </p>
       <button
         type="button"
-        onClick={() => void signIn('github')}
+        onClick={() => void signIn('github', { redirectTo })}
         className="mt-4 border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md"
       >
         Sign in with GitHub
