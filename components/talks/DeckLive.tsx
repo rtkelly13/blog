@@ -34,22 +34,25 @@ export function DeckDriver({
   const { activeView, skipTo, advanceSlide, regressSlide } =
     useContext(DeckContext);
   const index = activeView.slideIndex;
-  const [ready, setReady] = useState(false);
+  // The room's slide at the moment this driver opened — captured once (this
+  // component only mounts after the talk has loaded), then we align to it.
+  const targetRef = useRef(initialSlide);
+  const [aligned, setAligned] = useState(false);
 
   // Expose deck navigation to out-of-deck controls (the console Prev/Next).
   if (navRef) navRef.current = { next: advanceSlide, prev: regressSlide };
 
-  // Align to the room's current slide once, on mount.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only alignment
+  // Align to the room's slide, retrying until it lands — Spectacle can drop an
+  // early skipTo before its navigation is ready. Once aligned we start driving;
+  // we never broadcast the pre-alignment position (which would reset the room).
   useEffect(() => {
-    if (index !== initialSlide)
-      skipTo({ slideIndex: initialSlide, stepIndex: 0 });
-  }, []);
-
-  // Ready once aligned — so we never broadcast the pre-alignment position.
-  useEffect(() => {
-    if (!ready && index === initialSlide) setReady(true);
-  }, [ready, index, initialSlide]);
+    if (aligned) return;
+    if (index === targetRef.current) {
+      setAligned(true);
+      return;
+    }
+    skipTo({ slideIndex: targetRef.current, stepIndex: 0 });
+  }, [aligned, index, skipTo]);
 
   // Report position for the console's notes/preview (always).
   useEffect(() => {
@@ -58,13 +61,13 @@ export function DeckDriver({
 
   // Broadcast position to the room (only after alignment).
   useEffect(() => {
-    if (!ready || !room) return;
+    if (!aligned || !room) return;
     setSlide({ room, index })
       .then(() => onPublished?.(index))
       .catch((e) =>
         onError?.(e instanceof Error ? e.message : 'broadcast failed'),
       );
-  }, [ready, index, room, setSlide, onPublished, onError]);
+  }, [aligned, index, room, setSlide, onPublished, onError]);
 
   return null;
 }
