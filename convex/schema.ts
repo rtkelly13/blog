@@ -77,6 +77,19 @@ export default defineSchema({
     .index('by_room_machine', ['room', 'machineId'])
     .index('by_room_firstSeen', ['room', 'firstSeen']),
 
+  // Presenter heartbeats: one row per (room, sessionId) for a deck in presenter
+  // mode. Lets us detect when more than one presenter is connected to the same
+  // talk (stale tab / second device) so they don't fight over the slide. Reaped
+  // on a short TTL like presence. See convex/talks.ts presenterPing/presenterCount.
+  presenters: defineTable({
+    room: v.string(),
+    sessionId: v.string(),
+    lastSeen: v.number(),
+  })
+    .index('by_room_lastSeen', ['room', 'lastSeen'])
+    .index('by_room_session', ['room', 'sessionId'])
+    .index('by_lastSeen', ['lastSeen']),
+
   // Ephemeral emoji reactions that float up on screen. A `count` lets a client
   // debounce rapid taps into one row. Reaped on a short window by the cron.
   reactions: defineTable({

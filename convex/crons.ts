@@ -20,4 +20,13 @@ crons.interval(
   {},
 );
 
+// Presenter heartbeats are short-lived; sweep stale sessions so the
+// concurrent-presenter count is accurate.
+crons.interval(
+  'reap expired presenters',
+  { minutes: 1 },
+  internal.talks.reapPresenters,
+  {},
+);
+
 export default crons;

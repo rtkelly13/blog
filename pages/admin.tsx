@@ -130,7 +130,7 @@ function Dashboard() {
               (top-right) to drive every follower's slides.
             </p>
             <a
-              href={`/talks/${slug}/present`}
+              href={`/talks/${slug}/present?presenter=true`}
               target="_blank"
               rel="noreferrer"
               className="block border-2 border-white bg-brutalist-yellow px-4 py-2 text-center font-bold uppercase text-black shadow-hard-md"

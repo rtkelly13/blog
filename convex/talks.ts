@@ -2,7 +2,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
-import { mutation, query } from './_generated/server';
+import { internalMutation, mutation, query } from './_generated/server';
 import {
   DEFAULT_CONFIG,
   type TalkConfig,
@@ -190,5 +190,62 @@ export const setSlide = mutation({
     await ctx.db.patch(talk._id, {
       currentSlide: Math.max(0, Math.floor(index)),
     });
+  },
+});
+
+// A presenter session counts as "connected" only if it pinged within this window.
+const PRESENTER_TTL_MS = 15_000;
+
+/**
+ * Presenter heartbeat — one row per (room, sessionId). Admin-only; a deck in
+ * presenter mode calls this on a short interval. Distinct sessionIds for the
+ * same room mean more than one presenter is connected (stale tab / 2nd device).
+ */
+export const presenterPing = mutation({
+  args: { room: v.string(), sessionId: v.string() },
+  handler: async (ctx, { room, sessionId }) => {
+    await requireAdmin(ctx);
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk) return;
+    const now = Date.now();
+    const existing = await ctx.db
+      .query('presenters')
+      .withIndex('by_room_session', (q) =>
+        q.eq('room', room).eq('sessionId', sessionId),
+      )
+      .unique();
+    if (existing) {
+      await ctx.db.patch(existing._id, { lastSeen: now });
+    } else {
+      await ctx.db.insert('presenters', { room, sessionId, lastSeen: now });
+    }
+  },
+});
+
+/** How many presenter sessions are currently connected to a talk (≥2 = clash). */
+export const presenterCount = query({
+  args: { room: v.string() },
+  handler: async (ctx, { room }) => {
+    const cutoff = Date.now() - PRESENTER_TTL_MS;
+    const rows = await ctx.db
+      .query('presenters')
+      .withIndex('by_room_lastSeen', (q) =>
+        q.eq('room', room).gt('lastSeen', cutoff),
+      )
+      .collect();
+    return rows.length;
+  },
+});
+
+/** Scheduled (crons.ts): drop stale presenter heartbeats past the TTL. */
+export const reapPresenters = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const cutoff = Date.now() - PRESENTER_TTL_MS;
+    const expired = await ctx.db
+      .query('presenters')
+      .withIndex('by_lastSeen', (q) => q.lt('lastSeen', cutoff))
+      .collect();
+    await Promise.all(expired.map((row) => ctx.db.delete(row._id)));
   },
 });

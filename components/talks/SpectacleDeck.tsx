@@ -1,6 +1,6 @@
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Deck,
@@ -81,22 +81,29 @@ function BaseDeck({ slides }: { slides: DeckSlide[] }) {
 }
 
 /**
- * Deck with the follow-the-presenter live layer. Anyone viewing the live,
- * follow-enabled talk's deck follows along by default (soft-follow). Only a
- * signed-in admin sees the Broadcast control; flipping it makes their navigation
- * drive the room via the identity-gated setSlide mutation (no key). The
- * broadcaster and follower live inside the deck template so they can read/drive
- * Spectacle's navigation via DeckContext.
+ * Deck with the follow-the-presenter live layer.
+ *
+ * - `?presenter=true` + signed-in admin → BROADCAST: this deck's navigation
+ *   drives the room (via the identity-gated setSlide), and it heartbeats a
+ *   presenter session so we can warn if a second presenter is connected.
+ * - otherwise → FOLLOW: mirror the presenter's slide (soft-follow). `?follow=live`
+ *   is the clean audience view.
+ *
+ * Broadcaster/Follower live inside the deck template so they can read/drive
+ * Spectacle's navigation.
  */
 function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const router = useRouter();
   const current = useQuery(api.talks.current);
   const setSlide = useMutation(api.talks.setSlide);
+  const presenterPing = useMutation(api.talks.presenterPing);
   const { isAuthenticated } = useConvexAuth();
   const isAdmin = useQuery(api.talks.isAdmin) === true;
 
-  const [broadcastOn, setBroadcastOn] = useState(false);
-  // Visible broadcast feedback: which slide we last pushed, or an error string.
+  // Stable per-tab presenter session id (deck is client-only).
+  const sessionIdRef = useRef('');
+  if (!sessionIdRef.current) sessionIdRef.current = crypto.randomUUID();
+
   const [pubSlide, setPubSlide] = useState<number | null>(null);
   const [pubError, setPubError] = useState<string | null>(null);
   const onPublished = useCallback((index: number) => {
@@ -105,18 +112,34 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   }, []);
   const onError = useCallback((message: string) => setPubError(message), []);
 
-  // Follow engages by default whenever the live, follow-enabled talk is this
-  // deck — no query param needed, so simply opening the deck follows along.
-  // Broadcasting is the admin opt-in; while broadcasting, this tab stops
-  // following so the admin's own navigation drives the room. ?follow=live is
-  // just a clean audience view that hides the Broadcast control.
+  const isPresenterMode = router.query.presenter === 'true';
   const isAudienceMode = router.query.follow === 'live';
   const matches = current?.slug === slug && current?.config.follow === true;
-  const broadcasting = matches && broadcastOn && isAdmin;
+  // Broadcast only in explicit presenter mode, as an allowlisted admin, for the
+  // live follow-enabled talk. Everyone else follows.
+  const broadcasting = isPresenterMode && matches && isAdmin;
   const followEnabled = matches && !broadcasting;
-  // The Broadcast control is only offered to a signed-in admin, and never in the
-  // clean audience view.
-  const showBroadcastControl = !isAudienceMode && isAuthenticated && isAdmin;
+
+  const room = current?.room;
+
+  // Heartbeat this presenter session while broadcasting, so concurrent presenters
+  // are detectable.
+  useEffect(() => {
+    if (!broadcasting || !room) return;
+    const sessionId = sessionIdRef.current;
+    const ping = () => {
+      presenterPing({ room, sessionId }).catch(() => {});
+    };
+    ping();
+    const id = setInterval(ping, 5000);
+    return () => clearInterval(id);
+  }, [broadcasting, room, presenterPing]);
+
+  const presenterCount = useQuery(
+    api.talks.presenterCount,
+    broadcasting && room ? { room } : 'skip',
+  );
+  const clash = typeof presenterCount === 'number' && presenterCount > 1;
 
   const template = ({
     slideNumber,
@@ -129,7 +152,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
       <Chrome slideNumber={slideNumber} numberOfSlides={numberOfSlides} />
       <Broadcaster
         enabled={broadcasting}
-        room={current?.room}
+        room={room}
         slideIndex={slideNumber - 1}
         setSlide={setSlide}
         onPublished={onPublished}
@@ -139,13 +162,17 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     </>
   );
 
+  // Presenter status HUD — only for a signed-in admin who opened presenter mode.
+  const showPresenterHud =
+    isPresenterMode && isAuthenticated && isAdmin && !isAudienceMode;
+
   return (
     <>
       <Deck theme={brutalistTheme} template={template}>
         {renderSlides(slides)}
       </Deck>
 
-      {showBroadcastControl && (
+      {showPresenterHud && (
         <div
           style={{
             position: 'fixed',
@@ -153,45 +180,45 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
             right: '1rem',
             zIndex: 40,
             display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '0.4rem',
             fontFamily: MONO,
             fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            fontWeight: 700,
           }}
         >
-          {broadcastOn && (
-            <span
-              style={{
-                color: pubError
-                  ? '#f472b6'
-                  : broadcasting
-                    ? '#22d3ee'
-                    : '#facc15',
-                textTransform: 'uppercase',
-              }}
-            >
-              {pubError
-                ? `broadcast error: ${pubError}`
-                : broadcasting
-                  ? `● broadcasting${pubSlide != null ? ` · slide ${pubSlide + 1}` : ''}`
-                  : 'start a follow talk'}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => setBroadcastOn((v) => !v)}
+          <span
             style={{
               border: '2px solid #fff',
-              background: broadcastOn ? '#22d3ee' : '#000',
-              color: broadcastOn ? '#000' : '#fff',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              padding: '0.3rem 0.7rem',
-              cursor: 'pointer',
+              background: '#000',
+              padding: '0.3rem 0.6rem',
+              color: pubError
+                ? '#f472b6'
+                : broadcasting
+                  ? '#22d3ee'
+                  : '#facc15',
             }}
           >
-            Broadcast {broadcastOn ? '●' : '○'}
-          </button>
+            {!matches
+              ? 'no live follow talk'
+              : pubError
+                ? `broadcast error: ${pubError}`
+                : `● presenting${pubSlide != null ? ` · slide ${pubSlide + 1}` : ''}`}
+          </span>
+          {clash && (
+            <span
+              style={{
+                border: '2px solid #f472b6',
+                background: '#f472b6',
+                color: '#000',
+                padding: '0.3rem 0.6rem',
+              }}
+            >
+              ⚠ {presenterCount} presenters connected — you may clash
+            </span>
+          )}
         </div>
       )}
     </>
