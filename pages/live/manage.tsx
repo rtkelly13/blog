@@ -160,6 +160,15 @@ function Manage() {
             End talk
           </button>
         </div>
+
+        <a
+          href={`/talks/${current?.slug ?? slug}/present`}
+          target="_blank"
+          rel="noreferrer"
+          className="block border-2 border-white bg-brutalist-yellow px-5 py-2 text-center font-bold uppercase text-black shadow-hard-md"
+        >
+          Present deck → (flip Broadcast there to drive follow)
+        </a>
       </div>
 
       {error && <p className="mt-4 text-sm text-brutalist-pink">{error}</p>}
