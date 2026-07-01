@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from 'convex/react';
 import PresenceBadge from '@/components/PresenceBadge';
+import Reactions from '@/components/Reactions';
 import { PageSEO } from '@/components/SEO';
 import { api } from '@/convex/_generated/api';
 import siteMetadata from '@/data/siteMetadata';
@@ -62,8 +63,11 @@ export default function ConvexHello() {
           <span className="text-brutalist-yellow">&gt;</span> A reactive query +
           a mutation. Open this page in two tabs and click — both update live.
         </p>
-        <div className="mb-8">
+        <div className="mb-4">
           <PresenceBadge room="convex-hello" />
+        </div>
+        <div className="mb-8">
+          <Reactions room="convex-hello" />
         </div>
         {isConvexConfigured ? <LiveHello /> : <NotConfigured />}
       </article>

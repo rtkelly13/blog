@@ -12,4 +12,12 @@ crons.interval(
   {},
 );
 
+// Reactions are short-lived; sweep the leftovers.
+crons.interval(
+  'reap expired reactions',
+  { minutes: 1 },
+  internal.reactions.reapExpired,
+  {},
+);
+
 export default crons;

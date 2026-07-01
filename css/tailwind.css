@@ -199,3 +199,25 @@ html {
     font-weight: normal;
   }
 }
+
+/* Floating emoji reactions (see components/Reactions.tsx) */
+@keyframes reaction-float {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-42vh) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.reaction-bubble {
+  font-size: 1.75rem;
+  line-height: 1;
+  animation: reaction-float 3.4s ease-out forwards;
+  will-change: transform, opacity;
+}

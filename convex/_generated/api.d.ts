@@ -12,6 +12,7 @@ import type * as crons from "../crons.js";
 import type * as hello from "../hello.js";
 import type * as lib_profanity from "../lib/profanity.js";
 import type * as presence from "../presence.js";
+import type * as reactions from "../reactions.js";
 import type * as talks from "../talks.js";
 import type * as toast from "../toast.js";
 
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   hello: typeof hello;
   "lib/profanity": typeof lib_profanity;
   presence: typeof presence;
+  reactions: typeof reactions;
   talks: typeof talks;
   toast: typeof toast;
 }>;

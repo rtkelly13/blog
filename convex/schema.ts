@@ -54,6 +54,15 @@ export default defineSchema({
     .index('by_room_machine', ['room', 'machineId'])
     .index('by_room_firstSeen', ['room', 'firstSeen']),
 
+  // Ephemeral emoji reactions that float up on screen. A `count` lets a client
+  // debounce rapid taps into one row. Reaped on a short window by the cron.
+  reactions: defineTable({
+    room: v.string(),
+    emoji: v.string(),
+    count: v.number(),
+    at: v.number(),
+  }).index('by_room_at', ['room', 'at']),
+
   toastSubmissions: defineTable({
     talkSlug: v.string(),
     nickname: v.optional(v.string()),

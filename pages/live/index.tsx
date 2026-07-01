@@ -1,5 +1,6 @@
 import { useQuery } from 'convex/react';
 import PresenceBadge from '@/components/PresenceBadge';
+import Reactions from '@/components/Reactions';
 import { PageSEO } from '@/components/SEO';
 import { api } from '@/convex/_generated/api';
 import siteMetadata from '@/data/siteMetadata';
@@ -37,6 +38,10 @@ function LiveRoom() {
       <div className="mt-4">
         <PresenceBadge room={talk.room} />
       </div>
+      <p className="mt-6 mb-3 font-mono text-sm uppercase text-zinc-400">
+        React:
+      </p>
+      <Reactions room={talk.room} />
       <p className="mt-6 font-mono text-sm text-zinc-400">
         <span className="text-brutalist-yellow">&gt;</span> You're in. Keep this
         tab open to stay counted.
