@@ -87,7 +87,11 @@ export function getRehypePlugins(): Pluggable[] {
         visit(tree, 'element', (node: any) => {
           const [token, type] = node.properties.className || [];
           if (token === 'token') {
-            node.properties.className = [tokenClassNames[type]];
+            // Only remap tokens we have a brutalist class for; leaving the
+            // original className avoids emitting `[undefined]` (which strips
+            // the token's syntax color) for unmapped Prism token types.
+            const mapped = tokenClassNames[type];
+            if (mapped) node.properties.className = [mapped];
           }
         });
       };

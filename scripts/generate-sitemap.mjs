@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { globby } from 'globby';
+import matter from 'gray-matter';
 import prettier from 'prettier';
 
 const require = createRequire(import.meta.url);
@@ -33,10 +34,19 @@ const siteUrl = siteMetadata.siteUrl.replace(/\/$/, '');
     { cwd: root },
   );
 
+  // Draft content (blog posts / talks marked `draft: true`) is excluded from
+  // the production build's routes, so it must not appear in the sitemap either.
+  const isDraft = (page) => {
+    if (!/^data\/.*\.(mdx|md)$/.test(page)) return false;
+    const source = fs.readFileSync(path.join(root, page), 'utf8');
+    return matter(source).data.draft === true;
+  };
+  const publishedPages = pages.filter((page) => !isDraft(page));
+
   const sitemap = `
         <?xml version="1.0" encoding="UTF-8"?>
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-            ${pages
+            ${publishedPages
               .map((page) => {
                 const pagePath = page
                   .replace('pages/', '/')

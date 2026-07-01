@@ -21,22 +21,50 @@ function resolveTalkFile(slug: string): string | null {
   return null;
 }
 
-export function getTalkSlugs(): string[] {
-  if (!fs.existsSync(talksPath)) return [];
-  const showDrafts = show_drafts();
-  return fs
-    .readdirSync(talksPath)
-    .filter((file) => /\.(mdx|md)$/.test(file))
-    .filter((file) => {
-      if (showDrafts) return true;
-      // Draft talks (e.g. the E2E debug deck) are only routable in debug mode
-      // (dev or SHOW_DRAFTS) — excluded from the production build entirely.
-      const { data } = matter(
-        fs.readFileSync(path.join(talksPath, file), 'utf8'),
-      );
-      return data.draft !== true;
-    })
-    .map((file) => file.replace(/\.(mdx|md)$/, ''));
+/**
+ * A talk is published unless it explicitly sets `draft: true`. Drafts are shown
+ * in development (SHOW_DRAFTS). Applied to slug enumeration, detail loading, and
+ * the listing so draft talks never leak into the production static build.
+ */
+function isPublished(frontmatter: { draft?: boolean }): boolean {
+  return frontmatter.draft !== true || show_drafts();
+}
+
+function normalizeFrontMatter(
+  data: TalkFrontMatter,
+  slug: string,
+): TalkFrontMatter {
+  return {
+    ...data,
+    slug,
+    date: data.date ? new Date(data.date).toISOString() : null,
+  };
+}
+
+/**
+ * Split a talk body (frontmatter already stripped) into slide chunks on lines
+ * that contain only `---`. Fenced code blocks (``` / ~~~) are tracked so a
+ * `---` line *inside* a code sample never splits a slide. Authors who want a
+ * horizontal rule within a single slide should use `***` or `___`.
+ */
+function splitSlides(content: string): string[] {
+  const chunks: string[][] = [[]];
+  let fence: string | null = null;
+
+  for (const line of content.split('\n')) {
+    const fenceMatch = line.match(/^\s*(```+|~~~+)/);
+    if (fenceMatch) {
+      const marker = fenceMatch[1].startsWith('~') ? '~~~' : '```';
+      if (!fence) fence = marker;
+      else if (fence === marker) fence = null;
+    } else if (!fence && line.trim() === '---') {
+      chunks.push([]);
+      continue;
+    }
+    chunks[chunks.length - 1].push(line);
+  }
+
+  return chunks.map((chunk) => chunk.join('\n').trim()).filter(Boolean);
 }
 
 export function getAllTalksFrontMatter(): TalkFrontMatter[] {
@@ -47,17 +75,16 @@ export function getAllTalksFrontMatter(): TalkFrontMatter[] {
   for (const file of fs.readdirSync(talksPath)) {
     if (!/\.(mdx|md)$/.test(file)) continue;
 
-    const source = fs.readFileSync(path.join(talksPath, file), 'utf8');
-    const { data } = matter(source);
+    const { data } = matter(
+      fs.readFileSync(path.join(talksPath, file), 'utf8'),
+    );
     const frontmatter = data as TalkFrontMatter;
 
-    if (frontmatter.draft === true && !show_drafts()) continue;
+    if (!isPublished(frontmatter)) continue;
 
-    talks.push({
-      ...frontmatter,
-      slug: file.replace(/\.(mdx|md)$/, ''),
-      date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
-    });
+    talks.push(
+      normalizeFrontMatter(frontmatter, file.replace(/\.(mdx|md)$/, '')),
+    );
   }
 
   return talks.sort((a, b) => {
@@ -65,6 +92,43 @@ export function getAllTalksFrontMatter(): TalkFrontMatter[] {
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     return dateB - dateA;
   });
+}
+
+/**
+ * Published talk slugs only. Derived from getAllTalksFrontMatter so the draft
+ * filter lives in exactly one place (getStaticPaths must not enumerate drafts).
+ */
+export function getTalkSlugs(): string[] {
+  return getAllTalksFrontMatter().map((talk) => talk.slug);
+}
+
+/** Shared getStaticPaths body for the talk landing + present routes. */
+export function getTalkStaticPaths() {
+  return {
+    paths: getTalkSlugs().map((slug) => ({ params: { slug } })),
+    fallback: false as const,
+  };
+}
+
+/**
+ * Lightweight metadata (front matter + slide count) without compiling any MDX —
+ * used by the landing page, which only needs the count. Returns null for a
+ * missing or draft (in production) talk.
+ */
+export function getTalkMeta(
+  slug: string,
+): { frontMatter: TalkFrontMatter; slideCount: number } | null {
+  const filePath = resolveTalkFile(slug);
+  if (!filePath) return null;
+
+  const { data, content } = matter(fs.readFileSync(filePath, 'utf8'));
+  const frontmatter = data as TalkFrontMatter;
+  if (!isPublished(frontmatter)) return null;
+
+  return {
+    frontMatter: normalizeFrontMatter(frontmatter, slug),
+    slideCount: splitSlides(content).length,
+  };
 }
 
 /**
@@ -102,7 +166,13 @@ async function compileSlide(source: string): Promise<string> {
   return code;
 }
 
-export type TalkSlide = { code: string; notes: string | null };
+export type TalkSlide = {
+  code: string;
+  /** Raw notes markdown — a compact text preview in the presenter console. */
+  notes: string | null;
+  /** Compiled notes MDX — rendered (formatted) in Spectacle's presenter view. */
+  notesCode: string | null;
+};
 
 export async function getTalkBySlug(
   slug: string,
@@ -112,33 +182,28 @@ export async function getTalkBySlug(
 
   const { data, content } = matter(fs.readFileSync(filePath, 'utf8'));
   const frontmatter = data as TalkFrontMatter;
+  if (!isPublished(frontmatter)) return null;
 
-  // Draft talks are debug-only: unavailable unless dev / SHOW_DRAFTS.
-  if (frontmatter.draft === true && !show_drafts()) return null;
-
-  // Split the (frontmatter-stripped) body into individual slides on a line
-  // containing only `---`. Within a slide, an optional `???` line separates the
-  // slide body from speaker notes (shown in Spectacle's presenter mode).
-  const chunks = content
-    .split(/^---$/m)
-    .map((chunk) => chunk.trim())
-    .filter(Boolean);
+  // Split the (frontmatter-stripped) body into individual slides. Within a
+  // slide, an optional `???` line separates the slide body from speaker notes
+  // (shown in Spectacle's presenter mode). Both body and notes are compiled
+  // through the same MDX pipeline so formatting renders identically.
+  const chunks = splitSlides(content);
 
   const slides: TalkSlide[] = await Promise.all(
     chunks.map(async (chunk) => {
       const [body, ...noteParts] = chunk.split(/^\?\?\?$/m);
       const notes = noteParts.join('\n').trim();
-      const code = await compileSlide(body.trim());
-      return { code, notes: notes || null };
+      const [code, notesCode] = await Promise.all([
+        compileSlide(body.trim()),
+        notes ? compileSlide(notes) : Promise.resolve(null),
+      ]);
+      return { code, notes: notes || null, notesCode };
     }),
   );
 
   return {
-    frontMatter: {
-      ...frontmatter,
-      slug,
-      date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
-    },
+    frontMatter: normalizeFrontMatter(frontmatter, slug),
     slides,
   };
 }

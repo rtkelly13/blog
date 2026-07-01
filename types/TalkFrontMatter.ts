@@ -1,6 +1,7 @@
 export type TalkFrontMatter = {
   title: string;
-  date: string;
+  /** ISO date string, or null when the talk omits a date. */
+  date: string | null;
   event: string;
   location?: string;
   audience?: string;

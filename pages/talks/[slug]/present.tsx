@@ -6,7 +6,7 @@ import type { ReactElement } from 'react';
 import { useEffect } from 'react';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import type { TalkSlide } from '@/lib/talks';
-import { getTalkBySlug, getTalkSlugs } from '@/lib/talks';
+import { getTalkBySlug, getTalkStaticPaths } from '@/lib/talks';
 
 // Spectacle touches the DOM/window on mount, so render it client-side only.
 const SpectacleDeck = dynamic(
@@ -16,12 +16,7 @@ const SpectacleDeck = dynamic(
   },
 );
 
-export async function getStaticPaths() {
-  return {
-    paths: getTalkSlugs().map((slug) => ({ params: { slug } })),
-    fallback: false,
-  };
-}
+export const getStaticPaths = getTalkStaticPaths;
 
 export const getStaticProps: GetStaticProps<{
   frontMatter: TalkFrontMatter;
@@ -39,26 +34,43 @@ export default function Present({
   slides,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const router = useRouter();
-  const exporting =
-    router.query.exportMode === 'true' || router.query.printMode === 'true';
+  // Only `printMode` (Spectacle's print-optimized, one-slide-per-page layout)
+  // auto-opens the print dialog. `exportMode` is the scrollable overview and
+  // must not trigger printing, or the PDF captures the wrong layout.
+  const printing = router.query.printMode === 'true';
 
-  // In export/print mode, open the print dialog once everything (incl. fonts
-  // and client-rendered diagrams) has settled.
+  // Open the print dialog once fonts AND client-rendered mermaid diagrams have
+  // finished painting — a fixed timer would race async diagram rendering and
+  // print blank diagram slides. Falls back to an 8s deadline.
   useEffect(() => {
-    if (!exporting) return;
+    if (!printing) return;
     let cancelled = false;
-    const ready = document.fonts?.ready ?? Promise.resolve();
-    let timer: ReturnType<typeof setTimeout>;
-    ready.then(() => {
-      timer = setTimeout(() => {
-        if (!cancelled) window.print();
-      }, 1200);
+    const deadline = Date.now() + 8000;
+
+    const diagramsReady = () =>
+      Array.from(document.querySelectorAll('.mermaid-diagram')).every((el) =>
+        el.querySelector('svg'),
+      );
+
+    const fontsReady = document.fonts?.ready ?? Promise.resolve();
+    fontsReady.then(() => {
+      const tick = () => {
+        if (cancelled) return;
+        if (diagramsReady() || Date.now() > deadline) {
+          requestAnimationFrame(() => {
+            if (!cancelled) window.print();
+          });
+          return;
+        }
+        setTimeout(tick, 150);
+      };
+      tick();
     });
+
     return () => {
       cancelled = true;
-      clearTimeout(timer);
     };
-  }, [exporting]);
+  }, [printing]);
 
   return (
     <>
