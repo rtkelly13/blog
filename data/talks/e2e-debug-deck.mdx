@@ -22,6 +22,8 @@ Slide 1 of 4 — fixed content for visual regression.
 - Bravo
 - Charlie
 
+<QuestionQueue title="E2E Questions" info="Ask + upvote here." />
+
 ???
 
 Speaker notes for slide two — these should appear in the presenter console.
@@ -32,8 +34,19 @@ Speaker notes for slide two — these should appear in the presenter console.
 
 The quick brown fox jumps over the lazy dog.
 
+<LivePoll title="E2E Poll" info="One word." prompt="E2E poll prompt?" />
+
+<EmojiTop5 title="E2E Emoji Top 5" />
+
 ---
 
 # SLIDE FOUR
 
 The end. Deterministic — no dates, diagrams, or randomness.
+
+<OrderedActions
+  title="E2E Order"
+  prompt="Put the E2E steps in order"
+  options={['First', 'Second', 'Third']}
+  revealAfterMs={300000}
+/>

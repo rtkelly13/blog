@@ -29,7 +29,8 @@
     "format": "biome format --write .",
     "prepare": "husky install",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "test:live-e2e": "node tests/live-e2e.mjs"
   },
   "dependencies": {
     "@auth/core": "0.37.0",
