@@ -1,12 +1,12 @@
 ---
 title: So You Want To Build Software?
 date: '2026-06-28'
-event: Careers Talk
+event: Careers Workshop
 location: Secondary School
 audience: Years 10–11 (ages 14–16)
-summary: What a professional software engineer actually does all day — and how you could become one. No genius required, no maths degree needed, just curiosity and a willingness to get stuck.
+summary: What a professional software engineer actually does all day — and how you could become one. A 100-minute workshop with hands-on activities. No genius required, no maths degree needed, just curiosity and a willingness to get stuck.
 tags: ['careers', 'software-engineering', 'talks']
-durationMins: 30
+durationMins: 100
 draft: false
 ---
 
@@ -16,15 +16,17 @@ draft: false
 
 **Ryan Kelly** — Software Engineer
 
-> Use ← / → to navigate. Press the ⛶ button to go fullscreen.
+> A 100-minute workshop · two hands-on activities · ask me anything
 
 ???
 
-Speaker notes (visible only in presenter mode — press Cmd/Ctrl+Shift+P):
-
-Welcome everyone. Keep this intro short and warm — the goal of the whole talk
-is to make software engineering feel reachable, not intimidating. Smile, breathe,
-go slow.
+[⏱ 0–5 · INTRO] Welcome — keep it warm, the goal is "this is reachable, not
+intimidating."
+- Quick hook, hands up: **"Who used a computer to get here today?"** (bus times,
+  traffic lights, phone alarm — trick question, everyone did.)
+- Set expectations: 100 mins, we'll build things together, there's a break, and
+  you can interrupt with questions.
+- Breathe, go slow.
 
 ---
 
@@ -35,6 +37,13 @@ go slow.
 - I was once sat exactly where you are, with no idea this job existed.
 
 **The honest truth:** I'm not a genius. I just like solving puzzles and I don't give up easily.
+
+???
+
+[⏱ 5–9 · WHO AM I] Make it human. Name the company; one sentence on who it helps.
+- "Other people do this too — your parents' workplaces almost certainly employ
+  people like me" (foreshadow the parents'-jobs bit).
+- Land the honest truth line — it defuses the "you have to be a genius" fear early.
 
 ---
 
@@ -50,6 +59,36 @@ There's no single "correct" route into this — but here's the one I took.
 
 The **Year in Industry** was the turning point — a real job, before I'd even finished my degree.
 
+???
+
+[⏱ 9–14 · MY JOURNEY] Walk the arrow. Emphasise it wasn't a straight, obvious plan.
+- "How did I get started?" — the small moment/curiosity that hooked you.
+- Year in Industry = the turning point; you don't have to have it all figured out
+  at their age.
+- That placement was **food-factory automation** (pays off on the "Where I've
+  worked" slide) — you can foreshadow here: "a placement that took me to a factory
+  in America — more on that later."
+
+---
+
+# A SHORT HISTORY OF COMPUTING
+
+- **1940s–60s** — computers filled entire *rooms*, cost millions, run by teams in lab coats.
+- **1970s–80s** — the *personal* computer arrives on desks at home.
+- **1990s** — the **internet** connects them all together.
+- **2000s** — the **smartphone** puts one in everyone's pocket.
+- **Today** — **AI** that writes, draws, and talks.
+
+> The phone in your pocket is **millions of times** more powerful than the computer that guided Apollo to the Moon.
+
+???
+
+[⏱ 14–19 · HISTORY] Keep this FAST and visual — 4–5 milestones, don't lecture.
+- The point isn't the dates; it's the *pace of change*: in one lifetime, room →
+  pocket. "By the time you're my age, today's tech will look ancient."
+- The Apollo comparison always lands — let them sit with it for a beat.
+- Pivot: "So who builds all this? That's my job."
+
 ---
 
 # WHAT IS SOFTWARE ENGINEERING?
@@ -64,6 +103,17 @@ Software engineering is:
 
 It's less like a film hacker, more like **building with invisible LEGO**.
 
+???
+
+[⏱ 19–24 · WHAT IS SE + PARENTS] Interactive beat (device-free):
+- **"Shout out what your parents/carers do for work."** Take 4–5.
+- For each: "Do they use a computer or an app to do it?" — nurse (records),
+  shop (tills), driver (sat-nav/routing), builder (orders).
+- Land it: **software is everywhere, and someone built every bit of it.** That
+  someone has a job like mine.
+- Set up the key idea for the next activity: our job is turning an idea into
+  **exact instructions**.
+
 ---
 
 # WHAT DO WE ACTUALLY BUILD?
@@ -76,27 +126,53 @@ It's less like a film hacker, more like **building with invisible LEGO**.
 
 If it has a chip in it, someone wrote the software for it.
 
----
+???
 
-# SOMETHING I BUILT FOR FUN
-
-A **3D maze generator** I built in my spare time — I'm currently porting it to the **Godot** game engine and writing about it.
-
-<img src="/static/images/talks/maze-solved.png" alt="A generated maze with the solved path drawn from start to finish" style={{ display: 'block', margin: '1.25rem auto 0', maxHeight: '420px', width: 'auto', border: '2px solid #ffffff' }} />
-
-Curiosity → a small project → learning something new. That's the whole job, really.
+[⏱ 24–28 · WHAT WE BUILD] Quick — tie back to their parents' jobs. "The tills,
+the sat-nav, the hospital screens — all software."
+- Transition to the activity: "The hardest part isn't the typing. It's being
+  **precise**. Let me show you what I mean — let's make some toast."
 
 ---
 
-# IT'S A TEAM SPORT
+# 🍞 TRY IT: MAKING TOAST
 
-The biggest myth: that engineers work alone.
+**Your job:** in your groups, write the **exact steps** to make a piece of toast.
 
-- You build things **with** other people — designers, testers, product folks
-- You explain your ideas and listen to others
-- You disagree, then agree, then ship something better than any one person could
+**My job:** I'm the computer. I'll do *exactly* what you say — nothing more, nothing less.
 
-**Communicating clearly is a superpower.** Code is how we talk to computers; words are how we build things together.
+> Rules: no step-skipping, no "obviously". If you don't say it, I can't do it.
+
+???
+
+[⏱ 28–46 · TOAST ACTIVITY 🍞 · ~18 min · device-free]
+Based on discovere.org/engineering-activities/making-toast.
+1. (2m) Split into groups of 3–4. Each group writes numbered steps to make toast.
+2. (8m) Groups write. Circulate, encourage precision.
+3. (6m) Pick 1–2 groups. Read their steps aloud and **follow them literally** —
+   comedically. "Put bread in toaster" but they never said open the bag → jam
+   the whole bag in. "Press down" → they never said plug it in.
+4. (2m) DEBRIEF — the whole point:
+   - Computers do **exactly** what you say — no common sense.
+   - Breaking a problem into precise, ordered steps = **decomposition**, and it's
+     the single biggest part of my actual job.
+   - "You just did software engineering. No computer required."
+Props: a loaf + toaster if allowed, or mime it. Keep it light and funny.
+
+---
+
+# ☕ BREAK
+
+### Back in 5 minutes
+
+Stretch your legs. Think of one question you'd like to ask.
+
+???
+
+[⏱ 46–52 · BREAK] Hard stop the toast debrief before this. Put the timer up.
+- Give an exact "back at HH:MM". Use the loo/water break.
+- While they settle back, tee up: "Next — what I actually do all day, and a tiny
+  program you could build yourselves."
 
 ---
 
@@ -116,17 +192,162 @@ Building software is a **loop**, not a straight line. We ship a small piece, lea
 
 We go around this loop again and again — sometimes many times a day.
 
+???
+
+[⏱ 52–58 · HOW IT'S MADE] Connect to toast: "same idea — small precise steps,
+then check it worked."
+- The loop is the rhythm of the job. We don't build the whole thing at once; we
+  ship small and learn.
+
 ---
 
 # A DAY IN THE LIFE
 
-It's **not** 8 hours of silent typing in a dark room.
+It's **not** 8 hours of silent typing in a dark room. Most of my day is a cycle:
 
-- 🗣️ Talking with the team — planning, reviewing, helping
-- 🧩 Writing code to add something new
-- 🐛 Figuring out why something broke
+- 🔎 **Discover** a problem — something's broken or missing
+- 💡 **Propose** a solution — and talk it through with the team
+- ⌨️ **Write** the change — the actual code
+- ✅ **Test** it — prove it works before real people use it
 
-We spend **more time reading and talking than writing new code.**
+**Tools I use every day:** an editor (VS Code), Git (a time machine for code), and — increasingly — **AI assistants**.
+
+???
+
+[⏱ 58–66 · DAY IN THE LIFE] This is the "what do I actually do all day" section
+they asked about.
+- Walk discover → propose → write → test with a concrete example from your week.
+- Who I work for + **other employers**: games studios, banks, the NHS, startups,
+  the company down the road — every industry needs engineers.
+- Name-drop the tools briefly; mention AI honestly (a helper, not a replacement —
+  you still have to know what you're asking for).
+- We read & talk **more** than we type.
+
+---
+
+# THE ROLE OF AI
+
+AI is the biggest change in my job right now — but it's a **power tool, not a replacement**.
+
+- ✍️ It writes first drafts of code — I still decide *what* to build and *check* it's right
+- ⚡ It speeds up the boring bits, so I spend more time on the hard thinking
+- ⚠️ It's **confidently wrong** sometimes — you need the fundamentals to catch it
+
+**The skill that matters more than ever:** knowing what to ask for, and telling whether the answer is any good.
+
+???
+
+[⏱ 66–69 · THE ROLE OF AI] They'll be curious — be honest and balanced.
+- Frame it as a tool that makes good engineers faster, not one that removes the
+  need for them.
+- The "confidently wrong" point is key: you can't check AI's work without
+  understanding the basics — so learning fundamentals matters MORE, not less.
+- Reassure: it's an opportunity if you learn to work with it. Tie to the toast
+  activity — you still have to know the exact steps to spot a wrong one.
+
+---
+
+# WHERE I'VE WORKED
+
+Same skills — wildly different worlds:
+
+- 🏭 **Food factory automation** — my **placement year**. Software running the production lines that make your food — it took me to factories across the **UK** and one in the **USA** 🇺🇸
+- 🚗 **Car finance** — the systems that work out how people can actually afford a car
+- 🎵 **Music tech** *(now)* — helping musicians get paid for their work
+
+One job, and it's a **passport** — it's already taken me across the country and abroad.
+
+???
+
+[⏱ 69–71 · WHERE I'VE WORKED] Real jobs — concrete + relatable.
+- 🏭 **Food factory = my Year-in-Industry placement** (callback to MY JOURNEY —
+  this is the placement that changed everything). Automating production lines.
+  The hook that lands with teenagers: **"this job flew me to America to look at a
+  factory."** Also ties to the parents'-jobs point — manufacturing runs on software.
+- 🚗 **Car finance**: the maths/rules behind affording a car — real family stuff.
+- 🎵 **Music tech (now)**: helping artists actually get paid.
+- Takeaway: pick a field you love — food, cars, music, sport, medicine — it needs
+  engineers. Same skills, a passport into any of them (sometimes onto a plane).
+
+---
+
+# IT CAN TAKE YOU PLACES
+
+<img src="/static/images/talks/paris-eiffel-tower.jpg" alt="Me in front of the Eiffel Tower in Paris" style={{ display: 'block', margin: '0.5rem auto 0', maxHeight: '440px', width: 'auto', border: '2px solid #ffffff' }} />
+
+Factories around the UK, a trip to the USA — and the freedom to explore on my own time. Good work opens doors *(and airports)*.
+
+???
+
+[⏱ 71–72 · TRAVEL] Quick — show the photo, that's me at the Eiffel Tower.
+- Tie to the food-factory USA trip: work travel is real. And a steady career gives
+  you the means to explore on your own time too.
+- Message: software is built everywhere → it can take you almost anywhere.
+
+---
+
+# SOMETHING I BUILT FOR FUN
+
+A **3D maze generator** I built in my spare time — now ported to the **Godot** game engine.
+
+**▶ Try it live: [maze.ryankelly.dev](https://maze.ryankelly.dev)** — generate and solve a maze in your browser.
+
+<img src="/static/images/talks/maze-solved.png" alt="A generated maze with the solved path drawn from start to finish" style={{ display: 'block', margin: '1rem auto 0', maxHeight: '320px', width: 'auto', border: '2px solid #ffffff' }} />
+
+Curiosity → a small project → learning something new. That's the whole job, really.
+
+???
+
+[⏱ 72–73 · BUILT FOR FUN] Short. Job and hobby are the same muscle — curiosity + a
+small project.
+- If you have a screen up: **open maze.ryankelly.dev and generate one live** — it's
+  interactive and lands well. Otherwise just point them to it.
+- Segue: "small projects are exactly how you'd start — here's one you could do."
+
+---
+
+# SOMETHING YOU COULD BUILD
+
+The reactions popping up on screen? Counting and ranking emojis is a **real beginner project**.
+
+- Take a list of emojis → count them → show the **Top 5**. That's a genuine program.
+- Free, step-by-step: **Raspberry Pi — "Top 5 emoji list"**
+- projects.raspberrypi.org · learn for free at **raspberrypi.org/learn**
+
+**This is the exact shape of my job — just smaller.**
+
+???
+
+[⏱ 73–82 · EMOJI ACTIVITY/DEMO 😀 · ~9 min · FLEX]
+- LAB (devices): open the RPi "Top 5 emoji list" project; they follow it and get
+  a working program. Circulate. This is the highlight for a computer room.
+- NO-DEVICE (this school): run it on the projector — show the /live reactions
+  bubbling (or the ones from earlier), then walk the RPi project on screen:
+  "list → count → sort → top 5". Show it running.
+- Tie it back to the loop + decomposition: same skills as the toast activity,
+  now on a computer.
+- If time is tight, this is the flex segment — trim to a 5-min demo.
+
+---
+
+# IT'S A TEAM SPORT
+
+The biggest myth: that engineers work alone. Software is built by a **team of roles**:
+
+- 👩‍💻 **Engineers** — build it
+- 🎨 **Designers** — decide how it looks and feels
+- 🧪 **Testers / QA** — try to break it before users do
+- 📋 **Product managers** — decide what to build and why
+- 📊 **Data** & 🔒 **security** people, and more
+
+**Communicating clearly is a superpower.** Code talks to computers; words build things with people.
+
+???
+
+[⏱ 82–87 · TEAM SPORT + OTHER JOBS] Kill the lone-genius myth.
+- Walk the roles — "if you love art, design; if you love finding faults, QA; if
+  you love organising, product." There's a way in for lots of different people.
+- The point: you don't have to be *the coder* to work in tech.
 
 ---
 
@@ -141,6 +362,12 @@ You might be surprised:
 
 Coding can be taught. These are the things that make a *great* engineer.
 
+???
+
+[⏱ 87–90 · SKILLS] Callback to the toast activity — "you already showed problem
+solving and communication." Coding is the teachable bit; these are the durable
+bits.
+
 ---
 
 # MYTHS vs REALITY
@@ -154,6 +381,11 @@ Coding can be taught. These are the things that make a *great* engineer.
 
 **Nobody** memorises it all. We Google, we ask, we learn.
 
+???
+
+[⏱ 90–92 · MYTHS] Fast. Read the myths, let them react. Land "nobody memorises it
+all" — permission to not know things.
+
 ---
 
 # HOW DO YOU GET INTO IT?
@@ -164,9 +396,15 @@ There's **no single path**. Some routes:
 - 🛠️ **Apprenticeships** — get paid while you learn, no degree needed
 - 💻 **Self-teaching** — free tools online, build your own projects
 
-> Subjects that help: anything that teaches you to **think logically** — maths, sciences, but also music, languages, and art.
+> Free places to learn: **Raspberry Pi Foundation** (raspberrypi.org/learn) · **Scratch** · **Code.org** · **freeCodeCamp**
 
 The best thing you can do? **Build something small.**
+
+???
+
+[⏱ 92–96 · GET INTO IT] The practical takeaway slide. Point them at the RPi
+Foundation (the emoji project lives there) + the beginner sites.
+- Repeat the one instruction that matters: **build something small.**
 
 ---
 
@@ -184,18 +422,33 @@ The best thing you can do? **Build something small.**
 - You're always learning (which is also the fun bit)
 - Sometimes the bug is *you* 😅
 
+???
+
+[⏱ 96–98 · LOVE/HARD] Honest and quick. The "sometimes the bug is you" line is a
+good laugh and a good truth. Keep momentum toward the close.
+
 ---
 
-# FIND ME HERE
+# FIND ME HERE · QUICK LINKS
 
 ## [ ryankelly.dev ]
 
-**These slides, my projects, and where to start are all there.**
+Everything's here — no need to write anything down:
 
-No need to write anything down — just remember **ryankelly.dev**.
+- 🌐 **ryankelly.dev** — these slides + my projects
+- 🌀 **maze.ryankelly.dev** — the 3D maze generator (have a go!)
+- 😀 **projects.raspberrypi.org** — the Top-5 emoji project
+- 🧑‍💻 **Scratch · Code.org · freeCodeCamp** — free places to start
 
-When you're back at a computer, great free places to begin:
-**Scratch** · **Code.org** · **freeCodeCamp**
+Just remember **ryankelly.dev** — everything else is linked from there.
+
+???
+
+[⏱ 98–99 · FIND ME / QUICK LINKS] The one thing to remember: ryankelly.dev.
+- This is the quick-nav / "where do I go" slide — leave it up during Q&A so they
+  can note anything down.
+- Everything (slides, the maze app, the emoji project, beginner sites) is linked
+  from ryankelly.dev.
 
 ---
 
@@ -211,3 +464,9 @@ When you're back at a computer, great free places to begin:
 **Thanks for listening!** 👋
 
 Find everything at **ryankelly.dev**
+
+???
+
+[⏱ 99–100+ · Q&A] Leave real time for this — often the best part. Seed with the
+listed questions if the room is shy. Thank them; point once more at ryankelly.dev.
+Overrun buffer: the emoji segment is the flex if you're behind.
