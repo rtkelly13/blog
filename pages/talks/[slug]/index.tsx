@@ -6,26 +6,21 @@ import LiveTalkBanner from '@/components/LiveTalkBanner';
 import { PageSEO } from '@/components/SEO';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
-import { getTalkBySlug, getTalkSlugs } from '@/lib/talks';
+import { getTalkMeta, getTalkStaticPaths } from '@/lib/talks';
 import formatDate from '@/lib/utils/formatDate';
 
-export async function getStaticPaths() {
-  return {
-    paths: getTalkSlugs().map((slug) => ({ params: { slug } })),
-    fallback: false,
-  };
-}
+export const getStaticPaths = getTalkStaticPaths;
 
 export const getStaticProps: GetStaticProps<{
   frontMatter: TalkFrontMatter;
   slideCount: number;
 }> = async ({ params }) => {
   const slug = params.slug as string;
-  const talk = await getTalkBySlug(slug);
-  if (!talk) return { notFound: true };
+  const meta = getTalkMeta(slug);
+  if (!meta) return { notFound: true };
 
   return {
-    props: { frontMatter: talk.frontMatter, slideCount: talk.slides.length },
+    props: { frontMatter: meta.frontMatter, slideCount: meta.slideCount },
   };
 };
 
@@ -43,6 +38,7 @@ export default function TalkLanding({
     summary,
     tags,
     videoUrl,
+    pdf,
   } = frontMatter;
 
   return (
@@ -108,7 +104,7 @@ export default function TalkLanding({
             <Play className="h-4 w-4" /> Present
           </Link>
           <Link
-            href={`/talks/${slug}/present?exportMode=true`}
+            href={pdf ?? `/talks/${slug}/present?printMode=true`}
             target="_blank"
             rel="noopener noreferrer"
             className="border-2 border-white bg-white px-6 py-3 font-mono font-bold uppercase text-black shadow-hard-md transition-all hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none"

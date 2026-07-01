@@ -20,6 +20,7 @@ import { brutalistTheme } from './theme';
 export interface DeckSlide {
   code: string;
   notes: string | null;
+  notesCode: string | null;
 }
 
 interface SpectacleDeckProps {
@@ -69,7 +70,11 @@ function renderSlides(slides: DeckSlide[]) {
   return slides.map((slide, i) => (
     <Slide key={i} backgroundColor="#000000">
       <SlideBody code={slide.code} />
-      {slide.notes ? <Notes>{slide.notes}</Notes> : null}
+      {slide.notesCode ? (
+        <Notes>
+          <SlideBody code={slide.notesCode} />
+        </Notes>
+      ) : null}
     </Slide>
   ));
 }
