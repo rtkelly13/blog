@@ -13,7 +13,7 @@ import {
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 import { Broadcaster, Follower } from './DeckLive';
-import { AttendeeSidebar, ModerationSidebar } from './DeckSidebars';
+import { AttendeeSidebar, ConsoleSidebar } from './DeckSidebars';
 import SlideBody from './SlideBody';
 import { brutalistTheme } from './theme';
 
@@ -27,7 +27,7 @@ interface SpectacleDeckProps {
   slug: string;
 }
 
-type Mode = 'attendee' | 'presenter' | 'moderation';
+type Mode = 'attendee' | 'presenter' | 'console';
 
 const MONO = '"IBM Plex Mono", "Courier New", Courier, monospace';
 
@@ -84,7 +84,7 @@ function BaseDeck({ slides }: { slides: DeckSlide[] }) {
 }
 
 function resolveMode(raw: unknown): Mode {
-  if (raw === 'presenter' || raw === 'moderation' || raw === 'attendee') {
+  if (raw === 'presenter' || raw === 'console' || raw === 'attendee') {
     return raw;
   }
   return 'attendee';
@@ -98,8 +98,8 @@ function resolveMode(raw: unknown): Mode {
  *   Full-screen, clean (projector view).
  * - `attendee` (default) → WATCH ALONG: follows the presenter's slide and shows
  *   a reactions sidebar (react + everyone's synced reactions).
- * - `moderation` (admin) → follows + a moderator sidebar (presence, reactions,
- *   live numbers, End talk) — the presenter's second screen.
+ * - `console` (admin) → follows + a presenter console sidebar (connection status,
+ *   presence, reactions, live numbers, End talk) — the presenter's second screen.
  */
 function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const router = useRouter();
@@ -132,8 +132,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const followEnabled = followOn && !broadcasting;
 
   const showAttendeeSidebar = mode === 'attendee' && Boolean(reactionsOn);
-  const showModerationSidebar =
-    mode === 'moderation' && isAdmin && Boolean(liveHere);
+  const showConsoleSidebar = mode === 'console' && isAdmin && Boolean(liveHere);
   const showPresenterHud = mode === 'presenter' && isAuthenticated && isAdmin;
 
   // Heartbeat this presenter session while broadcasting, so concurrent
@@ -185,8 +184,8 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const sidebar =
     showAttendeeSidebar && room ? (
       <AttendeeSidebar room={room} />
-    ) : showModerationSidebar && room ? (
-      <ModerationSidebar room={room} />
+    ) : showConsoleSidebar && room ? (
+      <ConsoleSidebar room={room} />
     ) : null;
 
   // With a sidebar, the deck occupies the left ~4/5 (Spectacle scales into its

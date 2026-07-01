@@ -138,12 +138,12 @@ function Dashboard() {
               Open deck to broadcast →
             </a>
             <a
-              href={`/talks/${slug}/present?mode=moderation`}
+              href={`/talks/${slug}/present?mode=console`}
               target="_blank"
               rel="noreferrer"
               className="block border-2 border-white bg-black px-4 py-2 text-center font-bold uppercase text-brutalist-pink shadow-hard-md"
             >
-              Open moderation view (2nd screen) →
+              Open presenter console (2nd screen) →
             </a>
             {!current?.config.follow && (
               <p className="text-xs text-zinc-500">

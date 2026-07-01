@@ -1,4 +1,4 @@
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
@@ -24,19 +24,53 @@ export function AttendeeSidebar({ room }: { room: string }) {
   );
 }
 
-/** Moderator sidebar (admin second screen): monitor + control while presenting. */
-export function ModerationSidebar({ room }: { room: string }) {
+/**
+ * Presenter console (admin second screen): connection status, moderation, and
+ * controls while presenting from another view.
+ */
+export function ConsoleSidebar({ room }: { room: string }) {
+  const current = useQuery(api.talks.current);
+  const presenters = useQuery(api.talks.presenterCount, { room });
   const end = useMutation(api.talks.end);
+
+  const slide = (current?.currentSlide ?? 0) + 1;
+  const clash = typeof presenters === 'number' && presenters > 1;
+  const noPresenter = presenters === 0;
+
   return (
     <aside className={PANEL}>
       <p className="font-mono text-xs uppercase tracking-wider text-brutalist-pink">
-        Moderation
+        Console
       </p>
 
-      <PresenceBadge room={room} />
+      {/* Connection status */}
+      <div className="space-y-1 border-2 border-zinc-700 p-3 font-mono text-xs">
+        <p className="uppercase tracking-wider text-zinc-500">Status</p>
+        <p className="text-brutalist-cyan">● Live · on slide {slide}</p>
+        <p
+          className={
+            clash
+              ? 'text-brutalist-pink'
+              : noPresenter
+                ? 'text-brutalist-yellow'
+                : 'text-zinc-400'
+          }
+        >
+          {presenters === undefined
+            ? 'presenter link: …'
+            : clash
+              ? `⚠ ${presenters} presenters connected — clash`
+              : noPresenter
+                ? 'no presenter broadcasting'
+                : 'presenter connected'}
+        </p>
+        <PresenceBadge room={room} />
+      </div>
 
       <div>
-        <p className="mb-2 font-mono text-xs uppercase text-zinc-400">React</p>
+        <p className="mb-2 font-mono text-xs uppercase text-zinc-400">
+          Reactions
+        </p>
         <Reactions room={room} />
       </div>
 
