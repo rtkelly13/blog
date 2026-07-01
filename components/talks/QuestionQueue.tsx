@@ -29,7 +29,19 @@ function useVoted() {
   return { voted, mark };
 }
 
-function Queue({ room, display }: { room: string; display?: boolean }) {
+function Queue({
+  room,
+  display,
+  title,
+  info,
+  placeholder,
+}: {
+  room: string;
+  display?: boolean;
+  title?: string;
+  info?: string;
+  placeholder?: string;
+}) {
   const mode = useDeckMode();
   const data = useQuery(api.questions.list, { room });
   const ask = useMutation(api.questions.ask);
@@ -61,9 +73,11 @@ function Queue({ room, display }: { room: string; display?: boolean }) {
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
-      <p className="mb-3 font-mono text-sm uppercase text-brutalist-cyan">
-        {readOnly ? 'Top questions' : 'Ask a question'}
+      <p className="mb-1 font-mono text-sm uppercase text-brutalist-cyan">
+        {title ?? (readOnly ? 'Top questions' : 'Ask a question')}
       </p>
+      {info && <p className="mb-3 font-mono text-xs text-zinc-500">{info}</p>}
+      {!info && <div className="mb-2" />}
 
       {!readOnly && (
         <form onSubmit={submit} className="flex flex-col gap-3 sm:flex-row">
@@ -71,7 +85,7 @@ function Queue({ room, display }: { room: string; display?: boolean }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={280}
-            placeholder="Type your question…"
+            placeholder={placeholder ?? 'Type your question…'}
             className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-cyan focus:outline-none"
           />
           <button
@@ -154,11 +168,31 @@ function Queue({ room, display }: { room: string; display?: boolean }) {
   );
 }
 
-function Resolver({ room, display }: { room?: string; display?: boolean }) {
+function Resolver({
+  room,
+  display,
+  title,
+  info,
+  placeholder,
+}: {
+  room?: string;
+  display?: boolean;
+  title?: string;
+  info?: string;
+  placeholder?: string;
+}) {
   const current = useQuery(api.talks.current, room ? 'skip' : {});
   const resolved = room ?? current?.room;
   if (!resolved) return null;
-  return <Queue room={resolved} display={display} />;
+  return (
+    <Queue
+      room={resolved}
+      display={display}
+      title={title}
+      info={info}
+      placeholder={placeholder}
+    />
+  );
 }
 
 /**
@@ -170,10 +204,24 @@ function Resolver({ room, display }: { room?: string; display?: boolean }) {
 export default function QuestionQueue({
   room,
   display,
+  title,
+  info,
+  placeholder,
 }: {
   room?: string;
   display?: boolean;
+  title?: string;
+  info?: string;
+  placeholder?: string;
 }) {
   if (!isConvexConfigured) return null;
-  return <Resolver room={room} display={display} />;
+  return (
+    <Resolver
+      room={room}
+      display={display}
+      title={title}
+      info={info}
+      placeholder={placeholder}
+    />
+  );
 }

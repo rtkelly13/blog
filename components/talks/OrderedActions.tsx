@@ -56,7 +56,23 @@ function SubmissionCard({
   );
 }
 
-function Activity({ room, display }: { room: string; display?: boolean }) {
+function Activity({
+  room,
+  display,
+  title,
+  info,
+  prompt,
+  options: defaultOptions,
+  revealAfterMs,
+}: {
+  room: string;
+  display?: boolean;
+  title?: string;
+  info?: string;
+  prompt?: string;
+  options?: string[];
+  revealAfterMs?: number;
+}) {
   const mode = useDeckMode();
   const isConsole = mode === 'console';
 
@@ -66,6 +82,8 @@ function Activity({ room, display }: { room: string; display?: boolean }) {
   const active = useQuery(api.activities.active, isConsole ? 'skip' : { room });
   const feedRes = useQuery(api.activities.feed, isConsole ? { room } : 'skip');
   const submit = useMutation(api.activities.submit);
+  const openActivity = useMutation(api.activities.open);
+  const isAdmin = useQuery(api.talks.isAdmin) === true;
 
   const [steps, setSteps] = useState<string[]>(['']);
   const [sending, setSending] = useState(false);
@@ -78,8 +96,34 @@ function Activity({ room, display }: { room: string; display?: boolean }) {
     activity && !activity.revealed ? activity.revealAt : null,
   );
 
-  // No open activity (or still loading) → render nothing.
-  if (!activity) return null;
+  // No open activity yet. An admin on a slide that declares a prompt + default
+  // answer can launch it in one click (config lives with the slide, not /admin).
+  if (!activity) {
+    const canLaunch = isAdmin && !!prompt && (defaultOptions?.length ?? 0) > 0;
+    if (!canLaunch) return null;
+    return (
+      <div className="border-2 border-dashed border-brutalist-yellow bg-zinc-900 p-5">
+        <p className="mb-1 font-mono text-sm uppercase text-brutalist-yellow">
+          ● {title ?? 'Put it in order'}
+        </p>
+        <p className="mb-3 font-mono text-sm text-zinc-300">{prompt}</p>
+        <button
+          type="button"
+          onClick={() =>
+            openActivity({
+              room,
+              prompt: prompt as string,
+              options: defaultOptions as string[],
+              revealDelayMs: revealAfterMs,
+            }).catch(() => {})
+          }
+          className="border-2 border-white bg-brutalist-yellow px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
+        >
+          ▶ Open activity
+        </button>
+      </div>
+    );
+  }
 
   // Console always sees the answer; audience/presenter only once revealed. Keep
   // the two submission shapes as separate typed lists (console rows carry a
@@ -122,11 +166,13 @@ function Activity({ room, display }: { room: string; display?: boolean }) {
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
       <p className="mb-1 font-mono text-sm uppercase text-brutalist-yellow">
-        ● Put it in order
+        ● {title ?? 'Put it in order'}
       </p>
-      <h3 className="mb-4 font-display text-2xl font-bold uppercase text-white">
+      <h3 className="mb-1 font-display text-2xl font-bold uppercase text-white">
         {activity.prompt}
       </h3>
+      {info && <p className="mb-4 font-mono text-xs text-zinc-500">{info}</p>}
+      {!info && <div className="mb-3" />}
 
       {showForm &&
         (submitted ? (
@@ -250,11 +296,37 @@ function Activity({ room, display }: { room: string; display?: boolean }) {
   );
 }
 
-function Resolver({ room, display }: { room?: string; display?: boolean }) {
+function Resolver({
+  room,
+  display,
+  title,
+  info,
+  prompt,
+  options,
+  revealAfterMs,
+}: {
+  room?: string;
+  display?: boolean;
+  title?: string;
+  info?: string;
+  prompt?: string;
+  options?: string[];
+  revealAfterMs?: number;
+}) {
   const current = useQuery(api.talks.current, room ? 'skip' : {});
   const resolved = room ?? current?.room;
   if (!resolved) return null;
-  return <Activity room={resolved} display={display} />;
+  return (
+    <Activity
+      room={resolved}
+      display={display}
+      title={title}
+      info={info}
+      prompt={prompt}
+      options={options}
+      revealAfterMs={revealAfterMs}
+    />
+  );
 }
 
 /**
@@ -269,10 +341,31 @@ function Resolver({ room, display }: { room?: string; display?: boolean }) {
 export default function OrderedActions({
   room,
   display,
+  title,
+  info,
+  prompt,
+  options,
+  revealAfterMs,
 }: {
   room?: string;
   display?: boolean;
+  title?: string;
+  info?: string;
+  /** Slide-declared defaults — an admin can open the activity in one click. */
+  prompt?: string;
+  options?: string[];
+  revealAfterMs?: number;
 }) {
   if (!isConvexConfigured) return null;
-  return <Resolver room={room} display={display} />;
+  return (
+    <Resolver
+      room={room}
+      display={display}
+      title={title}
+      info={info}
+      prompt={prompt}
+      options={options}
+      revealAfterMs={revealAfterMs}
+    />
+  );
 }

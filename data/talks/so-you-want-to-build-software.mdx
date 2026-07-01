@@ -51,7 +51,11 @@ intimidating."
 
 **One word:** how does the idea of writing code make you feel?
 
-<LivePoll display />
+<LivePoll
+  display
+  prompt="One word: how does the idea of coding make you feel?"
+  info="Head to the live page and send one word — no wrong answers."
+/>
 
 ???
 
@@ -160,7 +164,19 @@ the sat-nav, the hospital screens — all software."
 
 > Rules: no step-skipping, no "obviously". If you don't say it, I can't do it.
 
-<OrderedActions />
+<OrderedActions
+  title="Make toast"
+  info="List the exact steps — I'll follow them literally. The answer reveals when I hit next."
+  prompt="Write the exact steps to make a piece of toast"
+  options={[
+    'Get the bread out of the bag',
+    'Put a slice in the toaster',
+    'Push the lever down',
+    'Wait for it to pop up',
+    'Spread butter on it',
+  ]}
+  revealAfterMs={120000}
+/>
 
 ???
 
@@ -338,7 +354,7 @@ The reactions popping up on screen? Counting and ranking emojis is a **real begi
 
 **This is the exact shape of my job — just smaller.**
 
-<EmojiTop5 />
+<EmojiTop5 title="Your reactions, ranked" info="This is the exact program — count them, sort them, show the top five." />
 
 ???
 
@@ -480,7 +496,7 @@ Just remember **ryankelly.dev** — everything else is linked from there.
 
 ### Ask me anything.
 
-<QuestionQueue display />
+<QuestionQueue display title="Your questions" info="Ask + upvote from the live page — top questions rise to the top." />
 
 **Thanks for listening!** 👋 Find everything at **ryankelly.dev**
 

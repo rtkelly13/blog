@@ -17,16 +17,48 @@ function sizeFor(count: number, max: number): string {
   return `${(1 + ratio * 2).toFixed(2)}rem`;
 }
 
-function Poll({ room, display }: { room: string; display?: boolean }) {
+function Poll({
+  room,
+  display,
+  title,
+  info,
+  prompt,
+}: {
+  room: string;
+  display?: boolean;
+  title?: string;
+  info?: string;
+  prompt?: string;
+}) {
   const mode = useDeckMode();
   const poll = useQuery(api.polls.active, { room });
   const submit = useMutation(api.polls.submit);
+  const start = useMutation(api.polls.start);
+  const isAdmin = useQuery(api.talks.isAdmin) === true;
   const [word, setWord] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
 
-  // No open poll → render nothing (embedded panels stay quiet until started).
-  if (!poll) return null;
+  // No open poll yet. An admin on a slide that declares a prompt can start it in
+  // one click (the poll question lives with the slide).
+  if (!poll) {
+    if (!isAdmin || !prompt) return null;
+    return (
+      <div className="border-2 border-dashed border-brutalist-pink bg-zinc-900 p-5">
+        <p className="mb-1 font-mono text-sm uppercase text-brutalist-pink">
+          ● {title ?? 'Live poll'}
+        </p>
+        <p className="mb-3 font-mono text-sm text-zinc-300">{prompt}</p>
+        <button
+          type="button"
+          onClick={() => start({ room, prompt }).catch(() => {})}
+          className="border-2 border-white bg-brutalist-pink px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
+        >
+          ▶ Start poll
+        </button>
+      </div>
+    );
+  }
 
   // Only the interactive audience surface gets the input; projected/console
   // decks and any `display` embed show the cloud only.
@@ -50,11 +82,13 @@ function Poll({ room, display }: { room: string; display?: boolean }) {
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
       <p className="mb-1 font-mono text-sm uppercase text-brutalist-pink">
-        ● Live poll
+        ● {title ?? 'Live poll'}
       </p>
-      <h3 className="mb-4 font-display text-2xl font-bold uppercase text-white">
+      <h3 className="mb-1 font-display text-2xl font-bold uppercase text-white">
         {poll.prompt}
       </h3>
+      {info && <p className="mb-4 font-mono text-xs text-zinc-500">{info}</p>}
+      {!info && <div className="mb-3" />}
 
       {/* On the projected deck (display) we show the cloud only — no dead input
           box on a big screen. Students still submit from /live. */}
@@ -106,11 +140,31 @@ function Poll({ room, display }: { room: string; display?: boolean }) {
   );
 }
 
-function Resolver({ room, display }: { room?: string; display?: boolean }) {
+function Resolver({
+  room,
+  display,
+  title,
+  info,
+  prompt,
+}: {
+  room?: string;
+  display?: boolean;
+  title?: string;
+  info?: string;
+  prompt?: string;
+}) {
   const current = useQuery(api.talks.current, room ? 'skip' : {});
   const resolved = room ?? current?.room;
   if (!resolved) return null;
-  return <Poll room={resolved} display={display} />;
+  return (
+    <Poll
+      room={resolved}
+      display={display}
+      title={title}
+      info={info}
+      prompt={prompt}
+    />
+  );
 }
 
 /**
@@ -122,10 +176,25 @@ function Resolver({ room, display }: { room?: string; display?: boolean }) {
 export default function LivePoll({
   room,
   display,
+  title,
+  info,
+  prompt,
 }: {
   room?: string;
   display?: boolean;
+  title?: string;
+  info?: string;
+  /** Slide-declared question — an admin can start the poll in one click. */
+  prompt?: string;
 }) {
   if (!isConvexConfigured) return null;
-  return <Resolver room={room} display={display} />;
+  return (
+    <Resolver
+      room={room}
+      display={display}
+      title={title}
+      info={info}
+      prompt={prompt}
+    />
+  );
 }
