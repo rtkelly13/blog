@@ -204,6 +204,20 @@ workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapsh
 - Mixed JS/TS in data layer (`siteMetadata.js` vs `headerNavLinks.ts`)
 - Storybook uses Vite adapter (`@storybook/nextjs-vite`)
 
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs live as local markdown under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Uses the five canonical roles with default strings (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
 ---
 
 _See also: [components/AGENTS.md](./components/AGENTS.md), [lib/AGENTS.md](./lib/AGENTS.md), [tests/AGENTS.md](./tests/AGENTS.md)_
