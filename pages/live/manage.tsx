@@ -6,9 +6,11 @@ import { TALK_PRESETS, type TalkConfig } from '@/convex/talkConfig';
 import siteMetadata from '@/data/siteMetadata';
 import { isConvexConfigured } from '@/lib/convexClient';
 
-// Kept in sessionStorage (this tab only, cleared on close) rather than the URL —
-// so the moderation key is never shown in the address bar / projected screen or
-// left in browser history.
+// Kept in localStorage (not the URL) so the moderation key is never shown in the
+// address bar / projected screen or left in browser history, yet is shared with
+// the deck tab (opened via the Present link) and survives a refresh — enter it
+// once here and broadcasting on the deck already has it. Clear it by clearing
+// site data on the presenter's machine.
 const KEY_STORAGE = 'rk:moderation-key';
 
 const FEATURE_TOGGLES: { key: keyof TalkConfig; label: string }[] = [
@@ -40,9 +42,9 @@ function Manage() {
   const setFlag = (key: keyof TalkConfig, value: boolean | number) =>
     setConfig((c) => ({ ...c, [key]: value }));
 
-  // Restore a previously-entered key for this tab (survives refresh, not the URL).
+  // Restore a previously-entered key (shared with the deck tab, not the URL).
   useEffect(() => {
-    const saved = sessionStorage.getItem(KEY_STORAGE);
+    const saved = localStorage.getItem(KEY_STORAGE);
     if (saved) setTalkKey(saved);
   }, []);
 
@@ -51,7 +53,7 @@ function Manage() {
     try {
       await fn();
       // Only remember the key once it's proven to work (no error thrown).
-      sessionStorage.setItem(KEY_STORAGE, talkKey);
+      localStorage.setItem(KEY_STORAGE, talkKey);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong');
     }

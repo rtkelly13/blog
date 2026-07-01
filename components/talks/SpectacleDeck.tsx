@@ -27,7 +27,8 @@ interface SpectacleDeckProps {
 }
 
 const MONO = '"IBM Plex Mono", "Courier New", Courier, monospace';
-// Presenter's moderation key is kept per-tab (never the URL), matching /live/manage.
+// Presenter's moderation key, shared with /live/manage via localStorage (never
+// the URL) — enter it once on either surface and broadcasting here picks it up.
 const KEY_STORAGE = 'rk:moderation-key';
 
 // Brutalist deck chrome: fullscreen toggle, progress dots, slide counter.
@@ -98,11 +99,11 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const [moderationKey, setModerationKey] = useState('');
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(KEY_STORAGE);
+    const saved = localStorage.getItem(KEY_STORAGE);
     if (saved) setModerationKey(saved);
   }, []);
   useEffect(() => {
-    if (moderationKey) sessionStorage.setItem(KEY_STORAGE, moderationKey);
+    if (moderationKey) localStorage.setItem(KEY_STORAGE, moderationKey);
   }, [moderationKey]);
 
   // Follow engages by default whenever the live, follow-enabled talk is this
