@@ -77,11 +77,7 @@ export default function Present({
       <Head>
         <title>{frontMatter.title}</title>
       </Head>
-      <SpectacleDeck
-        slides={slides}
-        slug={frontMatter.slug}
-        durationMins={frontMatter.durationMins}
-      />
+      <SpectacleDeck slides={slides} slug={frontMatter.slug} />
     </>
   );
 }

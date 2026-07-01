@@ -4,7 +4,6 @@ import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
 import { api } from '@/convex/_generated/api';
 import SlideBody from './SlideBody';
-import TalkTimer from './TalkTimer';
 
 type Slide = { code: string; notes: string | null };
 
@@ -70,16 +69,12 @@ export function ConsoleSidebar({
   currentSlide,
   onPrev,
   onNext,
-  startedAt,
-  durationMins,
 }: {
   room: string;
   slides: Slide[];
   currentSlide: number;
   onPrev: () => void;
   onNext: () => void;
-  startedAt?: number;
-  durationMins?: number;
 }) {
   const presenters = useQuery(api.talks.presenterCount, { room });
   const end = useMutation(api.talks.end);
@@ -100,15 +95,6 @@ export function ConsoleSidebar({
       <p className="font-mono text-xs uppercase tracking-wider text-brutalist-pink">
         Console
       </p>
-
-      {/* Pacing timer (keyed on startedAt so a new talk resets it) */}
-      {startedAt != null && (
-        <TalkTimer
-          key={startedAt}
-          startedAt={startedAt}
-          durationMins={durationMins}
-        />
-      )}
 
       {/* Drive the deck */}
       <div className="space-y-2">
