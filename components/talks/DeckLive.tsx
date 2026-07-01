@@ -13,21 +13,27 @@ type SetSlide = ReturnType<typeof useMutation>;
 export function Broadcaster({
   enabled,
   room,
+  slideIndex,
   setSlide,
+  onPublished,
+  onError,
 }: {
   enabled: boolean;
   room?: string;
+  /** Current slide index, driven by the deck template's slideNumber (reliable). */
+  slideIndex: number;
   setSlide: SetSlide;
+  onPublished?: (index: number) => void;
+  onError?: (message: string) => void;
 }) {
-  const { activeView } = useContext(DeckContext);
-  const slideIndex = activeView.slideIndex;
-
   useEffect(() => {
     if (!enabled || !room) return;
-    setSlide({ room, index: slideIndex }).catch(() => {
-      // Ignore transient failures — the next slide change re-publishes.
-    });
-  }, [enabled, room, slideIndex, setSlide]);
+    setSlide({ room, index: slideIndex })
+      .then(() => onPublished?.(slideIndex))
+      .catch((e) =>
+        onError?.(e instanceof Error ? e.message : 'broadcast failed'),
+      );
+  }, [enabled, room, slideIndex, setSlide, onPublished, onError]);
 
   return null;
 }

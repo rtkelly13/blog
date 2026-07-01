@@ -52,7 +52,7 @@ function LiveRoom() {
             href={`/talks/${talk.slug}/present?follow=live`}
             className="border-2 border-white bg-brutalist-yellow px-4 py-2 font-bold uppercase text-black shadow-hard-md"
           >
-            Follow the slides →
+            Watch along →
           </a>
         </p>
       )}
@@ -67,12 +67,11 @@ function LiveRoom() {
       )}
 
       {config.closingChart && (
-        <>
-          <p className="mt-8 mb-3 font-mono text-sm uppercase text-zinc-400">
-            This talk so far:
-          </p>
-          <TalkStatsChart room={talk.room} threshold={config.chartThreshold} />
-        </>
+        <TalkStatsChart
+          room={talk.room}
+          threshold={config.chartThreshold}
+          heading="This talk so far:"
+        />
       )}
 
       {!anyInteractive && !config.closingChart && (

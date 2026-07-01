@@ -2,61 +2,47 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 
-/** Always-on closing card — the deck/finale message, shown with or without a chart. */
-function Closing() {
-  return (
-    <div className="border-2 border-white bg-zinc-900 p-8 text-center">
-      <p className="font-display text-3xl font-bold uppercase text-white">
-        Thanks 👋
-      </p>
-      <a
-        href="https://ryankelly.dev"
-        className="mt-3 inline-block font-mono text-lg font-bold text-brutalist-cyan underline"
-      >
-        ryankelly.dev
-      </a>
-    </div>
-  );
-}
-
-function Chart({ room, threshold }: { room: string; threshold: number }) {
+function Chart({
+  room,
+  threshold,
+  heading,
+}: {
+  room: string;
+  threshold: number;
+  heading?: string;
+}) {
   const stats = useQuery(api.talks.stats, { room });
 
-  if (stats === undefined) {
-    return <p className="font-mono text-zinc-400">Tallying…</p>;
-  }
-
-  // Threshold reveal: below the bar we just show the closing message, so a
-  // quiet room never projects a near-empty chart. The chart layers in once
-  // there's meaningful data.
-  if (stats.totalReactions < threshold) {
-    return <Closing />;
-  }
+  // Hide the whole section until there's meaningful data (reactions ≥ threshold).
+  // No empty/placeholder state — nothing renders, heading included — so a quiet
+  // room shows no chart section at all.
+  if (stats === undefined || stats.totalReactions < threshold) return null;
 
   const max = Math.max(1, ...stats.reactions.map((r) => r.total));
 
   return (
-    <div className="border-2 border-white bg-zinc-900 p-6">
-      <div className="mb-6 flex flex-wrap gap-x-10 gap-y-2 font-mono">
-        <div>
-          <div className="font-display text-5xl font-bold text-brutalist-cyan">
-            {stats.totalReactions}
-          </div>
-          <div className="text-xs uppercase text-zinc-400">reactions</div>
-        </div>
-        <div>
-          <div className="font-display text-5xl font-bold text-brutalist-yellow">
-            {stats.attendees}
-          </div>
-          <div className="text-xs uppercase text-zinc-400">people joined</div>
-        </div>
-      </div>
-
-      {stats.reactions.length === 0 ? (
-        <p className="font-mono text-sm text-zinc-500">
-          No reactions yet — tap some emojis!
+    <>
+      {heading && (
+        <p className="mt-8 mb-3 font-mono text-sm uppercase text-zinc-400">
+          {heading}
         </p>
-      ) : (
+      )}
+      <div className="border-2 border-white bg-zinc-900 p-6">
+        <div className="mb-6 flex flex-wrap gap-x-10 gap-y-2 font-mono">
+          <div>
+            <div className="font-display text-5xl font-bold text-brutalist-cyan">
+              {stats.totalReactions}
+            </div>
+            <div className="text-xs uppercase text-zinc-400">reactions</div>
+          </div>
+          <div>
+            <div className="font-display text-5xl font-bold text-brutalist-yellow">
+              {stats.attendees}
+            </div>
+            <div className="text-xs uppercase text-zinc-400">people joined</div>
+          </div>
+        </div>
+
         <div className="space-y-3">
           {stats.reactions.map((r) => (
             <div key={r.emoji} className="flex items-center gap-3">
@@ -73,43 +59,47 @@ function Chart({ room, threshold }: { room: string; threshold: number }) {
             </div>
           ))}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 
-function Resolver({ room, threshold }: { room?: string; threshold?: number }) {
+function Resolver({
+  room,
+  threshold,
+  heading,
+}: {
+  room?: string;
+  threshold?: number;
+  heading?: string;
+}) {
   const current = useQuery(api.talks.current, room ? 'skip' : {});
   const resolved = room ?? current?.room;
   // Fall back to the live talk's configured reveal threshold when not overridden.
   const effectiveThreshold =
     threshold ?? (room ? 0 : (current?.config.chartThreshold ?? 0));
 
-  if (!room && current === undefined) {
-    return <p className="font-mono text-zinc-400">Tallying…</p>;
-  }
-  if (!resolved) {
-    return (
-      <p className="font-mono text-sm text-zinc-500">No live talk to chart.</p>
-    );
-  }
-  return <Chart room={resolved} threshold={effectiveThreshold} />;
+  if (!resolved) return null;
+  return (
+    <Chart room={resolved} threshold={effectiveThreshold} heading={heading} />
+  );
 }
 
 /**
- * Closing stats for a talk: a live bar chart of reaction totals plus headline
- * counts, revealed only once reactions reach the talk's `chartThreshold` (until
- * then it shows the plain Thanks / ryankelly.dev closing). With no `room` it
- * resolves the currently-live talk and its configured threshold — so as the
- * finale view it auto-charts whichever run is on. Self-guarding without Convex.
+ * Live bar chart of a talk's reaction totals plus headline counts. It reveals
+ * only once reactions reach `threshold`; below that it renders nothing at all
+ * (no placeholder, no heading). With no `room` it resolves the currently-live
+ * talk and its configured threshold. Self-guarding without Convex.
  */
 export default function TalkStatsChart({
   room,
   threshold,
+  heading,
 }: {
   room?: string;
   threshold?: number;
+  heading?: string;
 }) {
   if (!isConvexConfigured) return null;
-  return <Resolver room={room} threshold={threshold} />;
+  return <Resolver room={room} threshold={threshold} heading={heading} />;
 }

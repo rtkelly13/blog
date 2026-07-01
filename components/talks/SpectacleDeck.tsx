@@ -1,6 +1,6 @@
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Box,
   Deck,
@@ -96,6 +96,14 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
   const isAdmin = useQuery(api.talks.isAdmin) === true;
 
   const [broadcastOn, setBroadcastOn] = useState(false);
+  // Visible broadcast feedback: which slide we last pushed, or an error string.
+  const [pubSlide, setPubSlide] = useState<number | null>(null);
+  const [pubError, setPubError] = useState<string | null>(null);
+  const onPublished = useCallback((index: number) => {
+    setPubSlide(index);
+    setPubError(null);
+  }, []);
+  const onError = useCallback((message: string) => setPubError(message), []);
 
   // Follow engages by default whenever the live, follow-enabled talk is this
   // deck — no query param needed, so simply opening the deck follows along.
@@ -122,7 +130,10 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
       <Broadcaster
         enabled={broadcasting}
         room={current?.room}
+        slideIndex={slideNumber - 1}
         setSlide={setSlide}
+        onPublished={onPublished}
+        onError={onError}
       />
       <Follower enabled={followEnabled} currentSlide={current?.currentSlide} />
     </>
@@ -151,11 +162,19 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
           {broadcastOn && (
             <span
               style={{
-                color: broadcasting ? '#22d3ee' : '#facc15',
+                color: pubError
+                  ? '#f472b6'
+                  : broadcasting
+                    ? '#22d3ee'
+                    : '#facc15',
                 textTransform: 'uppercase',
               }}
             >
-              {broadcasting ? '● broadcasting' : 'start a follow talk'}
+              {pubError
+                ? `broadcast error: ${pubError}`
+                : broadcasting
+                  ? `● broadcasting${pubSlide != null ? ` · slide ${pubSlide + 1}` : ''}`
+                  : 'start a follow talk'}
             </span>
           )}
           <button
