@@ -61,3 +61,6 @@ storybook-static
 .worktrees/
 .claude/worktrees/
 tsconfig.tsbuildinfo
+
+# local scratch TODO (code-review findings, not for commit)
+todo.md
