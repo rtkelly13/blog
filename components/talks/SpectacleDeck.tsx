@@ -105,11 +105,15 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     if (moderationKey) sessionStorage.setItem(KEY_STORAGE, moderationKey);
   }, [moderationKey]);
 
-  const isFollowMode = router.query.follow === 'live';
-  // Follow only engages for the talk that is actually live and follow-enabled.
+  // Follow engages by default whenever the live, follow-enabled talk is this
+  // deck — no query param needed, so simply opening the deck follows along.
+  // Broadcasting is the explicit opt-in (flip Broadcast + key); while you
+  // broadcast, this tab stops following so your own navigation drives the room.
+  // ?follow=live is just a clean audience view that hides the Broadcast control.
+  const isAudienceMode = router.query.follow === 'live';
   const matches = current?.slug === slug && current?.config.follow === true;
-  const canBroadcast = matches && broadcastOn && Boolean(moderationKey);
-  const followEnabled = isFollowMode && matches;
+  const broadcasting = matches && broadcastOn && Boolean(moderationKey);
+  const followEnabled = matches && !broadcasting;
 
   const template = ({
     slideNumber,
@@ -121,7 +125,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     <>
       <Chrome slideNumber={slideNumber} numberOfSlides={numberOfSlides} />
       <Broadcaster
-        enabled={canBroadcast}
+        enabled={broadcasting}
         room={current?.room}
         moderationKey={moderationKey}
         setSlide={setSlide}
@@ -136,7 +140,7 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
         {renderSlides(slides)}
       </Deck>
 
-      {!isFollowMode && (
+      {!isAudienceMode && (
         <div
           style={{
             position: 'fixed',
@@ -169,11 +173,11 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
           {broadcastOn && (
             <span
               style={{
-                color: canBroadcast ? '#22d3ee' : '#facc15',
+                color: broadcasting ? '#22d3ee' : '#facc15',
                 textTransform: 'uppercase',
               }}
             >
-              {canBroadcast ? '● live' : 'start a follow talk'}
+              {broadcasting ? '● broadcasting' : 'start a follow talk'}
             </span>
           )}
           <button
