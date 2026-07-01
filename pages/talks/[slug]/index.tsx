@@ -2,6 +2,7 @@ import { Calendar, MapPin, Play, Users } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import Link from '@/components/Link';
+import LiveTalkBanner from '@/components/LiveTalkBanner';
 import { PageSEO } from '@/components/SEO';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
@@ -51,6 +52,10 @@ export default function TalkLanding({
         description={summary}
       />
       <article className="mx-auto max-w-3xl py-10">
+        <LiveTalkBanner
+          slug={slug}
+          className="mb-6 flex w-full items-center gap-3 border-2 border-white bg-black px-4 py-3 font-mono shadow-hard-md transition-shadow hover:shadow-hard-lg"
+        />
         <header className="border-2 border-white bg-zinc-900 p-6">
           <p className="mb-3 font-mono text-xs uppercase text-brutalist-cyan">
             {event}
