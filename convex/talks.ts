@@ -104,6 +104,22 @@ export const isAdmin = query({
   handler: async (ctx) => isAdminUser(ctx),
 });
 
+/** The signed-in user's GitHub identity (or null) — for the admin dashboard. */
+export const viewer = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
+    const githubLogin =
+      'githubLogin' in user && typeof user.githubLogin === 'string'
+        ? user.githubLogin
+        : null;
+    return { githubLogin, name: user.name ?? null };
+  },
+});
+
 /**
  * Aggregated stats for a talk room — for the closing chart. Reactive, so the
  * chart animates as reactions land right up to the final slide.
