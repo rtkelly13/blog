@@ -189,21 +189,31 @@ function LiveDeck({ slides, slug }: SpectacleDeckProps) {
     ) : null;
 
   // With a sidebar, the deck occupies the left ~4/5 (Spectacle scales into its
-  // container) and the sidebar fills the right 1/5.
+  // container) and the sidebar fills the right 1/5. Use dvh (dynamic viewport)
+  // + overflow-hidden so the layout fits the *visible* height — otherwise
+  // browser UI that shrinks the viewport (mobile chrome bars, or Chrome's
+  // "controlled by automated test software" infobar) pushes content off-screen.
   if (sidebar) {
     return (
-      <div style={{ display: 'flex', width: '100vw', height: '100vh' }}>
+      <div
+        style={{
+          display: 'flex',
+          width: '100vw',
+          height: '100dvh',
+          overflow: 'hidden',
+        }}
+      >
         <div
           style={{
             position: 'relative',
-            height: '100vh',
+            height: '100dvh',
             flex: '1 1 0%',
             minWidth: 0,
           }}
         >
           {deckEl}
         </div>
-        <div style={{ height: '100vh', flex: '0 0 20vw', width: '20vw' }}>
+        <div style={{ height: '100dvh', flex: '0 0 20vw', width: '20vw' }}>
           {sidebar}
         </div>
       </div>
