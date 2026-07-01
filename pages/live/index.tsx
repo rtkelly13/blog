@@ -2,6 +2,7 @@ import { useQuery } from 'convex/react';
 import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import { PageSEO } from '@/components/SEO';
+import TalkStatsChart from '@/components/TalkStatsChart';
 import { api } from '@/convex/_generated/api';
 import siteMetadata from '@/data/siteMetadata';
 import { isConvexConfigured } from '@/lib/convexClient';
@@ -42,6 +43,10 @@ function LiveRoom() {
         React:
       </p>
       <Reactions room={talk.room} />
+      <p className="mt-8 mb-3 font-mono text-sm uppercase text-zinc-400">
+        This talk so far:
+      </p>
+      <TalkStatsChart room={talk.room} />
       <p className="mt-6 font-mono text-sm text-zinc-400">
         <span className="text-brutalist-yellow">&gt;</span> You're in. Keep this
         tab open to stay counted.

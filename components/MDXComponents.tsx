@@ -9,6 +9,7 @@ import Image from './Image';
 import CustomLink from './Link';
 import NoteBlock from './NoteBlock';
 import Pre from './Pre';
+import TalkStatsChart from './TalkStatsChart';
 import TOCInline from './TOCInline';
 
 const Wrapper: React.ComponentType<{ layout: string }> = ({
@@ -24,6 +25,7 @@ export const MDXComponents: MDXComponentsType = {
   TOCInline,
   Diagram,
   NoteBlock,
+  TalkStatsChart,
   a: CustomLink,
   pre: Pre,
   wrapper: Wrapper,

@@ -45,6 +45,31 @@ export const current = query({
   },
 });
 
+/**
+ * Aggregated stats for a talk room — for the closing chart. Reactive, so the
+ * chart animates as reactions land right up to the final slide.
+ */
+export const stats = query({
+  args: { room: v.string() },
+  handler: async (ctx, { room }) => {
+    const tallies = await ctx.db
+      .query('reactionTotals')
+      .withIndex('by_room', (q) => q.eq('room', room))
+      .collect();
+    const reactions = tallies
+      .map((t) => ({ emoji: t.emoji, total: t.total }))
+      .sort((a, b) => b.total - a.total);
+    const totalReactions = reactions.reduce((sum, r) => sum + r.total, 0);
+
+    const attendeeRows = await ctx.db
+      .query('attendees')
+      .withIndex('by_room_firstSeen', (q) => q.eq('room', room))
+      .collect();
+
+    return { reactions, totalReactions, attendees: attendeeRows.length };
+  },
+});
+
 /** Presenter: start a talk (ends any currently-live one first). */
 export const start = mutation({
   args: { slug: v.string(), title: v.string(), key: v.string() },

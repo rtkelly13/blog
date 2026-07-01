@@ -17,6 +17,17 @@ export const send = mutation({
     if (!ALLOWED.has(emoji)) return; // silently drop anything off the allow-list
     const n = Math.min(Math.max(Math.floor(count), 1), 20);
     await ctx.db.insert('reactions', { room, emoji, count: n, at: Date.now() });
+
+    // Accumulate the persistent tally for the closing stats chart.
+    const tally = await ctx.db
+      .query('reactionTotals')
+      .withIndex('by_room_emoji', (q) => q.eq('room', room).eq('emoji', emoji))
+      .unique();
+    if (tally) {
+      await ctx.db.patch(tally._id, { total: tally.total + n });
+    } else {
+      await ctx.db.insert('reactionTotals', { room, emoji, total: n });
+    }
   },
 });
 

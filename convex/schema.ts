@@ -63,6 +63,16 @@ export default defineSchema({
     at: v.number(),
   }).index('by_room_at', ['room', 'at']),
 
+  // Persistent per-talk tally of reactions (the ephemeral `reactions` rows are
+  // reaped, so totals for the closing stats chart accumulate here instead).
+  reactionTotals: defineTable({
+    room: v.string(),
+    emoji: v.string(),
+    total: v.number(),
+  })
+    .index('by_room', ['room'])
+    .index('by_room_emoji', ['room', 'emoji']),
+
   toastSubmissions: defineTable({
     talkSlug: v.string(),
     nickname: v.optional(v.string()),
