@@ -321,8 +321,15 @@ function QAControls({ room }: { room: string }) {
 
   if (!feed?.authorized) return null;
 
+  // Live count in the card title so new arrivals are noticeable at a glance
+  // (the feed is reactive — the number ticks up as questions come in).
+  const count = feed.questions.length;
+
   return (
-    <Section title="Q&A moderation" accent="text-brutalist-cyan">
+    <Section
+      title={`Q&A moderation — ${count} question${count === 1 ? '' : 's'}`}
+      accent="text-brutalist-cyan"
+    >
       {feed.questions.length === 0 ? (
         <p className="font-mono text-sm text-zinc-500">No questions yet.</p>
       ) : (
