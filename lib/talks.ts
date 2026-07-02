@@ -94,7 +94,15 @@ function splitSlides(content: string): string[] {
   return chunks.map((chunk) => chunk.join('\n').trim()).filter(Boolean);
 }
 
-export function getAllTalksFrontMatter(): TalkFrontMatter[] {
+/**
+ * All talk front matter, newest first. By default drafts are filtered for public
+ * surfaces (listing, sitemap, search). Pass `includeDrafts` to get everything —
+ * the listing does this and then reveals draft cards only to a signed-in admin
+ * (client-side), each stamped with a DRAFT badge.
+ */
+export function getAllTalksFrontMatter(
+  includeDrafts = false,
+): TalkFrontMatter[] {
   if (!fs.existsSync(talksPath)) return [];
 
   const talks: TalkFrontMatter[] = [];
@@ -107,7 +115,7 @@ export function getAllTalksFrontMatter(): TalkFrontMatter[] {
     );
     const frontmatter = data as TalkFrontMatter;
 
-    if (!isPublished(frontmatter)) continue;
+    if (!includeDrafts && !isPublished(frontmatter)) continue;
 
     talks.push(
       normalizeFrontMatter(frontmatter, file.replace(/\.(mdx|md)$/, '')),
@@ -121,26 +129,29 @@ export function getAllTalksFrontMatter(): TalkFrontMatter[] {
   });
 }
 
-/**
- * Published talk slugs only. Derived from getAllTalksFrontMatter so the draft
- * filter lives in exactly one place (getStaticPaths must not enumerate drafts).
- */
+/** Published talk slugs only (used for sitemap/search — never drafts). */
 export function getTalkSlugs(): string[] {
   return getAllTalksFrontMatter().map((talk) => talk.slug);
 }
 
-/** Shared getStaticPaths body for the talk landing + present routes. */
+/**
+ * Shared getStaticPaths for the talk landing + present routes. Builds ALL talks
+ * including drafts, so an admin can open a draft deck by URL (it renders with a
+ * DRAFT badge); the listing is what hides drafts from non-admins.
+ */
 export function getTalkStaticPaths() {
   return {
-    paths: getTalkSlugs().map((slug) => ({ params: { slug } })),
+    paths: getAllTalksFrontMatter(true).map((t) => ({
+      params: { slug: t.slug },
+    })),
     fallback: false as const,
   };
 }
 
 /**
- * Lightweight metadata (front matter + slide count) without compiling any MDX —
- * used by the landing page, which only needs the count. Returns null for a
- * missing or draft (in production) talk.
+ * Lightweight metadata (front matter + slide count) without compiling any MDX.
+ * Drafts are returned (with `draft: true` in the front matter) so the page can
+ * render them behind a DRAFT badge; only a genuinely missing talk is null.
  */
 export function getTalkMeta(
   slug: string,
@@ -150,7 +161,6 @@ export function getTalkMeta(
 
   const { data, content } = matter(fs.readFileSync(filePath, 'utf8'));
   const frontmatter = data as TalkFrontMatter;
-  if (!isPublished(frontmatter)) return null;
 
   return {
     frontMatter: normalizeFrontMatter(frontmatter, slug),
@@ -209,7 +219,7 @@ export async function getTalkBySlug(
 
   const { data, content } = matter(fs.readFileSync(filePath, 'utf8'));
   const frontmatter = data as TalkFrontMatter;
-  if (!isPublished(frontmatter)) return null;
+  // Drafts render too (behind a DRAFT badge) — see getTalkStaticPaths.
 
   // Split the (frontmatter-stripped) body into individual slides. Within a
   // slide, an optional `???` line separates the slide body from speaker notes

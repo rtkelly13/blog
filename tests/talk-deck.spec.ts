@@ -33,11 +33,16 @@ async function next(page: Page) {
 
 test.describe('Talk deck — E2E debug deck (visual)', () => {
   test('renders each slide deterministically', async ({ page }) => {
-    const resp = await page.goto(PRESENT);
+    // Draft decks now always build (so admins can open them in prod), so this
+    // deck no longer 404s. Keep the visual spec opt-in via SHOW_DRAFTS — the
+    // scenario where its baseline snapshots are generated — so CI (which doesn't
+    // set it) keeps skipping rather than failing on missing baselines.
     test.skip(
-      resp?.status() === 404,
-      'debug deck not built (needs SHOW_DRAFTS / dev)',
+      process.env.SHOW_DRAFTS !== 'true',
+      'deck visual runs under SHOW_DRAFTS (where snapshots are generated)',
     );
+    const resp = await page.goto(PRESENT);
+    test.skip(resp?.status() === 404, 'debug deck not built');
     await deckReady(page);
 
     // Title slide.

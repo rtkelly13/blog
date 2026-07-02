@@ -3,6 +3,9 @@ import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import { PageSEO } from '@/components/SEO';
 import TalkStatsChart from '@/components/TalkStatsChart';
+import LivePoll from '@/components/talks/LivePoll';
+import OrderedActions from '@/components/talks/OrderedActions';
+import QuestionQueue from '@/components/talks/QuestionQueue';
 import { api } from '@/convex/_generated/api';
 import siteMetadata from '@/data/siteMetadata';
 import { isConvexConfigured } from '@/lib/convexClient';
@@ -65,6 +68,14 @@ function LiveRoom() {
           <Reactions room={talk.room} />
         </>
       )}
+
+      {/* Interactive activities live inline — no codes, no extra tabs. The poll
+          and ordered-actions panels stay hidden until the presenter opens one. */}
+      <div className="mt-6 space-y-6">
+        <LivePoll room={talk.room} />
+        <OrderedActions room={talk.room} />
+        <QuestionQueue room={talk.room} />
+      </div>
 
       {config.closingChart && (
         <TalkStatsChart

@@ -109,18 +109,67 @@ export default defineSchema({
     .index('by_room', ['room'])
     .index('by_room_emoji', ['room', 'emoji']),
 
-  toastSubmissions: defineTable({
-    talkSlug: v.string(),
+  // Live audience Q&A queue. Anyone submits a question; everyone can upvote it;
+  // the presenter answers/hides from the console. Sorted by votes for a natural
+  // "top questions" queue. Room-scoped to the live talk (room = talk _id).
+  questions: defineTable({
+    room: v.string(),
+    text: v.string(),
     nickname: v.optional(v.string()),
-    steps: v.array(v.string()),
-    /** Profanity was detected (and masked) in this submission. */
-    flagged: v.boolean(),
-    /** Has cleared the 5s buffer and may appear on the audience wall. */
+    votes: v.number(),
+    answered: v.boolean(),
+    /** Presenter has removed this from the audience-visible queue. */
+    hidden: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_room_created', ['room', 'createdAt']),
+
+  // Live poll / word cloud. The presenter opens a prompt; the audience submits
+  // single words; `pollWords` accumulates a per-word tally for the cloud/bars.
+  // One poll is `open` per room at a time.
+  polls: defineTable({
+    room: v.string(),
+    prompt: v.string(),
+    status: v.union(v.literal('open'), v.literal('closed')),
+    createdAt: v.number(),
+  }).index('by_room_created', ['room', 'createdAt']),
+
+  pollWords: defineTable({
+    pollId: v.id('polls'),
+    word: v.string(),
+    count: v.number(),
+    /** Presenter has blocked this word from the cloud (counted, not shown). */
+    hidden: v.optional(v.boolean()),
+  })
+    .index('by_poll', ['pollId'])
+    .index('by_poll_word', ['pollId', 'word']),
+
+  // Generic "put the actions in order" activity (the toast exercise generalized).
+  // The presenter opens an activity with a prompt and a set of pre-defined option
+  // labels that stay hidden until `revealAt`. The audience submits their own
+  // ordered list of steps; after the reveal time the canonical options appear.
+  activities: defineTable({
+    room: v.string(),
+    prompt: v.string(),
+    /** Canonical/example steps, revealed to everyone once `revealed` flips. */
+    options: v.array(v.string()),
+    /** Target timestamp for the reveal — drives the audience countdown. */
+    revealAt: v.union(v.number(), v.null()),
+    /** Flipped true by a scheduled function at `revealAt`; gates `options`. */
     revealed: v.boolean(),
-    /** Presenter has pulled this from the wall. */
+    status: v.union(v.literal('open'), v.literal('closed')),
+    createdAt: v.number(),
+  }).index('by_room_created', ['room', 'createdAt']),
+
+  activitySubmissions: defineTable({
+    activityId: v.id('activities'),
+    room: v.string(),
+    nickname: v.optional(v.string()),
+    /** The audience member's ordered list of actions (profanity-masked). */
+    steps: v.array(v.string()),
+    /** Presenter has removed this from the wall. */
     hidden: v.boolean(),
     createdAt: v.number(),
   })
-    // Wall + moderation both read newest-or-oldest within a single talk.
-    .index('by_slug_created', ['talkSlug', 'createdAt']),
+    .index('by_activity_created', ['activityId', 'createdAt'])
+    .index('by_room_created', ['room', 'createdAt']),
 });

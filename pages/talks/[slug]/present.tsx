@@ -76,7 +76,29 @@ export default function Present({
     <>
       <Head>
         <title>{frontMatter.title}</title>
+        {frontMatter.draft && <meta name="robots" content="noindex,nofollow" />}
       </Head>
+      {frontMatter.draft && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '0.75rem',
+            left: '0.75rem',
+            zIndex: 50,
+            border: '2px solid #f472b6',
+            color: '#f472b6',
+            background: '#000',
+            padding: '0.2rem 0.5rem',
+            fontFamily: '"IBM Plex Mono", monospace',
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            pointerEvents: 'none',
+          }}
+        >
+          ● Draft
+        </div>
+      )}
       <SpectacleDeck
         slides={slides}
         slug={frontMatter.slug}

@@ -13,6 +13,7 @@ import {
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 import { DeckDriver, Follower } from './DeckLive';
+import { DeckModeProvider } from './DeckModeContext';
 import { AttendeeSidebar, ConsoleSidebar } from './DeckSidebars';
 import SlideBody from './SlideBody';
 import { brutalistTheme } from './theme';
@@ -168,6 +169,34 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   );
   const clash = typeof presenterCount === 'number' && presenterCount > 1;
 
+  // Deck-native reveal: while driving the deck with an open activity whose answer
+  // is still hidden, the next "advance" press reveals the canonical answer to the
+  // room instead of changing slide (a Spectacle-stepper-style beat). A second
+  // press then advances normally. Only the broadcasting deck arms this.
+  const openActivity = useQuery(
+    api.activities.active,
+    broadcasting && room ? { room } : 'skip',
+  );
+  const revealNow = useMutation(api.activities.revealNow);
+  const pendingReveal =
+    broadcasting && openActivity && !openActivity.revealed
+      ? openActivity._id
+      : null;
+
+  useEffect(() => {
+    if (!pendingReveal) return;
+    const ADVANCE = new Set([' ', 'Spacebar', 'ArrowRight', 'PageDown']);
+    const onKey = (e: KeyboardEvent) => {
+      if (!ADVANCE.has(e.key)) return;
+      // Beat Spectacle's own handler and consume this press.
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      revealNow({ id: pendingReveal }).catch(() => {});
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [pendingReveal, revealNow]);
+
   const template = ({
     slideNumber,
     numberOfSlides,
@@ -197,9 +226,11 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   );
 
   const deckEl = (
-    <Deck theme={brutalistTheme} template={template}>
-      {renderSlides(slides)}
-    </Deck>
+    <DeckModeProvider value={mode}>
+      <Deck theme={brutalistTheme} template={template}>
+        {renderSlides(slides)}
+      </Deck>
+    </DeckModeProvider>
   );
 
   const sidebar =
@@ -306,6 +337,18 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
               }}
             >
               ⚠ {presenterCount} presenters connected — you may clash
+            </span>
+          )}
+          {pendingReveal && (
+            <span
+              style={{
+                border: '2px solid #facc15',
+                background: '#facc15',
+                color: '#000',
+                padding: '0.3rem 0.6rem',
+              }}
+            >
+              ▶ next reveals the answer
             </span>
           )}
         </div>

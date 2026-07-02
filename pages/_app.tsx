@@ -22,6 +22,7 @@ import Head from 'next/head';
 import { ThemeProvider } from 'next-themes';
 import type { ReactElement, ReactNode } from 'react';
 
+import AdminIndicator from '@/components/AdminIndicator';
 import Analytics from '@/components/analytics';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import SearchProvider from '@/components/search/SearchProvider';
@@ -56,7 +57,10 @@ export default function App({ Component, pageProps }: AppProps) {
   // else renders unchanged when NEXT_PUBLIC_CONVEX_URL is unset. ConvexAuthProvider
   // adds GitHub-session handling (tokens in localStorage) on top of ConvexProvider.
   return convex ? (
-    <ConvexAuthProvider client={convex}>{tree}</ConvexAuthProvider>
+    <ConvexAuthProvider client={convex}>
+      {tree}
+      <AdminIndicator />
+    </ConvexAuthProvider>
   ) : (
     tree
   );
