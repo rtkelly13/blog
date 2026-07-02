@@ -187,6 +187,12 @@ export default defineSchema({
     steps: v.array(v.string()),
     /** Presenter has removed this from the wall. */
     hidden: v.boolean(),
+    /**
+     * Presenter has marked this while evaluating submissions with the room
+     * (e.g. "discussing this one" / "already covered"). Presenter-only signal —
+     * never exposed on the audience wall.
+     */
+    marked: v.optional(v.boolean()),
     createdAt: v.number(),
   })
     .index('by_activity_created', ['activityId', 'createdAt'])
