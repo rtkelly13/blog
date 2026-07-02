@@ -38,6 +38,19 @@ function step(msg) {
   console.log(`\n\x1b[36m▸ ${msg}\x1b[0m`);
 }
 
+/** Run a phase; a thrown error is recorded as a failure but doesn't abort the run. */
+async function guard(label, fn) {
+  try {
+    await fn();
+  } catch (e) {
+    record(
+      `${label}: phase errored`,
+      false,
+      (e?.message || String(e)).slice(0, 90),
+    );
+  }
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Poll `fn` until it returns truthy or we time out. Returns the value or null. */
@@ -113,6 +126,9 @@ async function moderateRow(page, rowText, verb) {
 
 /** Click the first element matching a CSS selector whose text includes `text`. */
 async function clickByText(page, selector, text) {
+  // A backgrounded tab is throttled — element ops (click/scroll-into-view) can
+  // hang. Foreground it first so interactions stay responsive.
+  await page.bringToFront().catch(() => {});
   const handle = await page.evaluateHandle(
     (sel, needle) => {
       const els = Array.from(document.querySelectorAll(sel));
@@ -138,6 +154,8 @@ async function typeByPlaceholder(
   value,
   { submit } = {},
 ) {
+  // Foreground the tab so typing isn't throttled (see clickByText).
+  await page.bringToFront().catch(() => {});
   const el = await until(async () => {
     const h = await page.evaluateHandle((part) => {
       const inputs = Array.from(document.querySelectorAll('input, textarea'));
@@ -152,7 +170,14 @@ async function typeByPlaceholder(
     return h.asElement();
   });
   if (!el) throw new Error(`no field with placeholder ~"${placeholderPart}"`);
-  await el.click({ clickCount: 3 });
+  // Clear any existing value before typing — clickCount:3 select-all isn't
+  // reliable across inputs, and a pre-filled field (e.g. the default slug) would
+  // otherwise get the new text spliced into the middle.
+  await el.focus();
+  await el.evaluate((n) => {
+    if (typeof n.select === 'function') n.select();
+  });
+  await el.press('Backspace');
   await el.type(value, { delay: 8 });
   if (submit) await el.press('Enter');
   return el;
@@ -171,7 +196,7 @@ async function main() {
   const browser = await puppeteer.connect({
     browserURL: CDP_URL,
     defaultViewport: null,
-    protocolTimeout: 60000,
+    protocolTimeout: 30000,
   });
 
   // Close any stray tabs left by a previous run so they don't starve the deck.
@@ -201,12 +226,13 @@ async function main() {
   await typeByPlaceholder(admin, 'talk slug', SLUG);
   await typeByPlaceholder(admin, 'talk title', 'E2E Debug Deck');
   // Ensure presence/reactions/follow checkboxes are all ticked (follow drives
-  // the deck-native reveal broadcast path).
-  await admin.evaluate(() => {
-    for (const cb of document.querySelectorAll('input[type="checkbox"]')) {
-      if (!cb.checked) cb.click();
-    }
-  });
+  // the deck-native reveal broadcast path). Use real puppeteer clicks — a
+  // programmatic .click() inside evaluate doesn't fire React's controlled
+  // checkbox onChange, so features would silently stay off.
+  await admin.bringToFront().catch(() => {});
+  for (const box of await admin.$$('input[type="checkbox"]')) {
+    if (!(await box.evaluate((el) => el.checked))) await box.click();
+  }
   await clickByText(admin, 'button', 'Start talk');
   const live = await waitForText(admin, '● Live', { timeout: 10000 });
   record('admin: talk went live', Boolean(live));
@@ -263,100 +289,136 @@ async function main() {
     Boolean(hiddenFromAttendee),
   );
 
-  // ── Poll / word cloud ─────────────────────────────────────────────────────
-  step('Poll — start, submit words, block one word');
-  await typeByPlaceholder(admin, 'Poll prompt', 'One word: how do you feel?');
-  await clickByText(admin, 'button', 'Start');
-  // Attendee should now get the poll form.
-  const pollForm = await waitForField(attendee, 'One word', { timeout: 12000 });
-  record('poll: attendee sees the word form', Boolean(pollForm));
-  if (pollForm) {
-    await typeByPlaceholder(attendee, 'One word', 'excited', { submit: true });
-  }
-  const wordOnAdmin = await waitForText(admin, 'excited', { timeout: 10000 });
-  record('poll: submitted word reaches cockpit', Boolean(wordOnAdmin));
+  // Presenter deck tab is opened in the activity phase; declared here so the
+  // final cleanup can close it even if that phase errors early.
+  let presenter = null;
 
-  // Submit a word to block.
-  await clickByText(attendee, 'button', 'Add another').catch(() => {});
-  await waitForField(attendee, 'One word', { timeout: 6000 });
-  await typeByPlaceholder(attendee, 'One word', 'badword', { submit: true });
-  await waitForText(admin, 'badword', { timeout: 10000 });
-  const wordBlocked = await moderateRow(admin, 'badword', '^block$');
-  record('poll: blocked a word from cockpit', wordBlocked);
-  const pollBlockedCount = await until(
-    async () =>
-      !(await pageHasText(attendee, 'badword')) &&
-      (await pageHasText(attendee, 'blocked')),
-    { timeout: 10000 },
-  );
-  record(
-    'poll: blocked word hidden + counted for attendee',
-    Boolean(pollBlockedCount),
-  );
+  // ── Poll / word cloud ─────────────────────────────────────────────────────
+  await guard('poll', async () => {
+    step('Poll — start, submit words, block one word');
+    await typeByPlaceholder(admin, 'Poll prompt', 'One word: how do you feel?');
+    await clickByText(admin, 'button', 'Start');
+    // Attendee should now get the poll form.
+    const pollForm = await waitForField(attendee, 'One word', {
+      timeout: 12000,
+    });
+    record('poll: attendee sees the word form', Boolean(pollForm));
+    if (pollForm) {
+      await typeByPlaceholder(attendee, 'One word', 'excited', {
+        submit: true,
+      });
+    }
+    const wordOnAdmin = await waitForText(admin, 'excited', { timeout: 10000 });
+    record('poll: submitted word reaches cockpit', Boolean(wordOnAdmin));
+
+    // Submit a word to block.
+    await clickByText(attendee, 'button', 'Add another').catch(() => {});
+    await waitForField(attendee, 'One word', { timeout: 6000 });
+    await typeByPlaceholder(attendee, 'One word', 'badword', { submit: true });
+    await waitForText(admin, 'badword', { timeout: 10000 });
+    const wordBlocked = await moderateRow(admin, 'badword', '^block$');
+    record('poll: blocked a word from cockpit', wordBlocked);
+    const pollBlockedCount = await until(
+      async () =>
+        !(await pageHasText(attendee, 'badword')) &&
+        (await pageHasText(attendee, 'blocked')),
+      { timeout: 10000 },
+    );
+    record(
+      'poll: blocked word hidden + counted for attendee',
+      Boolean(pollBlockedCount),
+    );
+  });
 
   // ── Ordered actions + deck-native reveal ──────────────────────────────────
-  step('Ordered actions — open, submit, reveal via presenter deck');
-  await typeByPlaceholder(admin, 'Put the steps', 'Put the E2E steps in order');
-  await typeByPlaceholder(
-    admin,
-    'Answer steps',
-    'First do this\nThen do that\nFinally ship it',
-  );
-  await clickByText(admin, 'button', 'Open activity');
-  const activityForm = await waitForField(attendee, 'Step 1', {
-    timeout: 12000,
-  });
-  record('activity: attendee sees the ordering form', Boolean(activityForm));
-  if (activityForm) {
-    await typeByPlaceholder(attendee, 'Step 1', 'Wibble the widget');
-    await typeByPlaceholder(attendee, 'Step 2', 'Wobble the gadget');
-    await clickByText(attendee, 'button', 'Submit my order');
-  }
-  const subOnAdmin = await waitForText(admin, 'Wibble the widget', {
-    timeout: 10000,
-  });
-  record('activity: submission reaches cockpit', Boolean(subOnAdmin));
+  await guard('activity', async () => {
+    step('Ordered actions — open, submit, reveal via presenter deck');
+    await typeByPlaceholder(
+      admin,
+      'Put the steps',
+      'Put the E2E steps in order',
+    );
+    await typeByPlaceholder(
+      admin,
+      'Answer steps',
+      'First do this\nThen do that\nFinally ship it',
+    );
+    await clickByText(admin, 'button', 'Open activity');
+    const activityForm = await waitForField(attendee, 'Step 1', {
+      timeout: 12000,
+    });
+    record('activity: attendee sees the ordering form', Boolean(activityForm));
+    if (activityForm) {
+      // The form starts with a single step input; add a second before filling.
+      await typeByPlaceholder(attendee, 'Step 1', 'Wibble the widget');
+      await clickByText(attendee, 'button', 'Add step');
+      await waitForField(attendee, 'Step 2', { timeout: 6000 });
+      await typeByPlaceholder(attendee, 'Step 2', 'Wobble the gadget');
+      await clickByText(attendee, 'button', 'Submit my order');
+    }
+    const subOnAdmin = await waitForText(admin, 'Wibble the widget', {
+      timeout: 10000,
+    });
+    record('activity: submission reaches cockpit', Boolean(subOnAdmin));
 
-  // Answer must be HIDDEN from the attendee until revealed.
-  const hiddenBefore = !(await pageHasText(attendee, 'Finally ship it'));
-  record('activity: answer hidden from attendee before reveal', hiddenBefore);
+    // Answer must be HIDDEN from the attendee until revealed.
+    const hiddenBefore = !(await pageHasText(attendee, 'Finally ship it'));
+    record('activity: answer hidden from attendee before reveal', hiddenBefore);
 
-  // Open the presenter deck and press space — deck-native reveal.
-  step('Reveal — presenter deck intercepts space to reveal the answer');
-  const presenter = await newTab(
-    browser,
-    `/talks/${SLUG}/present?mode=presenter`,
-  );
-  await sleep(2500); // Spectacle mounts client-side
-  await presenter.bringToFront();
-  await presenter.keyboard.press('Space');
-  const revealedAdmin = await waitForText(admin, 'answer revealed', {
-    timeout: 10000,
+    // Open the presenter deck and press space — deck-native reveal.
+    step('Reveal — presenter deck intercepts space to reveal the answer');
+    presenter = await newTab(browser, `/talks/${SLUG}/present?mode=presenter`);
+    await presenter.bringToFront();
+    // Wait for the deck to actually be broadcasting — the reveal keydown-intercept
+    // only arms once `current` + the open activity have loaded (on dev the present
+    // route + Spectacle chunk also compile on first hit, which can take a while).
+    const broadcasting = await until(
+      async () =>
+        /● presenting/i.test(
+          await presenter.evaluate(() =>
+            document.body.innerText.replace(/\s+/g, ' '),
+          ),
+        ),
+      { timeout: 25000, interval: 1000 },
+    );
+    record('activity: presenter deck is broadcasting', Boolean(broadcasting));
+    // Early space presses can land before the intercept arms (they just advance
+    // a slide), so press-and-check in a loop until the reveal fires.
+    let revealedAdmin = false;
+    for (let i = 0; i < 6 && !revealedAdmin; i++) {
+      await presenter.keyboard.press('Space');
+      revealedAdmin = Boolean(
+        await waitForText(admin, 'answer revealed', { timeout: 2500 }),
+      );
+    }
+    record(
+      'activity: deck space-press revealed the answer',
+      Boolean(revealedAdmin),
+    );
+    const revealedAttendee = await waitForText(attendee, 'Finally ship it', {
+      timeout: 10000,
+    });
+    record(
+      'activity: revealed answer now visible to attendee',
+      Boolean(revealedAttendee),
+    );
   });
-  record(
-    'activity: deck space-press revealed the answer',
-    Boolean(revealedAdmin),
-  );
-  const revealedAttendee = await waitForText(attendee, 'Finally ship it', {
-    timeout: 10000,
-  });
-  record(
-    'activity: revealed answer now visible to attendee',
-    Boolean(revealedAttendee),
-  );
 
   // ── Reactions ─────────────────────────────────────────────────────────────
-  step('Reactions — attendee reacts, count increments');
-  const reacted = await attendee.evaluate(() => {
-    // Reaction buttons are emoji buttons under the "React:" heading.
-    const btns = Array.from(document.querySelectorAll('button')).filter((b) =>
-      /\p{Emoji}/u.test(b.innerText || ''),
-    );
-    if (!btns.length) return false;
-    btns[0].click();
-    return true;
+  await guard('reactions', async () => {
+    step('Reactions — attendee reacts, count increments');
+    await attendee.bringToFront().catch(() => {});
+    const reacted = await attendee.evaluate(() => {
+      // Reaction buttons are emoji buttons under the "React:" heading.
+      const btns = Array.from(document.querySelectorAll('button')).filter((b) =>
+        /\p{Emoji}/u.test(b.innerText || ''),
+      );
+      if (!btns.length) return false;
+      btns[0].click();
+      return true;
+    });
+    record('reactions: attendee clicked a reaction', reacted);
   });
-  record('reactions: attendee clicked a reaction', reacted);
 
   // ── Clear down ────────────────────────────────────────────────────────────
   step('Clear down — end the session and wipe its data');
@@ -379,7 +441,7 @@ async function main() {
   }
   record('clear-down: ran without error', Boolean(cd1));
 
-  await presenter.close().catch(() => {});
+  if (presenter) await presenter.close().catch(() => {});
   await attendee.close().catch(() => {});
   await admin.close().catch(() => {});
   browser.disconnect();
