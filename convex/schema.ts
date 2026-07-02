@@ -3,12 +3,10 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import { talkConfigValidator } from './talkConfig';
 
-// One row per audience submission to the "how to make toast" activity.
-// `steps` is the ordered list (already profanity-masked on the way in).
-// The 5-second moderation buffer is modelled with `revealed`: a submission is
-// inserted with `revealed: false`, shown to the presenter immediately, and only
-// flipped to `revealed: true` by a scheduled function ~5s later — unless the
-// presenter has `hidden` it first.
+// Schema for the live-talk realtime backend: talk sessions, presence, reactions,
+// and the audience-participation features (Q&A, poll/word-cloud, ordered-actions).
+// Audience content is profanity-masked on the way in and auto-hidden if flagged;
+// the presenter moderates from the console.
 export default defineSchema({
   // Convex Auth tables (users/sessions/accounts/etc). We override `users` to
   // carry the GitHub `login` so mutations can allowlist admins by username.
@@ -123,6 +121,14 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_room_created', ['room', 'createdAt']),
 
+  // One row per (question, machine) so a browser can upvote a given question at
+  // most once — `questions.votes` is the denormalized tally. machineId is the
+  // same pseudo-anonymous localStorage id presence uses.
+  questionVotes: defineTable({
+    questionId: v.id('questions'),
+    machineId: v.string(),
+  }).index('by_question_machine', ['questionId', 'machineId']),
+
   // Live poll / word cloud. The presenter opens a prompt; the audience submits
   // single words; `pollWords` accumulates a per-word tally for the cloud/bars.
   // One poll is `open` per room at a time.
@@ -142,6 +148,13 @@ export default defineSchema({
   })
     .index('by_poll', ['pollId'])
     .index('by_poll_word', ['pollId', 'word']),
+
+  // One row per (poll, machine): the audience answers a poll once, so a single
+  // browser can't inflate the word cloud by resubmitting.
+  pollSubmitters: defineTable({
+    pollId: v.id('polls'),
+    machineId: v.string(),
+  }).index('by_poll_machine', ['pollId', 'machineId']),
 
   // Generic "put the actions in order" activity (the toast exercise generalized).
   // The presenter opens an activity with a prompt and a set of pre-defined option

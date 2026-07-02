@@ -2,6 +2,13 @@ import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
+import { useRunAction } from './useRunAction';
+
+/** Shared error line for the admin panels. */
+function ErrorLine({ error }: { error: string | null }) {
+  if (!error) return null;
+  return <p className="font-mono text-xs text-brutalist-pink">{error}</p>;
+}
 
 const REVEAL_PRESETS = [
   { label: '30s', ms: 30_000 },
@@ -43,6 +50,7 @@ function PollControls({ room }: { room: string }) {
   const start = useMutation(api.polls.start);
   const close = useMutation(api.polls.close);
   const hideWord = useMutation(api.polls.hideWord);
+  const { run, error } = useRunAction();
   const [prompt, setPrompt] = useState('');
 
   return (
@@ -70,10 +78,12 @@ function PollControls({ room }: { room: string }) {
                     type="button"
                     className="shrink-0 text-xs uppercase text-brutalist-pink underline"
                     onClick={() =>
-                      hideWord({
-                        id: w._id as Id<'pollWords'>,
-                        hidden: !w.hidden,
-                      }).catch(() => {})
+                      run(() =>
+                        hideWord({
+                          id: w._id as Id<'pollWords'>,
+                          hidden: !w.hidden,
+                        }),
+                      )
                     }
                   >
                     {w.hidden ? 'unblock' : 'block'}
@@ -84,12 +94,11 @@ function PollControls({ room }: { room: string }) {
           <button
             type="button"
             className={`${btnCls} bg-black text-brutalist-pink`}
-            onClick={() =>
-              close({ id: poll._id as Id<'polls'> }).catch(() => {})
-            }
+            onClick={() => run(() => close({ id: poll._id as Id<'polls'> }))}
           >
             Close poll
           </button>
+          <ErrorLine error={error} />
         </div>
       ) : (
         <form
@@ -97,7 +106,7 @@ function PollControls({ room }: { room: string }) {
           onSubmit={(e) => {
             e.preventDefault();
             if (!prompt.trim()) return;
-            start({ room, prompt: prompt.trim() }).catch(() => {});
+            run(() => start({ room, prompt: prompt.trim() }));
             setPrompt('');
           }}
         >
@@ -114,6 +123,7 @@ function PollControls({ room }: { room: string }) {
           >
             Start
           </button>
+          <ErrorLine error={error} />
         </form>
       )}
     </Section>
@@ -127,6 +137,7 @@ function ActivityControls({ room }: { room: string }) {
   const close = useMutation(api.activities.close);
   const revealNow = useMutation(api.activities.revealNow);
   const setHidden = useMutation(api.activities.setHidden);
+  const { run, error } = useRunAction();
 
   const [prompt, setPrompt] = useState('');
   const [options, setOptions] = useState('');
@@ -163,10 +174,12 @@ function ActivityControls({ room }: { room: string }) {
                       type="button"
                       className="text-xs uppercase text-brutalist-pink underline"
                       onClick={() =>
-                        setHidden({
-                          id: s._id as Id<'activitySubmissions'>,
-                          hidden: !s.hidden,
-                        }).catch(() => {})
+                        run(() =>
+                          setHidden({
+                            id: s._id as Id<'activitySubmissions'>,
+                            hidden: !s.hidden,
+                          }),
+                        )
                       }
                     >
                       {s.hidden ? 'restore' : 'reject'}
@@ -184,9 +197,7 @@ function ActivityControls({ room }: { room: string }) {
                 type="button"
                 className={`${btnCls} bg-brutalist-cyan text-black`}
                 onClick={() =>
-                  revealNow({ id: activity._id as Id<'activities'> }).catch(
-                    () => {},
-                  )
+                  run(() => revealNow({ id: activity._id as Id<'activities'> }))
                 }
               >
                 Reveal answer now
@@ -196,12 +207,13 @@ function ActivityControls({ room }: { room: string }) {
               type="button"
               className={`${btnCls} bg-black text-brutalist-yellow`}
               onClick={() =>
-                close({ id: activity._id as Id<'activities'> }).catch(() => {})
+                run(() => close({ id: activity._id as Id<'activities'> }))
               }
             >
               Close activity
             </button>
           </div>
+          <ErrorLine error={error} />
         </div>
       ) : (
         <form
@@ -213,12 +225,14 @@ function ActivityControls({ room }: { room: string }) {
               .split('\n')
               .map((o) => o.trim())
               .filter(Boolean);
-            open({
-              room,
-              prompt: prompt.trim(),
-              options: opts,
-              revealDelayMs: delayMs,
-            }).catch(() => {});
+            run(() =>
+              open({
+                room,
+                prompt: prompt.trim(),
+                options: opts,
+                revealDelayMs: delayMs,
+              }),
+            );
             setPrompt('');
             setOptions('');
           }}
@@ -261,6 +275,7 @@ function ActivityControls({ room }: { room: string }) {
               Open activity
             </button>
           </div>
+          <ErrorLine error={error} />
         </form>
       )}
     </Section>
@@ -272,6 +287,7 @@ function QAControls({ room }: { room: string }) {
   const feed = useQuery(api.questions.feed, { room });
   const setAnswered = useMutation(api.questions.setAnswered);
   const setHidden = useMutation(api.questions.setHidden);
+  const { run, error } = useRunAction();
 
   if (!feed?.authorized) return null;
 
@@ -306,10 +322,12 @@ function QAControls({ room }: { room: string }) {
                   type="button"
                   className="text-brutalist-cyan underline"
                   onClick={() =>
-                    setAnswered({
-                      id: q._id as Id<'questions'>,
-                      answered: !q.answered,
-                    }).catch(() => {})
+                    run(() =>
+                      setAnswered({
+                        id: q._id as Id<'questions'>,
+                        answered: !q.answered,
+                      }),
+                    )
                   }
                 >
                   {q.answered ? 'unmark' : 'answered'}
@@ -318,10 +336,12 @@ function QAControls({ room }: { room: string }) {
                   type="button"
                   className="text-brutalist-pink underline"
                   onClick={() =>
-                    setHidden({
-                      id: q._id as Id<'questions'>,
-                      hidden: !q.hidden,
-                    }).catch(() => {})
+                    run(() =>
+                      setHidden({
+                        id: q._id as Id<'questions'>,
+                        hidden: !q.hidden,
+                      }),
+                    )
                   }
                 >
                   {q.hidden ? 'restore' : 'reject'}
@@ -329,6 +349,7 @@ function QAControls({ room }: { room: string }) {
               </div>
             </div>
           ))}
+          <ErrorLine error={error} />
         </div>
       )}
     </Section>

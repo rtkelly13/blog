@@ -13,6 +13,8 @@ components/
 ├── comments/         # Comment providers (Giscus, Utterances, Disqus)
 ├── social-icons/     # SVG social icons
 ├── analytics/        # Analytics providers (GA, Plausible, Simple)
+├── talks/            # Talk deck + embeddable live widgets (Convex-backed)
+├── admin/            # Presenter/admin hub UI (behind AdminGate)
 ├── MDXComponents.tsx # MDX element mapping + MDXLayoutRenderer
 ├── LayoutWrapper.tsx # Site chrome (header, footer, nav)
 └── *.tsx             # UI primitives (Button, Card, Image, etc.)
@@ -26,6 +28,9 @@ Use these for imports:
 - `social-icons/index.tsx` → SocialIcon
 - `comments/index.tsx` → Comments (auto-selects provider)
 - `analytics/index.tsx` → Analytics (auto-selects provider)
+- `talks/index.ts` → EmojiTop5, LivePoll, OrderedActions, QuestionQueue, TalkCard, TalkTimer
+  (**not** SpectacleDeck — see barrel note below)
+- `admin/index.ts` → AdminGate, AudienceControls, SessionManager, TalkControls
 
 ## KEY COMPONENTS
 
@@ -59,6 +64,42 @@ Types defined in `diagrams/types.ts`.
 
 Actions registered via `kbar` API. Add new commands in SearchProvider.
 
+## TALKS
+
+The live-talk UI, backed by Convex (see convex/AGENTS.md). Split into the deck
+itself and the embeddable audience widgets.
+
+| Component          | Purpose                                                       |
+| ------------------ | ------------------------------------------------------------ |
+| `SpectacleDeck`    | Spectacle-based slide deck (client-only; imported via `next/dynamic`) |
+| `SlideBody`        | Renders one compiled MDX slide (`getMDXComponent`)           |
+| `theme.ts`         | `brutalistTheme` — Spectacle theme matching the design system |
+| `TalkCard`         | Talk listing card                                            |
+| `TalkTimer`        | Pacing countdown (`react-timer-hook`)                        |
+| `ResolvedRoom`     | Shared shell: guards Convex-unconfigured, resolves the room (explicit prop or current live talk), hands it to children |
+| `DeckModeContext`  | `useDeckMode()` — attendee / presenter / console mode        |
+| `DeckLive`         | `DeckDriver` + `Follower` — follow-the-presenter broadcast/mirror (named exports) |
+| `DeckSidebars`     | `AttendeeSidebar` + `ConsoleSidebar` — deck side panels (named exports) |
+| `EmojiTop5`        | Live reaction leaderboard widget                            |
+| `LivePoll`         | Word-cloud poll widget                                      |
+| `OrderedActions`   | "Put the actions in order" activity widget                  |
+| `QuestionQueue`    | Audience Q&A queue widget                                   |
+
+The four embeddable widgets (EmojiTop5, LivePoll, OrderedActions, QuestionQueue)
+are usable in MDX slides and on `/live`; each wraps its body in `ResolvedRoom`.
+
+## ADMIN
+
+Presenter/admin hub UI, rendered on `/admin` behind `AdminGate`.
+
+| Component          | Purpose                                                       |
+| ------------------ | ------------------------------------------------------------ |
+| `AdminGate`        | GitHub sign-in gate — renders children only for an allowed admin |
+| `TalkControls`     | Start/end a talk, pick a config preset + toggles             |
+| `AudienceControls` | Presenter moderation: Q&A, poll, activity controls           |
+| `SessionManager`   | Past/live session log with per-session data + clear-down     |
+| `useRunAction`     | Hook wrapping a Convex mutation call with pending/error state |
+
 ## CONVENTIONS
 
 - PascalCase filenames
@@ -66,6 +107,17 @@ Actions registered via `kbar` API. Add new commands in SearchProvider.
 - Props interfaces inline or in types.ts
 - Barrel exports via index.ts in feature folders
 - Stories colocated (e.g., `Button.stories.tsx`)
+
+### Exceptions & notes
+
+- **(#16) Export convention exception:** `DeckLive.tsx` (DeckDriver + Follower) and
+  `DeckSidebars.tsx` (AttendeeSidebar + ConsoleSidebar) intentionally use *named*
+  exports because each is a tightly-coupled pair of components in one module — the
+  "default export per component" rule assumes one component per file.
+- **(#17) Barrel exclusion:** `SpectacleDeck` is intentionally **not** re-exported
+  from `talks/index.ts` — `present.tsx` imports it via `next/dynamic` for
+  code-splitting, and routing it through the barrel would pull the heavy Spectacle
+  dependency into every consumer of the module.
 
 ## STORYBOOK
 
@@ -75,3 +127,9 @@ Components with `.stories.tsx` are documented in Storybook:
 - `stories/*.stories.tsx` - Design sandbox examples
 
 Run: `pnpm storybook`
+
+- **(#18) Talk components aren't storied (yet):** the talk/admin components are hard
+  to story in the Storybook browser-test env — they depend on a Convex provider,
+  `react-timer-hook` fails the dep-optimizer, and the `Link`→`data/siteMetadata`
+  CJS interop breaks the import. Stories are deferred pending Storybook infra (a
+  Convex decorator + a CJS interop fix).

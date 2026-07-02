@@ -1,27 +1,9 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect } from 'react';
 import { api } from '@/convex/_generated/api';
+import { getMachineId } from './machineId';
 
-const STORAGE_KEY = 'rk:machine-id';
 const HEARTBEAT_MS = 10_000;
-
-/**
- * Pseudo-anonymous machine id: a random UUID kept in localStorage. No PII, not a
- * real hardware id — it just de-duplicates this browser profile's tabs/reloads.
- * Falls back to a per-session id if storage is unavailable (private mode etc.).
- */
-function getMachineId(): string {
-  try {
-    let id = localStorage.getItem(STORAGE_KEY);
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem(STORAGE_KEY, id);
-    }
-    return id;
-  } catch {
-    return `ephemeral-${crypto.randomUUID()}`;
-  }
-}
 
 export interface PresenceState {
   /** Live, de-duplicated count of machines currently present. */

@@ -13,16 +13,23 @@ Personal blog for Ryan Kelly (ryankelly.dev). Next.js 16 + React 19, Tailwind CS
 ```
 blog/
 ├── components/       # React components (see components/AGENTS.md)
-├── lib/              # MDX pipeline, utilities (see lib/AGENTS.md)
+├── convex/           # Realtime backend — talk sessions, presence, Q&A, polls (see convex/AGENTS.md)
+├── lib/              # MDX pipeline, utilities, hooks (see lib/AGENTS.md)
 ├── tests/            # Playwright + Vitest (see tests/AGENTS.md)
 ├── layouts/          # 6 MDX layouts (PostLayout, ListLayout, SeriesLayout, etc.)
-├── pages/            # Next.js pages router
+├── pages/            # Next.js pages router (incl. /talks, /live, /admin)
 ├── data/             # MDX content + siteMetadata.js
+│   ├── blog/         # Blog post MDX
+│   └── talks/        # Talk deck MDX (slide-split decks)
 ├── scripts/          # Build scripts (sitemap, search, RSS)
 ├── stories/          # Storybook CSF 3.0 stories
 ├── temp/             # Ignored folder for visual snapshots or temporary outputs
+├── types/            # Shared TS types (PostFrontMatter, TalkFrontMatter)
 └── .storybook/       # Storybook config (Vite adapter)
 ```
+
+Talk routes: `pages/talks/` (deck landing + `present` presenter view), `pages/live/`
+(the audience-join live surface; `live/manage` redirects to `/admin`).
 
 ## WHERE TO LOOK
 
@@ -32,6 +39,10 @@ blog/
 | Edit site config   | `data/siteMetadata.js` | Title, socials, analytics, comments          |
 | Add/edit component | `components/`          | See components/AGENTS.md                     |
 | MDX processing     | `lib/mdx.ts`           | bundleMDX, remark/rehype plugins             |
+| Realtime backend / Convex functions | `convex/` | Talk sessions, presence, Q&A, polls — see convex/AGENTS.md |
+| Talk deck content  | `data/talks/<slug>.mdx` | Slide-split MDX; frontmatter: `types/TalkFrontMatter.ts` |
+| Talk / live routes | `pages/talks/`, `pages/live/`, `pages/admin.tsx` | Deck, audience-join, presenter hub |
+| Talk components    | `components/talks/`, `components/admin/` | See components/AGENTS.md              |
 | Page layouts       | `layouts/*.tsx`        | PostLayout, ListLayout, SeriesLayout         |
 | Remark plugins     | `lib/remark-*.ts`      | Custom: code-title, toc-headings, img-to-jsx |
 | Design tokens      | `tailwind.config.js`   | Brutalist colors, shadows, typography        |

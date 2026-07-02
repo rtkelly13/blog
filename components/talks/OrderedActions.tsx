@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useState } from 'react';
 import { api } from '@/convex/_generated/api';
-import { isConvexConfigured } from '@/lib/convexClient';
 import { useDeckMode } from './DeckModeContext';
+import { ResolvedRoom } from './ResolvedRoom';
 
 /** Live-updating seconds remaining until `revealAt` (null once elapsed/absent). */
 function useCountdown(revealAt: number | null | undefined): number | null {
@@ -138,6 +138,13 @@ function Activity({
     : (active?.blocked ?? 0);
   const submissionCount = isConsole ? consoleSubs.length : audienceWall.length;
   const showForm = !display && mode === 'attendee';
+  // Whether this activity has a canonical answer at all. The console reads it
+  // directly from the full options; the audience gets a `hasAnswer` flag since
+  // its `options` are withheld until reveal. Answer-less activities show no
+  // countdown and no reveal block.
+  const hasAnswer = isConsole
+    ? (consoleActivity?.options.length ?? 0) > 0
+    : (active?.hasAnswer ?? false);
   const answerVisible = options.length > 0 && (isConsole || activity.revealed);
 
   const setStep = (i: number, val: string) =>
@@ -255,7 +262,7 @@ function Activity({
           </ol>
         </div>
       )}
-      {!isConsole && !activity.revealed && countdown != null && (
+      {!isConsole && hasAnswer && !activity.revealed && countdown != null && (
         <p className="mt-4 font-mono text-xs uppercase text-zinc-500">
           Answer reveals in {countdown}s…
         </p>
@@ -296,39 +303,6 @@ function Activity({
   );
 }
 
-function Resolver({
-  room,
-  display,
-  title,
-  info,
-  prompt,
-  options,
-  revealAfterMs,
-}: {
-  room?: string;
-  display?: boolean;
-  title?: string;
-  info?: string;
-  prompt?: string;
-  options?: string[];
-  revealAfterMs?: number;
-}) {
-  const current = useQuery(api.talks.current, room ? 'skip' : {});
-  const resolved = room ?? current?.room;
-  if (!resolved) return null;
-  return (
-    <Activity
-      room={resolved}
-      display={display}
-      title={title}
-      info={info}
-      prompt={prompt}
-      options={options}
-      revealAfterMs={revealAfterMs}
-    />
-  );
-}
-
 /**
  * Embedded "put the actions in order" activity (the toast exercise generalized).
  * The presenter opens a prompt + hidden canonical options; the audience builds an
@@ -356,16 +330,19 @@ export default function OrderedActions({
   options?: string[];
   revealAfterMs?: number;
 }) {
-  if (!isConvexConfigured) return null;
   return (
-    <Resolver
-      room={room}
-      display={display}
-      title={title}
-      info={info}
-      prompt={prompt}
-      options={options}
-      revealAfterMs={revealAfterMs}
-    />
+    <ResolvedRoom room={room}>
+      {(r) => (
+        <Activity
+          room={r}
+          display={display}
+          title={title}
+          info={info}
+          prompt={prompt}
+          options={options}
+          revealAfterMs={revealAfterMs}
+        />
+      )}
+    </ResolvedRoom>
   );
 }

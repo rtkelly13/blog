@@ -183,19 +183,35 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
       ? openActivity._id
       : null;
 
+  // Record the slide the presenter is on the moment a reveal arms (derived
+  // during render so it captures the arm-time slide, not later navigation).
+  const prevPendingRef = useRef<string | null>(null);
+  const armedSlideRef = useRef<number | null>(null);
+  if (pendingReveal !== prevPendingRef.current) {
+    prevPendingRef.current = pendingReveal;
+    armedSlideRef.current = pendingReveal ? deckIndex : null;
+  }
+  // Arm the next-key reveal only while the presenter is still on the activity's
+  // own slide — advancing on any other slide navigates normally instead of
+  // prematurely broadcasting the answer.
+  const revealArmed =
+    pendingReveal != null && deckIndex === armedSlideRef.current
+      ? pendingReveal
+      : null;
+
   useEffect(() => {
-    if (!pendingReveal) return;
+    if (!revealArmed) return;
     const ADVANCE = new Set([' ', 'Spacebar', 'ArrowRight', 'PageDown']);
     const onKey = (e: KeyboardEvent) => {
       if (!ADVANCE.has(e.key)) return;
       // Beat Spectacle's own handler and consume this press.
       e.preventDefault();
       e.stopImmediatePropagation();
-      revealNow({ id: pendingReveal }).catch(() => {});
+      revealNow({ id: revealArmed }).catch(() => {});
     };
     document.addEventListener('keydown', onKey, true);
     return () => document.removeEventListener('keydown', onKey, true);
-  }, [pendingReveal, revealNow]);
+  }, [revealArmed, revealNow]);
 
   const template = ({
     slideNumber,
@@ -339,7 +355,7 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
               ⚠ {presenterCount} presenters connected — you may clash
             </span>
           )}
-          {pendingReveal && (
+          {revealArmed && (
             <span
               style={{
                 border: '2px solid #facc15',

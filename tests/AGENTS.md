@@ -18,7 +18,10 @@ tests/
 ├── tag-validation.spec.ts  # Tag consistency checks
 ├── blog-upgrade.spec.ts    # Reading-time tests
 ├── experiments.spec.ts     # Experiments page tests
+├── talk-deck.spec.ts       # Talk deck smoke + visual (pinned to e2e-debug-deck; Linux-only)
 ├── theme-engine.test.ts    # Vitest unit test
+├── talk-metadata.test.ts   # Vitest unit: talk front-matter validation + loading
+├── toast-profanity.test.ts # Vitest unit: profanity mask/flag (convex/lib/profanity)
 └── __snapshots__/          # Visual baseline images
 ```
 

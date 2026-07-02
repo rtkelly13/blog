@@ -60,7 +60,6 @@ storybook-static
 # git worktrees (scratch state for parallel branches)
 .worktrees/
 .claude/worktrees/
-tsconfig.tsbuildinfo
 
 # local scratch TODO (code-review findings, not for commit)
 todo.md

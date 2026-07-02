@@ -99,13 +99,15 @@ export const close = mutation({
 export const active = query({
   args: { room: v.string() },
   handler: async (ctx, { room }) => {
-    const rows = await ctx.db
+    // The open row (if any) is always the newest: open() closes prior open
+    // activities before inserting, so reading only the latest row avoids
+    // collecting the room's entire activity history on every reactive poll.
+    const activity = await ctx.db
       .query('activities')
       .withIndex('by_room_created', (q) => q.eq('room', room))
       .order('desc')
-      .collect();
-    const activity = rows.find((a) => a.status === 'open');
-    if (!activity) return null;
+      .first();
+    if (!activity || activity.status !== 'open') return null;
 
     const submissions = await ctx.db
       .query('activitySubmissions')
@@ -119,6 +121,11 @@ export const active = query({
       prompt: activity.prompt,
       revealAt: activity.revealAt,
       revealed: activity.revealed,
+      // Whether a canonical answer exists at all — exposed pre-reveal (without
+      // the answer itself) so the audience only shows a countdown/reveal for
+      // activities that actually have one. Answer-less activities are valid
+      // (collect-only), and must not show a "reveal" that never happens.
+      hasAnswer: activity.options.length > 0,
       options: activity.revealed ? activity.options : [],
       submissionCount: submissions.length,
       // Presenter-rejected entries are never sent to the audience — only a count.
@@ -137,13 +144,15 @@ export const feed = query({
   args: { room: v.string() },
   handler: async (ctx, { room }) => {
     if (!(await isAdminUser(ctx))) return { authorized: false as const };
-    const rows = await ctx.db
+    // Newest row is the only possibly-open one (see `active`).
+    const activity = await ctx.db
       .query('activities')
       .withIndex('by_room_created', (q) => q.eq('room', room))
       .order('desc')
-      .collect();
-    const activity = rows.find((a) => a.status === 'open');
-    if (!activity) return { authorized: true as const, activity: null };
+      .first();
+    if (!activity || activity.status !== 'open') {
+      return { authorized: true as const, activity: null };
+    }
 
     const submissions = await ctx.db
       .query('activitySubmissions')
@@ -188,18 +197,26 @@ export const submit = mutation({
     if (trimmed.length === 0) {
       throw new Error('Add at least one step before submitting.');
     }
-    const { steps } = cleanSteps(trimmed);
+    const { steps, flagged: stepsFlagged } = cleanSteps(trimmed);
 
     let nickname: string | undefined;
+    let nicknameFlagged = false;
     const rawNickname = args.nickname?.trim().slice(0, MAX_NICKNAME_LEN);
-    if (rawNickname) nickname = cleanText(rawNickname).text;
+    if (rawNickname) {
+      const cleaned = cleanText(rawNickname);
+      nickname = cleaned.text;
+      nicknameFlagged = cleaned.flagged;
+    }
 
     await ctx.db.insert('activitySubmissions', {
       activityId: args.activityId,
       room: activity.room,
       nickname,
       steps,
-      hidden: false,
+      // Content that tripped the profanity filter is auto-hidden pending
+      // presenter review — the masked text still reaches the console feed so it
+      // can be restored, but it never lands on the audience wall.
+      hidden: stepsFlagged || nicknameFlagged,
       createdAt: Date.now(),
     });
     return { ok: true };

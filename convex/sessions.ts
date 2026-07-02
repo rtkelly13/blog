@@ -76,23 +76,36 @@ export const list = query({
   },
 });
 
-/** Delete every row in `table` matching (index, room) — small helper for clearDown. */
+/**
+ * Each room-scoped table paired with its room index. This single map is the
+ * source of truth for `purgeByRoom`, so a table can only ever be purged through
+ * its correct room-keyed index — a mismatched pairing is impossible to express
+ * at the call site (the old `index as any` param let a wrong index slip through
+ * and fail silently as a no-op delete at runtime).
+ */
+const ROOM_INDEX = {
+  reactions: 'by_room_at',
+  reactionTotals: 'by_room',
+  attendees: 'by_room_firstSeen',
+  presence: 'by_room_lastSeen',
+  presenters: 'by_room_lastSeen',
+  questions: 'by_room_created',
+  activitySubmissions: 'by_room_created',
+} as const;
+
+type RoomTable = keyof typeof ROOM_INDEX;
+
+/** Delete every row in `table` for `room`, via that table's room index. */
 async function purgeByRoom(
   ctx: MutationCtx,
-  table:
-    | 'reactions'
-    | 'reactionTotals'
-    | 'attendees'
-    | 'presence'
-    | 'presenters'
-    | 'questions'
-    | 'activitySubmissions',
-  index: string,
+  table: RoomTable,
   room: string,
 ): Promise<number> {
   const rows = await ctx.db
     .query(table)
-    .withIndex(index as any, (q: any) => q.eq('room', room))
+    // The (table → index) pairing is validated by ROOM_INDEX; the cast only
+    // bridges the union-typed `table` to Convex's per-table index typing.
+    .withIndex(ROOM_INDEX[table] as never, (q: any) => q.eq('room', room))
     .collect();
   await Promise.all(rows.map((r) => ctx.db.delete(r._id)));
   return rows.length;
@@ -108,15 +121,38 @@ export const clearDown = mutation({
   handler: async (ctx, { room }) => {
     await requireAdmin(ctx);
 
-    await purgeByRoom(ctx, 'reactions', 'by_room_at', room);
-    await purgeByRoom(ctx, 'reactionTotals', 'by_room', room);
-    await purgeByRoom(ctx, 'attendees', 'by_room_firstSeen', room);
-    await purgeByRoom(ctx, 'presence', 'by_room_lastSeen', room);
-    await purgeByRoom(ctx, 'presenters', 'by_room_lastSeen', room);
-    await purgeByRoom(ctx, 'questions', 'by_room_created', room);
-    await purgeByRoom(ctx, 'activitySubmissions', 'by_room_created', room);
+    // A live session must be ended before its data can be cleared — otherwise
+    // still-connected clients immediately repopulate presence/reactions and the
+    // wipe looks like it silently failed.
+    const talk = await ctx.db.get(room as Id<'talks'>);
+    if (talk?.status === 'live') {
+      throw new Error('End the talk before clearing its data.');
+    }
 
-    // Polls own child word rows; activities are cleared by their own room index.
+    await purgeByRoom(ctx, 'reactions', room);
+    await purgeByRoom(ctx, 'reactionTotals', room);
+    await purgeByRoom(ctx, 'attendees', room);
+    await purgeByRoom(ctx, 'presence', room);
+    await purgeByRoom(ctx, 'presenters', room);
+    await purgeByRoom(ctx, 'activitySubmissions', room);
+
+    // Questions own child vote rows (keyed by question, not room).
+    const questions = await ctx.db
+      .query('questions')
+      .withIndex('by_room_created', (q) => q.eq('room', room))
+      .collect();
+    for (const question of questions) {
+      const votes = await ctx.db
+        .query('questionVotes')
+        .withIndex('by_question_machine', (q) =>
+          q.eq('questionId', question._id),
+        )
+        .collect();
+      await Promise.all(votes.map((row) => ctx.db.delete(row._id)));
+      await ctx.db.delete(question._id);
+    }
+
+    // Polls own child word + submitter rows; activities are cleared by room index.
     const polls = await ctx.db
       .query('polls')
       .withIndex('by_room_created', (q) => q.eq('room', room))
@@ -127,6 +163,11 @@ export const clearDown = mutation({
         .withIndex('by_poll', (q) => q.eq('pollId', poll._id))
         .collect();
       await Promise.all(words.map((w) => ctx.db.delete(w._id)));
+      const submitters = await ctx.db
+        .query('pollSubmitters')
+        .withIndex('by_poll_machine', (q) => q.eq('pollId', poll._id))
+        .collect();
+      await Promise.all(submitters.map((s) => ctx.db.delete(s._id)));
       await ctx.db.delete(poll._id);
     }
 

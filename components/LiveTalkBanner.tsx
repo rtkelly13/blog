@@ -15,7 +15,7 @@ function Banner({ slug, className }: { slug?: string; className?: string }) {
   return (
     <a href="/live" className={className ?? OVERLAY_CLASS}>
       <span className="flex items-center gap-2 text-sm font-bold uppercase text-brutalist-pink">
-        <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-brutalist-pink" />
+        <span className="inline-block h-2.5 w-2.5 animate-pulse bg-brutalist-pink" />
         Live now
       </span>
       <span className="max-w-[14rem] truncate text-sm text-white sm:max-w-xs">
