@@ -39,6 +39,12 @@ export default defineSchema({
     config: v.optional(talkConfigValidator),
     // Presenter's current slide index, published in follow mode via setSlide.
     currentSlide: v.optional(v.number()),
+    // Break countdown (startBreak/extendBreak/endBreak). The authoritative end
+    // timestamp lives here so the projected deck, the console and every /live
+    // attendee compute the same remaining time — the same idea as the activity
+    // `revealAt` scheduled reveal. `breakStartedAt` sizes the progress bar.
+    breakStartedAt: v.optional(v.number()),
+    breakEndsAt: v.optional(v.number()),
   }).index('by_status', ['status']),
 
   // Minimal "hello world" example: a single named counter, bumped by anyone,

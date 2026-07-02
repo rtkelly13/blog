@@ -28,7 +28,7 @@ Use these for imports:
 - `social-icons/index.tsx` → SocialIcon
 - `comments/index.tsx` → Comments (auto-selects provider)
 - `analytics/index.tsx` → Analytics (auto-selects provider)
-- `talks/index.ts` → EmojiTop5, LivePoll, OrderedActions, QuestionQueue, TalkCard, TalkTimer
+- `talks/index.ts` → BreakTimer, EmojiTop5, LivePoll, OrderedActions, QuestionQueue, TalkCard, TalkTimer
   (**not** SpectacleDeck — see barrel note below)
 - `admin/index.ts` → AdminGate, AudienceControls, SessionManager, TalkControls
 
@@ -80,13 +80,15 @@ itself and the embeddable audience widgets.
 | `DeckModeContext`  | `useDeckMode()` — attendee / presenter / console mode        |
 | `DeckLive`         | `DeckDriver` + `Follower` — follow-the-presenter broadcast/mirror (named exports) |
 | `DeckSidebars`     | `AttendeeSidebar` + `ConsoleSidebar` — deck side panels (named exports) |
+| `BreakTimer`       | Shared break countdown widget (+ `BreakControl` console panel) |
 | `EmojiTop5`        | Live reaction leaderboard widget                            |
 | `LivePoll`         | Word-cloud poll widget                                      |
 | `OrderedActions`   | "Put the actions in order" activity widget                  |
 | `QuestionQueue`    | Audience Q&A queue widget                                   |
 
-The four embeddable widgets (EmojiTop5, LivePoll, OrderedActions, QuestionQueue)
-are usable in MDX slides and on `/live`; each wraps its body in `ResolvedRoom`.
+The embeddable widgets (BreakTimer, EmojiTop5, LivePoll, OrderedActions,
+QuestionQueue) are usable in MDX slides and on `/live`; each wraps its body in
+`ResolvedRoom`.
 
 ## ADMIN
 

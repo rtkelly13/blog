@@ -2,7 +2,12 @@ import { useQuery } from 'convex/react';
 import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
-import { LivePoll, OrderedActions, QuestionQueue } from '@/components/talks';
+import {
+  BreakTimer,
+  LivePoll,
+  OrderedActions,
+  QuestionQueue,
+} from '@/components/talks';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 
@@ -68,6 +73,8 @@ function Room() {
       {/* Interactive activities live inline — no codes, no extra tabs. The poll
           and ordered-actions panels stay hidden until the presenter opens one. */}
       <div className="mt-6 space-y-6">
+        {/* Presenter-started break countdown — same server clock as the deck. */}
+        <BreakTimer room={talk.room} />
         <LivePoll room={talk.room} />
         <OrderedActions room={talk.room} />
         <QuestionQueue room={talk.room} />

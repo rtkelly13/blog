@@ -169,6 +169,82 @@ export const setSlide = mutation({
   },
 });
 
+// Presenter-chosen break durations, clamped server-side.
+const MIN_BREAK_MS = 30_000;
+const MAX_BREAK_MS = 60 * 60_000;
+
+/**
+ * Presenter: start (or restart) a break countdown for the live talk. Only the
+ * target timestamps are stored — every surface (projected break slide, console,
+ * /live) derives the remaining time from the same authoritative `breakEndsAt`,
+ * so the whole room shares one clock (the activity `revealAt` pattern).
+ */
+export const startBreak = mutation({
+  args: { room: v.string(), durationMs: v.number() },
+  handler: async (ctx, { room, durationMs }) => {
+    await requireAdmin(ctx);
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk) throw new Error('No live talk.');
+    const duration = Math.min(
+      MAX_BREAK_MS,
+      Math.max(MIN_BREAK_MS, Math.floor(durationMs)),
+    );
+    const now = Date.now();
+    await ctx.db.patch(talk._id, {
+      breakStartedAt: now,
+      breakEndsAt: now + duration,
+    });
+  },
+});
+
+/** Presenter: push the break's end time out (an elapsed break resumes from now). */
+export const extendBreak = mutation({
+  args: { room: v.string(), byMs: v.number() },
+  handler: async (ctx, { room, byMs }) => {
+    await requireAdmin(ctx);
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk || talk.breakEndsAt == null) return;
+    const now = Date.now();
+    const base = Math.max(now, talk.breakEndsAt);
+    await ctx.db.patch(talk._id, {
+      breakEndsAt: Math.min(
+        now + MAX_BREAK_MS,
+        base + Math.max(0, Math.floor(byMs)),
+      ),
+    });
+  },
+});
+
+/** Presenter: cancel/dismiss the break countdown on every surface at once. */
+export const endBreak = mutation({
+  args: { room: v.string() },
+  handler: async (ctx, { room }) => {
+    await requireAdmin(ctx);
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk) return;
+    await ctx.db.patch(talk._id, {
+      breakStartedAt: undefined,
+      breakEndsAt: undefined,
+    });
+  },
+});
+
+/**
+ * Public + reactive: the live talk's break countdown timestamps, or null when no
+ * break is running (or the talk isn't live). Clients tick locally against these.
+ */
+export const breakStatus = query({
+  args: { room: v.string() },
+  handler: async (ctx, { room }) => {
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk || talk.breakEndsAt == null) return null;
+    return {
+      startedAt: talk.breakStartedAt ?? talk.breakEndsAt,
+      endsAt: talk.breakEndsAt,
+    };
+  },
+});
+
 // A presenter session counts as "connected" only if it pinged within this window.
 const PRESENTER_TTL_MS = 15_000;
 
