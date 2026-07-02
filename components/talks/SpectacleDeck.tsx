@@ -146,7 +146,10 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
 
   // Both presenter and console DRIVE the deck (their navigation broadcasts);
   // attendees follow. Same admin identity, so both heartbeat a presenter session
-  // and two connected at once surfaces a clash.
+  // and two connected at once surfaces a multi-presenter notice. Concurrent
+  // drivers resolve last-write-wins on the room's single slide: each driver
+  // follows the other's moves (see DeckDriver), so surfaces converge instead
+  // of diverging and stale-writing over each other.
   const broadcasting =
     (mode === 'presenter' || mode === 'console') && followOn && isAdmin;
   const followEnabled = followOn && !broadcasting;
@@ -240,6 +243,7 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
         <DeckDriver
           room={room}
           initialSlide={current?.currentSlide ?? 0}
+          currentSlide={current?.currentSlide}
           setSlide={setSlide}
           onIndex={setDeckIndex}
           navRef={navRef}
@@ -366,7 +370,7 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
                 padding: '0.3rem 0.6rem',
               }}
             >
-              ⚠ {presenterCount} presenters connected — you may clash
+              ⚠ {presenterCount} presenters connected — last change wins
             </span>
           )}
           {revealArmed && (
