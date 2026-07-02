@@ -1,9 +1,11 @@
 import { useMutation, useQuery } from 'convex/react';
+import { useEffect, useRef, useState } from 'react';
 import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
 import { api } from '@/convex/_generated/api';
 import type { SlideWindow } from '@/lib/slideTiming';
+import QuestionQueue from './QuestionQueue';
 import SlideBody from './SlideBody';
 import TalkTimer from './TalkTimer';
 
@@ -30,6 +32,80 @@ export function AttendeeSidebar({ room }: { room: string }) {
       <p className="mt-auto font-mono text-[10px] uppercase leading-relaxed text-zinc-600">
         Tap to react — everyone's reactions float up here.
       </p>
+    </aside>
+  );
+}
+
+/**
+ * Console Q&A panel: always-visible live queue (audience-visible questions,
+ * votes-first via `questions.list`) with a toast-style "+N new" ping when a
+ * question arrives. Last-seen is tracked client-side per mount, seeded with
+ * whatever is already in the queue so opening the console doesn't ping.
+ */
+function ConsoleQuestionsPanel({ room }: { room: string }) {
+  const data = useQuery(api.questions.list, { room });
+  const questions = data?.questions;
+
+  const seenRef = useRef<Set<string> | null>(null);
+  const [fresh, setFresh] = useState(0);
+
+  useEffect(() => {
+    if (!questions) return;
+    if (seenRef.current === null) {
+      seenRef.current = new Set(questions.map((q) => q._id));
+      return;
+    }
+    const seen = seenRef.current;
+    const arrived = questions.filter((q) => !seen.has(q._id));
+    if (arrived.length === 0) return;
+    for (const q of arrived) seen.add(q._id);
+    setFresh((n) => n + arrived.length);
+  }, [questions]);
+
+  // The ping is a transient flash, not a persistent unread count — the queue
+  // itself is always on screen, so clear the badge after a few seconds.
+  useEffect(() => {
+    if (fresh === 0) return;
+    const t = setTimeout(() => setFresh(0), 6000);
+    return () => clearTimeout(t);
+  }, [fresh]);
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="font-mono text-xs uppercase text-zinc-400">
+          Questions{' '}
+          <span className="text-white">
+            {questions ? questions.length : '…'}
+          </span>
+        </p>
+        {fresh > 0 && (
+          <span className="animate-pulse border-2 border-brutalist-yellow bg-brutalist-yellow px-2 py-0.5 font-mono text-xs font-bold uppercase text-black">
+            +{fresh} new
+          </span>
+        )}
+      </div>
+      <div className="max-h-72 overflow-y-auto">
+        <QuestionQueue room={room} display title="Live queue" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Projected-deck Q&A sidebar: the presenter toggles this on to show the room
+ * the question queue. Display-only and audience-safe — it renders the same
+ * non-hidden, votes-ordered list the audience sees on /live.
+ */
+export function PresenterQuestionsSidebar({ room }: { room: string }) {
+  return (
+    <aside className={PANEL}>
+      <QuestionQueue
+        room={room}
+        display
+        title="Questions from the room"
+        info="Ask + upvote from the live link — top-voted first."
+      />
     </aside>
   );
 }
@@ -68,7 +144,8 @@ function Thumb({ code }: { code: string }) {
 /**
  * Presenter console (admin second screen): drive the deck (Prev/Next → setSlide,
  * same identity as the presenter), read speaker notes for the current slide,
- * preview what's next, and monitor connection status / reactions / numbers.
+ * preview what's next, and monitor the Q&A queue (with a new-question ping),
+ * connection status, reactions and live numbers.
  */
 export function ConsoleSidebar({
   room,
@@ -169,6 +246,9 @@ export function ConsoleSidebar({
           <Thumb code={next.code} />
         </div>
       )}
+
+      {/* Q&A queue (always visible — new arrivals ping) */}
+      <ConsoleQuestionsPanel room={room} />
 
       {/* Connection status */}
       <div className="space-y-1 border-2 border-zinc-700 p-3 font-mono text-xs">
