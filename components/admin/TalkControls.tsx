@@ -9,6 +9,9 @@ const FEATURE_TOGGLES: { key: keyof TalkConfig; label: string }[] = [
   { key: 'reactions', label: 'Emoji reactions' },
   { key: 'follow', label: 'Follow-the-presenter' },
   { key: 'closingChart', label: 'Closing stats chart' },
+  { key: 'qa', label: 'Q&A queue' },
+  { key: 'poll', label: 'Poll / word cloud' },
+  { key: 'activities', label: 'Ordering activities' },
 ];
 
 /**
@@ -19,6 +22,7 @@ export default function TalkControls() {
   const current = useQuery(api.talks.current);
   const start = useMutation(api.talks.start);
   const end = useMutation(api.talks.end);
+  const updateConfig = useMutation(api.talks.updateConfig);
 
   const [slug, setSlug] = useState('so-you-want-to-build-software');
   const [title, setTitle] = useState('So You Want To Build Software?');
@@ -38,14 +42,45 @@ export default function TalkControls() {
     return <p className="font-mono text-zinc-400">Connecting…</p>;
   }
 
-  // While a talk is live, hide the start form entirely — the only action is to
-  // stop it.
+  // While a talk is live, hide the start form — but keep the feature toggles
+  // available so flags (e.g. reactions) can be flipped mid-talk without ending
+  // the session. Toggles write through talks.updateConfig; every audience
+  // mutation re-checks the config server-side, so flips apply immediately.
   if (current) {
+    const liveConfig = current.config;
+    const setLiveFlag = (key: keyof TalkConfig, value: boolean) =>
+      run(() =>
+        updateConfig({
+          room: current.room,
+          config: { ...liveConfig, [key]: value },
+        }),
+      );
     return (
       <div className="space-y-3 font-mono">
         <p className="text-sm text-zinc-300">
           A talk is running. Starting a new one isn't available until this ends.
         </p>
+        <fieldset className="border-2 border-zinc-700 p-3">
+          <legend className="px-1 text-xs uppercase text-zinc-400">
+            Live features (apply instantly)
+          </legend>
+          <div className="space-y-2">
+            {FEATURE_TOGGLES.map(({ key, label }) => (
+              <label
+                key={key}
+                className="flex items-center gap-2 text-sm text-white"
+              >
+                <input
+                  type="checkbox"
+                  checked={liveConfig[key] as boolean}
+                  onChange={(e) => setLiveFlag(key, e.target.checked)}
+                  className="h-4 w-4 accent-brutalist-cyan"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <button
           type="button"
           onClick={() => run(() => end({}))}

@@ -12,6 +12,7 @@ import {
 } from 'spectacle';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
+import type { SlideWindow } from '@/lib/slideTiming';
 import { DeckDriver, Follower } from './DeckLive';
 import { DeckModeProvider } from './DeckModeContext';
 import {
@@ -26,6 +27,8 @@ export interface DeckSlide {
   code: string;
   notes: string | null;
   notesCode: string | null;
+  /** Per-slide `[⏱ a–b …]` timing window (minutes from talk start), if any. */
+  window?: SlideWindow | null;
 }
 
 interface SpectacleDeckProps {
