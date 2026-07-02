@@ -4,6 +4,7 @@ import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import { PageSEO } from '@/components/SEO';
 import TalkCard from '@/components/talks/TalkCard';
 import siteMetadata from '@/data/siteMetadata';
+import { isConvexConfigured } from '@/lib/convexClient';
 import { getAllTalksFrontMatter } from '@/lib/talks';
 import { useIsAdmin } from '@/lib/useIsAdmin';
 
@@ -15,11 +16,7 @@ export const getStaticProps: GetStaticProps<{
   return { props: { talks } };
 };
 
-export default function TalksPage({
-  talks,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-  const isAdmin = useIsAdmin();
-  const visible = talks.filter((t) => isAdmin || !t.draft);
+function TalksContent({ visible }: { visible: TalkFrontMatter[] }) {
   return (
     <>
       <PageSEO
@@ -57,4 +54,23 @@ export default function TalksPage({
       </div>
     </>
   );
+}
+
+// Admin-aware variant — reveals drafts to a signed-in admin. Rendered only when
+// Convex is configured, so useIsAdmin always runs under a ConvexProvider.
+function AdminAwareTalks({ talks }: { talks: TalkFrontMatter[] }) {
+  const isAdmin = useIsAdmin();
+  return <TalksContent visible={talks.filter((t) => isAdmin || !t.draft)} />;
+}
+
+export default function TalksPage({
+  talks,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  // No Convex deployment (CI / SSG) means no ConvexProvider in the tree, so the
+  // admin check can't run — show published talks only. When configured, defer
+  // to the admin-aware variant, which reveals drafts to admins on the client.
+  if (!isConvexConfigured) {
+    return <TalksContent visible={talks.filter((t) => !t.draft)} />;
+  }
+  return <AdminAwareTalks talks={talks} />;
 }
