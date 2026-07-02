@@ -14,8 +14,10 @@ const MAX_PROMPT_LEN = 200;
 /**
  * The generalized "put the actions in order" activity (toast is one instance).
  * The presenter opens an activity with a prompt and a hidden set of canonical
- * options; the audience submits their own ordered steps; after `revealDelayMs`
- * a scheduled function flips `revealed` so everyone sees the canonical options.
+ * options; the audience submits their own ordered steps; the presenter decides
+ * when `revealed` flips (reveal-now / the deck's reveal beat). An auto-reveal
+ * timer is an opt-in fallback: only when `revealDelayMs` is explicitly passed
+ * does a scheduled function flip `revealed` — and it can be cancelled.
  */
 export const open = mutation({
   args: {
@@ -50,19 +52,25 @@ export const open = mutation({
       .slice(0, MAX_OPTIONS)
       .map((o) => cleanText(o.slice(0, MAX_STEP_LEN)).text);
 
-    const delay = Math.max(0, Math.floor(revealDelayMs ?? 60_000));
+    // Auto-reveal is strictly opt-in: omitting `revealDelayMs` keeps the answer
+    // hidden until the presenter reveals it (reveal-now / the deck's reveal
+    // beat). Passing 0 reveals immediately; passing >0 arms a fallback timer.
+    const delay =
+      revealDelayMs === undefined
+        ? null
+        : Math.max(0, Math.floor(revealDelayMs));
     const now = Date.now();
     const id = await ctx.db.insert('activities', {
       room,
       prompt: cleanPrompt,
       options: cleanOptions,
-      revealAt: delay > 0 ? now + delay : now,
+      revealAt: delay === null ? null : now + delay,
       revealed: delay === 0,
       status: 'open',
       createdAt: now,
     });
 
-    if (delay > 0) {
+    if (delay !== null && delay > 0) {
       await ctx.scheduler.runAfter(delay, internal.activities.reveal, { id });
     }
     return { ok: true };
@@ -74,8 +82,22 @@ export const reveal = internalMutation({
   args: { id: v.id('activities') },
   handler: async (ctx, { id }) => {
     const doc = await ctx.db.get(id);
-    if (!doc || doc.revealed) return;
+    // `revealAt: null` means the presenter cancelled the timer after this run
+    // was scheduled — the stale invocation must not reveal anything.
+    if (!doc || doc.revealed || doc.revealAt === null) return;
     await ctx.db.patch(id, { revealed: true });
+  },
+});
+
+/**
+ * Presenter: cancel a pending auto-reveal timer. The answer stays hidden until
+ * an explicit reveal (reveal-now / the deck's reveal beat).
+ */
+export const cancelReveal = mutation({
+  args: { id: v.id('activities') },
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
+    await ctx.db.patch(id, { revealAt: null });
   },
 });
 

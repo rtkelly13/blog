@@ -8,6 +8,7 @@ import {
   getRemarkPlugins,
   setEsbuildBinaryPath,
 } from './mdx';
+import { parseSlideWindow, type SlideWindow } from './slideTiming';
 import { show_drafts } from './utils/showDrafts';
 
 const root = process.cwd();
@@ -209,6 +210,11 @@ export type TalkSlide = {
   notes: string | null;
   /** Compiled notes MDX — rendered (formatted) in Spectacle's presenter view. */
   notesCode: string | null;
+  /**
+   * Timing window (minutes from talk start) parsed from the notes' `[⏱ a–b …]`
+   * tag — drives the console's per-slide pacing indicator. Null = no window.
+   */
+  window: SlideWindow | null;
 };
 
 export async function getTalkBySlug(
@@ -235,7 +241,12 @@ export async function getTalkBySlug(
         compileSlide(body.trim()),
         notes ? compileSlide(notes) : Promise.resolve(null),
       ]);
-      return { code, notes: notes || null, notesCode };
+      return {
+        code,
+        notes: notes || null,
+        notesCode,
+        window: parseSlideWindow(notes),
+      };
     }),
   );
 
