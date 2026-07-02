@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useCountdown } from '@/components/talks/OrderedActions';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
+import ActivityEvalGrid from './ActivityEvalGrid';
 import { useRunAction } from './useRunAction';
 
 /** Shared error line for the admin panels. */
@@ -141,7 +142,6 @@ function ActivityControls({ room }: { room: string }) {
   const close = useMutation(api.activities.close);
   const revealNow = useMutation(api.activities.revealNow);
   const cancelReveal = useMutation(api.activities.cancelReveal);
-  const setHidden = useMutation(api.activities.setHidden);
   const { run, error } = useRunAction();
 
   const [prompt, setPrompt] = useState('');
@@ -170,42 +170,11 @@ function ActivityControls({ room }: { room: string }) {
               )
             </span>
           </p>
-          <div className="max-h-56 space-y-2 overflow-y-auto">
-            {feed?.authorized &&
-              feed.submissions.map((s) => (
-                <div
-                  key={s._id}
-                  className={`border-2 p-2 font-mono text-xs ${
-                    s.hidden
-                      ? 'border-zinc-800 text-zinc-600'
-                      : 'border-zinc-700 text-zinc-200'
-                  }`}
-                >
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="text-brutalist-pink">
-                      {s.nickname ?? 'anon'}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-xs uppercase text-brutalist-pink underline"
-                      onClick={() =>
-                        run(() =>
-                          setHidden({
-                            id: s._id as Id<'activitySubmissions'>,
-                            hidden: !s.hidden,
-                          }),
-                        )
-                      }
-                    >
-                      {s.hidden ? 'restore' : 'reject'}
-                    </button>
-                  </div>
-                  <span className={s.hidden ? 'line-through' : ''}>
-                    {s.steps.join(' → ')}
-                  </span>
-                </div>
-              ))}
-          </div>
+          {feed?.authorized && (
+            <div className="max-h-96 overflow-y-auto pr-1">
+              <ActivityEvalGrid submissions={feed.submissions} />
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             {!activity.revealed && (
               <button
