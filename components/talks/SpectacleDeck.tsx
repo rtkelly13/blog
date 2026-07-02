@@ -148,6 +148,16 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
     (mode === 'presenter' || mode === 'console') && followOn && isAdmin;
   const followEnabled = followOn && !broadcasting;
 
+  // A deck the presenter is actively driving on THIS live talk (presenter screen
+  // or console), regardless of follow. Slide-broadcast still only takes effect
+  // when `follow` is on (setSlide is gated server-side), but this deck always
+  // renders the driver so it reports its slide index and wires Prev/Next — which
+  // the deck-native reveal beat below needs even in a non-follow session.
+  const drivingDeck =
+    (mode === 'presenter' || mode === 'console') &&
+    isAdmin &&
+    Boolean(liveHere);
+
   const showAttendeeSidebar = mode === 'attendee' && Boolean(reactionsOn);
   const showConsoleSidebar = mode === 'console' && isAdmin && Boolean(liveHere);
   const showPresenterHud = mode === 'presenter' && isAuthenticated && isAdmin;
@@ -172,14 +182,15 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   // Deck-native reveal: while driving the deck with an open activity whose answer
   // is still hidden, the next "advance" press reveals the canonical answer to the
   // room instead of changing slide (a Spectacle-stepper-style beat). A second
-  // press then advances normally. Only the broadcasting deck arms this.
+  // press then advances normally. Armed on any deck the presenter is driving —
+  // independent of follow, so it works in a non-follow session too.
   const openActivity = useQuery(
     api.activities.active,
-    broadcasting && room ? { room } : 'skip',
+    drivingDeck && room ? { room } : 'skip',
   );
   const revealNow = useMutation(api.activities.revealNow);
   const pendingReveal =
-    broadcasting && openActivity && !openActivity.revealed
+    drivingDeck && openActivity && !openActivity.revealed
       ? openActivity._id
       : null;
 
@@ -222,7 +233,7 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   }) => (
     <>
       <Chrome slideNumber={slideNumber} numberOfSlides={numberOfSlides} />
-      {broadcasting ? (
+      {drivingDeck ? (
         <DeckDriver
           room={room}
           initialSlide={current?.currentSlide ?? 0}

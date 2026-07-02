@@ -147,9 +147,8 @@ function Poll({
         )}
       </div>
 
-      <div className="mt-4 flex justify-between font-mono text-xs text-zinc-500">
+      <div className="mt-4 font-mono text-xs text-zinc-500">
         <span>{poll.total} answers</span>
-        {poll.blocked > 0 && <span>🚫 {poll.blocked} blocked</span>}
       </div>
     </div>
   );

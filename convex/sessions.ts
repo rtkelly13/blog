@@ -1,7 +1,19 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
-import { type MutationCtx, mutation, query } from './_generated/server';
+import {
+  internalMutation,
+  type MutationCtx,
+  mutation,
+  query,
+} from './_generated/server';
 import { isAdminUser, requireAdmin } from './lib/admin';
+
+/**
+ * Ended sessions are auto-purged this long after they end (the `talks` row is
+ * kept, only its generated data goes). Manual clear-down is available sooner.
+ * See ADR-0003.
+ */
+const RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
  * Session management for the admin hub. A "session" is one live run of a talk
@@ -112,9 +124,65 @@ async function purgeByRoom(
 }
 
 /**
- * Admin: clear down all data a session generated — reactions, head-count,
- * presence, questions, polls (+ their words) and activities (+ submissions).
- * The session record itself is kept, so the log persists (now showing zeroes).
+ * Delete every row every feature scoped to this room — reactions, head-count,
+ * presence, questions (+ their vote ledger), polls (+ their words and submitter
+ * ledger) and activities (+ submissions). The `talks` row itself is left intact,
+ * so the session log persists (now showing zeroes). Shared by the manual
+ * clear-down and the auto-expiry reaper. See ADR-0003.
+ */
+async function purgeSessionData(ctx: MutationCtx, room: string): Promise<void> {
+  await purgeByRoom(ctx, 'reactions', room);
+  await purgeByRoom(ctx, 'reactionTotals', room);
+  await purgeByRoom(ctx, 'attendees', room);
+  await purgeByRoom(ctx, 'presence', room);
+  await purgeByRoom(ctx, 'presenters', room);
+  await purgeByRoom(ctx, 'activitySubmissions', room);
+
+  // Questions own child vote rows (keyed by question, not room).
+  const questions = await ctx.db
+    .query('questions')
+    .withIndex('by_room_created', (q) => q.eq('room', room))
+    .collect();
+  for (const question of questions) {
+    const votes = await ctx.db
+      .query('questionVotes')
+      .withIndex('by_question_machine', (q) => q.eq('questionId', question._id))
+      .collect();
+    await Promise.all(votes.map((row) => ctx.db.delete(row._id)));
+    await ctx.db.delete(question._id);
+  }
+
+  // Polls own child word + submitter rows; activities are cleared by room index.
+  const polls = await ctx.db
+    .query('polls')
+    .withIndex('by_room_created', (q) => q.eq('room', room))
+    .collect();
+  for (const poll of polls) {
+    const words = await ctx.db
+      .query('pollWords')
+      .withIndex('by_poll', (q) => q.eq('pollId', poll._id))
+      .collect();
+    await Promise.all(words.map((w) => ctx.db.delete(w._id)));
+    const submitters = await ctx.db
+      .query('pollSubmitters')
+      .withIndex('by_poll_machine', (q) => q.eq('pollId', poll._id))
+      .collect();
+    await Promise.all(submitters.map((s) => ctx.db.delete(s._id)));
+    await ctx.db.delete(poll._id);
+  }
+
+  const activities = await ctx.db
+    .query('activities')
+    .withIndex('by_room_created', (q) => q.eq('room', room))
+    .collect();
+  await Promise.all(
+    activities.map((a) => ctx.db.delete(a._id as Id<'activities'>)),
+  );
+}
+
+/**
+ * Admin: clear down all data a session generated. The session record itself is
+ * kept, so the log persists (now showing zeroes).
  */
 export const clearDown = mutation({
   args: { room: v.string() },
@@ -129,56 +197,28 @@ export const clearDown = mutation({
       throw new Error('End the talk before clearing its data.');
     }
 
-    await purgeByRoom(ctx, 'reactions', room);
-    await purgeByRoom(ctx, 'reactionTotals', room);
-    await purgeByRoom(ctx, 'attendees', room);
-    await purgeByRoom(ctx, 'presence', room);
-    await purgeByRoom(ctx, 'presenters', room);
-    await purgeByRoom(ctx, 'activitySubmissions', room);
-
-    // Questions own child vote rows (keyed by question, not room).
-    const questions = await ctx.db
-      .query('questions')
-      .withIndex('by_room_created', (q) => q.eq('room', room))
-      .collect();
-    for (const question of questions) {
-      const votes = await ctx.db
-        .query('questionVotes')
-        .withIndex('by_question_machine', (q) =>
-          q.eq('questionId', question._id),
-        )
-        .collect();
-      await Promise.all(votes.map((row) => ctx.db.delete(row._id)));
-      await ctx.db.delete(question._id);
-    }
-
-    // Polls own child word + submitter rows; activities are cleared by room index.
-    const polls = await ctx.db
-      .query('polls')
-      .withIndex('by_room_created', (q) => q.eq('room', room))
-      .collect();
-    for (const poll of polls) {
-      const words = await ctx.db
-        .query('pollWords')
-        .withIndex('by_poll', (q) => q.eq('pollId', poll._id))
-        .collect();
-      await Promise.all(words.map((w) => ctx.db.delete(w._id)));
-      const submitters = await ctx.db
-        .query('pollSubmitters')
-        .withIndex('by_poll_machine', (q) => q.eq('pollId', poll._id))
-        .collect();
-      await Promise.all(submitters.map((s) => ctx.db.delete(s._id)));
-      await ctx.db.delete(poll._id);
-    }
-
-    const activities = await ctx.db
-      .query('activities')
-      .withIndex('by_room_created', (q) => q.eq('room', room))
-      .collect();
-    await Promise.all(
-      activities.map((a) => ctx.db.delete(a._id as Id<'activities'>)),
-    );
-
+    await purgeSessionData(ctx, room);
     return { ok: true };
+  },
+});
+
+/**
+ * Scheduled (crons.ts): auto-expire ended sessions past the retention window.
+ * Purges each old session's generated data while keeping its `talks` row, so the
+ * session log stays but the (possibly unmasked) audience content does not.
+ * See ADR-0003.
+ */
+export const reapEndedSessions = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const cutoff = Date.now() - RETENTION_MS;
+    const ended = await ctx.db
+      .query('talks')
+      .withIndex('by_status', (q) => q.eq('status', 'ended'))
+      .collect();
+    for (const talk of ended) {
+      if ((talk.endedAt ?? talk.startedAt) > cutoff) continue;
+      await purgeSessionData(ctx, talk._id as string);
+    }
   },
 });

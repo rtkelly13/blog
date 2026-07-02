@@ -29,4 +29,13 @@ crons.interval(
   {},
 );
 
+// Auto-expire ended sessions past the retention window: purge the (possibly
+// unmasked) audience data they generated while keeping the session log. ADR-0003.
+crons.interval(
+  'reap ended sessions',
+  { hours: 24 },
+  internal.sessions.reapEndedSessions,
+  {},
+);
+
 export default crons;

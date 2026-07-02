@@ -70,7 +70,6 @@ function Queue({
   };
 
   const questions = data?.questions ?? [];
-  const blocked = data?.blocked ?? 0;
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
@@ -167,11 +166,6 @@ function Queue({
             );
           })
         )}
-        {blocked > 0 && (
-          <p className="pt-1 font-mono text-xs text-zinc-600">
-            🚫 {blocked} {blocked === 1 ? 'entry' : 'entries'} blocked
-          </p>
-        )}
       </div>
     </div>
   );
@@ -179,9 +173,10 @@ function Queue({
 
 /**
  * Embedded live Q&A: anyone types a question, everyone upvotes to reorder the
- * queue, the presenter answers/rejects from the console. Rejected questions show
- * only as a "blocked" count. Resolves the live room automatically, or takes one.
- * `display` (projected deck) is read-only — no ask box, votes as static badges.
+ * queue, the presenter answers/rejects from the console. Rejected questions are
+ * omitted from the audience entirely (the presenter sees them on the console).
+ * Resolves the live room automatically, or takes one. `display` (projected deck)
+ * is read-only — no ask box, votes as static badges.
  */
 export default function QuestionQueue({
   room,
