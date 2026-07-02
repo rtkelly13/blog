@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from 'convex/react';
+import ActivityEvalGrid from '@/components/admin/ActivityEvalGrid';
 import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
@@ -82,6 +83,9 @@ export function ConsoleSidebar({
   durationMins?: number;
 }) {
   const presenters = useQuery(api.talks.presenterCount, { room });
+  // Presenter-only feed of the open ordered-actions activity (null when none),
+  // so submissions can be evaluated from the console without leaving the deck.
+  const activityFeed = useQuery(api.activities.feed, { room });
   const end = useMutation(api.talks.end);
 
   const last = slides.length - 1;
@@ -158,6 +162,25 @@ export function ConsoleSidebar({
             Next up
           </p>
           <Thumb code={next.code} />
+        </div>
+      )}
+
+      {/* Open ordered-actions activity: evaluate submissions in-context
+          (mark the one being discussed, hide/restore) without leaving the deck. */}
+      {activityFeed?.authorized && activityFeed.activity && (
+        <div>
+          <p className="mb-1 font-mono text-xs uppercase tracking-wider text-brutalist-yellow">
+            Activity · {activityFeed.submissions.length}{' '}
+            {activityFeed.submissions.length === 1
+              ? 'submission'
+              : 'submissions'}
+          </p>
+          <p className="mb-2 font-mono text-xs text-zinc-400">
+            {activityFeed.activity.prompt}
+          </p>
+          <div className="max-h-80 overflow-y-auto pr-1">
+            <ActivityEvalGrid submissions={activityFeed.submissions} />
+          </div>
         </div>
       )}
 

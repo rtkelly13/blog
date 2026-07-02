@@ -236,3 +236,16 @@ export const setHidden = mutation({
     await ctx.db.patch(id, { hidden });
   },
 });
+
+/**
+ * Presenter: mark/unmark a submission while working through the responses with
+ * the room. Only surfaced on presenter views (the audience `active` query never
+ * returns it), so marking carries no audience-facing side effects.
+ */
+export const setMarked = mutation({
+  args: { id: v.id('activitySubmissions'), marked: v.boolean() },
+  handler: async (ctx, { id, marked }) => {
+    await requireAdmin(ctx);
+    await ctx.db.patch(id, { marked });
+  },
+});
