@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import RateLimitNotice from '@/components/talks/RateLimitNotice';
 import { isConvexConfigured } from '@/lib/convexClient';
+import { useRateLimitNotice } from '@/lib/useRateLimitNotice';
 import { useReactions } from '@/lib/useReactions';
 
 // Mirrors the server allow-list (convex/reactions.ts). Kept here so the client
@@ -15,7 +17,8 @@ interface Bubble {
 }
 
 function LiveReactions({ room }: { room: string }) {
-  const { recent, react } = useReactions(room);
+  const { secondsLeft, notify } = useRateLimitNotice();
+  const { recent, react } = useReactions(room, notify);
   const seen = useRef<Set<string>>(new Set());
   const primed = useRef(false);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
@@ -65,6 +68,12 @@ function LiveReactions({ room }: { room: string }) {
           </button>
         ))}
       </div>
+
+      {secondsLeft !== null && (
+        <div className="mt-2">
+          <RateLimitNotice secondsLeft={secondsLeft} />
+        </div>
+      )}
 
       {/* Floating reactions — bottom-right 20% of the viewport. */}
       <div className="reaction-stream pointer-events-none fixed right-0 bottom-0 z-40 h-[45vh] w-[20vw] overflow-hidden">

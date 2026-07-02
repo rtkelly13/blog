@@ -3,6 +3,7 @@ import { internal } from './_generated/api';
 import { internalMutation, mutation, query } from './_generated/server';
 import { isAdminUser, requireAdmin } from './lib/admin';
 import { cleanSteps, cleanText } from './lib/profanity';
+import { enforceRateLimit } from './lib/rateLimit';
 import { liveTalkForRoom, resolveConfig } from './talks';
 
 const MAX_STEPS = 12;
@@ -176,12 +177,16 @@ export const feed = query({
   },
 });
 
-/** Audience: submit an ordered list of actions for the open activity. */
+/**
+ * Audience: submit an ordered list of actions for the open activity.
+ * Rate-limited per machine (structured refusal, so the UI can say when to retry).
+ */
 export const submit = mutation({
   args: {
     activityId: v.id('activities'),
     nickname: v.optional(v.string()),
     steps: v.array(v.string()),
+    machineId: v.string(),
   },
   handler: async (ctx, args) => {
     const activity = await ctx.db.get(args.activityId);
@@ -191,8 +196,10 @@ export const submit = mutation({
     // Gate on the live talk owning this room (mirrors reactions/questions).
     const talk = await liveTalkForRoom(ctx, activity.room);
     if (!talk) throw new Error('No live talk.');
-    // Activities disabled for this session: drop the write silently.
-    if (!resolveConfig(talk).activities) return { ok: false as const };
+    // Activities disabled for this session: drop the write (visibly).
+    if (!resolveConfig(talk).activities) {
+      return { ok: false as const, reason: 'disabled' as const };
+    }
 
     const trimmed = args.steps
       .map((step) => step.trim())
@@ -202,6 +209,14 @@ export const submit = mutation({
     if (trimmed.length === 0) {
       throw new Error('Add at least one step before submitting.');
     }
+
+    const limited = await enforceRateLimit(
+      ctx,
+      args.machineId,
+      'activity:submit',
+    );
+    if (limited) return limited;
+
     const { steps, flagged: stepsFlagged } = cleanSteps(trimmed);
 
     let nickname: string | undefined;
@@ -224,7 +239,7 @@ export const submit = mutation({
       hidden: stepsFlagged || nicknameFlagged,
       createdAt: Date.now(),
     });
-    return { ok: true };
+    return { ok: true as const };
   },
 });
 

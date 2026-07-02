@@ -3,7 +3,9 @@ import { useCallback, useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { getMachineId } from '@/lib/machineId';
+import { useRateLimitNotice } from '@/lib/useRateLimitNotice';
 import { useDeckMode } from './DeckModeContext';
+import RateLimitNotice from './RateLimitNotice';
 import { ResolvedRoom } from './ResolvedRoom';
 
 const VOTED_KEY = 'talk-qa-voted';
@@ -51,6 +53,7 @@ function Queue({
 
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const { secondsLeft, notify } = useRateLimitNotice();
 
   // Projected/console decks (and any `display` embed) are read-only: no ask box,
   // votes shown as static badges. Students ask + upvote from /live.
@@ -62,8 +65,14 @@ function Queue({
     if (!trimmed || sending) return;
     setSending(true);
     try {
-      await ask({ room, text: trimmed });
-      setText('');
+      const res = await ask({ room, text: trimmed, machineId: getMachineId() });
+      // `=== false` so the union narrows under this repo's `strict: false`.
+      if (res.ok === false && res.reason === 'rate_limited') {
+        // Refused, not dropped: keep the typed question and show when to retry.
+        notify(res.retryAfterMs);
+      } else {
+        setText('');
+      }
     } finally {
       setSending(false);
     }
@@ -96,6 +105,12 @@ function Queue({
             Ask
           </button>
         </form>
+      )}
+
+      {!readOnly && (
+        <div className="mt-3 empty:hidden">
+          <RateLimitNotice secondsLeft={secondsLeft} />
+        </div>
       )}
 
       <div className={`${readOnly ? '' : 'mt-5'} space-y-2`}>
@@ -133,8 +148,10 @@ function Queue({
                         id: q._id as Id<'questions'>,
                         machineId: getMachineId(),
                       })
-                        .then((ok) => {
-                          if (ok) mark(q._id);
+                        .then((res) => {
+                          if (res.ok === true) mark(q._id);
+                          else if (res.reason === 'rate_limited')
+                            notify(res.retryAfterMs);
                         })
                         .catch(() => {});
                     }}

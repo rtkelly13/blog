@@ -1,7 +1,10 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useState } from 'react';
 import { api } from '@/convex/_generated/api';
+import { getMachineId } from '@/lib/machineId';
+import { useRateLimitNotice } from '@/lib/useRateLimitNotice';
 import { useDeckMode } from './DeckModeContext';
+import RateLimitNotice from './RateLimitNotice';
 import { ResolvedRoom } from './ResolvedRoom';
 
 /** Live-updating seconds remaining until `revealAt` (null once elapsed/absent). */
@@ -88,6 +91,7 @@ function Activity({
   const [steps, setSteps] = useState<string[]>(['']);
   const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const { secondsLeft, notify } = useRateLimitNotice();
 
   const consoleActivity = feedRes?.authorized ? feedRes.activity : null;
   const activity = isConsole ? consoleActivity : (active ?? null);
@@ -159,9 +163,19 @@ function Activity({
     if (filled.length === 0 || sending) return;
     setSending(true);
     try {
-      await submit({ activityId: activity._id, steps: filled });
-      setSteps(['']);
-      setSubmitted(true);
+      const res = await submit({
+        activityId: activity._id,
+        steps: filled,
+        machineId: getMachineId(),
+      });
+      // `=== false` so the union narrows under this repo's `strict: false`.
+      if (res.ok === false && res.reason === 'rate_limited') {
+        // Refused, not dropped: keep the typed steps and show when to retry.
+        notify(res.retryAfterMs);
+      } else {
+        setSteps(['']);
+        setSubmitted(true);
+      }
     } finally {
       setSending(false);
     }
@@ -217,6 +231,7 @@ function Activity({
                 )}
               </div>
             ))}
+            <RateLimitNotice secondsLeft={secondsLeft} />
             <div className="flex flex-col gap-2 pt-1 sm:flex-row">
               <button
                 type="button"

@@ -15,6 +15,7 @@ import type * as hello from "../hello.js";
 import type * as http from "../http.js";
 import type * as lib_admin from "../lib/admin.js";
 import type * as lib_profanity from "../lib/profanity.js";
+import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as polls from "../polls.js";
 import type * as presence from "../presence.js";
 import type * as questions from "../questions.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/admin": typeof lib_admin;
   "lib/profanity": typeof lib_profanity;
+  "lib/rateLimit": typeof lib_rateLimit;
   polls: typeof polls;
   presence: typeof presence;
   questions: typeof questions;
