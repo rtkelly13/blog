@@ -2,7 +2,7 @@ import { Presentation } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import { PageSEO } from '@/components/SEO';
-import TalkCard from '@/components/talks/TalkCard';
+import { TalkCard } from '@/components/talks';
 import siteMetadata from '@/data/siteMetadata';
 import { isConvexConfigured } from '@/lib/convexClient';
 import { getAllTalksFrontMatter } from '@/lib/talks';

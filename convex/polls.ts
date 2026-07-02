@@ -51,13 +51,14 @@ export const close = mutation({
 export const active = query({
   args: { room: v.string() },
   handler: async (ctx, { room }) => {
-    const rows = await ctx.db
+    // Newest poll is the only possibly-open one: start() closes prior open
+    // polls before inserting, so we read one row instead of the room's history.
+    const poll = await ctx.db
       .query('polls')
       .withIndex('by_room_created', (q) => q.eq('room', room))
       .order('desc')
-      .collect();
-    const poll = rows.find((p) => p.status === 'open');
-    if (!poll) return null;
+      .first();
+    if (!poll || poll.status !== 'open') return null;
 
     const words = await ctx.db
       .query('pollWords')
@@ -104,10 +105,13 @@ export const hideWord = mutation({
   },
 });
 
-/** Audience: submit a one-word answer; upserts the running tally. */
+/**
+ * Audience: submit a one-word answer; upserts the running tally. One answer per
+ * machine per poll, so a single browser can't inflate the cloud by resubmitting.
+ */
 export const submit = mutation({
-  args: { pollId: v.id('polls'), word: v.string() },
-  handler: async (ctx, { pollId, word }) => {
+  args: { pollId: v.id('polls'), word: v.string(), machineId: v.string() },
+  handler: async (ctx, { pollId, word, machineId }) => {
     const poll = await ctx.db.get(pollId);
     if (!poll || poll.status !== 'open') {
       throw new Error('This poll is closed.');
@@ -117,6 +121,15 @@ export const submit = mutation({
 
     const normalized = normalizeWord(word);
     if (!normalized) throw new Error('Type a word before submitting.');
+
+    const already = await ctx.db
+      .query('pollSubmitters')
+      .withIndex('by_poll_machine', (row) =>
+        row.eq('pollId', pollId).eq('machineId', machineId),
+      )
+      .unique();
+    if (already) throw new Error('You have already answered this poll.');
+    await ctx.db.insert('pollSubmitters', { pollId, machineId });
 
     const existing = await ctx.db
       .query('pollWords')

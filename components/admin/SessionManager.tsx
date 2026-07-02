@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
+import { useRunAction } from './useRunAction';
 
 /** Short, human date-time for a session's start (locale, no seconds). */
 function when(ts: number): string {
@@ -22,8 +23,8 @@ function ClearDownButton({
   hasData: boolean;
 }) {
   const clearDown = useMutation(api.sessions.clearDown);
+  const { run, error, busy } = useRunAction();
   const [armed, setArmed] = useState(false);
-  const [busy, setBusy] = useState(false);
 
   if (!hasData) {
     return (
@@ -31,15 +32,21 @@ function ClearDownButton({
     );
   }
 
-  const run = async () => {
-    setBusy(true);
-    try {
+  // A live session can't be cleared — its data would repopulate from connected
+  // clients — so surface that instead of a clear button until the talk ends.
+  if (live) {
+    return (
+      <span className="font-mono text-xs uppercase text-zinc-600">
+        end talk to clear
+      </span>
+    );
+  }
+
+  const wipe = () =>
+    run(async () => {
       await clearDown({ room });
       setArmed(false);
-    } finally {
-      setBusy(false);
-    }
-  };
+    });
 
   if (!armed) {
     return (
@@ -56,12 +63,12 @@ function ClearDownButton({
   return (
     <span className="flex items-center gap-2">
       <span className="font-mono text-xs uppercase text-brutalist-pink">
-        {live ? 'Clear LIVE session?' : 'Sure?'}
+        {error ?? 'Sure?'}
       </span>
       <button
         type="button"
         disabled={busy}
-        onClick={run}
+        onClick={wipe}
         className="border-2 border-brutalist-pink bg-brutalist-pink px-3 py-1.5 font-mono text-xs font-bold uppercase text-black disabled:opacity-40"
       >
         {busy ? '…' : 'Yes, wipe'}

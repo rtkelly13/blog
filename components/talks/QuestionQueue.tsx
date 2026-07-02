@@ -2,8 +2,9 @@ import { useMutation, useQuery } from 'convex/react';
 import { useCallback, useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
-import { isConvexConfigured } from '@/lib/convexClient';
+import { getMachineId } from '@/lib/machineId';
 import { useDeckMode } from './DeckModeContext';
+import { ResolvedRoom } from './ResolvedRoom';
 
 const VOTED_KEY = 'talk-qa-voted';
 
@@ -127,8 +128,16 @@ function Queue({
                     type="button"
                     disabled={hasVoted || q.answered}
                     onClick={() => {
-                      upvote({ id: q._id as Id<'questions'> }).catch(() => {});
-                      mark(q._id);
+                      // Only mark as voted once the mutation confirms the vote
+                      // counted — a failed or no-op upvote leaves the button live.
+                      upvote({
+                        id: q._id as Id<'questions'>,
+                        machineId: getMachineId(),
+                      })
+                        .then((ok) => {
+                          if (ok) mark(q._id);
+                        })
+                        .catch(() => {});
                     }}
                     className={`flex w-12 shrink-0 flex-col items-center border-2 py-1 font-mono font-bold ${
                       hasVoted
@@ -168,33 +177,6 @@ function Queue({
   );
 }
 
-function Resolver({
-  room,
-  display,
-  title,
-  info,
-  placeholder,
-}: {
-  room?: string;
-  display?: boolean;
-  title?: string;
-  info?: string;
-  placeholder?: string;
-}) {
-  const current = useQuery(api.talks.current, room ? 'skip' : {});
-  const resolved = room ?? current?.room;
-  if (!resolved) return null;
-  return (
-    <Queue
-      room={resolved}
-      display={display}
-      title={title}
-      info={info}
-      placeholder={placeholder}
-    />
-  );
-}
-
 /**
  * Embedded live Q&A: anyone types a question, everyone upvotes to reorder the
  * queue, the presenter answers/rejects from the console. Rejected questions show
@@ -214,14 +196,17 @@ export default function QuestionQueue({
   info?: string;
   placeholder?: string;
 }) {
-  if (!isConvexConfigured) return null;
   return (
-    <Resolver
-      room={room}
-      display={display}
-      title={title}
-      info={info}
-      placeholder={placeholder}
-    />
+    <ResolvedRoom room={room}>
+      {(r) => (
+        <Queue
+          room={r}
+          display={display}
+          title={title}
+          info={info}
+          placeholder={placeholder}
+        />
+      )}
+    </ResolvedRoom>
   );
 }

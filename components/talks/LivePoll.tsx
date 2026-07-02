@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
-import { isConvexConfigured } from '@/lib/convexClient';
+import { getMachineId } from '@/lib/machineId';
 import { useDeckMode } from './DeckModeContext';
+import { ResolvedRoom } from './ResolvedRoom';
 
 const CLOUD_COLORS = [
   'text-brutalist-cyan',
@@ -71,8 +72,16 @@ function Poll({
     if (!trimmed || sending) return;
     setSending(true);
     try {
-      await submit({ pollId: poll._id, word: trimmed });
+      await submit({
+        pollId: poll._id,
+        word: trimmed,
+        machineId: getMachineId(),
+      });
       setWord('');
+      setDone(true);
+    } catch {
+      // One answer per person: an "already answered" (or transient) failure
+      // still lands us in the submitted state so we stop offering the form.
       setDone(true);
     } finally {
       setSending(false);
@@ -91,25 +100,31 @@ function Poll({
       {!info && <div className="mb-3" />}
 
       {/* On the projected deck (display) we show the cloud only — no dead input
-          box on a big screen. Students still submit from /live. */}
-      {showForm && (
-        <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row">
-          <input
-            value={word}
-            onChange={(e) => setWord(e.target.value)}
-            maxLength={32}
-            placeholder="One word…"
-            className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-pink focus:outline-none"
-          />
-          <button
-            type="submit"
-            disabled={sending || !word.trim()}
-            className="border-2 border-white bg-brutalist-pink px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
-          >
-            {done ? 'Add another' : 'Send'}
-          </button>
-        </form>
-      )}
+          box on a big screen. Students still submit from /live. One answer per
+          person, so once submitted we confirm instead of re-offering the form. */}
+      {showForm &&
+        (done ? (
+          <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
+            ✓ Your answer's in — watch the cloud below.
+          </p>
+        ) : (
+          <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row">
+            <input
+              value={word}
+              onChange={(e) => setWord(e.target.value)}
+              maxLength={32}
+              placeholder="One word…"
+              className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-pink focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={sending || !word.trim()}
+              className="border-2 border-white bg-brutalist-pink px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
+            >
+              Send
+            </button>
+          </form>
+        ))}
 
       <div className="mt-5 flex min-h-[4rem] flex-wrap items-center gap-x-4 gap-y-1">
         {poll.words.length === 0 ? (
@@ -140,33 +155,6 @@ function Poll({
   );
 }
 
-function Resolver({
-  room,
-  display,
-  title,
-  info,
-  prompt,
-}: {
-  room?: string;
-  display?: boolean;
-  title?: string;
-  info?: string;
-  prompt?: string;
-}) {
-  const current = useQuery(api.talks.current, room ? 'skip' : {});
-  const resolved = room ?? current?.room;
-  if (!resolved) return null;
-  return (
-    <Poll
-      room={resolved}
-      display={display}
-      title={title}
-      info={info}
-      prompt={prompt}
-    />
-  );
-}
-
 /**
  * Embedded live poll / word cloud. The presenter opens a prompt from the console;
  * the audience submits single words that grow in the cloud by frequency. Renders
@@ -187,14 +175,17 @@ export default function LivePoll({
   /** Slide-declared question — an admin can start the poll in one click. */
   prompt?: string;
 }) {
-  if (!isConvexConfigured) return null;
   return (
-    <Resolver
-      room={room}
-      display={display}
-      title={title}
-      info={info}
-      prompt={prompt}
-    />
+    <ResolvedRoom room={room}>
+      {(r) => (
+        <Poll
+          room={r}
+          display={display}
+          title={title}
+          info={info}
+          prompt={prompt}
+        />
+      )}
+    </ResolvedRoom>
   );
 }

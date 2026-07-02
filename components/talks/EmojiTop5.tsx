@@ -1,6 +1,6 @@
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { isConvexConfigured } from '@/lib/convexClient';
+import { ResolvedRoom } from './ResolvedRoom';
 
 const MEDALS = ['🥇', '🥈', '🥉', '4', '5'];
 const BAR_COLORS = [
@@ -65,23 +65,6 @@ function Board({
   );
 }
 
-function Resolver({
-  room,
-  title,
-  info,
-  limit,
-}: {
-  room?: string;
-  title?: string;
-  info?: string;
-  limit?: number;
-}) {
-  const current = useQuery(api.talks.current, room ? 'skip' : {});
-  const resolved = room ?? current?.room;
-  if (!resolved) return null;
-  return <Board room={resolved} title={title} info={info} limit={limit} />;
-}
-
 /**
  * Live "top 5 reacted emoji" leaderboard — the audience-facing view of the same
  * reactionTotals the console chart draws from, ranked with medals. Embeddable in
@@ -101,6 +84,9 @@ export default function EmojiTop5({
   /** How many ranked emoji to show (default 5). */
   limit?: number;
 }) {
-  if (!isConvexConfigured) return null;
-  return <Resolver room={room} title={title} info={info} limit={limit} />;
+  return (
+    <ResolvedRoom room={room}>
+      {(r) => <Board room={r} title={title} info={info} limit={limit} />}
+    </ResolvedRoom>
+  );
 }

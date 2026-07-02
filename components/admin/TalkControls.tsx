@@ -2,6 +2,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import { TALK_PRESETS, type TalkConfig } from '@/convex/talkConfig';
+import { useRunAction } from './useRunAction';
 
 const FEATURE_TOGGLES: { key: keyof TalkConfig; label: string }[] = [
   { key: 'presence', label: 'Live head-count' },
@@ -23,7 +24,7 @@ export default function TalkControls() {
   const [title, setTitle] = useState('So You Want To Build Software?');
   const [presetId, setPresetId] = useState(TALK_PRESETS[0].id);
   const [config, setConfig] = useState<TalkConfig>(TALK_PRESETS[0].config);
-  const [error, setError] = useState<string | null>(null);
+  const { run, error } = useRunAction();
 
   const applyPreset = (id: string) => {
     setPresetId(id);
@@ -32,15 +33,6 @@ export default function TalkControls() {
   };
   const setFlag = (key: keyof TalkConfig, value: boolean | number) =>
     setConfig((c) => ({ ...c, [key]: value }));
-
-  const run = async (fn: () => Promise<unknown>) => {
-    setError(null);
-    try {
-      await fn();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong');
-    }
-  };
 
   if (current === undefined) {
     return <p className="font-mono text-zinc-400">Connecting…</p>;

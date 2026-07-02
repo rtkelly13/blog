@@ -11,10 +11,7 @@ import NoteBlock from './NoteBlock';
 import Pre from './Pre';
 import TalkStatsChart from './TalkStatsChart';
 import TOCInline from './TOCInline';
-import EmojiTop5 from './talks/EmojiTop5';
-import LivePoll from './talks/LivePoll';
-import OrderedActions from './talks/OrderedActions';
-import QuestionQueue from './talks/QuestionQueue';
+import { EmojiTop5, LivePoll, OrderedActions, QuestionQueue } from './talks';
 
 const Wrapper: React.ComponentType<{ layout: string }> = ({
   layout,

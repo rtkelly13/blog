@@ -1,10 +1,12 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
 import type { ReactNode } from 'react';
-import AdminGate from '@/components/admin/AdminGate';
-import AudienceControls from '@/components/admin/AudienceControls';
-import SessionManager from '@/components/admin/SessionManager';
-import TalkControls from '@/components/admin/TalkControls';
+import {
+  AdminGate,
+  AudienceControls,
+  SessionManager,
+  TalkControls,
+} from '@/components/admin';
 import { PageSEO } from '@/components/SEO';
 import TalkStatsChart from '@/components/TalkStatsChart';
 import { api } from '@/convex/_generated/api';

@@ -9,9 +9,14 @@ MDX processing pipeline, custom remark/rehype plugins, and utility functions.
 ```
 lib/
 ├── mdx.ts              # Core MDX bundler (getFileBySlug, getAllFilesFrontMatter)
+├── talks.ts            # Talk deck loading (front matter, slide split, MDX compile)
 ├── tags.ts             # Tag extraction (getAllTags)
 ├── series.ts           # Series navigation (getSeriesWithPosts, getSeriesNavigation)
 ├── generate-rss.ts     # RSS feed generation
+├── convexClient.ts     # Convex browser client + isConvexConfigured guard
+├── usePresence.ts      # Hook: presence heartbeat + live count/join feed
+├── useReactions.ts     # Hook: debounced emoji reactions + recent feed
+├── machineId.ts        # Pseudo-anonymous localStorage machine id (dedup)
 ├── remark-code-title.ts    # Code block titles plugin
 ├── remark-toc-headings.ts  # TOC extraction plugin
 ├── remark-img-to-jsx.ts    # Image → JSX plugin
@@ -23,6 +28,13 @@ lib/
     └── showDrafts.ts   # Draft visibility check
 ```
 
+> **(#19) Hooks are a new `lib/` category.** `lib/` was originally scoped to the
+> MDX pipeline + utilities; it now also holds React hooks (`usePresence`,
+> `useReactions`) and the shared `machineId` client helper for the talk system.
+> They live at `lib/` top-level (not `components/`) because they are Convex-client
+> concerns shared across the talk UI. Only call them where `ConvexProvider` is
+> mounted (behind an `isConvexConfigured` guard).
+
 ## KEY EXPORTS
 
 ### mdx.ts
@@ -32,6 +44,10 @@ getFiles(type: 'blog' | 'authors' | 'series')  // List MDX files
 getFileBySlug(type, slug)                       // Bundle single MDX file
 getAllFilesFrontMatter(folder: 'blog')          // All posts with frontmatter
 sortPosts(a, b)                                 // Date + series ordering
+// Shared plugin factories reused by talks.ts (so slides render like posts):
+getRemarkPlugins(toc?)                          // Shared remark stack
+getRehypePlugins()                              // Shared rehype stack
+setEsbuildBinaryPath()                          // esbuild binary resolution
 ```
 
 ### tags.ts
@@ -47,6 +63,31 @@ getAllSeries(); // List all series
 getSeriesBySlug(slug); // Single series metadata
 getSeriesWithPosts(slug); // Series + all its posts
 getSeriesNavigation(slug, currentSlug); // Prev/next within series
+```
+
+### talks.ts
+
+Loads talk decks from `data/talks/<slug>.mdx`. Bodies are split into slides on
+`---` lines (fence-aware), and each slide's optional speaker notes follow a `???`
+line. Reuses `mdx.ts`'s plugin stack (`getRemarkPlugins`/`getRehypePlugins`/
+`setEsbuildBinaryPath`) so slides render like blog posts.
+
+```typescript
+getAllTalksFrontMatter();            // Published talks, newest first
+getTalkSlugs();                      // Published slugs (drafts excluded)
+getTalkStaticPaths();                // Shared getStaticPaths for talk routes
+getTalkMeta(slug);                   // Front matter + slideCount (no MDX compile)
+getTalkBySlug(slug);                 // Front matter + compiled slides (+ notes)
+validateTalkFrontMatter(data, slug); // Build-time guard (title/date/durationMins)
+// Types: TalkSlide; front matter in types/TalkFrontMatter.ts
+```
+
+### Hooks (Convex-client)
+
+```typescript
+usePresence(room); // { count, joins } — heartbeats + live head-count feed
+useReactions(room); // { recent, react } — debounced emoji sends + recent feed
+getMachineId(); // machineId.ts — stable per-browser id (localStorage)
 ```
 
 ## MDX PIPELINE

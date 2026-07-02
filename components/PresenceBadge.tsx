@@ -37,7 +37,7 @@ function LivePresence({ room }: { room: string }) {
     <>
       <span className="inline-flex items-center gap-2 font-mono text-sm uppercase text-brutalist-cyan">
         <span
-          className="inline-block h-2 w-2 animate-pulse rounded-full bg-brutalist-cyan"
+          className="inline-block h-2 w-2 animate-pulse bg-brutalist-cyan"
           aria-hidden
         />
         👥 {count ?? '—'} {label} here
