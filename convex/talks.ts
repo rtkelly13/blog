@@ -143,6 +143,22 @@ export const start = mutation({
   },
 });
 
+/**
+ * Presenter: replace the live talk's feature config mid-talk. Admin-only.
+ * Every audience mutation re-resolves the config on each call (e.g.
+ * reactions.send re-checks `resolveConfig(talk).reactions` before inserting),
+ * so a flipped flag takes effect immediately — no new room, nothing orphaned.
+ */
+export const updateConfig = mutation({
+  args: { room: v.string(), config: talkConfigValidator },
+  handler: async (ctx, { room, config }) => {
+    await requireAdmin(ctx);
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk) return;
+    await ctx.db.patch(talk._id, { config });
+  },
+});
+
 /** Presenter: end the current talk. Admin-only. */
 export const end = mutation({
   args: {},
