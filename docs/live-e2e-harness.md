@@ -66,3 +66,11 @@ the agent-browser CLI after deploy: prod is a separate Convex deployment
 end-to-end signal. Drive the same surfaces (`/admin` cockpit, `/live`,
 `/talks/<slug>/present`) and confirm the same behaviours, then clear the session
 down.
+
+Vercel **preview** environments are deliberately *not* the target for admin-driven
+runs: per-branch previews can't pre-register a GitHub OAuth callback on their
+ephemeral `*.convex.site`, so admin sign-in breaks even when the backend is
+healthy. Local (stable `localhost` callback) and production (stable domain) are
+the supported targets. See
+[ADR-0004](adr/0004-preview-environments-and-auth.md) for the tradeoff and the
+going-forward options.
