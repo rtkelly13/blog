@@ -6,6 +6,7 @@ import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
 import { api } from '@/convex/_generated/api';
 import type { SlideWindow } from '@/lib/slideTiming';
+import { BreakControl } from './BreakTimer';
 import QuestionQueue from './QuestionQueue';
 import SlideBody from './SlideBody';
 import TalkTimer from './TalkTimer';
@@ -199,6 +200,10 @@ export function ConsoleSidebar({
           slideWindow={slides[idx]?.window ?? null}
         />
       )}
+
+      {/* Break countdown: start/extend/end — mirrored big on the break slide
+          and on every attendee's /live page (shared server-side end time). */}
+      <BreakControl room={room} />
 
       {/* Drive the deck */}
       <div className="space-y-2">
