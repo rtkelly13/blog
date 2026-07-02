@@ -13,10 +13,19 @@ type NavRef = { current: { next: () => void; prev: () => void } | null };
  * room — the deck itself is the source of truth, so it never "detaches". On mount
  * it aligns to the room's current slide (so opening a driver mid-talk doesn't
  * reset everyone to the first slide), and only broadcasts once aligned.
+ *
+ * Multiple drivers (presenter screen + console, or two presenters) co-exist via
+ * last-write-wins on the room's single `currentSlide`: a driver broadcasts its
+ * OWN navigation, and *follows* a remote change made by another driver (skipTo
+ * without re-detaching). Distinguishing the two — local index moved vs. room
+ * slide moved — is what prevents the echo/stale-write clash: without it a second
+ * driver sits diverged after the first one navigates, and its next keypress
+ * yanks the whole room back to its stale position.
  */
 export function DeckDriver({
   room,
   initialSlide,
+  currentSlide,
   setSlide,
   onIndex,
   navRef,
@@ -25,6 +34,8 @@ export function DeckDriver({
 }: {
   room?: string;
   initialSlide: number;
+  /** The room's live slide — remote co-driver moves are followed via skipTo. */
+  currentSlide?: number;
   setSlide: SetSlide;
   onIndex?: (index: number) => void;
   navRef?: NavRef;
@@ -34,40 +45,85 @@ export function DeckDriver({
   const { activeView, skipTo, advanceSlide, regressSlide } =
     useContext(DeckContext);
   const index = activeView.slideIndex;
-  // The room's slide at the moment this driver opened — captured once (this
-  // component only mounts after the talk has loaded), then we align to it.
+  // Fallback alignment target (the room's slide when this driver opened) for
+  // the moment before the live query delivers `currentSlide`.
   const targetRef = useRef(initialSlide);
   const [aligned, setAligned] = useState(false);
 
   // Expose deck navigation to out-of-deck controls (the console Prev/Next).
   if (navRef) navRef.current = { next: advanceSlide, prev: regressSlide };
 
-  // Align to the room's slide, retrying until it lands — Spectacle can drop an
-  // early skipTo before its navigation is ready. Once aligned we start driving;
-  // we never broadcast the pre-alignment position (which would reset the room).
+  // Align to the room's LIVE slide, retrying until it lands — Spectacle can drop
+  // an early skipTo before its navigation is ready. Tracking the live value (not
+  // just the mount-time snapshot) means a driver opened while another presenter
+  // is navigating aligns to where the room actually is, instead of broadcasting
+  // a stale position back at it. Once aligned we start driving; we never
+  // broadcast the pre-alignment position (which would reset the room).
   useEffect(() => {
     if (aligned) return;
-    if (index === targetRef.current) {
+    const target = currentSlide ?? targetRef.current;
+    if (index === target) {
       setAligned(true);
       return;
     }
-    skipTo({ slideIndex: targetRef.current, stepIndex: 0 });
-  }, [aligned, index, skipTo]);
+    skipTo({ slideIndex: target, stepIndex: 0 });
+  }, [aligned, index, currentSlide, skipTo]);
 
   // Report position for the console's notes/preview (always).
   useEffect(() => {
     onIndex?.(index);
   }, [index, onIndex]);
 
-  // Broadcast position to the room (only after alignment).
+  // Drive / converge (only after alignment). Local navigation broadcasts
+  // (last write wins on the shared slide); a remote change from another driver
+  // is followed. A remote echo of our own broadcast (room caught up to us) is
+  // a no-op, so drivers can't ping-pong.
+  const prevIndexRef = useRef<number | null>(null);
+  const prevRemoteRef = useRef(currentSlide);
+  const followTargetRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!aligned || !room) return;
-    setSlide({ room, index })
-      .then(() => onPublished?.(index))
-      .catch((e) =>
-        onError?.(e instanceof Error ? e.message : 'broadcast failed'),
-      );
-  }, [aligned, index, room, setSlide, onPublished, onError]);
+    if (!aligned || !room) {
+      // Pre-alignment: consume remote updates so alignment-time state doesn't
+      // read as a "remote move" once we start driving.
+      prevRemoteRef.current = currentSlide;
+      return;
+    }
+    const localMoved =
+      prevIndexRef.current === null || index !== prevIndexRef.current;
+    const remoteMoved = currentSlide !== prevRemoteRef.current;
+    prevIndexRef.current = index;
+    prevRemoteRef.current = currentSlide;
+
+    if (localMoved) {
+      if (index === followTargetRef.current) {
+        // Our own follow-skipTo landing — the room is already on this slide,
+        // so re-broadcasting would only race a newer remote move.
+        followTargetRef.current = null;
+        onPublished?.(index);
+        return;
+      }
+      // This driver navigated (or just finished aligning) — publish it.
+      followTargetRef.current = null;
+      setSlide({ room, index })
+        .then(() => onPublished?.(index))
+        .catch((e) =>
+          onError?.(e instanceof Error ? e.message : 'broadcast failed'),
+        );
+    } else if (remoteMoved && currentSlide != null && currentSlide !== index) {
+      // Another driver moved the room — converge on their slide.
+      followTargetRef.current = currentSlide;
+      skipTo({ slideIndex: currentSlide, stepIndex: 0 });
+    }
+  }, [
+    aligned,
+    index,
+    currentSlide,
+    room,
+    setSlide,
+    skipTo,
+    onPublished,
+    onError,
+  ]);
 
   return null;
 }
