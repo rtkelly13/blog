@@ -203,6 +203,29 @@ export const clearDown = mutation({
 });
 
 /**
+ * Admin: permanently delete a session — purge all data it generated AND remove
+ * the `talks` row itself, so it disappears from the session log. Irreversible;
+ * to keep the log entry but drop the audience content, use `clearDown`. A live
+ * session must be ended first (same guard, same reason).
+ */
+export const deleteSession = mutation({
+  args: { room: v.string() },
+  handler: async (ctx, { room }) => {
+    await requireAdmin(ctx);
+
+    const talk = await ctx.db.get(room as Id<'talks'>);
+    if (!talk) return { ok: true }; // already gone — deleting is idempotent
+    if (talk.status === 'live') {
+      throw new Error('End the talk before deleting the session.');
+    }
+
+    await purgeSessionData(ctx, room);
+    await ctx.db.delete(talk._id);
+    return { ok: true };
+  },
+});
+
+/**
  * Scheduled (crons.ts): auto-expire ended sessions past the retention window.
  * Purges each old session's generated data while keeping its `talks` row, so the
  * session log stays but the (possibly unmasked) audience content does not.

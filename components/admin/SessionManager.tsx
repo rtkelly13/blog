@@ -84,10 +84,55 @@ function ClearDownButton({
   );
 }
 
+function DeleteSessionButton({ room, live }: { room: string; live: boolean }) {
+  const deleteSession = useMutation(api.sessions.deleteSession);
+  const { run, error, busy } = useRunAction();
+  const [armed, setArmed] = useState(false);
+
+  // Same guard as clear-down: a live session must be ended first.
+  if (live) return null;
+
+  if (!armed) {
+    return (
+      <button
+        type="button"
+        onClick={() => setArmed(true)}
+        className="border-2 border-zinc-500 px-3 py-1.5 font-mono text-xs font-bold uppercase text-zinc-400 hover:border-brutalist-pink hover:bg-brutalist-pink hover:text-black"
+      >
+        Delete
+      </button>
+    );
+  }
+
+  return (
+    <span className="flex items-center gap-2">
+      <span className="font-mono text-xs uppercase text-brutalist-pink">
+        {error ?? 'Gone forever?'}
+      </span>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => run(() => deleteSession({ room }))}
+        className="border-2 border-brutalist-pink bg-brutalist-pink px-3 py-1.5 font-mono text-xs font-bold uppercase text-black disabled:opacity-40"
+      >
+        {busy ? '…' : 'Yes, delete'}
+      </button>
+      <button
+        type="button"
+        onClick={() => setArmed(false)}
+        className="font-mono text-xs uppercase text-zinc-400 underline"
+      >
+        Cancel
+      </button>
+    </span>
+  );
+}
+
 /**
  * Admin "Sessions" panel: every live run of a talk (a session = the room every
- * feature scopes to), newest first, with the volume of data it generated and a
- * per-session "Clear down" that wipes that data (keeping the session record).
+ * feature scopes to), newest first, with the volume of data it generated, a
+ * per-session "Clear down" that wipes that data (keeping the session record),
+ * and a "Delete" that removes the session — data and log entry — entirely.
  */
 export default function SessionManager() {
   const data = useQuery(api.sessions.list, {});
@@ -127,12 +172,13 @@ export default function SessionManager() {
               submissions
             </p>
           </div>
-          <div className="shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             <ClearDownButton
               room={s.room}
               live={s.status === 'live'}
               hasData={s.hasData}
             />
+            <DeleteSessionButton room={s.room} live={s.status === 'live'} />
           </div>
         </div>
       ))}
