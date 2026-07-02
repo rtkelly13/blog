@@ -33,7 +33,7 @@ export const DEFAULT_CONFIG: TalkConfig = {
   reactions: true,
   closingChart: true,
   chartThreshold: 3,
-  follow: false,
+  follow: true,
 };
 
 /**
@@ -50,7 +50,7 @@ export const TALK_PRESETS: { id: string; label: string; config: TalkConfig }[] =
         reactions: true,
         closingChart: true,
         chartThreshold: 3,
-        follow: false,
+        follow: true,
       },
     },
     {
