@@ -10,9 +10,15 @@ import {
   talkConfigValidator,
 } from './talkConfig';
 
-/** A talk's config, falling back to defaults for talks started before configs. */
-export function resolveConfig(talk: { config?: TalkConfig }): TalkConfig {
-  return talk.config ?? DEFAULT_CONFIG;
+/**
+ * A talk's config. Defaults fill in for talks started before configs existed,
+ * and are merged *over* a partial config so a talk stored before a newer toggle
+ * (qa/poll/activities) resolves that toggle to its default, not `undefined`.
+ */
+export function resolveConfig(talk: {
+  config?: Partial<TalkConfig>;
+}): TalkConfig {
+  return { ...DEFAULT_CONFIG, ...talk.config };
 }
 
 /**

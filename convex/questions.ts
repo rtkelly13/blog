@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { isAdminUser, requireAdmin } from './lib/admin';
 import { cleanText } from './lib/profanity';
-import { liveTalkForRoom } from './talks';
+import { liveTalkForRoom, resolveConfig } from './talks';
 
 const MAX_TEXT_LEN = 280;
 const MAX_NICKNAME_LEN = 24;
@@ -15,7 +15,7 @@ function byPriority<T extends { votes: number; createdAt: number }>(
   return b.votes - a.votes || a.createdAt - b.createdAt;
 }
 
-/** Audience: ask a question. Gated on a live talk owning the room. */
+/** Audience: ask a question. Gated on a live talk with Q&A enabled. */
 export const ask = mutation({
   args: {
     room: v.string(),
@@ -25,6 +25,8 @@ export const ask = mutation({
   handler: async (ctx, { room, text, nickname }) => {
     const talk = await liveTalkForRoom(ctx, room);
     if (!talk) throw new Error('No live talk.');
+    // Q&A disabled for this session: drop the write silently (not merely hidden).
+    if (!resolveConfig(talk).qa) return { ok: false as const };
 
     const cleaned = cleanText(text.trim().slice(0, MAX_TEXT_LEN));
     if (!cleaned.text) throw new Error('Type a question before submitting.');
@@ -42,13 +44,14 @@ export const ask = mutation({
       hidden: cleaned.flagged || (cleanedNickname?.flagged ?? false),
       createdAt: Date.now(),
     });
-    return { ok: true };
+    return { ok: true as const };
   },
 });
 
 /**
- * Public: the audience-visible queue (non-rejected), ordered by priority, plus a
- * `blocked` count of presenter-rejected questions (content withheld, count only).
+ * Public: the audience-visible queue (non-rejected), ordered by priority.
+ * Rejected (hidden) questions are omitted entirely — the audience is shown
+ * neither their content nor a count (the presenter tracks those on the console).
  */
 export const list = query({
   args: { room: v.string() },
@@ -57,10 +60,9 @@ export const list = query({
       .query('questions')
       .withIndex('by_room_created', (q) => q.eq('room', room))
       .collect();
-    const visible = rows.filter((r) => !r.hidden);
     return {
-      blocked: rows.length - visible.length,
-      questions: visible
+      questions: rows
+        .filter((r) => !r.hidden)
         .sort(byPriority)
         .map(({ _id, text, nickname, votes, answered }) => ({
           _id,

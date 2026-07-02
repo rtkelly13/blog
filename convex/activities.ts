@@ -3,7 +3,7 @@ import { internal } from './_generated/api';
 import { internalMutation, mutation, query } from './_generated/server';
 import { isAdminUser, requireAdmin } from './lib/admin';
 import { cleanSteps, cleanText } from './lib/profanity';
-import { liveTalkForRoom } from './talks';
+import { liveTalkForRoom, resolveConfig } from './talks';
 
 const MAX_STEPS = 12;
 const MAX_STEP_LEN = 140;
@@ -26,6 +26,11 @@ export const open = mutation({
   },
   handler: async (ctx, { room, prompt, options, revealDelayMs }) => {
     await requireAdmin(ctx);
+    // Only for a live talk with the activities feature enabled.
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk || !resolveConfig(talk).activities) {
+      throw new Error('The activities feature is disabled for this session.');
+    }
 
     // Close any activity already open in this room — one at a time.
     const existing = await ctx.db
@@ -128,8 +133,6 @@ export const active = query({
       hasAnswer: activity.options.length > 0,
       options: activity.revealed ? activity.options : [],
       submissionCount: submissions.length,
-      // Presenter-rejected entries are never sent to the audience — only a count.
-      blocked: submissions.length - visible.length,
       wall: visible.map(({ _id, nickname, steps }) => ({
         _id,
         nickname,
@@ -188,6 +191,8 @@ export const submit = mutation({
     // Gate on the live talk owning this room (mirrors reactions/questions).
     const talk = await liveTalkForRoom(ctx, activity.room);
     if (!talk) throw new Error('No live talk.');
+    // Activities disabled for this session: drop the write silently.
+    if (!resolveConfig(talk).activities) return { ok: false as const };
 
     const trimmed = args.steps
       .map((step) => step.trim())

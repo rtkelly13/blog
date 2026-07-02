@@ -133,9 +133,6 @@ function Activity({
     : (active?.options ?? []);
   const consoleSubs = isConsole ? (feedRes?.submissions ?? []) : [];
   const audienceWall = isConsole ? [] : (active?.wall ?? []);
-  const blocked = isConsole
-    ? consoleSubs.filter((s) => s.hidden).length
-    : (active?.blocked ?? 0);
   const submissionCount = isConsole ? consoleSubs.length : audienceWall.length;
   const showForm = !display && mode === 'attendee';
   // Whether this activity has a canonical answer at all. The console reads it
@@ -292,12 +289,6 @@ function Activity({
                 />
               ))}
         </div>
-        {/* Audience surfaces only ever see a count of what was blocked. */}
-        {!isConsole && blocked > 0 && (
-          <p className="pt-2 font-mono text-xs text-zinc-600">
-            🚫 {blocked} {blocked === 1 ? 'entry' : 'entries'} blocked
-          </p>
-        )}
       </div>
     </div>
   );
@@ -308,7 +299,7 @@ function Activity({
  * The presenter opens a prompt + hidden canonical options; the audience builds an
  * ordered step list and submits; the wall fills live and the canonical answer
  * reveals on a timer (or via the deck's next-key). Mode-aware:
- * - attendee → reveal-gated + submission form (blocked entries show as a count),
+ * - attendee → reveal-gated + submission form (rejected entries are omitted),
  * - presenter (projected) → reveal-gated, display-only,
  * - console (2nd screen) → answer + every submission incl. blocked shown always.
  */

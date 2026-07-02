@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { isAdminUser, requireAdmin } from './lib/admin';
 import { cleanText } from './lib/profanity';
-import { liveTalkForRoom } from './talks';
+import { liveTalkForRoom, resolveConfig } from './talks';
 
 const MAX_PROMPT_LEN = 160;
 const MAX_WORD_LEN = 32;
@@ -19,6 +19,11 @@ export const start = mutation({
   args: { room: v.string(), prompt: v.string() },
   handler: async (ctx, { room, prompt }) => {
     await requireAdmin(ctx);
+    // Only for a live talk with the poll feature enabled.
+    const talk = await liveTalkForRoom(ctx, room);
+    if (!talk || !resolveConfig(talk).poll) {
+      throw new Error('The poll feature is disabled for this session.');
+    }
     const existing = await ctx.db
       .query('polls')
       .withIndex('by_room_created', (q) => q.eq('room', room))
@@ -67,12 +72,12 @@ export const active = query({
 
     const visible = words.filter((w) => !w.hidden);
     const total = visible.reduce((sum, w) => sum + w.count, 0);
+    // Blocked words are withheld from the audience entirely — no count either
+    // (the presenter sees them on the console feed).
     return {
       _id: poll._id,
       prompt: poll.prompt,
       total,
-      // Blocked words are counted for the presenter's awareness but withheld.
-      blocked: words.length - visible.length,
       words: visible
         .map(({ word, count }) => ({ word, count }))
         .sort((a, b) => b.count - a.count),
@@ -118,6 +123,8 @@ export const submit = mutation({
     }
     const talk = await liveTalkForRoom(ctx, poll.room);
     if (!talk) throw new Error('No live talk.');
+    // Poll disabled for this session: drop the write silently.
+    if (!resolveConfig(talk).poll) return { ok: false as const };
 
     const normalized = normalizeWord(word);
     if (!normalized) throw new Error('Type a word before submitting.');

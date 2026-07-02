@@ -17,6 +17,16 @@ export const talkConfigValidator = v.object({
   chartThreshold: v.number(),
   /** Follow-the-presenter: audience decks mirror the presenter's slide. */
   follow: v.boolean(),
+  // The audience-participation features. Optional in the validator so talks
+  // started before these existed still validate; `resolveConfig` fills the
+  // gaps from DEFAULT_CONFIG. Enforced server-side — a disabled feature's
+  // writes are dropped, not merely hidden.
+  /** Live Q&A queue. */
+  qa: v.optional(v.boolean()),
+  /** Live poll / word cloud. */
+  poll: v.optional(v.boolean()),
+  /** Put-it-in-order activities. */
+  activities: v.optional(v.boolean()),
 });
 
 export type TalkConfig = {
@@ -25,15 +35,24 @@ export type TalkConfig = {
   closingChart: boolean;
   chartThreshold: number;
   follow: boolean;
+  qa: boolean;
+  poll: boolean;
+  activities: boolean;
 };
 
-/** Applied to any talk missing a config (e.g. started before configs existed). */
+/**
+ * Applied to any talk missing a config, and merged over a partial config so a
+ * talk stored before the newer toggles existed resolves to sensible defaults.
+ */
 export const DEFAULT_CONFIG: TalkConfig = {
   presence: true,
   reactions: true,
   closingChart: true,
   chartThreshold: 3,
   follow: true,
+  qa: true,
+  poll: true,
+  activities: true,
 };
 
 /**
@@ -51,6 +70,9 @@ export const TALK_PRESETS: { id: string; label: string; config: TalkConfig }[] =
         closingChart: true,
         chartThreshold: 3,
         follow: true,
+        qa: true,
+        poll: true,
+        activities: true,
       },
     },
     {
@@ -62,6 +84,9 @@ export const TALK_PRESETS: { id: string; label: string; config: TalkConfig }[] =
         closingChart: true,
         chartThreshold: 3,
         follow: true,
+        qa: true,
+        poll: true,
+        activities: true,
       },
     },
     {
@@ -73,6 +98,9 @@ export const TALK_PRESETS: { id: string; label: string; config: TalkConfig }[] =
         closingChart: false,
         chartThreshold: 3,
         follow: false,
+        qa: false,
+        poll: false,
+        activities: false,
       },
     },
   ];
