@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { ALLOWED_EMOJIS as EMOJIS } from '@/convex/reactionEmojis';
 import { isConvexConfigured } from '@/lib/convexClient';
 import { useReactions } from '@/lib/useReactions';
 
-// Mirrors the server allow-list (convex/reactions.ts). Kept here so the client
-// bundle doesn't import server code.
-const EMOJIS = ['👍', '❤️', '😂', '🎉', '👏', '🔥', '💩'];
 const MAX_BUBBLES_PER_BATCH = 12;
 
 interface Bubble {

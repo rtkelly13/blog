@@ -1,15 +1,12 @@
 import { v } from 'convex/values';
 import { internalMutation, mutation, query } from './_generated/server';
+import { ALLOWED_EMOJIS } from './reactionEmojis';
 import { liveTalkForRoom, resolveConfig } from './talks';
 
 // Reactions only need to live long enough to animate on screen.
 const FEED_MS = 6_000;
 
-// Allow-list of basic, non-offensive emojis. Anything else is rejected so the
-// stream can't be used to push arbitrary/unpleasant content.
-const ALLOWED = new Set(['👍', '❤️', '😂', '🎉', '👏', '🔥', '💩']);
-
-export const ALLOWED_EMOJIS = ['👍', '❤️', '😂', '🎉', '👏', '🔥', '💩'];
+const ALLOWED = new Set(ALLOWED_EMOJIS);
 
 /** Send a batch of one emoji (count = debounced taps). Validated against the allow-list. */
 export const send = mutation({
