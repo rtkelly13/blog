@@ -143,6 +143,11 @@ export default defineSchema({
     prompt: v.string(),
     status: v.union(v.literal('open'), v.literal('closed')),
     createdAt: v.number(),
+    /**
+     * Answers each attendee may submit (server-clamped 1–5). Absent on polls
+     * opened before the field existed — treated as the default of 1.
+     */
+    maxAnswersPerAttendee: v.optional(v.number()),
   }).index('by_room_created', ['room', 'createdAt']),
 
   pollWords: defineTable({
@@ -155,12 +160,28 @@ export default defineSchema({
     .index('by_poll', ['pollId'])
     .index('by_poll_word', ['pollId', 'word']),
 
-  // One row per (poll, machine): the audience answers a poll once, so a single
-  // browser can't inflate the word cloud by resubmitting.
+  // One row per (poll, machine) with a per-machine answer count, enforced
+  // server-side against the poll's `maxAnswersPerAttendee` (default 1) so a
+  // single browser can't inflate the word cloud by resubmitting.
   pollSubmitters: defineTable({
     pollId: v.id('polls'),
     machineId: v.string(),
+    /** Answers this machine has submitted (absent on legacy rows = 1). */
+    count: v.optional(v.number()),
   }).index('by_poll_machine', ['pollId', 'machineId']),
+
+  // Per-(machine, kind) fixed-window counters rate-limiting the audience-write
+  // endpoints (poll submit, question ask/upvote, activity submit, reaction
+  // send). One row per machine+kind, reused across windows (patched, never
+  // deleted), so the table stays bounded without a reaper. Machine-scoped, not
+  // room-scoped — deliberately outside the per-session clear-down. See
+  // convex/lib/rateLimit.ts.
+  rateLimits: defineTable({
+    machineId: v.string(),
+    kind: v.string(),
+    windowStart: v.number(),
+    count: v.number(),
+  }).index('by_machine_kind', ['machineId', 'kind']),
 
   // Generic "put the actions in order" activity (the toast exercise generalized).
   // The presenter opens an activity with a prompt and a set of pre-defined option

@@ -2,7 +2,9 @@ import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import { getMachineId } from '@/lib/machineId';
+import { useRateLimitNotice } from '@/lib/useRateLimitNotice';
 import { useDeckMode } from './DeckModeContext';
+import RateLimitNotice from './RateLimitNotice';
 import { ResolvedRoom } from './ResolvedRoom';
 
 const CLOUD_COLORS = [
@@ -39,6 +41,10 @@ function Poll({
   const [word, setWord] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
+  // Answers this browser has left on a multi-answer poll (null until the first
+  // submit confirms; the server is the source of truth via `remaining`).
+  const [answersLeft, setAnswersLeft] = useState<number | null>(null);
+  const { secondsLeft, notify } = useRateLimitNotice();
 
   // No open poll yet. An admin on a slide that declares a prompt can start it in
   // one click (the poll question lives with the slide).
@@ -72,16 +78,26 @@ function Poll({
     if (!trimmed || sending) return;
     setSending(true);
     try {
-      await submit({
+      const res = await submit({
         pollId: poll._id,
         word: trimmed,
         machineId: getMachineId(),
       });
-      setWord('');
-      setDone(true);
+      // `=== true` so the union narrows under this repo's `strict: false`.
+      if (res.ok === true) {
+        setWord('');
+        setAnswersLeft(res.remaining);
+        if (res.remaining <= 0) setDone(true);
+      } else if (res.reason === 'rate_limited') {
+        // Refused, not dropped: keep the typed word and show when to retry.
+        notify(res.retryAfterMs);
+      } else {
+        // limit_reached / disabled: stop offering the form.
+        setDone(true);
+      }
     } catch {
-      // One answer per person: an "already answered" (or transient) failure
-      // still lands us in the submitted state so we stop offering the form.
+      // A transient/closed-poll failure still lands us in the submitted state
+      // so we stop offering the form.
       setDone(true);
     } finally {
       setSending(false);
@@ -100,30 +116,45 @@ function Poll({
       {!info && <div className="mb-3" />}
 
       {/* On the projected deck (display) we show the cloud only — no dead input
-          box on a big screen. Students still submit from /live. One answer per
-          person, so once submitted we confirm instead of re-offering the form. */}
+          box on a big screen. Students still submit from /live. Answers per
+          person are capped server-side (default 1, presenter-set up to 5);
+          once they're used up we confirm instead of re-offering the form. */}
       {showForm &&
         (done ? (
           <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
-            ✓ Your answer's in — watch the cloud below.
+            {poll.maxAnswers > 1
+              ? '✓ Your answers are in — watch the cloud below.'
+              : "✓ Your answer's in — watch the cloud below."}
           </p>
         ) : (
-          <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row">
-            <input
-              value={word}
-              onChange={(e) => setWord(e.target.value)}
-              maxLength={32}
-              placeholder="One word…"
-              className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-pink focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={sending || !word.trim()}
-              className="border-2 border-white bg-brutalist-pink px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
-            >
-              Send
-            </button>
-          </form>
+          <div className="space-y-2">
+            <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row">
+              <input
+                value={word}
+                onChange={(e) => setWord(e.target.value)}
+                maxLength={32}
+                placeholder="One word…"
+                className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-pink focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={sending || !word.trim()}
+                className="border-2 border-white bg-brutalist-pink px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
+              >
+                Send
+              </button>
+            </form>
+            {poll.maxAnswers > 1 && (
+              <p className="font-mono text-xs text-zinc-500">
+                {answersLeft === null
+                  ? `Up to ${poll.maxAnswers} answers per person.`
+                  : `✓ Sent — ${answersLeft} answer${
+                      answersLeft === 1 ? '' : 's'
+                    } left.`}
+              </p>
+            )}
+            <RateLimitNotice secondsLeft={secondsLeft} />
+          </div>
         ))}
 
       <div className="mt-5 flex min-h-[4rem] flex-wrap items-center gap-x-4 gap-y-1">

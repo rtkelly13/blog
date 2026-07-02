@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { isAdminUser, requireAdmin } from './lib/admin';
 import { cleanText } from './lib/profanity';
+import { enforceRateLimit } from './lib/rateLimit';
 import { liveTalkForRoom, resolveConfig } from './talks';
 
 const MAX_TEXT_LEN = 280;
@@ -15,21 +16,30 @@ function byPriority<T extends { votes: number; createdAt: number }>(
   return b.votes - a.votes || a.createdAt - b.createdAt;
 }
 
-/** Audience: ask a question. Gated on a live talk with Q&A enabled. */
+/**
+ * Audience: ask a question. Gated on a live talk with Q&A enabled and
+ * rate-limited per machine (structured refusal, so the UI can say when to retry).
+ */
 export const ask = mutation({
   args: {
     room: v.string(),
     text: v.string(),
     nickname: v.optional(v.string()),
+    machineId: v.string(),
   },
-  handler: async (ctx, { room, text, nickname }) => {
+  handler: async (ctx, { room, text, nickname, machineId }) => {
     const talk = await liveTalkForRoom(ctx, room);
     if (!talk) throw new Error('No live talk.');
-    // Q&A disabled for this session: drop the write silently (not merely hidden).
-    if (!resolveConfig(talk).qa) return { ok: false as const };
+    // Q&A disabled for this session: drop the write (not merely hidden).
+    if (!resolveConfig(talk).qa) {
+      return { ok: false as const, reason: 'disabled' as const };
+    }
 
     const cleaned = cleanText(text.trim().slice(0, MAX_TEXT_LEN));
     if (!cleaned.text) throw new Error('Type a question before submitting.');
+
+    const limited = await enforceRateLimit(ctx, machineId, 'question:ask');
+    if (limited) return limited;
 
     const rawNickname = nickname?.trim().slice(0, MAX_NICKNAME_LEN);
     const cleanedNickname = rawNickname ? cleanText(rawNickname) : undefined;
@@ -81,14 +91,18 @@ export const list = query({
  * single browser can upvote a given question at most once. Returns whether the
  * vote actually counted so the client only disables the button on a real success
  * (a no-op — hidden question, no live talk, or already voted — leaves it live).
+ * Rate-limited per machine with a structured refusal so the UI can say when to
+ * retry.
  */
 export const upvote = mutation({
   args: { id: v.id('questions'), machineId: v.string() },
   handler: async (ctx, { id, machineId }) => {
     const q = await ctx.db.get(id);
-    if (!q || q.hidden) return false;
+    if (!q || q.hidden) {
+      return { ok: false as const, reason: 'not_counted' as const };
+    }
     const talk = await liveTalkForRoom(ctx, q.room);
-    if (!talk) return false;
+    if (!talk) return { ok: false as const, reason: 'not_counted' as const };
 
     const already = await ctx.db
       .query('questionVotes')
@@ -96,11 +110,14 @@ export const upvote = mutation({
         row.eq('questionId', id).eq('machineId', machineId),
       )
       .unique();
-    if (already) return false;
+    if (already) return { ok: false as const, reason: 'not_counted' as const };
+
+    const limited = await enforceRateLimit(ctx, machineId, 'question:upvote');
+    if (limited) return limited;
 
     await ctx.db.insert('questionVotes', { questionId: id, machineId });
     await ctx.db.patch(id, { votes: q.votes + 1 });
-    return true;
+    return { ok: true as const };
   },
 });
 

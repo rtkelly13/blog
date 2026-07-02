@@ -9,5 +9,6 @@ export { default as EmojiTop5 } from './EmojiTop5';
 export { default as LivePoll } from './LivePoll';
 export { default as OrderedActions } from './OrderedActions';
 export { default as QuestionQueue } from './QuestionQueue';
+export { default as RateLimitNotice } from './RateLimitNotice';
 export { default as TalkCard } from './TalkCard';
 export { default as TalkTimer } from './TalkTimer';

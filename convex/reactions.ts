@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { internalMutation, mutation, query } from './_generated/server';
+import { enforceRateLimit } from './lib/rateLimit';
 import { liveTalkForRoom, resolveConfig } from './talks';
 
 // Reactions only need to live long enough to animate on screen.
@@ -11,14 +12,33 @@ const ALLOWED = new Set(['👍', '❤️', '😂', '🎉', '👏', '🔥']);
 
 export const ALLOWED_EMOJIS = ['👍', '❤️', '😂', '🎉', '👏', '🔥'];
 
-/** Send a batch of one emoji (count = debounced taps). Validated against the allow-list. */
+/**
+ * Send a batch of one emoji (count = debounced taps, clamped 1–20 — that's
+ * input clamping; the real flood control is the per-machine rate limit on
+ * batches, refused with a structured `rate_limited` result the UI surfaces).
+ * Validated against the allow-list.
+ */
 export const send = mutation({
-  args: { room: v.string(), emoji: v.string(), count: v.number() },
-  handler: async (ctx, { room, emoji, count }) => {
-    if (!ALLOWED.has(emoji)) return; // silently drop anything off the allow-list
+  args: {
+    room: v.string(),
+    emoji: v.string(),
+    count: v.number(),
+    machineId: v.string(),
+  },
+  handler: async (ctx, { room, emoji, count, machineId }) => {
+    // Drop anything off the allow-list (structured, but nothing to retry).
+    if (!ALLOWED.has(emoji)) {
+      return { ok: false as const, reason: 'dropped' as const };
+    }
     // Server-side gate: reactions only land for a live talk with reactions on.
     const talk = await liveTalkForRoom(ctx, room);
-    if (!talk || !resolveConfig(talk).reactions) return;
+    if (!talk || !resolveConfig(talk).reactions) {
+      return { ok: false as const, reason: 'dropped' as const };
+    }
+
+    const limited = await enforceRateLimit(ctx, machineId, 'reaction:send');
+    if (limited) return limited;
+
     const n = Math.min(Math.max(Math.floor(count), 1), 20);
     await ctx.db.insert('reactions', { room, emoji, count: n, at: Date.now() });
 
@@ -32,6 +52,7 @@ export const send = mutation({
     } else {
       await ctx.db.insert('reactionTotals', { room, emoji, total: n });
     }
+    return { ok: true as const };
   },
 });
 

@@ -34,7 +34,8 @@ content; a **talk session** is one live run of it. They share only the `slug`.
 | `questionVotes`       | One row per (question, machineId) — dedups upvotes                  |
 | `polls`               | Word-cloud poll prompts (`open`/`closed`)                           |
 | `pollWords`           | Per-(poll, word) tally; `hidden` blocks a word                      |
-| `pollSubmitters`      | One row per (poll, machineId) — dedups answers                      |
+| `pollSubmitters`      | One row per (poll, machineId) with answer `count` — caps answers per attendee |
+| `rateLimits`          | Per-(machineId, kind) fixed-window counters for audience writes    |
 | `activities`          | "Put the actions in order" activity (`options`, `revealAt`, `revealed`) |
 | `activitySubmissions` | Audience ordered-step submissions (`hidden` when flagged)          |
 | `...authTables`       | Convex Auth tables; `users` overridden to carry `githubLogin`       |
@@ -56,6 +57,7 @@ content; a **talk session** is one live run of it. They share only the `slug`.
 | `crons.ts`        | Scheduled TTL reapers (presence, reactions, presenters), every 1 min |
 | `lib/admin.ts`    | `isAdminUser` / `requireAdmin` — GitHub-login allowlist gate      |
 | `lib/profanity.ts`| `cleanText` / `cleanSteps` — mask + flag profanity (`obscenity`) |
+| `lib/rateLimit.ts`| Per-machine fixed-window rate limits for audience writes; structured `rate_limited` refusals |
 | `_generated/`     | Convex codegen (derived from schema + functions — do not hand-edit) |
 
 ## WHERE TO LOOK

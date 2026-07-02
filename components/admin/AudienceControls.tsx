@@ -57,13 +57,19 @@ function PollControls({ room }: { room: string }) {
   const hideWord = useMutation(api.polls.hideWord);
   const { run, error } = useRunAction();
   const [prompt, setPrompt] = useState('');
+  // Answers each attendee may submit (server-clamped 1–5; default 1).
+  const [maxAnswers, setMaxAnswers] = useState(1);
 
   return (
     <Section title="Live poll / word cloud" accent="text-brutalist-pink">
       {poll ? (
         <div className="space-y-3">
           <p className="font-mono text-sm text-white">
-            Open: <b>{poll.prompt}</b>
+            Open: <b>{poll.prompt}</b>{' '}
+            <span className="text-zinc-500">
+              ({poll.maxAnswers} answer{poll.maxAnswers === 1 ? '' : 's'} per
+              person)
+            </span>
           </p>
           <div className="max-h-48 space-y-1 overflow-y-auto">
             {feed?.authorized &&
@@ -107,12 +113,19 @@ function PollControls({ room }: { room: string }) {
         </div>
       ) : (
         <form
-          className="flex flex-col gap-2 sm:flex-row"
+          className="space-y-2"
           onSubmit={(e) => {
             e.preventDefault();
             if (!prompt.trim()) return;
-            run(() => start({ room, prompt: prompt.trim() }));
+            run(() =>
+              start({
+                room,
+                prompt: prompt.trim(),
+                maxAnswersPerAttendee: maxAnswers,
+              }),
+            );
             setPrompt('');
+            setMaxAnswers(1);
           }}
         >
           <input
@@ -121,13 +134,32 @@ function PollControls({ room }: { room: string }) {
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Poll prompt, e.g. One word: how do you feel about coding?"
           />
-          <button
-            type="submit"
-            disabled={!prompt.trim()}
-            className={`${btnCls} bg-brutalist-pink text-black`}
-          >
-            Start
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-xs uppercase text-zinc-500">
+              Answers per person
+            </span>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setMaxAnswers(n)}
+                className={`border-2 px-2 py-1 font-mono text-xs ${
+                  maxAnswers === n
+                    ? 'border-brutalist-pink bg-brutalist-pink text-black'
+                    : 'border-white text-white'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              type="submit"
+              disabled={!prompt.trim()}
+              className={`${btnCls} ml-auto bg-brutalist-pink text-black`}
+            >
+              Start
+            </button>
+          </div>
           <ErrorLine error={error} />
         </form>
       )}
