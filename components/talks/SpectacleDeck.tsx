@@ -141,9 +141,11 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   const reactionsOn = liveHere && current?.config.reactions === true;
   const room = current?.room;
 
-  // Both presenter and console DRIVE the deck (their navigation broadcasts);
-  // attendees follow. Same admin identity, so both heartbeat a presenter session
-  // and two connected at once surfaces a clash.
+  // Both presenter and console DRIVE the deck (their navigation broadcasts),
+  // and via DeckDriver's co-presenter follow they also track each other, so
+  // advancing either surface moves the other. Attendees follow. Same admin
+  // identity, so both heartbeat a presenter session and two connected at once
+  // surfaces a clash.
   const broadcasting =
     (mode === 'presenter' || mode === 'console') && followOn && isAdmin;
   const followEnabled = followOn && !broadcasting;
@@ -237,6 +239,7 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
         <DeckDriver
           room={room}
           initialSlide={current?.currentSlide ?? 0}
+          currentSlide={current?.currentSlide}
           setSlide={setSlide}
           onIndex={setDeckIndex}
           navRef={navRef}

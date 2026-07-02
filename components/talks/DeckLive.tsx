@@ -13,10 +13,19 @@ type NavRef = { current: { next: () => void; prev: () => void } | null };
  * room — the deck itself is the source of truth, so it never "detaches". On mount
  * it aligns to the room's current slide (so opening a driver mid-talk doesn't
  * reset everyone to the first slide), and only broadcasts once aligned.
+ *
+ * The presenter can run TWO driving surfaces at once (projected deck +
+ * console). Each also follows `currentSlide`, so a move on either surface
+ * pulls the other along — like attendee follow, but without detach: both
+ * surfaces stay live drivers. Two guards prevent echo loops: room changes
+ * are ignored while our own broadcast is in flight (that change is our own
+ * echo), and a position we moved to *because* the room changed is never
+ * re-broadcast.
  */
 export function DeckDriver({
   room,
   initialSlide,
+  currentSlide,
   setSlide,
   onIndex,
   navRef,
@@ -25,6 +34,8 @@ export function DeckDriver({
 }: {
   room?: string;
   initialSlide: number;
+  /** Live room slide — lets co-presenter surfaces (deck + console) follow each other. */
+  currentSlide?: number;
   setSlide: SetSlide;
   onIndex?: (index: number) => void;
   navRef?: NavRef;
@@ -38,6 +49,13 @@ export function DeckDriver({
   // component only mounts after the talk has loaded), then we align to it.
   const targetRef = useRef(initialSlide);
   const [aligned, setAligned] = useState(false);
+  // Broadcasts from THIS surface still in flight — while any are pending, a
+  // room-slide change is our own write echoing back, not another surface.
+  const pendingRef = useRef(0);
+  // Slide we jumped to because the room moved (other surface drove there) —
+  // consumed by the broadcast effect so we don't re-publish what we received.
+  const followedRef = useRef<number | null>(null);
+  const prevRemoteRef = useRef(currentSlide);
 
   // Expose deck navigation to out-of-deck controls (the console Prev/Next).
   if (navRef) navRef.current = { next: advanceSlide, prev: regressSlide };
@@ -59,14 +77,37 @@ export function DeckDriver({
     onIndex?.(index);
   }, [index, onIndex]);
 
+  // Co-presenter follow: the room's slide changed and it isn't an echo of our
+  // own broadcast — the presenter's OTHER surface moved, so follow it.
+  useEffect(() => {
+    const prev = prevRemoteRef.current;
+    prevRemoteRef.current = currentSlide;
+    if (!aligned || currentSlide == null || currentSlide === prev) return;
+    if (pendingRef.current > 0) return; // our own write echoing back
+    if (currentSlide === index) return;
+    followedRef.current = currentSlide;
+    skipTo({ slideIndex: currentSlide, stepIndex: 0 });
+  }, [aligned, currentSlide, index, skipTo]);
+
   // Broadcast position to the room (only after alignment).
   useEffect(() => {
     if (!aligned || !room) return;
+    if (followedRef.current === index) {
+      // We're on this slide because the other surface drove here — don't
+      // publish it back (that echo could drag a fast-moving driver backwards).
+      followedRef.current = null;
+      return;
+    }
+    followedRef.current = null;
+    pendingRef.current += 1;
     setSlide({ room, index })
       .then(() => onPublished?.(index))
       .catch((e) =>
         onError?.(e instanceof Error ? e.message : 'broadcast failed'),
-      );
+      )
+      .finally(() => {
+        pendingRef.current -= 1;
+      });
   }, [aligned, index, room, setSlide, onPublished, onError]);
 
   return null;
