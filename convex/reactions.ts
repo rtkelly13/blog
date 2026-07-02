@@ -7,9 +7,9 @@ const FEED_MS = 6_000;
 
 // Allow-list of basic, non-offensive emojis. Anything else is rejected so the
 // stream can't be used to push arbitrary/unpleasant content.
-const ALLOWED = new Set(['👍', '❤️', '😂', '🎉', '👏', '🔥']);
+const ALLOWED = new Set(['👍', '❤️', '😂', '🎉', '👏', '🔥', '💩']);
 
-export const ALLOWED_EMOJIS = ['👍', '❤️', '😂', '🎉', '👏', '🔥'];
+export const ALLOWED_EMOJIS = ['👍', '❤️', '😂', '🎉', '👏', '🔥', '💩'];
 
 /** Send a batch of one emoji (count = debounced taps). Validated against the allow-list. */
 export const send = mutation({
