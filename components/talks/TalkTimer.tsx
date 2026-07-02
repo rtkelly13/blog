@@ -1,9 +1,40 @@
 import { useStopwatch } from 'react-timer-hook';
+import { pacingStatus, type SlideWindow } from '@/lib/slideTiming';
 
 function fmt(totalSeconds: number): string {
   const s = Math.abs(Math.floor(totalSeconds));
   const m = Math.floor(s / 60);
   return `${m}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/** "on track / ~N min ahead / ~N min behind" vs the current slide's window. */
+function SlidePace({
+  elapsedSeconds,
+  window,
+}: {
+  elapsedSeconds: number;
+  window: SlideWindow;
+}) {
+  const pace = pacingStatus(elapsedSeconds, window);
+  const color =
+    pace.kind === 'behind'
+      ? '#f472b6'
+      : pace.kind === 'ahead'
+        ? '#facc15'
+        : '#22d3ee';
+  const label =
+    pace.kind === 'on-track' ? 'on track' : `~${pace.minutes} min ${pace.kind}`;
+
+  return (
+    <div className="mt-2 flex items-baseline justify-between gap-2 border-t-2 border-zinc-700 pt-2 text-xs uppercase">
+      <span className="text-zinc-400">
+        slide {window.startMin}–{window.endMin}m
+      </span>
+      <span className="font-bold" style={{ color }}>
+        {label}
+      </span>
+    </div>
+  );
 }
 
 /**
@@ -12,13 +43,19 @@ function fmt(totalSeconds: number): string {
  * talk has a target duration, shows time remaining + a progress bar that turns
  * amber near the end and pink when overtime. Seeded via react-timer-hook's
  * useStopwatch offset; re-mount (keyed on startedAt) resets it for a new talk.
+ *
+ * When the current slide has a `[⏱ a–b …]` window in its presenter notes,
+ * pass it as `slideWindow` to also show a per-slide "on track / ahead /
+ * behind" line; slides without a window show nothing extra.
  */
 export default function TalkTimer({
   startedAt,
   durationMins,
+  slideWindow,
 }: {
   startedAt: number;
   durationMins?: number;
+  slideWindow?: SlideWindow | null;
 }) {
   // Seed the stopwatch with however long the talk has already been running.
   const elapsedNow = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
@@ -57,6 +94,9 @@ export default function TalkTimer({
             style={{ width: `${pct}%`, background: color }}
           />
         </div>
+      )}
+      {slideWindow && (
+        <SlidePace elapsedSeconds={totalSeconds} window={slideWindow} />
       )}
     </div>
   );

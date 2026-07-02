@@ -3,10 +3,16 @@ import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
 import { api } from '@/convex/_generated/api';
+import type { SlideWindow } from '@/lib/slideTiming';
 import SlideBody from './SlideBody';
 import TalkTimer from './TalkTimer';
 
-type Slide = { code: string; notes: string | null };
+type Slide = {
+  code: string;
+  notes: string | null;
+  /** `[⏱ a–b …]` window from the notes — drives the pacing indicator. */
+  window?: SlideWindow | null;
+};
 
 // Right-hand deck sidebar. The floating reaction bubbles (from <Reactions>) rise
 // in the viewport's right 20vw, i.e. within/near this panel.
@@ -101,12 +107,15 @@ export function ConsoleSidebar({
         Console
       </p>
 
-      {/* Pacing timer (keyed on startedAt so a new talk resets it) */}
+      {/* Pacing timer (keyed on startedAt so a new talk resets it) — with the
+          current slide's ⏱ window (when its notes declare one) for the
+          on-track / ahead / behind indicator. */}
       {startedAt != null && (
         <TalkTimer
           key={startedAt}
           startedAt={startedAt}
           durationMins={durationMins}
+          slideWindow={slides[idx]?.window ?? null}
         />
       )}
 
