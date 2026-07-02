@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useIsAdmin } from '@/lib/useIsAdmin';
 
 /**
@@ -9,7 +10,16 @@ import { useIsAdmin } from '@/lib/useIsAdmin';
  */
 export default function AdminIndicator() {
   const isAdmin = useIsAdmin();
-  if (!isAdmin) return null;
+  const router = useRouter();
+
+  // Never overlay the badge on a projected deck — attendee/presenter views are
+  // shown to the room, so the audience would see it. The presenter console
+  // (mode=console) is a private 2nd screen, so the badge stays there. The deck
+  // defaults to attendee when no mode is set, so treat "not console" as hidden.
+  const onDeck = router.pathname === '/talks/[slug]/present';
+  const hiddenOnProjectedDeck = onDeck && router.query.mode !== 'console';
+
+  if (!isAdmin || hiddenOnProjectedDeck) return null;
   return (
     <Link
       href="/admin"
