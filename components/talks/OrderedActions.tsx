@@ -8,7 +8,9 @@ import RateLimitNotice from './RateLimitNotice';
 import { ResolvedRoom } from './ResolvedRoom';
 
 /** Live-updating seconds remaining until `revealAt` (null once elapsed/absent). */
-function useCountdown(revealAt: number | null | undefined): number | null {
+export function useCountdown(
+  revealAt: number | null | undefined,
+): number | null {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!revealAt) return;
@@ -86,6 +88,8 @@ function Activity({
   const feedRes = useQuery(api.activities.feed, isConsole ? { room } : 'skip');
   const submit = useMutation(api.activities.submit);
   const openActivity = useMutation(api.activities.open);
+  const revealNow = useMutation(api.activities.revealNow);
+  const cancelReveal = useMutation(api.activities.cancelReveal);
   const isAdmin = useQuery(api.talks.isAdmin) === true;
 
   const [steps, setSteps] = useState<string[]>(['']);
@@ -272,6 +276,31 @@ function Activity({
               </li>
             ))}
           </ol>
+          {/* The reveal moment belongs to the presenter: reveal-now is always at
+              hand on the console, and an opt-in auto-reveal timer can be
+              cancelled here while it's still pending. */}
+          {isConsole && !activity.revealed && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => revealNow({ id: activity._id }).catch(() => {})}
+                className="border-2 border-white bg-brutalist-cyan px-4 py-2 font-mono text-xs font-bold uppercase text-black shadow-hard-md"
+              >
+                Reveal to room now
+              </button>
+              {countdown != null && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    cancelReveal({ id: activity._id }).catch(() => {})
+                  }
+                  className="border-2 border-white bg-black px-4 py-2 font-mono text-xs font-bold uppercase text-white"
+                >
+                  ✕ Cancel timer
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
       {!isConsole && hasAnswer && !activity.revealed && countdown != null && (
@@ -313,7 +342,9 @@ function Activity({
  * Embedded "put the actions in order" activity (the toast exercise generalized).
  * The presenter opens a prompt + hidden canonical options; the audience builds an
  * ordered step list and submits; the wall fills live and the canonical answer
- * reveals on a timer (or via the deck's next-key). Mode-aware:
+ * reveals when the presenter decides (the deck's next-key beat, the console's
+ * reveal-now, or /admin) — an auto-reveal timer only runs if the slide opts in
+ * via `revealAfterMs`. Mode-aware:
  * - attendee → reveal-gated + submission form (rejected entries are omitted),
  * - presenter (projected) → reveal-gated, display-only,
  * - console (2nd screen) → answer + every submission incl. blocked shown always.
@@ -334,6 +365,11 @@ export default function OrderedActions({
   /** Slide-declared defaults — an admin can open the activity in one click. */
   prompt?: string;
   options?: string[];
+  /**
+   * Opt-in auto-reveal fallback. Omit (the default) and the answer stays hidden
+   * until the presenter reveals it; set it only when a slide genuinely wants a
+   * self-firing timer.
+   */
   revealAfterMs?: number;
 }) {
   return (

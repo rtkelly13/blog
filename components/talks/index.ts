@@ -4,6 +4,7 @@
 // SpectacleDeck is intentionally NOT re-exported here: present.tsx imports it via
 // next/dynamic for code-splitting, and routing it through this barrel would pull
 // Spectacle (a heavy dependency) into every consumer of the module.
+export { default as BreakTimer } from './BreakTimer';
 export { default as EmojiTop5 } from './EmojiTop5';
 export { default as LivePoll } from './LivePoll';
 export { default as OrderedActions } from './OrderedActions';

@@ -11,7 +11,13 @@ import NoteBlock from './NoteBlock';
 import Pre from './Pre';
 import TalkStatsChart from './TalkStatsChart';
 import TOCInline from './TOCInline';
-import { EmojiTop5, LivePoll, OrderedActions, QuestionQueue } from './talks';
+import {
+  BreakTimer,
+  EmojiTop5,
+  LivePoll,
+  OrderedActions,
+  QuestionQueue,
+} from './talks';
 
 const Wrapper: React.ComponentType<{ layout: string }> = ({
   layout,
@@ -26,6 +32,7 @@ export const MDXComponents: MDXComponentsType = {
   TOCInline,
   Diagram,
   NoteBlock,
+  BreakTimer,
   EmojiTop5,
   LivePoll,
   OrderedActions,
