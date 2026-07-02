@@ -176,7 +176,7 @@ export function ConsoleSidebar({
           {presenters === undefined
             ? 'presenter link: …'
             : clash
-              ? `⚠ ${presenters} presenters connected — clash`
+              ? `⚠ ${presenters} presenters connected — last change wins`
               : noPresenter
                 ? 'no presenter broadcasting'
                 : 'presenter connected'}
