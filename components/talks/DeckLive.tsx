@@ -78,6 +78,9 @@ export function DeckDriver({
  * own they detach to free-roam (a "resume" button re-attaches). We distinguish
  * a presenter move (currentSlide changed → follow it) from a manual move
  * (activeView changed on its own → detach) by tracking the previous values.
+ * On join it aligns to the room's slide, retrying until it lands — the same
+ * dropped-early-skipTo race DeckDriver works around; without the retry a
+ * mid-talk joiner sits on slide 1 until the presenter next moves.
  */
 export function Follower({
   enabled,
@@ -89,11 +92,35 @@ export function Follower({
   const { activeView, skipTo } = useContext(DeckContext);
   const active = activeView.slideIndex;
   const [detached, setDetached] = useState(false);
+  const [aligned, setAligned] = useState(false);
   const prevCurrent = useRef(currentSlide);
   const prevActive = useRef(active);
 
+  // Join alignment: drive to the room's slide until Spectacle actually lands
+  // there (an early skipTo can be silently dropped before nav is ready).
+  useEffect(() => {
+    if (aligned || !enabled || currentSlide == null || detached) return;
+    if (active === currentSlide) {
+      setAligned(true);
+      return;
+    }
+    skipTo({ slideIndex: currentSlide, stepIndex: 0 });
+    const retry = setInterval(
+      () => skipTo({ slideIndex: currentSlide, stepIndex: 0 }),
+      250,
+    );
+    return () => clearInterval(retry);
+  }, [aligned, enabled, currentSlide, active, detached, skipTo]);
+
   useEffect(() => {
     if (!enabled || currentSlide == null) {
+      prevCurrent.current = currentSlide;
+      prevActive.current = active;
+      return;
+    }
+    if (!aligned) {
+      // Pre-alignment navigation belongs to the join effect above — don't let
+      // its skipTos read as manual moves and detach the viewer.
       prevCurrent.current = currentSlide;
       prevActive.current = active;
       return;
@@ -117,7 +144,7 @@ export function Follower({
 
     prevCurrent.current = currentSlide;
     prevActive.current = active;
-  }, [enabled, currentSlide, active, detached, skipTo]);
+  }, [enabled, currentSlide, active, detached, aligned, skipTo]);
 
   if (!enabled) return null;
 
