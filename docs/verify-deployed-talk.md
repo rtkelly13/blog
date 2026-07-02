@@ -101,6 +101,44 @@ If `/admin` shows only the bare `[ ADMIN ]` heading: wait ~5s (Convex auth
 hydrates client-side); a persistent "Connecting…" means wedged tabs (see gotchas),
 not necessarily a prod outage — clean up tabs before panicking.
 
+### Clicking buttons: use `eval` JS clicks, not coordinate clicks
+
+`agent-browser click` / `find … click` **report success but do nothing** on this
+site's React buttons in several cases, with no error anywhere:
+
+- **On the deck**, Spectacle keeps *every* slide mounted in the DOM. A coordinate
+  click at a HUD button's position can hit another slide's element instead —
+  `document.elementFromPoint` at the "Live — resume" button's centre returned a
+  different slide's `<h1>`. HUD buttons also sit at `opacity: 0;
+  pointer-events: none` in their idle state, so they're invisible to hit-testing.
+- **On `/admin`**, `find role button click "START TALK"` and ref clicks (`@e22`)
+  returned ✓ but never fired the mutation (a human click on the same button
+  worked immediately).
+
+The reliable pattern is a **direct JS click** — it bypasses hit-testing:
+
+```bash
+agent-browser --session <s> eval "(()=>{const b=[...document.querySelectorAll('button')].find(x=>/end talk/i.test(x.textContent)); if(!b) return 'not found'; b.click(); return 'clicked';})()"
+```
+
+(Wrap in an IIFE — bare `const` in `eval` collides on re-run. `fill` + `click`
+on plain form inputs, e.g. the /live poll/question boxes, work fine.)
+
+Diagnostic when a click "succeeds" but nothing happens:
+
+```bash
+agent-browser --session <s> eval "(()=>{const b=[...document.querySelectorAll('button')].find(x=>/TEXT/i.test(x.textContent)); const r=b.getBoundingClientRect(); const el=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2); return JSON.stringify({hit:el.tagName+':'+(el.textContent||'').slice(0,20), isButton:el===b||b.contains(el)});})()"
+```
+
+### Sharing a headed window with the user
+
+If the user signs in / tests in your headed browser window, **the active tab
+moves under you** — presses and snapshots silently target whatever tab they
+focused (this masqueraded as "follow is broken": an ArrowRight went to a
+`?mode=attendee` tab, which broadcasts nothing). Before every deck action:
+`tab list`, then `tab <n>` the exact tab you mean. Better: keep the headed
+window for the user's sign-in only, and do your driving in headless sessions.
+
 ## 4. Live realtime drill (REQUIRES USER GO-AHEAD — changes prod state)
 
 Flipping a talk live is visible to anyone on `/live`. Ask the user first; the
@@ -146,3 +184,28 @@ those bugs are live on prod**).
 - ✅ `/live` anonymous — correct idle state
 - ⏸ Live drill (section 4) — **not run**: needs user authorization to flip prod
   live state
+
+### Run: 2026-07-02 (second pass, after PR #30 deployed) — live drill
+
+Deployed: `main` @ PR #30 (follow default on). CI + Deploy Convex green.
+
+- ✅ `/admin` Interactive preset shows **Follow-the-presenter pre-ticked** (#30 live)
+- ✅ START TALK (user-clicked) → `/live` flips to LIVE NOW, presence `👥 2 PEOPLE HERE`
+- ✅ Emoji reaction from anonymous attendee registers
+- ✅ **Follow-the-presenter**: presenter ArrowRight 3→4 mirrored on the attendee
+  deck within ~2s (once the *actual* `?mode=presenter` tab was driven — see
+  active-tab gotcha). Broadcasting is **automatic** for an admin in
+  presenter/console mode with follow on; the `/admin` copy about a manual
+  "Broadcast (top-right)" toggle is stale.
+- ✅ Poll round-trip: slide-declared prompt opened; attendee word `excited`
+  appears in the cloud
+- ✅ Q&A: attendee question submitted and queued (self-upvote doesn't increment —
+  appears intentional)
+- ✅ END TALK, then Sessions **CLEAR DOWN** wiped the drill session to zeroes
+- 🐛 **Bug found — mid-talk join misalignment**: an attendee who opens the deck
+  while a talk is live stays on slide 1 until the presenter *next* changes
+  slide. `Follower`'s initial reconcile `skipTo` is dropped by Spectacle before
+  nav is ready and never retried — `DeckDriver` has a retry loop for exactly
+  this (`components/talks/DeckLive.tsx`); `Follower` needs the same. Not
+  covered by PR #26. Workaround live: presenter taps forward/back once after
+  people join.
