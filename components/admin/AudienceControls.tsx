@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
+import { useCountdown } from '@/components/talks/OrderedActions';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useRunAction } from './useRunAction';
@@ -10,7 +11,10 @@ function ErrorLine({ error }: { error: string | null }) {
   return <p className="font-mono text-xs text-brutalist-pink">{error}</p>;
 }
 
-const REVEAL_PRESETS = [
+// The presenter owns the reveal by default ("manual" arms no timer); the timed
+// presets are an opt-in fallback that can still be cancelled while pending.
+const REVEAL_PRESETS: { label: string; ms: number | null }[] = [
+  { label: 'Manual', ms: null },
   { label: '30s', ms: 30_000 },
   { label: '1 min', ms: 60_000 },
   { label: '2 min', ms: 120_000 },
@@ -136,14 +140,19 @@ function ActivityControls({ room }: { room: string }) {
   const open = useMutation(api.activities.open);
   const close = useMutation(api.activities.close);
   const revealNow = useMutation(api.activities.revealNow);
+  const cancelReveal = useMutation(api.activities.cancelReveal);
   const setHidden = useMutation(api.activities.setHidden);
   const { run, error } = useRunAction();
 
   const [prompt, setPrompt] = useState('');
   const [options, setOptions] = useState('');
-  const [delayMs, setDelayMs] = useState(120_000);
+  // null = manual (the default): no auto-reveal timer is armed on open.
+  const [delayMs, setDelayMs] = useState<number | null>(null);
 
   const activity = feed?.authorized ? feed.activity : null;
+  const countdown = useCountdown(
+    activity && !activity.revealed ? activity.revealAt : null,
+  );
 
   return (
     <Section title="Put-it-in-order activity" accent="text-brutalist-yellow">
@@ -152,7 +161,13 @@ function ActivityControls({ room }: { room: string }) {
           <p className="font-mono text-sm text-white">
             Open: <b>{activity.prompt}</b>{' '}
             <span className="text-zinc-500">
-              ({activity.revealed ? 'answer revealed' : 'answer hidden'})
+              (
+              {activity.revealed
+                ? 'answer revealed'
+                : countdown != null
+                  ? `auto-reveals in ${countdown}s`
+                  : 'answer hidden — reveal when you are ready'}
+              )
             </span>
           </p>
           <div className="max-h-56 space-y-2 overflow-y-auto">
@@ -191,7 +206,7 @@ function ActivityControls({ room }: { room: string }) {
                 </div>
               ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {!activity.revealed && (
               <button
                 type="button"
@@ -201,6 +216,19 @@ function ActivityControls({ room }: { room: string }) {
                 }
               >
                 Reveal answer now
+              </button>
+            )}
+            {!activity.revealed && countdown != null && (
+              <button
+                type="button"
+                className={`${btnCls} bg-black text-white`}
+                onClick={() =>
+                  run(() =>
+                    cancelReveal({ id: activity._id as Id<'activities'> }),
+                  )
+                }
+              >
+                Cancel auto-reveal
               </button>
             )}
             <button
@@ -230,7 +258,9 @@ function ActivityControls({ room }: { room: string }) {
                 room,
                 prompt: prompt.trim(),
                 options: opts,
-                revealDelayMs: delayMs,
+                // Manual (null) sends no delay at all — the backend only arms
+                // an auto-reveal timer when one is explicitly requested.
+                revealDelayMs: delayMs ?? undefined,
               }),
             );
             setPrompt('');
@@ -247,15 +277,15 @@ function ActivityControls({ room }: { room: string }) {
             className={`${inputCls} h-24 resize-none`}
             value={options}
             onChange={(e) => setOptions(e.target.value)}
-            placeholder={'Answer steps (one per line) — revealed on the timer'}
+            placeholder={'Answer steps (one per line) — revealed when you say'}
           />
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-xs uppercase text-zinc-500">
-              Reveal after
+              Reveal
             </span>
             {REVEAL_PRESETS.map((p) => (
               <button
-                key={p.ms}
+                key={p.label}
                 type="button"
                 onClick={() => setDelayMs(p.ms)}
                 className={`border-2 px-2 py-1 font-mono text-xs ${
