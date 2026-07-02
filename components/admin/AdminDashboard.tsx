@@ -6,6 +6,7 @@ import AudienceControls from '@/components/admin/AudienceControls';
 import SessionManager from '@/components/admin/SessionManager';
 import TalkControls from '@/components/admin/TalkControls';
 import TalkStatsChart from '@/components/TalkStatsChart';
+import TalkTimer from '@/components/talks/TalkTimer';
 import { api } from '@/convex/_generated/api';
 
 const DEFAULT_SLUG = 'so-you-want-to-build-software';
@@ -68,7 +69,11 @@ function ConfigBadges({
   );
 }
 
-function Dashboard() {
+function Dashboard({
+  talkDurations,
+}: {
+  talkDurations?: Record<string, number>;
+}) {
   const current = useQuery(api.talks.current);
   const viewer = useQuery(api.talks.viewer);
   const { signOut } = useAuthActions();
@@ -108,6 +113,13 @@ function Dashboard() {
               {current.title}
             </p>
             <ConfigBadges config={current.config} />
+            {/* Whole-talk clock — same pacing timer as the presenter console,
+                keyed on startedAt so a new talk resets it. */}
+            <TalkTimer
+              key={current.startedAt}
+              startedAt={current.startedAt}
+              durationMins={talkDurations?.[current.slug]}
+            />
           </div>
         ) : (
           <p className="font-mono text-zinc-400">
@@ -226,10 +238,15 @@ function Dashboard() {
  * the page shell prerender cleanly and never crash at build time on a missing
  * ConvexProvider.
  */
-export default function AdminDashboard() {
+export default function AdminDashboard({
+  talkDurations,
+}: {
+  /** slug → frontmatter durationMins, baked in by pages/admin getStaticProps. */
+  talkDurations?: Record<string, number>;
+}) {
   return (
     <AdminGate>
-      <Dashboard />
+      <Dashboard talkDurations={talkDurations} />
     </AdminGate>
   );
 }
