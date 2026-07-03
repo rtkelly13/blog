@@ -25,7 +25,21 @@ import puppeteer from 'puppeteer-core';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3002';
 const CDP_URL = process.env.CDP_URL ?? 'http://127.0.0.1:53460';
+// When set (and the app was built with NEXT_PUBLIC_E2E_BYPASS=1), the harness
+// launches its own headless browser and signs in via the `e2e` bypass provider
+// instead of attaching to a pre-authenticated profile over CDP. This is the
+// CI path — no OAuth, no profile. See ADR-0005.
+const E2E_BYPASS = process.env.E2E_BYPASS === '1';
 const SLUG = 'e2e-debug-deck';
+
+/** Resolve a Chromium executable for headless bypass mode: an explicit
+ * CHROME_PATH wins; otherwise use Playwright's installed chromium (present in
+ * this repo's CI for the visual suites). */
+async function chromiumPath() {
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  const { chromium } = await import('@playwright/test');
+  return chromium.executablePath();
+}
 
 // ── tiny assertion harness ──────────────────────────────────────────────────
 const results = [];
@@ -192,12 +206,23 @@ async function newTab(browser, url) {
 
 // ── the run ─────────────────────────────────────────────────────────────────
 async function main() {
-  step(`Connecting to browser at ${CDP_URL}`);
-  const browser = await puppeteer.connect({
-    browserURL: CDP_URL,
-    defaultViewport: null,
-    protocolTimeout: 30000,
-  });
+  let browser;
+  if (E2E_BYPASS) {
+    step('Launching headless browser (E2E bypass auth)');
+    browser = await puppeteer.launch({
+      executablePath: await chromiumPath(),
+      headless: true,
+      defaultViewport: { width: 1400, height: 900 },
+      protocolTimeout: 30000,
+    });
+  } else {
+    step(`Connecting to browser at ${CDP_URL}`);
+    browser = await puppeteer.connect({
+      browserURL: CDP_URL,
+      defaultViewport: null,
+      protocolTimeout: 30000,
+    });
+  }
 
   // Close any stray tabs left by a previous run so they don't starve the deck.
   for (const p of await browser.pages()) {
@@ -206,12 +231,31 @@ async function main() {
 
   const admin = await newTab(browser, '/admin');
 
+  // Bypass mode: a fresh browser has no session — sign in via the e2e provider
+  // (button rendered only when the app was built with NEXT_PUBLIC_E2E_BYPASS=1).
+  if (E2E_BYPASS) {
+    const btn = await until(() => admin.$('[data-testid="e2e-signin"]'), {
+      timeout: 20000,
+    });
+    record('admin: e2e sign-in button present', Boolean(btn));
+    if (btn) await btn.click();
+  }
+
   // Sanity: we're signed in as an admin (cockpit visible, no sign-in wall).
   // AdminGate validates the token server-side, which can take a beat.
   const signedIn = await waitForText(admin, 'signed in as', { timeout: 25000 });
-  record('admin: signed in (reused OAuth session)', Boolean(signedIn));
+  record(
+    E2E_BYPASS
+      ? 'admin: signed in (e2e bypass)'
+      : 'admin: signed in (reused OAuth session)',
+    Boolean(signedIn),
+  );
   if (!signedIn) {
-    console.error('\nNot signed in — open the CDP browser and sign in first.');
+    console.error(
+      E2E_BYPASS
+        ? '\nBypass sign-in failed — is AUTH_E2E_BYPASS_SECRET set on the deployment, NEXT_PUBLIC_E2E_BYPASS=1 on the app build, and the bypass login on ADMIN_GITHUB_LOGINS?'
+        : '\nNot signed in — open the CDP browser and sign in first.',
+    );
     printSummaryAndExit();
     return;
   }

@@ -4,6 +4,15 @@ import type { ReactNode } from 'react';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 
+// E2E bypass sign-in is offered only when the build opts in — and never on the
+// test-github branch, whose whole point is exercising the real OAuth flow.
+// (Hard-coded, not configurable: matching the server-side guard philosophy in
+// convex/auth.ts.) The secret is public to this bundle by design: it only
+// exists on dev/CI deployments, where the bypass provider is enabled anyway.
+const E2E_BYPASS_AVAILABLE =
+  process.env.NEXT_PUBLIC_E2E_BYPASS === '1' &&
+  process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF !== 'test-github';
+
 function SignIn() {
   const { signIn } = useAuthActions();
   // Return to the page the sign-in was launched from (default is SITE_URL = "/").
@@ -21,6 +30,20 @@ function SignIn() {
       >
         Sign in with GitHub
       </button>
+      {E2E_BYPASS_AVAILABLE && (
+        <button
+          type="button"
+          data-testid="e2e-signin"
+          onClick={() =>
+            void signIn('e2e', {
+              secret: process.env.NEXT_PUBLIC_E2E_BYPASS_SECRET ?? '',
+            })
+          }
+          className="ml-3 mt-4 border-2 border-brutalist-yellow px-5 py-2 font-bold uppercase text-brutalist-yellow"
+        >
+          E2E dev sign-in
+        </button>
+      )}
     </div>
   );
 }

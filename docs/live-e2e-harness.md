@@ -21,9 +21,26 @@ It exercises, in one pass:
 
 ## Running it
 
-Point it at a running server and an already-authenticated Chrome exposed over
-CDP (the [agent-browser](https://github.com/) dev profile, or any Chrome
-launched with `--remote-debugging-port`):
+Two auth modes:
+
+**Headless bypass (CI, or local without a signed-in profile).** With the
+`e2e` bypass provider enabled on the Convex deployment (ADR-0005) and the app
+built with `NEXT_PUBLIC_E2E_BYPASS=1`, the harness launches its own headless
+Chromium and signs in via the bypass button — no OAuth, no profile:
+
+```bash
+E2E_BYPASS=1 BASE_URL=http://localhost:3002 pnpm test:live-e2e
+```
+
+This is what `.github/workflows/live-e2e.yml` runs on PRs. The real GitHub
+sign-in flow is deliberately not covered here — exercise it against the
+long-lived `test-github` branch deployment (bypass hard-disabled there) or
+production.
+
+**CDP attach (original mode).** Point it at a running server and an
+already-authenticated Chrome exposed over CDP (the
+[agent-browser](https://github.com/) dev profile, or any Chrome launched with
+`--remote-debugging-port`):
 
 ```bash
 # 1. dev server
