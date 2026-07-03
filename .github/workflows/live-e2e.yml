@@ -1,0 +1,85 @@
+name: Live E2E
+
+# Full live-talk flow (admin cockpit + presenter deck + attendee) driven by
+# tests/live-e2e.mjs in headless-bypass mode — no OAuth, no browser profile.
+# See ADR-0005 (docs/adr/0005-e2e-auth-bypass-and-test-github-branch.md).
+#
+# Required repo secrets (provisioned once, on the dedicated E2E dev deployment):
+#   CONVEX_DEPLOY_KEY_E2E   — deploy key for the E2E Convex deployment
+#   E2E_CONVEX_URL          — that deployment's .convex.cloud URL
+#   E2E_BYPASS_SECRET       — matches AUTH_E2E_BYPASS_SECRET set on it
+# The deployment itself needs: AUTH_E2E_BYPASS_SECRET, SITE_URL=http://localhost:3002,
+# and ADMIN_GITHUB_LOGINS including "e2e-bypass".
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # The E2E Convex deployment is shared state — one run at a time.
+  group: live-e2e
+  cancel-in-progress: false
+
+jobs:
+  live-e2e:
+    name: Live-talk flow (headless bypass)
+    runs-on: ubuntu-latest
+    # Skip gracefully on forks / until the secrets are provisioned.
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+        with:
+          install-playwright: "true"
+
+      - name: Check secrets provisioned
+        id: secrets
+        working-directory: blog
+        env:
+          KEY: ${{ secrets.CONVEX_DEPLOY_KEY_E2E }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "provisioned=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CONVEX_DEPLOY_KEY_E2E not set — skipping live E2E."
+          else
+            echo "provisioned=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push functions to the E2E deployment
+        if: steps.secrets.outputs.provisioned == 'true'
+        working-directory: blog
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_E2E }}
+        run: npx convex deploy --yes
+
+      - name: Start dev server (bypass build)
+        if: steps.secrets.outputs.provisioned == 'true'
+        working-directory: blog
+        env:
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.E2E_CONVEX_URL }}
+          NEXT_PUBLIC_E2E_BYPASS: "1"
+          NEXT_PUBLIC_E2E_BYPASS_SECRET: ${{ secrets.E2E_BYPASS_SECRET }}
+        run: |
+          pnpm dev -p 3002 > dev.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:3002 && break
+            sleep 2
+          done
+
+      - name: Run live E2E harness
+        if: steps.secrets.outputs.provisioned == 'true'
+        working-directory: blog
+        env:
+          BASE_URL: http://localhost:3002
+          E2E_BYPASS: "1"
+        run: node tests/live-e2e.mjs
+
+      - name: Server log on failure
+        if: failure()
+        working-directory: blog
+        run: tail -50 dev.log || true
