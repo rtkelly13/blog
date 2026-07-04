@@ -3,6 +3,8 @@ import { KBarProvider } from 'kbar';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { isConvexConfigured } from '@/lib/convexClient';
+import DeepSearch from './DeepSearch';
 import KBarModal from './KBarModal';
 
 interface Props {
@@ -84,6 +86,10 @@ export default function SearchProvider({ children }: Props) {
   return (
     <KBarProvider actions={defaultActions}>
       <KBarModal actions={searchActions} isLoading={!loaded} />
+      {/* Full-body search via Convex, layered on top of the static list. Only
+          mounted when a Convex deployment is configured so `useQuery` always
+          has a provider; the palette degrades to search.json otherwise. */}
+      {isConvexConfigured && <DeepSearch />}
       {children}
     </KBarProvider>
   );

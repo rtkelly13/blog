@@ -76,10 +76,12 @@ function RenderResults() {
                   : 'bg-transparent text-zinc-300 border-transparent hover:bg-zinc-900'
               }`}
             >
-              <div className="flex flex-col">
+              <div className="flex min-w-0 flex-col">
                 <span className="font-bold">{item.name}</span>
                 {item.subtitle && (
-                  <span className="text-xs text-zinc-500">{item.subtitle}</span>
+                  <span className="line-clamp-2 text-xs text-zinc-500">
+                    {item.subtitle}
+                  </span>
                 )}
               </div>
               {item.shortcut?.length && (

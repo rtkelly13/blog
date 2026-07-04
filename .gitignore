@@ -57,6 +57,9 @@ storybook-static
 # temporary working files
 /temp/
 
+# generated search corpus (built at deploy time by scripts/build-search-index.mjs)
+/convex/search-docs.jsonl
+
 # git worktrees (scratch state for parallel branches)
 .worktrees/
 .claude/worktrees/

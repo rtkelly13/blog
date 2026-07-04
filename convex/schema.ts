@@ -218,4 +218,32 @@ export default defineSchema({
   })
     .index('by_activity_created', ['activityId', 'createdAt'])
     .index('by_room_created', ['room', 'createdAt']),
+
+  // Full-text search corpus for the whole site. One row per published blog post
+  // and talk, populated at deploy time from the MDX sources (see
+  // scripts/build-search-index.mjs + .github/workflows/index-search.yml, which
+  // `convex import --replace` this table). This is NOT the source of truth — the
+  // MDX files are — it's a derived, rebuild-on-deploy search index that powers
+  // the command palette's deep (full-body) search. Kept separate from the
+  // live-talk tables above so a reindex never touches operational data.
+  documents: defineTable({
+    slug: v.string(),
+    type: v.union(v.literal('blog'), v.literal('talk')),
+    title: v.string(),
+    summary: v.optional(v.string()),
+    tags: v.array(v.string()),
+    date: v.optional(v.string()),
+    url: v.string(),
+    // The searchable haystack: title + tags + summary + plaintext body, joined
+    // by the indexer and capped well under Convex's 1MB field limit, so a query
+    // matches across all of them in one search index.
+    text: v.string(),
+    // Short human-readable excerpt shown under each palette result.
+    snippet: v.string(),
+  })
+    .index('by_slug', ['slug'])
+    .searchIndex('search_text', {
+      searchField: 'text',
+      filterFields: ['type'],
+    }),
 });
