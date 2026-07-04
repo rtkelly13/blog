@@ -9,7 +9,7 @@
   "scripts": {
     "start": "next-remote-watch ./data",
     "dev": "next dev --turbopack",
-    "build": "next build && node ./scripts/generate-sitemap.mjs && node ./scripts/generate-search.mjs && node ./scripts/generate-tag-rss.mjs",
+    "build": "next build && node ./scripts/generate-sitemap.mjs && node ./scripts/generate-search.mjs && node ./scripts/generate-tag-rss.mjs && node ./scripts/build-search-index.mjs",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build",
     "test": "vitest",
@@ -26,6 +26,7 @@
     "post:wizard": "node scripts/compose.mjs",
     "check:seo": "node scripts/audit-seo.mjs",
     "check:deploy": "node scripts/verify-deployment.mjs",
+    "search:index": "node scripts/build-search-index.mjs",
     "lint": "biome check .",
     "format": "biome format --write .",
     "prepare": "husky install",

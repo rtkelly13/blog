@@ -1,4 +1,3 @@
-import type { Action } from 'kbar';
 import {
   KBarAnimator,
   KBarPortal,
@@ -6,17 +5,9 @@ import {
   KBarResults,
   KBarSearch,
   useMatches,
-  useRegisterActions,
 } from 'kbar';
 
-interface Props {
-  actions: Action[];
-  isLoading: boolean;
-}
-
-export default function KBarModal({ actions, isLoading }: Props) {
-  useRegisterActions(actions, [actions]);
-
+export default function KBarModal() {
   return (
     <KBarPortal>
       <KBarPositioner className="z-50 bg-black/80 p-4 backdrop-blur-sm">
@@ -34,12 +25,7 @@ export default function KBarModal({ actions, isLoading }: Props) {
                 ESC
               </kbd>
             </div>
-            {!isLoading && <RenderResults />}
-            {isLoading && (
-              <div className="block px-4 py-6 text-center text-brutalist-cyan animate-pulse">
-                [ LOADING_DATA... ]
-              </div>
-            )}
+            <RenderResults />
           </div>
         </KBarAnimator>
       </KBarPositioner>
@@ -76,10 +62,12 @@ function RenderResults() {
                   : 'bg-transparent text-zinc-300 border-transparent hover:bg-zinc-900'
               }`}
             >
-              <div className="flex flex-col">
+              <div className="flex min-w-0 flex-col">
                 <span className="font-bold">{item.name}</span>
                 {item.subtitle && (
-                  <span className="text-xs text-zinc-500">{item.subtitle}</span>
+                  <span className="line-clamp-2 text-xs text-zinc-500">
+                    {item.subtitle}
+                  </span>
                 )}
               </div>
               {item.shortcut?.length && (
