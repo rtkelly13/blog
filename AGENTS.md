@@ -4,6 +4,37 @@
 **Commit:** e6620e1
 **Branch:** main
 
+## AUTHORSHIP POLICY (READ FIRST)
+
+**The prose is human-authored. The words a reader reads are written by Ryan.**
+
+This blog is working toward *fully human-authored words*. The narrative body of
+every post and talk — the sentences and paragraphs in `data/blog/**` and
+`data/talks/**` — is written by the human author. Agents must **not** draft,
+ghostwrite, or rewrite that prose, and must not "polish" it into their own
+phrasing. When a post's body is still an AI-generated draft, treat it as a
+scaffold to be replaced by the author's own words, not as finished copy.
+
+**Agents assist with everything *around* the words** — this is not only allowed,
+it's the point:
+
+- **Shape, not sentences** — propose an outline, section order, or where an idea
+  belongs; suggest that a section is missing or overlong. Leave the actual
+  wording to the author.
+- **Peripheral & utility artifacts** — diagrams (`<Diagram>`/Mermaid), header and
+  OG images (`lib/og/`), code samples, tables, frontmatter, tags, file
+  scaffolding, MDX component wiring, links, and asset generation.
+- **Mechanics** — fix typos, broken links, Markdown/MDX syntax, and formatting;
+  never reword for content.
+- **Everything outside `data/`** — components, layouts, `lib/`, tests, build
+  tooling, CI — is normal agent territory.
+
+Reader-facing metadata that is prose (a post `summary`) may be *drafted* by an
+agent as a suggestion, but the author owns the final wording.
+
+Rule of thumb: **if a reader reads it as the author's voice, a human wrote it;
+if it's structure, code, or an asset, an agent can.**
+
 ## OVERVIEW
 
 Personal blog for Ryan Kelly (ryankelly.dev). Next.js 16 + React 19, Tailwind CSS v4, MDX content, brutalist design system.
