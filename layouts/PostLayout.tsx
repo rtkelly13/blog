@@ -10,6 +10,7 @@ import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import NewsletterForm from '@/components/NewsletterForm';
 import PageTitle from '@/components/PageTitle';
+import PostHeaderImage from '@/components/PostHeaderImage';
 import References, { ReferencesContext } from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
@@ -68,7 +69,8 @@ export default function PostLayout({
   hasManualReferences,
   seriesData,
 }: Props) {
-  const { slug, fileName, date, title, tags } = frontMatter;
+  const { slug, fileName, date, title, tags, images } = frontMatter;
+  const hasExplicitImage = Array.isArray(images) && images.length > 0;
   const [activeId, setActiveId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -114,6 +116,18 @@ export default function PostLayout({
         {...frontMatter}
       />
       <article>
+        {!hasExplicitImage && (
+          <div className="pt-6">
+            <PostHeaderImage
+              title={title}
+              slug={slug}
+              tags={tags}
+              date={date}
+              variant="banner"
+              className="w-full border-2 border-brutalist-cyan shadow-hard-cyan [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
+            />
+          </div>
+        )}
         <div className="xl:divide-y xl:divide-zinc-800">
           <header className="pt-6 xl:pb-6">
             <div className="space-y-1 text-center">

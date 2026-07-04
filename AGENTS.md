@@ -47,6 +47,7 @@ Talk routes: `pages/talks/` (deck landing + `present` presenter view), `pages/li
 | Remark plugins     | `lib/remark-*.ts`      | Custom: code-title, toc-headings, references, img-to-jsx |
 | Bibliography / durable links | `lib/remark-references.ts`, `components/References.tsx` | Auto [n] citations + References section (original + archived link); `pnpm archive-links` saves URLs to the Wayback Machine |
 | Design tokens      | `tailwind.config.js`   | Brutalist colors, shadows, typography        |
+| Header / OG images | `lib/og/headerImage.mjs` | Deterministic SVG engine (see lib/AGENTS.md) |
 | Global CSS         | `css/tailwind.css`     | Tailwind v4 imports, CSS vars, utilities     |
 | Tests              | `tests/*.spec.ts`      | See tests/AGENTS.md                          |
 | Build scripts      | `scripts/*.mjs`        | sitemap, search, tag-rss, create-post        |
@@ -198,7 +199,8 @@ pnpm build
 ├── next build (Turbopack)
 ├── scripts/generate-sitemap.mjs
 ├── scripts/generate-search.mjs
-└── scripts/generate-tag-rss.mjs
+├── scripts/generate-tag-rss.mjs
+└── scripts/generate-og-images.mjs   # deterministic per-post OG cards → public/static/og/<slug>.png
 ```
 
 Custom: requires building external `@rtkelly/mermaid-toolkit` first in CI.

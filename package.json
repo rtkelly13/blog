@@ -9,7 +9,8 @@
   "scripts": {
     "start": "next-remote-watch ./data",
     "dev": "next dev --turbopack",
-    "build": "next build && node ./scripts/generate-sitemap.mjs && node ./scripts/generate-search.mjs && node ./scripts/generate-tag-rss.mjs && node ./scripts/build-search-index.mjs",
+    "build": "next build && node ./scripts/generate-sitemap.mjs && node ./scripts/generate-search.mjs && node ./scripts/generate-tag-rss.mjs && node ./scripts/build-search-index.mjs && node ./scripts/generate-og-images.mjs",
+    "og:images": "node ./scripts/generate-og-images.mjs",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build",
     "test": "vitest",

@@ -9,11 +9,10 @@ tags:
     "developer-tools",
     "architecture",
     "workflow",
-    "python",
-    "opencode",
+    "productivity",
   ]
 draft: true
-summary: "Eleven repositories, five languages, 90k+ files — and a coding agent that only sees one folder at a time. This is how a 'virtual monorepo' (a config-only brain, symlinked to independent repos) gives agents a single, coherent world to navigate, and why that turns out to matter more for the agents than for the humans."
+summary: "A pile of separate repositories, several languages, and a coding agent that only ever sees one folder at a time. This is the 'virtual monorepo' — a config-only 'brain' repo symlinked to your real repos — and why it turns out to matter more for the agents than for the humans."
 images: []
 layout: PostLayout
 authors: ["default"]
@@ -21,77 +20,76 @@ authors: ["default"]
 
 # The problem nobody warns you about
 
-At work we have eleven repositories. A .NET rights-application with 45,000 files
-and 448k lines of code. A React monorepo. A pile of Python ETL pipelines with
-2.75 _million_ lines between them. A data platform, a CMS, a public artist site,
-E2E test suites, bootstrap scripts. Five languages, independent git histories,
-independent deploys. Ninety-thousand-plus files if you add it all up.
+Most companies past a certain age don't have _a_ codebase. They have a dozen.
+A backend here, a couple of frontends there, a stack of data pipelines, some
+infrastructure, a few standalone tools, the test suites nobody wants to touch.
+Different languages, independent git histories, independent deploys. It's the
+normal end state of any organisation that's been shipping for more than a few
+years, and — day #1 to day #1000 — it mostly works fine.
 
-None of that is unusual. Plenty of companies live in a polyrepo world and are
-perfectly happy. What _changed_ is that I now spend a large chunk of my day
-handing work to coding agents — OpenCode, Claude Code, Gemini — and a coding
-agent has one brutal limitation that a human developer mostly doesn't:
+I live in exactly that world at work. And plenty of teams are perfectly happy in
+it. What _changed_ for me is that I now spend a large chunk of my day handing
+work to coding agents, and a coding agent has one brutal limitation that a human
+developer mostly doesn't:
 
 **its working directory is its entire universe.**
 
-A human engineer holds the shape of the whole company in their head. They know
-that authentication lives in the rights-app, that reporting queries hit the data
-platform, that the people-to-GitHub mapping is a JSON file in the platform repo.
-They `cd` between clones without thinking. An agent, dropped into one repo, sees
-one repo. Ask it "who calls this function across our services" and it can't —
-the other services aren't on its filesystem. Ask it "follow our git conventions"
-and it will follow whatever it can find in _this_ repo, which may be nothing.
+A human engineer holds the shape of the whole system in their head. They know
+that authentication lives in one service, that reporting queries hit another,
+that the "who owns what" mapping is a file buried in a third. They `cd` between
+clones without thinking. An agent, dropped into one repo, sees one repo. Ask it
+"who calls this function across our services" and it can't — the other services
+aren't on its filesystem. Ask it to "follow our conventions" and it will follow
+whatever it happens to find in _this_ repo, which is often nothing.
 
-The obvious fix is "put everything in a monorepo." But merging eleven repos with
-independent histories, CI, and deploy cadences is a multi-quarter migration
-nobody has budget for, and it throws away the independence that makes the repos
+The obvious fix is "put everything in a monorepo." But merging a dozen repos with
+independent histories, CI, and release cadences is a multi-quarter migration
+nobody has budget for, and it throws away the independence that makes each repo
 easy to reason about in the first place.
 
-So we did something cheaper and, it turns out, better suited to agents: a
-**virtual monorepo**.
+So instead of a real monorepo, there's a much cheaper move that — it turns out —
+suits agents even better: a **virtual monorepo**.
 
 # Brain and body
 
 The idea is a split between a **brain** and a **body**.
 
-The **body** is all the real product repositories, cloned side by side under one
-parent directory (`~/code/sentric/`). They stay exactly what they are — separate
-git repos, separate CI, separate deploys. Nothing about them changes.
+The **body** is all your real repositories, cloned side by side under one parent
+directory. They stay exactly what they are — separate git repos, separate CI,
+separate deploys. Nothing about them changes.
 
-The **brain** is a single small repo — we call it `workspace` — that tracks
-*no product source code at all*. It holds configuration, documentation, shared
-CLIs, environment setup, and the agent instructions. Then it exposes the entire
-body through **one symlink**:
+The **brain** is a single small repo that tracks _no product source code at all_.
+It holds configuration, documentation, shared tooling, and — crucially — the
+agent instructions. Then it exposes the entire body through **one symlink**:
 
 ```
 ~/code/
-├── sentric/                       # BODY — independent git repos
-│   ├── rights-application/
-│   ├── data-platform/
-│   ├── sentric-frontends/
-│   ├── publishing-dashboard/
-│   └── ... 7 more
+├── company/                       # BODY — independent git repos
+│   ├── backend-service/
+│   ├── web-frontend/
+│   ├── data-pipelines/
+│   └── ... more repos
 │
 └── workspace/                     # BRAIN — config + docs + tooling only
     ├── AGENTS.md                  # canonical agent instructions
     ├── docs/                      # runbooks, conventions, process
-    ├── src/                       # workspace CLIs (Python / uv)
-    └── projects  ->  ../sentric   # the whole body, one symlink
+    ├── tools/                     # small cross-repo CLIs
+    └── projects  ->  ../company   # the whole body, one symlink
 ```
 
-That `projects -> ../sentric` symlink is the whole trick. From inside the brain,
-`projects/rights-application/`, `projects/data-platform/`, and every other repo
-are _right there_ on the filesystem. One `ln -s` on macOS and Linux, a junction
-point on Windows.
+That `projects -> ../company` symlink is the whole trick. From inside the brain,
+`projects/backend-service/`, `projects/web-frontend/`, and every other repo are
+_right there_ on the filesystem. One `ln -s` on macOS and Linux, a junction point
+on Windows, and a small bootstrap script to hide the difference.
 
-<Diagram type="mermaid" caption="Brain/Body: one symlink turns eleven repos into one navigable tree">
+<Diagram type="mermaid" caption="Brain/Body: one symlink turns many repos into one navigable tree">
 {`graph TD
-    A[workspace<br/>THE BRAIN<br/>config · docs · CLIs]
+    A[workspace<br/>THE BRAIN<br/>config · docs · tools]
     P[projects/ symlink]
-    B1[rights-application]
-    B2[data-platform]
-    B3[sentric-frontends]
-    B4[...7 more repos]
+    B1[backend-service]
+    B2[web-frontend]
+    B3[data-pipelines]
+    B4[...more repos]
     A --> P
     P --> B1
     P --> B2
@@ -106,37 +104,36 @@ point on Windows.
     linkStyle default stroke:#fff,stroke-width:2px`}
 </Diagram>
 
-The name I keep coming back to is **"one world to reason about."** A real
-monorepo gives you atomic cross-repo commits, which is genuinely something we
+The phrase I keep coming back to is **"one world to reason about."** A real
+monorepo gives you atomic cross-repo commits, which is genuinely something you
 give up here. But most of what makes a monorepo pleasant day to day isn't atomic
 commits — it's that _everything is in one tree you can see at once_. The virtual
 monorepo buys you exactly that property, for the price of a symlink, without
-touching a single product repo's history.
+rewriting a single repo's history.
 
 # Why this is really a coding-agent story
 
 I want to be honest about the framing. A virtual monorepo is _nice_ for humans —
 it's convenient to have one folder. But humans already had a workaround: they
-kept the mental model in their heads. The reason we actually built the tooling
-around this, the reason it earned real investment, is that **agents don't have
-heads.** Everything a human "just knows" has to become a file, a symlink, or a
-command. The virtual monorepo is the substrate that makes that possible. Here's
-what we hang off it.
+kept the mental model in their heads. The reason this pattern earns real
+investment is that **agents don't have heads.** Everything a human "just knows"
+has to become a file, a symlink, or a command an agent can run. The virtual
+monorepo is the substrate that makes that possible. Here's what you hang off it.
 
 ## 1. One filesystem root, one permission grant
 
 When an agent runs inside the brain, cross-repo work stops being impossible and
-becomes a plain relative path. "Find every caller of this batch constant" is now
-a search over `projects/**` instead of a task that requires cloning three repos
-the agent doesn't know exist.
+becomes a plain relative path. "Find every caller of this function" is now a
+search over `projects/**` instead of a task that needs the agent to clone three
+repos it doesn't know exist.
 
-It also collapses the permissions story. Instead of granting an agent read
-access repo-by-repo, you grant it the one parent directory (`~/code/sentric`)
-and it can see the whole body. We even tell the agent's ignore file to
-_explicitly_ allow traversing the symlink:
+It also collapses the permissions story. Instead of granting an agent read access
+repo-by-repo, you grant it the one parent directory and it can see the whole body.
+You can even tell the agent's ignore file to _explicitly_ allow traversing the
+symlink while still hiding the noise:
 
 ```gitignore
-# .opencodeignore — let the agent see the code via the symlink
+# let the agent see the code via the symlink
 !projects/
 
 # ...while still ignoring the junk
@@ -147,125 +144,111 @@ node_modules/
 
 <NoteBlock title="the subtle part" color="yellow">
 The brain tracks the symlink, not the code behind it. So `git status` in the
-workspace never fills up with a diff of eleven repos — the body's changes belong
-to the body's repos. The agent sees everything; version control still sees clean
+brain never fills up with a diff of a dozen repos — the body's changes belong to
+the body's repos. The agent sees everything; version control still sees clean
 boundaries.
 </NoteBlock>
 
 ## 2. A hierarchical AGENTS.md knowledge base
 
-A single filesystem is necessary but not sufficient — an agent staring at 90,000
-files needs a map, not just access. So the brain's `AGENTS.md` is a genuine
-navigation document, and it's the _root_ of a hierarchy: it points down into each
-domain's own `AGENTS.md`.
+A single filesystem is necessary but not sufficient — an agent staring at tens of
+thousands of files needs a _map_, not just access. So the brain's `AGENTS.md`
+becomes a genuine navigation document, and it's the _root_ of a hierarchy: it
+points down into each repo's own `AGENTS.md`.
 
-The root file carries the things an agent would otherwise have to rediscover
-every session: which domains exist and roughly how big they are, a **"WHERE TO
-LOOK"** table mapping tasks to paths, and domain entry points. A representative
-slice:
+The root file carries the things an agent would otherwise rediscover every single
+session: which domains exist and roughly how big they are, a **"where to look"**
+table mapping tasks to paths, and the entry point for each domain. Something like:
 
 | Task | Location |
 | :--- | :------- |
-| Batch job patterns | `projects/rights-application/core/Sentric.Constants/Batch/` |
-| Shared UI components | `projects/sentric-frontends/packages/ui/` |
-| Table schemas | `projects/data-platform/sql/schema/` |
-| Reviewer lookup data | `projects/platform/data/people.json` |
+| Background job patterns | `projects/backend-service/jobs/` |
+| Shared UI components | `projects/web-frontend/packages/ui/` |
+| Database schemas | `projects/data-pipelines/schema/` |
+| Who-owns-what mapping | `projects/platform/data/people.json` |
 
-That table is pure leverage for an agent. It's the difference between "grep the
-whole tree and hope" and "go straight to the four files that matter."
+That table is pure leverage. It's the difference between "grep the whole tree and
+hope" and "go straight to the four files that matter."
 
 ## 3. One source of instructions, every agent
 
 Here's a mess the multi-tool era created: every coding agent looks for a
-_different_ filename. Claude Code reads `CLAUDE.md`. Gemini reads `GEMINI.md`.
-OpenCode has its own config. The naive response is to maintain the same guidance
-in four places and watch them drift apart within a week.
+_different_ filename for its instructions. One reads `AGENTS.md`. Another wants its
+own dotfile. A third has its own config format. The naive response is to maintain
+the same guidance in three or four places and watch them drift apart within a week.
 
-The virtual monorepo's brain refuses to do that. `AGENTS.md` is the one canonical
-source. The tool-specific files are three-line pointers:
+The brain refuses to do that. `AGENTS.md` is the one canonical source; the
+tool-specific files become three-line pointers back to it:
 
 ```markdown
-# CLAUDE.md
-This file provides guidance to Claude Code when working with code in this repo.
+# <TOOL>.md
+This file provides guidance to <tool> when working with code in this repo.
 
 ## Documentation
-See [AGENTS.md](./AGENTS.md) for project guidance, architecture, and
-development instructions.
+See AGENTS.md for project guidance, architecture, and development instructions.
 ```
 
-`GEMINI.md` is the same file with a different name at the top. And because those
-alias files are easy to forget or let rot, the workspace ships a CLI to keep them
-honest:
+And because those alias files are easy to forget or let rot, it's worth a tiny CLI
+that regenerates and verifies them from the canonical source:
 
 ```bash
-uv run docs agent-context check   # is this checkout wired up for every tool?
-uv run docs agent-context fix     # regenerate the aliases from AGENTS.md
+tools/agent-context check   # is this checkout wired up for every tool?
+tools/agent-context fix     # regenerate the aliases from AGENTS.md
 ```
 
-Write the instructions once; every agent, whichever filename it happens to hunt
-for, lands on the same truth.
+Write the instructions once; every agent, whichever filename it hunts for, lands
+on the same truth.
 
 ## 4. The brain gives agents _verbs_, not just files
 
 This is the part I underestimated at first. Files are nouns — an agent can read
-them. But the brain also ships a suite of Python CLIs (run through `uv`) that
-give agents _verbs_: things they can do across the whole virtual monorepo.
+them. But the brain can also ship small cross-repo CLIs that give agents _verbs_:
+things they can _do_ across the whole virtual monorepo. The two that matter map
+onto the two questions an agent actually asks:
 
-```bash
-uv run help                     # discover every workspace command
-uv run docs search "<query>"    # semantic search across all repos' docs
-uv run workspace intel ...      # structural code navigation (definitions, callers)
-uv run workspace web            # browse the whole thing interactively
-```
+- **"Where is this documented?"** → a docs-search command backed by an index
+  across every repo's documentation. Instead of an agent widening `grep` queries
+  against `docs/**` until it gives up, it gets ranked results in one shot.
+- **"How does this code fit together?"** → a **code-intelligence** command. If you
+  index your repos into a graph and expose it (an MCP server is the natural fit),
+  an agent can ask for _structural_ answers — every caller of a function, the
+  dependency edges between modules, the blast radius of a change — across repos,
+  without pulling a single file into its context window.
 
-Two of those are worth dwelling on, because they map onto the two questions an
-agent actually asks:
-
-- **"Where is this documented?"** → `docs search`. Instead of an agent widening
-  grep queries against `docs/**` until it gives up, it hits a real index across
-  every repo's documentation. The AGENTS.md even codifies the handoff: use docs
-  search for runbooks and terminology _first_.
-- **"How does this code fit together?"** → **code intelligence**. We run a
-  Codebase Memory graph as an MCP server, so an agent can call `search_nodes`,
-  `query_graph`, or `trace_call_path` and get _structural_ answers — every caller
-  of a function, the dependency edges between modules, the blast radius of a
-  change — across repos, without reading a single file into its context window.
-
-That second one is the payoff a plain symlink could never give you. Cross-repo
-impact analysis is precisely the thing an agent-in-one-repo _cannot_ do, and the
-virtual monorepo plus a graph index makes it a single tool call.
+That second one is the payoff a plain symlink could never give you on its own.
+Cross-repo impact analysis is precisely the thing an agent-in-one-repo _cannot_
+do, and a virtual monorepo plus a graph index turns it into a single tool call.
 
 <NoteBlock title="nouns vs verbs" color="primary">
-A folder of files tells an agent what exists. A folder of files _plus a CLI_
-tells it what it can do. The brain is deliberately the second thing — the code
-lives in the body; the capabilities live in the brain.
+A folder of files tells an agent what exists. A folder of files _plus a CLI_ tells
+it what it can do. The brain is deliberately the second thing — the code lives in
+the body; the capabilities live in the brain.
 </NoteBlock>
 
 ## 5. Guardrails written down once, enforced everywhere
 
-Every "please don't do that" an agent needs to hear lives in the brain, so it's
-in scope no matter which repo the work touches. A few real ones:
+Every "please don't do that" an agent needs to hear lives in the brain, so it's in
+scope no matter which repo the work touches:
 
 - **Run lint and type-check before every push** — CI will reject failures and it
-  blocks other engineers.
-- **Never merge a PR with failing checks**, even when GitHub lets you.
-- **Always use the self-hosted Pulumi S3 backend, never Pulumi Cloud** — and if
-  you hit an Access Denied on the state bucket, _stop_; that's intentional, not a
-  puzzle to route around.
-- **Don't run `gh aw compile` headless** — it silently hangs in a sandbox with no
-  TTY; use the workspace's compile-script wrapper instead.
+  blocks everyone else.
+- **Never merge a PR with failing checks**, even when the platform lets you.
+- **If a deploy or a state operation returns "access denied", _stop_** — that's a
+  permission boundary doing its job, not a puzzle to route around.
+- The one non-obvious command gotcha that has bitten every new engineer, written
+  down so the agent learns it the same way a new hire would.
 
-That last one is the kind of hard-won, non-obvious knowledge that used to live
-only in a senior engineer's memory. Now it's a line in `AGENTS.md`, so the agent
-learns it the same way a new hire would — except it never forgets.
+That last category is the interesting one: hard-won, non-obvious knowledge that
+used to live only in a senior engineer's memory. Now it's a line in `AGENTS.md`,
+and the agent never forgets it.
 
-## 6. Shared agent definitions ride along too
+## 6. Shared agent assets ride along too
 
-Because the body is just more repos under the same symlink, shared _agent_
-assets travel the same road. We keep a `playbook` repo — migration agents, reusable
-skills, coding conventions, a domain glossary — and it shows up at
-`projects/playbook/` like everything else. Define a migration skill once; every
-agent working anywhere in the virtual monorepo can reach it.
+Because the body is just more repos under the same symlink, shared _agent_ assets
+travel the same road. Keep a "playbook" repo — reusable skills, migration recipes,
+coding conventions, a domain glossary — and it shows up alongside everything else.
+Define a skill once; every agent working anywhere in the virtual monorepo can
+reach it.
 
 # The honest tradeoffs
 
@@ -277,33 +260,33 @@ I don't want to sell this as free. It isn't.
 - **Symlinks are a cross-platform tax.** `ln -s` on Unix, junctions on Windows,
   and a bootstrap script to paper over the difference. It mostly just works, but
   "mostly" is carrying weight.
-- **The brain can drift from the body.** A "WHERE TO LOOK" path rots when a repo
-  reorganizes. The fix is discipline plus doc-lint tooling, but drift is a real
-  failure mode — a confidently wrong map is worse than no map.
+- **The brain can drift from the body.** A "where to look" path rots when a repo
+  reorganises. The fix is discipline plus doc-lint tooling — but a confidently
+  wrong map is worse than no map.
 - **"Where's the source of truth?" needs a firm answer.** The whole thing falls
-  apart the moment someone copies guidance into a `CLAUDE.md` instead of pointing
-  at `AGENTS.md`. The convention has to be enforced, not just hoped for.
+  apart the moment someone pastes guidance into a tool-specific dotfile instead of
+  pointing at `AGENTS.md`. The convention has to be enforced, not just hoped for.
 
-None of these outweigh the payoff for us, but they're the questions to ask before
-copying the pattern.
+None of these outweigh the payoff for me, but they're the questions to ask before
+adopting the pattern.
 
 # The takeaway
 
 I went into this thinking a virtual monorepo was a convenience for _me_ — one
-folder instead of eleven. What I actually built was a **world model for
-agents**: a single filesystem they can traverse, a map that tells them where to
-look, one set of instructions every tool reads, a CLI of verbs they can call, and
-guardrails they can't forget.
+folder instead of a dozen. What I actually built was a **world model for agents**:
+a single filesystem they can traverse, a map that tells them where to look, one
+set of instructions every tool reads, a CLI of verbs they can call, and guardrails
+they can't forget.
 
-The reframe I'd offer anyone drowning in polyrepo sprawl and trying to get
-serious about coding agents: you probably can't afford a real monorepo, and you
-may not want one. But you can almost certainly afford a symlink and a config repo.
+The reframe I'd offer anyone drowning in polyrepo sprawl and trying to get serious
+about coding agents: you probably can't afford a real monorepo, and you may not
+even want one. But you can almost certainly afford a symlink and a config repo.
 Give your agents one world to reason about, and they start reasoning about it
 remarkably well.
 
 ---
 
-_The workspace tooling described here is internal, but the pattern is
-repository-shaped and portable: a config-only "brain" repo, one symlink to a
-parent folder of your real repos, a canonical `AGENTS.md`, and a small CLI that
-gives agents search and code-intelligence over the whole tree._
+_The pattern is deliberately repository-shaped and portable: a config-only "brain"
+repo, one symlink to a parent folder of your real repos, a canonical `AGENTS.md`,
+and a small CLI that gives agents search and code-intelligence over the whole
+tree. No product code moves; nothing about your existing repos has to change._

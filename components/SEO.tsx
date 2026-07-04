@@ -110,14 +110,19 @@ export const BlogSEO = ({
   date,
   lastmod,
   url,
+  slug,
   images = [],
 }: BlogSeoProps) => {
   const router = useRouter();
   const publishedAt = new Date(date).toISOString();
   const modifiedAt = new Date(lastmod || date).toISOString();
+  // With no explicit front-matter image, fall back to the post's
+  // deterministic, build-generated OG card (scripts/generate-og-images.mjs)
+  // rather than the generic site banner, so every post shares a unique card.
+  const fallbackImage = slug ? `/static/og/${slug}.png` : siteMetadata.socialBanner;
   const imagesArr =
     images.length === 0
-      ? [siteMetadata.socialBanner]
+      ? [fallbackImage]
       : typeof images === 'string'
         ? [images]
         : images;
