@@ -115,6 +115,28 @@ ever leaves the client; the server only stores the opaque id.
 `_generated/` (api, server, dataModel) is produced by Convex from the schema and
 function signatures. Never hand-edit it — it regenerates on `convex dev` / deploy.
 
+> Exception on the `claude/convex-deep-search` branch: `_generated/api.d.ts` was
+> hand-edited to add the `documents` module so `tsc` resolves `api.documents.*`
+> without a local codegen run. Running `npx convex dev`/`deploy` regenerates it
+> identically — the edit is a stopgap, not a new source of truth.
+
+## SEARCH CORPUS (`documents`)
+
+Site-wide full-text search for the command palette. `documents` is a **derived**
+table — one row per published blog post and talk — not operational data:
+
+- **Source of truth is the MDX**, not Convex. `scripts/build-search-index.mjs`
+  strips each post/talk body to plain text and writes `convex/search-docs.jsonl`.
+- **Indexed at deploy**, off preview builds: `.github/workflows/index-search.yml`
+  runs on push to `main`, `convex deploy`s then `convex import --replace --table
+  documents`, which rebuilds the `search_text` full-text index. Needs repo secret
+  `CONVEX_DEPLOY_KEY` (a Convex production deploy key).
+- **Query**: `api.documents.search({ query, type?, limit? })` (`convex/documents.ts`)
+  via `withSearchIndex('search_text', …)`, returning a bounded display projection.
+- **Client**: `components/search/DeepSearch.tsx` registers hits as kbar actions,
+  mounted only when `isConvexConfigured` so the palette degrades to the static
+  `public/search.json` list when Convex is absent.
+
 ## SEE ALSO
 
 React-side hooks and clients: `lib/usePresence.ts`, `lib/useReactions.ts`,

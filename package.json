@@ -26,6 +26,7 @@
     "post:wizard": "node scripts/compose.mjs",
     "check:seo": "node scripts/audit-seo.mjs",
     "check:deploy": "node scripts/verify-deployment.mjs",
+    "search:index": "node scripts/build-search-index.mjs",
     "lint": "biome check .",
     "format": "biome format --write .",
     "prepare": "husky install",
