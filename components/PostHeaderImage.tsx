@@ -35,9 +35,6 @@ export default function PostHeaderImage({
   // Non-user SVG generated locally from post metadata (text is XML-escaped
   // inside the engine), so inlining it is safe.
   return (
-    <div
-      className={className}
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
+    <div className={className} dangerouslySetInnerHTML={{ __html: svg }} />
   );
 }

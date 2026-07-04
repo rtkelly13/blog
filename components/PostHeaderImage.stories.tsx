@@ -32,7 +32,8 @@ type Story = StoryObj<typeof meta>;
 
 export const LongTitle: Story = {
   args: {
-    title: 'The Virtual Monorepo: Giving Coding Agents One World to Reason About',
+    title:
+      'The Virtual Monorepo: Giving Coding Agents One World to Reason About',
     slug: 'virtual-monorepo-coding-agents',
     tags: ['ai', 'coding-agents', 'monorepo', 'architecture'],
     date: '2026-07-04',

@@ -119,7 +119,9 @@ export const BlogSEO = ({
   // With no explicit front-matter image, fall back to the post's
   // deterministic, build-generated OG card (scripts/generate-og-images.mjs)
   // rather than the generic site banner, so every post shares a unique card.
-  const fallbackImage = slug ? `/static/og/${slug}.png` : siteMetadata.socialBanner;
+  const fallbackImage = slug
+    ? `/static/og/${slug}.png`
+    : siteMetadata.socialBanner;
   const imagesArr =
     images.length === 0
       ? [fallbackImage]
