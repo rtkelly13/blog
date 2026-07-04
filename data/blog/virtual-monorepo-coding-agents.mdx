@@ -170,6 +170,35 @@ table mapping tasks to paths, and the entry point for each domain. Something lik
 That table is pure leverage. It's the difference between "grep the whole tree and
 hope" and "go straight to the four files that matter."
 
+### Progressive disclosure: the root file is a router, not an encyclopaedia
+
+The temptation is to cram everything into that root `AGENTS.md` — every repo's
+build commands, conventions, and gotchas in one giant file. Don't. It would blow
+the agent's context window on the way in, most of it irrelevant to the task at
+hand, and it would rot the moment any repo changed.
+
+The pattern that actually works is **progressive disclosure**. The root file
+stays deliberately thin: enough to orient — what exists, how big, and _where to
+go next_ — and then it does one job well, which is to **steer the agent to the
+`AGENTS.md` of the appropriate repo.** The agent reads the map, decides it's a
+job about the data pipelines, and only _then_ opens `projects/data-pipelines/AGENTS.md`
+for the detail. That repo's file can disclose further still — pointing at a
+subdirectory's `AGENTS.md`, a runbook, a schema doc — so context arrives in
+layers, just-in-time, only for the slice of the world the task actually touches.
+
+<NoteBlock title="why layered beats flat" color="primary">
+Three wins fall out of it: the agent's context stays lean and on-topic; each
+repo _owns_ its own guidance, so nothing drifts out of sync with a copy in the
+brain; and the instructions the agent ends up reading are always the version that
+lives right next to the code it's about to change.
+</NoteBlock>
+
+This post is itself a small example of the idea. It won't teach you the specifics
+of any one repo — that's not its job. For the concrete conventions, commands, and
+entry points, the move is the same one an agent makes: **start at the root
+`AGENTS.md`, and let it steer you to the `AGENTS.md` of the repo you actually care
+about.**
+
 ## 3. One source of instructions, every agent
 
 Here's a mess the multi-tool era created: every coding agent looks for a
