@@ -1,5 +1,6 @@
 import type { Action } from 'kbar';
 import { useKBar, useRegisterActions } from 'kbar';
+import MiniSearch, { type SearchResult } from 'minisearch';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -8,12 +9,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
  *
  * On first open the command palette fetches `public/search-index.json` (built by
  * scripts/build-search-index.mjs — every post/talk with its body as plain text),
- * then ranks matches client-side and registers them as kbar actions. No backend
- * and no per-keystroke network: the index is a shared asset loaded once, on
- * demand, so it never weighs on initial page load.
+ * indexes it in-memory with MiniSearch, and registers ranked matches as kbar
+ * actions. No backend and no per-keystroke network: the index is a shared asset
+ * loaded once, on demand, so it never weighs on initial page load. MiniSearch
+ * gives prefix + fuzzy (typo-tolerant) matching and BM25-ish ranking for free.
  *
- * Empty query → browse all content (newest first). Non-empty → weighted match
- * across title/tags/summary/body with a contextual snippet.
+ * Empty query → browse all content (newest first). Non-empty → ranked matches
+ * with a contextual snippet around the hit.
  */
 interface Doc {
   slug: string;
@@ -28,35 +30,15 @@ interface Doc {
 
 const SECTION = { blog: 'Blog Posts', talk: 'Talks' } as const;
 
-/** Weighted score; returns 0 unless every query term hits at least one field. */
-function score(doc: Doc, terms: string[]): number {
-  const title = doc.title.toLowerCase();
-  const tags = doc.tags.join(' ').toLowerCase();
-  const summary = doc.summary.toLowerCase();
-  const body = doc.body.toLowerCase();
-  let total = 0;
-  for (const term of terms) {
-    let hit = 0;
-    if (title.includes(term)) hit += title.startsWith(term) ? 12 : 8;
-    if (tags.includes(term)) hit += 5;
-    if (summary.includes(term)) hit += 3;
-    if (body.includes(term)) hit += 1;
-    if (hit === 0) return 0; // AND semantics: every term must appear somewhere
-    total += hit;
-  }
-  return total;
-}
-
 /** A short excerpt around the first matched term, else the summary/body head. */
-function snippet(doc: Doc, terms: string[]): string {
-  const body = doc.body;
+function snippet(body: string, terms: string[]): string {
   const lower = body.toLowerCase();
   let at = -1;
   for (const term of terms) {
-    const i = lower.indexOf(term);
+    const i = lower.indexOf(term.toLowerCase());
     if (i !== -1 && (at === -1 || i < at)) at = i;
   }
-  if (at === -1) return doc.summary || `${body.slice(0, 140)}…`;
+  if (at === -1) return `${body.slice(0, 140)}…`;
   const start = Math.max(0, at - 60);
   const end = Math.min(body.length, at + 100);
   return `${start > 0 ? '…' : ''}${body.slice(start, end)}${end < body.length ? '…' : ''}`;
@@ -81,40 +63,58 @@ export default function DeepSearch() {
       .catch(() => setDocs([]));
   }, [visualState]);
 
-  // Debounce so ranking doesn't run on every keystroke.
+  // Build the in-memory MiniSearch index once the docs are loaded.
+  const mini = useMemo(() => {
+    if (!docs) return null;
+    const ms = new MiniSearch({
+      fields: ['title', 'tags', 'summary', 'body'],
+      searchOptions: {
+        boost: { title: 4, tags: 2, summary: 2 },
+        prefix: true,
+        fuzzy: 0.2,
+      },
+    });
+    ms.addAll(
+      docs.map((d, id) => ({
+        id,
+        title: d.title,
+        tags: d.tags.join(' '),
+        summary: d.summary,
+        body: d.body,
+      })),
+    );
+    return ms;
+  }, [docs]);
+
+  // Debounce so search doesn't run on every keystroke.
   const [debounced, setDebounced] = useState('');
   useEffect(() => {
-    const id = setTimeout(
-      () => setDebounced(searchQuery.trim().toLowerCase()),
-      150,
-    );
+    const id = setTimeout(() => setDebounced(searchQuery.trim()), 150);
     return () => clearTimeout(id);
   }, [searchQuery]);
 
   const actions = useMemo<Action[]>(() => {
     if (!docs) return [];
-    const terms = debounced.split(/\s+/).filter(Boolean);
 
-    const chosen =
-      terms.length === 0
-        ? docs
-        : docs
-            .map((d) => ({ d, s: score(d, terms) }))
-            .filter((x) => x.s > 0)
-            .sort((a, b) => b.s - a.s)
-            .slice(0, 12)
-            .map((x) => x.d);
+    const chosen: { doc: Doc; terms: string[] }[] = !debounced
+      ? docs.map((doc) => ({ doc, terms: [] })) // browse: newest first
+      : (mini?.search(debounced) ?? []).slice(0, 12).map((r: SearchResult) => ({
+          doc: docs[r.id as number],
+          terms: r.terms,
+        }));
 
-    return chosen.map((d) => ({
-      id: `doc-${d.type}-${d.slug}`,
-      name: d.title,
+    return chosen.map(({ doc, terms }) => ({
+      id: `doc-${doc.type}-${doc.slug}`,
+      name: doc.title,
       // Include the raw query so kbar's own matcher keeps every result we ranked.
-      keywords: `${d.tags.join(' ')} ${d.summary} ${debounced}`,
-      section: SECTION[d.type],
-      subtitle: terms.length ? snippet(d, terms) : d.summary || d.date,
-      perform: () => router.push(d.url),
+      keywords: `${doc.tags.join(' ')} ${doc.summary} ${debounced}`,
+      section: SECTION[doc.type],
+      subtitle: terms.length
+        ? snippet(doc.body, terms)
+        : doc.summary || doc.date,
+      perform: () => router.push(doc.url),
     }));
-  }, [docs, debounced, router]);
+  }, [docs, mini, debounced, router]);
 
   useRegisterActions(actions, [actions]);
 
