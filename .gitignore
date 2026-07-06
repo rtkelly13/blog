@@ -63,3 +63,6 @@ storybook-static
 
 # local scratch TODO (code-review findings, not for commit)
 todo.md
+
+# provisioning secrets (see secrets/README.md) — never commit values
+/secrets/*.env

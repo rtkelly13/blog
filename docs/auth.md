@@ -201,6 +201,17 @@ Env vars by deployment:
 | `AUTH_E2E_BYPASS_SECRET` | **never** | ✅ | ✅ | Arms the bypass provider |
 | `AUTH_E2E_BYPASS_LOGIN` | — | optional | optional | Synthetic login (default `e2e-bypass`) |
 
+### Provisioning from files
+
+The gitignored `secrets/` directory (see `secrets/README.md`) is the local
+source of truth for all of the above — one dotenv file per target, pushed
+with `pnpm provision <convex-dev|convex-prod|convex-preview|ci|vercel-preview>`.
+Per-target files make cross-environment mistakes structural rather than
+disciplinary: `convex-prod` additionally refuses any `E2E`/`BYPASS` key
+before pushing. `convex-preview` prints values for manual dashboard entry
+(Convex project-default env vars have no CLI). Rotation = edit file, re-run
+target.
+
 Commands:
 
 ```bash
