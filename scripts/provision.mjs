@@ -43,7 +43,13 @@ function run(cmd, args, input) {
 
 const targets = {
   'convex-dev': () => {
-    run('npx', ['convex', 'env', 'set', '--from-file', 'secrets/convex.dev.env']);
+    run('npx', [
+      'convex',
+      'env',
+      'set',
+      '--from-file',
+      'secrets/convex.dev.env',
+    ]);
   },
   'convex-prod': () => {
     // Structural guard on top of the hard-coded one in convex/auth.ts: the
@@ -52,9 +58,18 @@ const targets = {
       /E2E|BYPASS/i.test(k),
     );
     if (banned.length) {
-      fail(`convex.prod.env contains ${banned.map(([k]) => k).join(', ')} — remove before provisioning prod`);
+      fail(
+        `convex.prod.env contains ${banned.map(([k]) => k).join(', ')} — remove before provisioning prod`,
+      );
     }
-    run('npx', ['convex', 'env', 'set', '--prod', '--from-file', 'secrets/convex.prod.env']);
+    run('npx', [
+      'convex',
+      'env',
+      'set',
+      '--prod',
+      '--from-file',
+      'secrets/convex.prod.env',
+    ]);
   },
   ci: () => {
     for (const [k, v] of parse('ci.env')) {
@@ -76,7 +91,9 @@ const targets = {
     console.log(
       'Project default env vars have no CLI — enter these in the Convex dashboard',
     );
-    console.log('(project settings → Default environment variables → Preview):\n');
+    console.log(
+      '(project settings → Default environment variables → Preview):\n',
+    );
     for (const [k, v] of parse('convex.preview.env')) console.log(`${k}=${v}`);
   },
 };
