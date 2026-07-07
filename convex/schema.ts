@@ -117,6 +117,16 @@ export default defineSchema({
     answered: v.boolean(),
     /** Presenter has removed this from the audience-visible queue. */
     hidden: v.boolean(),
+    /**
+     * The profanity Mask fired on ingest (ADR-0002). Flagged rows are
+     * auto-hidden pending presenter review; the console tags them so they're
+     * distinguishable from presenter-Hidden rows.
+     */
+    flagged: v.optional(v.boolean()),
+    /** Pre-mask original text — presenter-only (admin feed), never public. */
+    original: v.optional(v.string()),
+    /** Pre-mask original nickname — presenter-only, never public. */
+    originalNickname: v.optional(v.string()),
     createdAt: v.number(),
   }).index('by_room_created', ['room', 'createdAt']),
 
@@ -201,6 +211,16 @@ export default defineSchema({
     steps: v.array(v.string()),
     /** Presenter has removed this from the wall. */
     hidden: v.boolean(),
+    /**
+     * The profanity Mask fired on ingest (ADR-0002). Flagged rows are
+     * auto-hidden pending presenter review; the console tags them so they're
+     * distinguishable from presenter-Hidden rows.
+     */
+    flagged: v.optional(v.boolean()),
+    /** Pre-mask original steps — presenter-only (admin feed), never public. */
+    originalSteps: v.optional(v.array(v.string())),
+    /** Pre-mask original nickname — presenter-only, never public. */
+    originalNickname: v.optional(v.string()),
     /**
      * Presenter has marked this while evaluating submissions with the room
      * (e.g. "discussing this one" / "already covered"). Presenter-only signal —

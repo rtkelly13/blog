@@ -51,10 +51,12 @@ Two independent mechanisms, not to be conflated:
 
 **Mask**:
 The *automatic* mechanism. On ingest, profanity is replaced with asterisks
-(`f**k`). The audience sees the masked text; the original is retained
-presenter-only and the entry is marked `flagged` so the console can highlight it
-(see [ADR-0002](docs/adr/0002-profanity-mask-retains-original.md)).
-_Avoid_: censor, filter, block (blocking is the manual mechanism).
+(`f**k`) and the entry is marked `flagged`: it is auto-Hidden pending presenter
+review, with the pre-mask original retained presenter-only so a false positive
+is judgeable. A restored entry shows the audience only the masked text — the
+original is never public (see
+[ADR-0002](docs/adr/0002-profanity-mask-retains-original.md)).
+_Avoid_: censor, filter, block.
 
 **Hide**:
 The *manual* mechanism. The Presenter removes an entry from the audience-visible
