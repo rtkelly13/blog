@@ -10,6 +10,8 @@ import {
   Progress,
   Slide,
 } from 'spectacle';
+import type { TalkBackground } from 'types/TalkFrontMatter';
+import { graphicDataUri } from '@/components/graphics';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 import type { SlideWindow } from '@/lib/slideTiming';
@@ -36,6 +38,8 @@ interface SpectacleDeckProps {
   slug: string;
   /** Target length (frontmatter durationMins) — drives the console pacing timer. */
   durationMins?: number;
+  /** Optional generated deck background (frontmatter `background`). */
+  background?: TalkBackground;
 }
 
 type Mode = 'attendee' | 'presenter' | 'console';
@@ -76,9 +80,28 @@ function Chrome({
   );
 }
 
-function renderSlides(slides: DeckSlide[]) {
+// A generated background is baked into a single data-URI SVG (opacity folded in)
+// and applied to every slide via Spectacle's native full-bleed backgroundImage.
+function backgroundImage(background?: TalkBackground): string | undefined {
+  if (!background?.generator) return undefined;
+  const uri = graphicDataUri(background.generator, {
+    seed: background.seed,
+    accent: background.accent,
+    density: background.density,
+    opacity: background.opacity ?? 0.18,
+  });
+  return uri ? `url("${uri}")` : undefined;
+}
+
+function renderSlides(slides: DeckSlide[], background?: TalkBackground) {
+  const bgImage = backgroundImage(background);
   return slides.map((slide, i) => (
-    <Slide key={i} backgroundColor="#000000">
+    <Slide
+      key={i}
+      backgroundColor="#000000"
+      backgroundImage={bgImage}
+      backgroundSize="cover"
+    >
       <SlideBody code={slide.code} />
       {slide.notesCode ? (
         <Notes>
@@ -90,10 +113,16 @@ function renderSlides(slides: DeckSlide[]) {
 }
 
 /** Deck with no live layer — used when Convex isn't configured. */
-function BaseDeck({ slides }: { slides: DeckSlide[] }) {
+function BaseDeck({
+  slides,
+  background,
+}: {
+  slides: DeckSlide[];
+  background?: TalkBackground;
+}) {
   return (
     <Deck theme={brutalistTheme} template={Chrome}>
-      {renderSlides(slides)}
+      {renderSlides(slides, background)}
     </Deck>
   );
 }
@@ -117,7 +146,12 @@ function resolveMode(raw: unknown): Mode {
  * - `console` (admin) → follows + a presenter console sidebar (connection status,
  *   presence, reactions, live numbers, End talk) — the presenter's second screen.
  */
-function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
+function LiveDeck({
+  slides,
+  slug,
+  durationMins,
+  background,
+}: SpectacleDeckProps) {
   const router = useRouter();
   const current = useQuery(api.talks.current);
   const setSlide = useMutation(api.talks.setSlide);
@@ -296,7 +330,7 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   const deckEl = (
     <DeckModeProvider value={mode}>
       <Deck theme={brutalistTheme} template={template}>
-        {renderSlides(slides)}
+        {renderSlides(slides, background)}
       </Deck>
     </DeckModeProvider>
   );
@@ -464,7 +498,16 @@ export default function SpectacleDeck({
   slides,
   slug,
   durationMins,
+  background,
 }: SpectacleDeckProps) {
-  if (!isConvexConfigured) return <BaseDeck slides={slides} />;
-  return <LiveDeck slides={slides} slug={slug} durationMins={durationMins} />;
+  if (!isConvexConfigured)
+    return <BaseDeck slides={slides} background={background} />;
+  return (
+    <LiveDeck
+      slides={slides}
+      slug={slug}
+      durationMins={durationMins}
+      background={background}
+    />
+  );
 }

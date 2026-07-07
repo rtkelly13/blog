@@ -103,6 +103,7 @@ export default function Present({
         slides={slides}
         slug={frontMatter.slug}
         durationMins={frontMatter.durationMins}
+        background={frontMatter.background}
       />
     </>
   );
