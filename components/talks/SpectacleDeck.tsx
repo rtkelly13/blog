@@ -12,6 +12,7 @@ import {
   Slide,
 } from 'spectacle';
 import type { TalkBackground } from 'types/TalkFrontMatter';
+import { useRunAction } from '@/components/admin/useRunAction';
 import { graphicDataUri } from '@/components/graphics';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
@@ -23,6 +24,10 @@ import {
   ConsoleSidebar,
   PresenterQuestionsSidebar,
 } from './DeckSidebars';
+import {
+  ActivitySlideRegistryProvider,
+  SlideIndexProvider,
+} from './RevealBeatContext';
 import SlideBody from './SlideBody';
 import { brutalistTheme } from './theme';
 
@@ -178,7 +183,9 @@ function deckTheme(hasBackground: boolean): typeof brutalistTheme {
 function renderSlides(slides: DeckSlide[], hasBackground: boolean) {
   return slides.map((slide, i) => (
     <Slide key={i} backgroundColor={hasBackground ? 'transparent' : '#000000'}>
-      <SlideBody code={slide.code} />
+      <SlideIndexProvider value={i}>
+        <SlideBody code={slide.code} />
+      </SlideIndexProvider>
       {slide.notesCode ? (
         <Notes>
           <SlideBody code={slide.notesCode} />
@@ -389,35 +396,72 @@ function LiveDeck({
       ? openActivity._id
       : null;
 
+  // Slide-embedded activity widgets report which slide *declares* the open
+  // activity (matched by prompt — Spectacle keeps every slide mounted, so the
+  // declaring slide's widget is live even while the presenter is elsewhere).
+  // Keyed by activity id; an activity launched from /admin with a prompt no
+  // slide declares simply never registers.
+  const [declaredSlides, setDeclaredSlides] = useState<Record<string, number>>(
+    {},
+  );
+  const slideRegistry = useMemo(
+    () => ({
+      report: (activityId: string, slideIndex: number) =>
+        setDeclaredSlides((m) =>
+          m[activityId] === slideIndex ? m : { ...m, [activityId]: slideIndex },
+        ),
+    }),
+    [],
+  );
+
   // Record the slide the presenter is on the moment a reveal arms (derived
   // during render so it captures the arm-time slide, not later navigation).
+  // Only the fallback for activities no slide declares — the declaring slide,
+  // when known, always wins (fixes arming the wrong slide when the activity is
+  // opened from /admin while the presenter is elsewhere in the deck).
   const prevPendingRef = useRef<string | null>(null);
   const armedSlideRef = useRef<number | null>(null);
   if (pendingReveal !== prevPendingRef.current) {
     prevPendingRef.current = pendingReveal;
     armedSlideRef.current = pendingReveal ? deckIndex : null;
   }
-  // Arm the next-key reveal only while the presenter is still on the activity's
-  // own slide — advancing on any other slide navigates normally instead of
+  const armedSlide =
+    (pendingReveal != null ? declaredSlides[pendingReveal] : undefined) ??
+    armedSlideRef.current;
+  // Arm the next-key reveal only while the presenter is on the activity's own
+  // slide — advancing on any other slide navigates normally instead of
   // prematurely broadcasting the answer.
   const revealArmed =
-    pendingReveal != null && deckIndex === armedSlideRef.current
-      ? pendingReveal
-      : null;
+    pendingReveal != null && deckIndex === armedSlide ? pendingReveal : null;
 
+  // Surface reveal failures (e.g. a lapsed admin session) instead of a silent
+  // no-op — the beat consumes the keypress, so a swallowed error looks like a
+  // dead deck.
+  const { run: runReveal, error: revealError } = useRunAction();
   useEffect(() => {
     if (!revealArmed) return;
     const ADVANCE = new Set([' ', 'Spacebar', 'ArrowRight', 'PageDown']);
     const onKey = (e: KeyboardEvent) => {
       if (!ADVANCE.has(e.key)) return;
+      // Never steal keys from form fields (console break-minutes input etc.) —
+      // same guard as the "Q" toggle above.
+      const t = e.target as HTMLElement | null;
+      if (
+        t &&
+        (t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA' ||
+          t.isContentEditable)
+      ) {
+        return;
+      }
       // Beat Spectacle's own handler and consume this press.
       e.preventDefault();
       e.stopImmediatePropagation();
-      revealNow({ id: revealArmed }).catch(() => {});
+      void runReveal(() => revealNow({ id: revealArmed }));
     };
     document.addEventListener('keydown', onKey, true);
     return () => document.removeEventListener('keydown', onKey, true);
-  }, [revealArmed, revealNow]);
+  }, [revealArmed, revealNow, runReveal]);
 
   const template = ({
     slideNumber,
@@ -451,14 +495,39 @@ function LiveDeck({
 
   const deckEl = (
     <DeckModeProvider value={mode}>
-      <Deck
-        theme={deckTheme(hasBg)}
-        template={template}
-        transition={hasBg ? fadeTransition : undefined}
-      >
-        {renderSlides(slides, hasBg)}
-      </Deck>
+      <ActivitySlideRegistryProvider value={drivingDeck ? slideRegistry : null}>
+        <Deck
+          theme={deckTheme(hasBg)}
+          template={template}
+          transition={hasBg ? fadeTransition : undefined}
+        >
+          {renderSlides(slides, hasBg)}
+        </Deck>
+      </ActivitySlideRegistryProvider>
     </DeckModeProvider>
+  );
+
+  // Reveal-beat failure chip — shown on any driving deck (the presenter HUD is
+  // presenter-mode-only, and the console needs the feedback too).
+  const revealErrorChip = drivingDeck && revealError && (
+    <div
+      style={{
+        position: 'fixed',
+        bottom: '3.5rem',
+        right: '1rem',
+        zIndex: 40,
+        border: '2px solid #f472b6',
+        background: '#000',
+        color: '#f472b6',
+        padding: '0.3rem 0.6rem',
+        fontFamily: MONO,
+        fontSize: '0.75rem',
+        textTransform: 'uppercase',
+        fontWeight: 700,
+      }}
+    >
+      reveal failed: {revealError}
+    </div>
   );
 
   const sidebar =
@@ -592,6 +661,7 @@ function LiveDeck({
           >
             {deckEl}
             {hud}
+            {revealErrorChip}
           </div>
           <div
             style={{
@@ -612,6 +682,7 @@ function LiveDeck({
       {hasBg && <DeckBackground uris={bgUris} activeName={bgName} />}
       {deckEl}
       {hud}
+      {revealErrorChip}
     </>
   );
 }

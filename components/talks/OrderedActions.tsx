@@ -1,11 +1,14 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useState } from 'react';
+import ErrorLine from '@/components/admin/ErrorLine';
+import { useRunAction } from '@/components/admin/useRunAction';
 import { api } from '@/convex/_generated/api';
 import { getMachineId } from '@/lib/machineId';
 import { useRateLimitNotice } from '@/lib/useRateLimitNotice';
 import { useDeckMode } from './DeckModeContext';
 import RateLimitNotice from './RateLimitNotice';
 import { ResolvedRoom } from './ResolvedRoom';
+import { useActivitySlideRegistry, useSlideIndex } from './RevealBeatContext';
 
 /** Live-updating seconds remaining until `revealAt` (null once elapsed/absent). */
 export function useCountdown(
@@ -104,6 +107,19 @@ function Activity({
     activity && !activity.revealed ? activity.revealAt : null,
   );
 
+  // Presenter controls (open / reveal / cancel) surface their errors — a lapsed
+  // admin session must not look like a working button.
+  const { run: runControl, error: controlError } = useRunAction();
+
+  // On a driving deck, tell the deck which slide declares the open activity so
+  // the reveal beat arms there (matched by prompt; see RevealBeatContext).
+  const slideIndex = useSlideIndex();
+  const registry = useActivitySlideRegistry();
+  useEffect(() => {
+    if (!registry || slideIndex == null || !activity || !prompt) return;
+    if (activity.prompt === prompt) registry.report(activity._id, slideIndex);
+  }, [registry, slideIndex, activity, prompt]);
+
   // No open activity yet. An admin on a slide that declares a prompt + default
   // answer can launch it in one click (config lives with the slide, not /admin).
   if (!activity) {
@@ -118,17 +134,20 @@ function Activity({
         <button
           type="button"
           onClick={() =>
-            openActivity({
-              room,
-              prompt: prompt as string,
-              options: defaultOptions as string[],
-              revealDelayMs: revealAfterMs,
-            }).catch(() => {})
+            runControl(() =>
+              openActivity({
+                room,
+                prompt: prompt as string,
+                options: defaultOptions as string[],
+                revealDelayMs: revealAfterMs,
+              }),
+            )
           }
           className="border-2 border-white bg-brutalist-yellow px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
         >
           ▶ Open activity
         </button>
+        <ErrorLine error={controlError} />
       </div>
     );
   }
@@ -280,25 +299,30 @@ function Activity({
               hand on the console, and an opt-in auto-reveal timer can be
               cancelled here while it's still pending. */}
           {isConsole && !activity.revealed && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => revealNow({ id: activity._id }).catch(() => {})}
-                className="border-2 border-white bg-brutalist-cyan px-4 py-2 font-mono text-xs font-bold uppercase text-black shadow-hard-md"
-              >
-                Reveal to room now
-              </button>
-              {countdown != null && (
+            <div className="mt-3 space-y-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() =>
-                    cancelReveal({ id: activity._id }).catch(() => {})
+                    runControl(() => revealNow({ id: activity._id }))
                   }
-                  className="border-2 border-white bg-black px-4 py-2 font-mono text-xs font-bold uppercase text-white"
+                  className="border-2 border-white bg-brutalist-cyan px-4 py-2 font-mono text-xs font-bold uppercase text-black shadow-hard-md"
                 >
-                  ✕ Cancel timer
+                  Reveal to room now
                 </button>
-              )}
+                {countdown != null && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      runControl(() => cancelReveal({ id: activity._id }))
+                    }
+                    className="border-2 border-white bg-black px-4 py-2 font-mono text-xs font-bold uppercase text-white"
+                  >
+                    ✕ Cancel timer
+                  </button>
+                )}
+              </div>
+              <ErrorLine error={controlError} />
             </div>
           )}
         </div>
