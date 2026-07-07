@@ -20,8 +20,8 @@ function frame(params: GraphicParams, inner: string): string {
 const dotGrid: RenderFn = (p) => {
   const rng = mulberry32(p.seed);
   const spacing = lerp(96, 34, p.density);
-  const faint = withAlpha(p.accent, 0.12);
-  const bright = withAlpha(p.accent, 0.85);
+  const faint = withAlpha(p.accent, 0.4);
+  const bright = withAlpha(p.accent, 0.95);
   let out = '';
   for (let y = spacing / 2; y < p.height; y += spacing) {
     for (let x = spacing / 2; x < p.width; x += spacing) {
@@ -38,8 +38,8 @@ const dotGrid: RenderFn = (p) => {
 const diagonalHatch: RenderFn = (p) => {
   const rng = mulberry32(p.seed);
   const gap = lerp(70, 20, p.density);
-  const faint = withAlpha(p.accent, 0.1);
-  const bright = withAlpha(p.accent, 0.7);
+  const faint = withAlpha(p.accent, 0.32);
+  const bright = withAlpha(p.accent, 0.9);
   let out = '';
   for (let o = -p.height; o < p.width; o += gap) {
     const hot = chance(rng, 0.12);
@@ -57,8 +57,8 @@ const nodeNetwork: RenderFn = (p) => {
     x: range(rng, 0, p.width),
     y: range(rng, 0, p.height),
   }));
-  const edge = withAlpha(p.accent, 0.18);
-  const dot = withAlpha(p.accent, 0.9);
+  const edge = withAlpha(p.accent, 0.35);
+  const dot = withAlpha(p.accent, 0.95);
   let lines = '';
   for (let i = 0; i < nodes.length; i++) {
     const dists = nodes
@@ -95,7 +95,7 @@ const contourLines: RenderFn = (p) => {
     const freq = range(rng, 1.2, 3.2);
     const phase = range(rng, 0, Math.PI * 2);
     const hot = chance(rng, 0.15);
-    const stroke = hot ? withAlpha(p.accent, 0.8) : withAlpha(p.accent, 0.14);
+    const stroke = hot ? withAlpha(p.accent, 0.9) : withAlpha(p.accent, 0.32);
     let d = '';
     for (let x = 0; x <= p.width; x += step) {
       const y =
@@ -112,9 +112,9 @@ const isoGrid: RenderFn = (p) => {
   const rng = mulberry32(p.seed);
   const cw = lerp(120, 52, p.density);
   const ch = cw * 0.58;
-  const line = withAlpha(p.accent, 0.16);
-  const fill = withAlpha(p.accent, 0.1);
-  const hot = withAlpha(p.accent, 0.55);
+  const line = withAlpha(p.accent, 0.36);
+  const fill = withAlpha(p.accent, 0.22);
+  const hot = withAlpha(p.accent, 0.85);
   let out = '';
   for (let row = -1; row * ch * 0.5 < p.height + ch; row++) {
     for (let col = -1; col * cw < p.width + cw; col++) {
@@ -132,9 +132,9 @@ const isoGrid: RenderFn = (p) => {
 const scatterBlocks: RenderFn = (p) => {
   const rng = mulberry32(p.seed);
   const count = Math.round(lerp(14, 76, p.density));
-  const outline = withAlpha(p.accent, 0.3);
-  const faint = withAlpha(p.accent, 0.08);
-  const solid = withAlpha(p.accent, 0.85);
+  const outline = withAlpha(p.accent, 0.5);
+  const faint = withAlpha(p.accent, 0.22);
+  const solid = withAlpha(p.accent, 0.95);
   let out = '';
   for (let i = 0; i < count; i++) {
     const x = range(rng, 0, p.width);
