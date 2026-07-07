@@ -1,0 +1,142 @@
+---
+title: What is the SAFE Stack?
+date: '2019-01-24'
+event: F# Talk
+audience: Developers
+summary: An end-to-end F# web stack. Saturn and Giraffe on the server, Fable compiling F# to JavaScript on the client, and Elmish bringing the Elm Model-View-Update pattern to the browser — one language from the database to the DOM. Recreated in the talks format from the original 2019 slides.com deck.
+tags: ['fsharp', 'safe-stack', 'fable', 'web', 'talks']
+durationMins: 20
+draft: true
+---
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#22d3ee' }}>● The SAFE Stack · 2019</div>
+
+# WHAT IS THE SAFE STACK?
+
+### F# from the database to the DOM
+
+**Ryan Kelly**
+
+> One language, one type system, all the way through the web app.
+
+???
+
+[⏱ 0–2 · INTRO] The pitch: full-stack web development where server and client are
+both F#, sharing types across the wire. No context-switching between languages.
+
+---
+
+# SAFE = SATURN · AZURE · FABLE · ELMISH
+
+Four pieces, one acronym:
+
+<Diagram type="mermaid" caption="The SAFE stack, end to end">
+{`flowchart LR
+  DB[("Data")] --> S["Saturn + Giraffe<br/>(server)"]
+  S -->|"shared F# types"| F["Fable<br/>(F# → JS)"]
+  F --> E["Elmish<br/>(MVU in the browser)"]
+  E --> U["UI"]
+  A["Azure<br/>(hosting)"] -.-> S`}
+</Diagram>
+
+The magic: the **same F# types** describe your API on both sides of the wire.
+
+???
+
+[⏱ 2–4] Walk the pipeline. The standout property is shared types — define a record
+once, use it on server and client, and the compiler catches a mismatch.
+
+---
+
+# SATURN + GIRAFFE
+
+The server layer.
+
+- **Giraffe** — functional wrappers over ASP.NET Core
+- **Saturn** — an opinionated, MVC-flavoured layer on top of Giraffe
+
+You get ASP.NET Core's performance with a composable, functional routing model.
+
+<NoteBlock title="Docs" color="blue">
+saturnframework.org · giraffe-fsharp Giraffe docs
+</NoteBlock>
+
+???
+
+[⏱ 4–7] Giraffe is the low-level HttpHandler pipeline; Saturn is the batteries-
+included layer if you want structure. Both are just ASP.NET Core underneath.
+
+---
+
+# FABLE
+
+The client layer: **F# |> Babel**.
+
+- Compiles **F# to JavaScript** using Babel as the transpiler
+- Ties in heavily with the JS ecosystem — npm packages, React, the lot
+- Designed to be highly compatible with existing JS tooling
+
+<NoteBlock title="Docs" color="blue">
+fable.io
+</NoteBlock>
+
+???
+
+[⏱ 7–10] This is what makes the "F# in the browser" claim real. You still reach
+into the npm ecosystem, but you write F#. Interop is first-class.
+
+---
+
+# ELMISH
+
+MVU for the browser.
+
+- A Fable library that, with React/Redux, gives you the **Elm architecture**
+- **Model → View → Update** — a single state, pure update function, rendered view
+- Hot Module Reload via Redux/Webpack
+
+<Diagram type="mermaid" caption="Model-View-Update loop">
+{`flowchart LR
+  M["Model"] --> V["View"]
+  V -->|"message"| U["Update"]
+  U --> M`}
+</Diagram>
+
+???
+
+[⏱ 10–14] MVU is the heart of the client. One immutable model, messages describe
+what happened, update produces the next model. Predictable, testable, time-travel
+debuggable.
+
+---
+
+# FULMA
+
+Styling, the F# way.
+
+- **F# + Bulma** — typed wrappers over the Bulma CSS framework
+- Build your UI with F# functions instead of hand-written class strings
+
+The whole front end — layout, components, styles — stays in F#.
+
+???
+
+[⏱ 14–16] Optional but lovely: Fulma means even your CSS framework is typed. No
+stringly-typed class names.
+
+---
+
+# ONE LANGUAGE, END TO END
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontWeight: 700, color: '#22d3ee', marginTop: '0.5rem' }}>Saturn ⟶ shared types ⟶ Fable ⟶ Elmish</div>
+
+- Server and client both F#
+- Types shared across the wire — refactor once, both sides update
+- The Elm architecture in the browser, ASP.NET Core on the server
+
+**Thanks!** 👋
+
+???
+
+[⏱ 16–20 · CLOSE] Recap the through-line: it's the shared type system that makes
+SAFE more than "F# on both ends." Take questions.

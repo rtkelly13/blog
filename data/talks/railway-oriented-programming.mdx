@@ -1,0 +1,315 @@
+---
+title: Railway Oriented Programming
+date: '2018-04-13'
+event: F# Talk
+audience: Developers
+summary: Error handling as a first-class value. Why exceptions, error-callbacks, null and ad-hoc result objects all fall short — and how F#'s Result type lets you model success and failure honestly, then compose them with map, bind and mapError. Recreated in the talks format from the original 2018 slides.com deck.
+tags: ['fsharp', 'functional-programming', 'error-handling', 'talks']
+durationMins: 30
+draft: true
+---
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#ec4899' }}>● Railway Oriented Programming · 2018</div>
+
+# RAILWAY ORIENTED PROGRAMMING
+
+### Error handling you can actually see in the types
+
+**Ryan Kelly**
+
+> Success and failure as two tracks — and the points that switch between them.
+
+???
+
+[⏱ 0–2 · INTRO] Set the frame: we handle errors constantly, but most of the ways
+we do it hide the failure from the type system. Today: make failure explicit and
+composable.
+
+---
+
+# WHAT PROBLEM ARE WE SOLVING?
+
+Almost every useful function can **fail**:
+
+- Parse a string that isn't a number
+- Fetch a record that doesn't exist
+- Call a service that's down
+
+The question isn't *whether* things fail — it's whether the **type** tells you they can.
+
+???
+
+[⏱ 2–4] The thesis in one line: an honest signature admits it can fail. Everything
+that follows is about getting failure into the return type.
+
+---
+
+# THE USUAL SUSPECTS
+
+Four ways we already handle errors — each with a catch.
+
+<Diagram type="mermaid" caption="Ways to signal failure">
+{`flowchart TB
+  A["Exceptions"] --> E["something is hidden<br/>from the caller"]
+  B["callback(err, result)"] --> E
+  C["Default values / null"] --> E
+  D["Ad-hoc Result objects"] --> E`}
+</Diagram>
+
+Let's take them one at a time.
+
+???
+
+[⏱ 4–5] Preview the next four slides. The common thread: the compiler doesn't make
+you deal with the failure.
+
+---
+
+# EXCEPTIONS
+
+Basically a **goto** with nicer syntax.
+
+- Any line *could* be doing something you don't expect
+- Often the simplest thing to reach for
+
+<NoteBlock title="Main issue" color="red">
+**Magic code paths** — control can leave a function from anywhere, invisibly.
+</NoteBlock>
+
+???
+
+[⏱ 5–8] Exceptions aren't evil, but they're invisible in the signature. `int
+Parse(string)` doesn't tell you it throws. Control flow you can't see.
+
+---
+
+# callback(err, result)
+
+The Node.js classic.
+
+- You must check `err` **before** touching `result`
+- Every layer has to handle — or forward — the error
+
+<NoteBlock title="Main issue" color="red">
+**Too much boilerplate** — and nothing forces you to check `err` first.
+</NoteBlock>
+
+???
+
+[⏱ 8–10] Convention, not enforcement. Forget the check and you read a `result`
+that was never valid.
+
+---
+
+# DEFAULT VALUES & null
+
+"If in doubt, return `null`" — or `0`, or `1970-01-01`.
+
+- `Option<'a>` is better, but still only says *"nothing"*
+
+<NoteBlock title="Main issue" color="red">
+**No explanation of the error** — you know it failed, not *why*.
+</NoteBlock>
+
+???
+
+[⏱ 10–12] Option is a real step up (no null), but a bare `None` throws away the
+reason. Sometimes you need the why.
+
+---
+
+# AD-HOC RESULT OBJECTS
+
+Roll your own bag of fields:
+
+```csharp
+public class Result<T> {
+    public bool HasError { get; set; }
+    public T Value { get; set; }
+    public string Error { get; set; }
+}
+```
+
+<NoteBlock title="Main issue" color="red">
+**Nothing forces the caller to handle the error** — `Value` is readable even when `HasError` is true.
+</NoteBlock>
+
+???
+
+[⏱ 12–14] So close — but the two states aren't mutually exclusive in the type. You
+can read a value that isn't there. We want the compiler to stop that.
+
+---
+
+# WHAT ABOUT Either?
+
+Abstracts a **Left** and a **Right**:
+
+```fsharp
+type Either<'a, 'b> =
+  | Left of 'a
+  | Right of 'b
+```
+
+<NoteBlock title="Main issue" color="red">
+Which side is the error? By convention it's the **Left** — but you have to *know* that.
+</NoteBlock>
+
+???
+
+[⏱ 14–16] Either has the right shape — a union, two mutually exclusive cases — but
+Left/Right carry no meaning. We want the names to say what they mean.
+
+---
+
+# WHAT DO WE ACTUALLY WANT?
+
+- **Simple semantics** — easy to read at the call site
+- **Unambiguous** — no "which side is the error?"
+- **Defer errors** — carry failure along, handle it later
+- **Honest APIs** — the signature admits it can fail
+- **Explicit consumption** — you *must* deal with both cases
+
+???
+
+[⏱ 16–18] This is the checklist. Next slide is the type that ticks every box.
+
+---
+
+# THE RESULT TYPE
+
+A union of an **Ok** and an **Error** — named, unambiguous, exhaustive.
+
+```fsharp
+type Result<'T,'TError> =
+  | Ok of ResultValue:'T
+  | Error of ErrorValue:'TError
+```
+
+The names *are* the documentation. You can't read an `Ok` value out of an `Error`.
+
+???
+
+[⏱ 18–20] The payoff. Built into F#. Pattern matching forces you to handle both
+cases or the compiler complains. Now let's use it.
+
+---
+
+# THREE PHASES
+
+Working with `Result` breaks into three moves:
+
+<Diagram type="mermaid" caption="The shape of every Result workflow">
+{`flowchart LR
+  A["Construction<br/>get into Result"] --> B["Pipelining<br/>transform inside"]
+  B --> C["Consumption<br/>get back out"]`}
+</Diagram>
+
+???
+
+[⏱ 20–21] Map the rest of the talk: construct → pipeline → consume. Same three
+beats every time.
+
+---
+
+# CONSTRUCTION
+
+Get a raw value **into** a `Result`:
+
+```fsharp
+let construction value =
+    match System.Int32.TryParse(value) with
+    | (true, int) -> Ok int
+    | _ -> sprintf "Could not parse value %s" value |> Error
+```
+
+Signature: `string -> Result<int, string>` — honest about failing.
+
+???
+
+[⏱ 21–23] The boundary. Once a value is inside a Result, everything downstream
+composes. Note the signature tells the whole story.
+
+---
+
+# PIPELINING
+
+Transform the value **without** leaving the track:
+
+```fsharp
+let pipeline value =
+    value
+    |> parseInt
+    |> Result.bind (fun x ->
+        if x > 10 then Ok x
+        else Error "Value must be greater than 10")
+    |> Result.map (fun x -> x * 2)
+    |> Result.mapError (fun error -> sprintf "Error: %s" error)
+```
+
+Errors short-circuit; the happy path flows on.
+
+???
+
+[⏱ 23–26] This is the "railway": Ok stays on the main line, Error diverts to the
+error track and skips the rest. Three combinators do the switching — next three
+slides.
+
+---
+
+# map · bind · mapError
+
+The three combinators that keep you on the rails:
+
+| Combinator | When it runs | What it takes |
+| --- | --- | --- |
+| `Result.map` | on **Ok** | `'a -> 'b` |
+| `Result.bind` | on **Ok** | `'a -> Result<'b,'e>` |
+| `Result.mapError` | on **Error** | `'e -> 'f` |
+
+`map` transforms a value; `bind` chains another failable step; `mapError` reshapes the failure.
+
+???
+
+[⏱ 26–28] The whole algebra on one slide. bind is the important one — it's how you
+compose two things that can each fail without nesting.
+
+---
+
+# CONSUMPTION
+
+Finally, get a value back **out** — and you must handle both cases:
+
+```fsharp
+let consumption value =
+    match value |> pipeline with
+    | Ok ok -> ok
+    | Error error -> failwith error
+```
+
+Same pattern match as any other union — the compiler makes sure you cover both.
+
+???
+
+[⏱ 28–29] At the edge of the system you collapse the Result — log it, return an
+HTTP code, throw. But you decide, explicitly, and the compiler holds you to it.
+
+---
+
+# THERE'S MUCH MORE
+
+This is just a glimpse. Where it goes next:
+
+- **Computation expressions** — `result { ... }` to hide the plumbing
+- **Result aggregation** — collect many results into one
+- **Tee** — run side effects without leaving the track
+- **Kleisli composition** — glue failable functions together
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontWeight: 700, color: '#ec4899', marginTop: '1rem' }}>Model failure in the type — then let composition do the work.</div>
+
+**Thanks!** 👋
+
+???
+
+[⏱ 29–30 · CLOSE] Leave them with the one idea: put failure in the return type and
+everything else composes. Take questions.
