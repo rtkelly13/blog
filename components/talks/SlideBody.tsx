@@ -19,9 +19,14 @@ interface SlideBodyProps {
 export default function SlideBody({ code }: SlideBodyProps) {
   const MDXContent = useMemo(() => getMDXComponent(code), [code]);
 
+  // Fill the slide's full height and center the content vertically so sparse
+  // slides read as intentional (not top-clustered with empty space below), and
+  // size text up (prose-xl) for projection. The densest slide still fits 768px.
   return (
-    <div className="prose prose-invert prose-lg max-w-none">
-      <MDXContent components={slideComponents} />
+    <div className="flex h-full flex-col justify-center">
+      <div className="prose prose-invert prose-xl max-w-none">
+        <MDXContent components={slideComponents} />
+      </div>
     </div>
   );
 }
