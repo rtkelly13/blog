@@ -1,5 +1,7 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
+import ErrorLine from '@/components/admin/ErrorLine';
+import { useRunAction } from '@/components/admin/useRunAction';
 import { api } from '@/convex/_generated/api';
 import { getMachineId } from '@/lib/machineId';
 import { useRateLimitNotice } from '@/lib/useRateLimitNotice';
@@ -45,6 +47,8 @@ function Poll({
   // submit confirms; the server is the source of truth via `remaining`).
   const [answersLeft, setAnswersLeft] = useState<number | null>(null);
   const { secondsLeft, notify } = useRateLimitNotice();
+  // Slide-embedded start is a presenter control — surface its failures.
+  const { run: runStart, error: startError } = useRunAction();
 
   // No open poll yet. An admin on a slide that declares a prompt can start it in
   // one click (the poll question lives with the slide).
@@ -58,11 +62,12 @@ function Poll({
         <p className="mb-3 font-mono text-sm text-zinc-300">{prompt}</p>
         <button
           type="button"
-          onClick={() => start({ room, prompt }).catch(() => {})}
+          onClick={() => runStart(() => start({ room, prompt }))}
           className="border-2 border-white bg-brutalist-pink px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
         >
           ▶ Start poll
         </button>
+        <ErrorLine error={startError} />
       </div>
     );
   }

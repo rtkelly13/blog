@@ -71,8 +71,10 @@ function ConfigBadges({
 
 function Dashboard({
   talkDurations,
+  talkOptions,
 }: {
   talkDurations?: Record<string, number>;
+  talkOptions?: { slug: string; title: string }[];
 }) {
   const current = useQuery(api.talks.current);
   const viewer = useQuery(api.talks.viewer);
@@ -131,7 +133,7 @@ function Dashboard({
       <div className="grid gap-6 md:grid-cols-2">
         {/* Start / control */}
         <Card title="Start / control a talk">
-          <TalkControls />
+          <TalkControls talkOptions={talkOptions} />
         </Card>
 
         {/* Broadcast launcher */}
@@ -240,13 +242,16 @@ function Dashboard({
  */
 export default function AdminDashboard({
   talkDurations,
+  talkOptions,
 }: {
   /** slug → frontmatter durationMins, baked in by pages/admin getStaticProps. */
   talkDurations?: Record<string, number>;
+  /** Real deck slugs/titles for the start form, from the same getStaticProps. */
+  talkOptions?: { slug: string; title: string }[];
 }) {
   return (
     <AdminGate>
-      <Dashboard talkDurations={talkDurations} />
+      <Dashboard talkDurations={talkDurations} talkOptions={talkOptions} />
     </AdminGate>
   );
 }
