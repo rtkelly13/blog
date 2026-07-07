@@ -54,13 +54,18 @@ export function getGenerator(name: string): Generator | undefined {
   return BY_NAME.get(name);
 }
 
-/** Merge caller params over a generator's defaults into a full param set. */
+/** Merge caller params over a generator's defaults into a full param set.
+ * `undefined` overrides are dropped so a missing prop (e.g. width) falls back
+ * to the default instead of clobbering it with undefined. */
 export function resolveParams(
   name: string,
   overrides: Partial<GraphicParams> = {},
 ): GraphicParams {
   const gen = getGenerator(name);
-  return { ...BASE_PARAMS, ...gen?.defaults, ...overrides };
+  const defined = Object.fromEntries(
+    Object.entries(overrides).filter(([, v]) => v !== undefined),
+  );
+  return { ...BASE_PARAMS, ...gen?.defaults, ...defined };
 }
 
 /** Render a generator to a raw SVG string. Empty string for unknown names. */
