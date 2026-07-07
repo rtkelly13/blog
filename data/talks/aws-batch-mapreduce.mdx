@@ -1,0 +1,127 @@
+---
+title: Map/Reduce with AWS Batch
+date: '2022-09-10'
+event: Tech Talk
+audience: Developers
+summary: Batch compute without babysitting servers. Where AWS Batch sits on the serverless spectrum, how compute environments and task definitions fit together, and how to shape a classic map/reduce job — fanning out over NYC taxi data to build a visualisation. Recreated in the talks format from the original 2022 slides.com deck.
+tags: ['aws', 'aws-batch', 'mapreduce', 'cloud', 'talks']
+durationMins: 20
+draft: true
+---
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#39ff14' }}>● AWS Batch Map/Reduce · 2022</div>
+
+# {'{'}AWS Batch{'}'}
+
+### Implementing Map/Reduce with AWS Batch
+
+**Ryan Kelly**
+
+> Fan a big job out over a fleet you never have to manage.
+
+???
+
+[⏱ 0–2 · INTRO] The idea: AWS Batch runs containerised jobs at scale without you
+running the cluster. We'll use it to do map/reduce over a real dataset.
+
+---
+
+# WHERE DOES BATCH FIT?
+
+AWS gives you a **spectrum** of compute, trading control for convenience.
+
+<Diagram type="mermaid" caption="The serverless spectrum">
+{`flowchart LR
+  A["EC2<br/>you manage it all"] --> B["AWS Batch<br/>managed job queue"]
+  B --> C["Fargate<br/>serverless containers"]
+  C --> D["Lambda<br/>serverless functions"]`}
+</Diagram>
+
+Batch sits in the sweet spot for **large, parallel, batch** workloads.
+
+???
+
+[⏱ 2–5] Frame Batch against Lambda and raw EC2. Lambda is great until the job is
+too big or too long; EC2 means running your own cluster. Batch queues and schedules
+container jobs for you.
+
+---
+
+# TWO BUILDING BLOCKS
+
+**Compute Environments** — the *where*:
+
+- EC2 Spot, EC2 On-Demand, or **Fargate**
+- Batch scales the fleet up and down to match the queue
+
+**Task (Job) Definitions** — the *what*:
+
+- Container spec: image, vCPU, memory, command
+
+???
+
+[⏱ 5–9] Two concepts do most of the work. Compute environment = the pool of
+capacity (Spot to save money); job definition = the container blueprint. A job
+queue ties them together.
+
+---
+
+# WHAT IS MAP/REDUCE?
+
+> MapReduce is a programming model… for processing and generating big data sets
+> with a parallel, distributed algorithm on a cluster. — *Wikipedia*
+
+<Diagram type="mermaid" caption="Map, then reduce">
+{`flowchart LR
+  I["Input<br/>split into chunks"] --> M1["map"]
+  I --> M2["map"]
+  I --> M3["map"]
+  M1 --> R["reduce<br/>combine results"]
+  M2 --> R
+  M3 --> R
+  R --> O["Output"]`}
+</Diagram>
+
+**Map** each chunk in parallel, then **reduce** the partial results into one answer.
+
+???
+
+[⏱ 9–12] Classic pattern. On Batch: each map is a job over a slice of the data;
+the reduce job depends on the maps finishing (job dependencies) and combines them.
+
+---
+
+# THE DEMO
+
+Load **NYC taxi data** and build a video visualisation.
+
+- **Map** — process trip data in parallel slices
+- **Reduce** — stitch frames into a visualisation
+- Batch fans the maps out across the compute environment, then runs the reduce
+
+<NoteBlock title="Code" color="green">
+github.com/rtkelly13/AWSBatch-MapReduce
+</NoteBlock>
+
+???
+
+[⏱ 12–18 · DEMO 🚀] Walk the repo: job definitions for map and reduce, the queue,
+and the dependency that makes reduce wait. Show the resulting visualisation if the
+render's ready.
+
+---
+
+# TO THE DEMO! 🚀
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontWeight: 700, color: '#39ff14', marginTop: '0.5rem' }}>github.com/rtkelly13/AWSBatch-MapReduce</div>
+
+- Batch = managed, parallel, containerised jobs
+- Compute environment (the where) + job definition (the what)
+- Map/reduce falls out naturally with job dependencies
+
+**Thanks!** 👋
+
+???
+
+[⏱ 18–20 · CLOSE] Recap the two building blocks and point at the repo. Take
+questions.

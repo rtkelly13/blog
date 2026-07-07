@@ -1,0 +1,183 @@
+---
+title: Paket and its Perks
+date: '2018-07-13'
+event: .NET Talk
+audience: Developers
+summary: A dependency manager built for reproducible builds. Why lock files matter, how transitive dependencies bite you, and what Paket adds on top of the NuGet ecosystem — global version resolution, a real CLI, groups, and a pile of extra features. Recreated in the talks format from the original 2018 slides.com deck.
+tags: ['dotnet', 'paket', 'nuget', 'build', 'talks']
+durationMins: 25
+draft: true
+---
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#facc15' }}>● Paket and its Perks · 2018</div>
+
+# PAKET AND ITS PERKS
+
+### Dependency management for reproducible .NET builds
+
+**Ryan Kelly**
+
+> The build that works on your machine should work on every machine — forever.
+
+???
+
+[⏱ 0–2 · INTRO] The promise of Paket in one line: reproducible builds. Everything
+in this talk hangs off that goal.
+
+---
+
+# REPRODUCIBLE BUILDS
+
+The same source should produce the **same output** — today, next year, on CI, on a
+teammate's laptop.
+
+- No "works on my machine"
+- No silent dependency drift
+- A build you can trust a year from now
+
+???
+
+[⏱ 2–4] Define the enemy: dependency drift. A transitive package quietly bumps and
+your "unchanged" build behaves differently. Reproducibility is the fix.
+
+---
+
+# LOCK-BASED SOURCE CONTROL
+
+Other ecosystems solved this with a **lock file**:
+
+- **npm** — `package-lock.json`
+- **pip** — `requirements.txt` (pinned)
+- **Cargo, Bundler, Composer…** — same idea
+
+The lock file records the *exact* resolved graph, so everyone restores identical versions.
+
+???
+
+[⏱ 4–7] Paket brings the lock-file discipline that npm/pip/cargo already have to
+.NET. `paket.dependencies` = what you want; `paket.lock` = exactly what you got.
+
+---
+
+# THE PROBLEM WITH raw csproj
+
+Traditional package references leave gaps:
+
+- Versions pinned **per-project**, not solution-wide → the same package at
+  different versions across projects
+- **Unknown transitive dependencies** — you never explicitly see what your
+  packages dragged in
+- No single source of truth for the whole graph
+
+???
+
+[⏱ 7–10] The classic .NET pain: two projects in one solution resolve the same
+dependency to different versions. And the transitive graph is invisible.
+
+---
+
+# WHY IT MATTERS: SUPPLY CHAIN
+
+Loose dependency management is a **security** problem too.
+
+- **Malicious package attacks** — a compromised version slips in
+- Version **consolidation** — one version, reviewed, across the whole solution
+- **Unknown transitive dependencies** — you can't audit what you can't see
+
+<NoteBlock title="Reproducibility = auditability" color="yellow">
+If your build isn't reproducible, you can't be sure *what* you actually shipped.
+</NoteBlock>
+
+???
+
+[⏱ 10–13] Tie reproducibility to security. A pinned, visible, consolidated graph
+is one you can actually review. This landed harder over the years as supply-chain
+attacks grew.
+
+---
+
+# PAKET: YET ANOTHER PACKAGE MANAGER
+
+So what does Paket add?
+
+- Versions managed **globally** (solution-wide) vs per-project
+- A real **CLI** experience vs GUI-focused workflows
+- **Reproducible builds** by default (lock file)
+- **Compatible** with the existing NuGet ecosystem — same feeds, same packages
+
+???
+
+[⏱ 13–16] The elevator pitch. Crucially it's not a rival registry — it sits on top
+of NuGet. You lose nothing, you gain the lock file and global resolution.
+
+---
+
+# HOW DOES IT WORK?
+
+Three files tell the whole story:
+
+<Diagram type="mermaid" caption="Paket's three files">
+{`flowchart LR
+  A["paket.dependencies<br/>what you want"] --> B["paket.lock<br/>exactly what resolved"]
+  B --> C["paket.references<br/>per-project needs"]`}
+</Diagram>
+
+`dependencies` declares intent, `lock` pins the resolved graph, `references` says which project uses what.
+
+???
+
+[⏱ 16–19] Walk the three files. The lock file is the star — commit it, and every
+restore anywhere reproduces the exact graph.
+
+---
+
+# LET'S CONVERT A PROJECT
+
+Migration is straightforward:
+
+1. `paket init`
+2. Move your NuGet references into `paket.dependencies`
+3. `paket install` — generates the lock file and wires up projects
+4. Commit `paket.lock`
+
+From here, every restore is reproducible.
+
+???
+
+[⏱ 19–22 · DEMO] Live-convert a small project if there's a machine. Otherwise walk
+the four steps. The payoff is the committed lock file.
+
+---
+
+# EXTRA PERKS
+
+Once you're in, you get a lot for free:
+
+- Build **NuGet packages** automatically
+- **Source dependencies** right inside `paket.dependencies` (GitHub files, gists)
+- **Groups** — isolate build-only or test-only dependencies
+- **Build scripts** — generate CSX/FSX DLL includes
+- **Local builds** — clone and build repos locally
+- **Package caches**, **feed credentials**, **overridden packages**
+
+???
+
+[⏱ 22–24] The "perks" of the title. Groups and source dependencies are the
+sleepers — most people come for reproducibility and stay for these.
+
+---
+
+# TAKEAWAY
+
+<div style={{ fontFamily: '"IBM Plex Mono", monospace', fontWeight: 700, color: '#facc15', marginTop: '0.5rem' }}>Same NuGet ecosystem — plus a lock file you can trust.</div>
+
+- Reproducible builds by default
+- Global, auditable dependency graph
+- A pile of extras once you're in
+
+**Thanks!** 👋
+
+???
+
+[⏱ 24–25 · CLOSE] One line to remember: Paket = NuGet + a lock file + global
+resolution. Take questions.
