@@ -97,7 +97,7 @@ function PollControls({ room }: { room: string }) {
                       )
                     }
                   >
-                    {w.hidden ? 'unblock' : 'block'}
+                    {w.hidden ? 'restore' : 'hide'}
                   </button>
                 </div>
               ))}
@@ -382,7 +382,7 @@ function QAControls({ room }: { room: string }) {
                     )
                   }
                 >
-                  {q.hidden ? 'restore' : 'reject'}
+                  {q.hidden ? 'restore' : 'hide'}
                 </button>
               </div>
             </div>
@@ -397,8 +397,8 @@ function QAControls({ room }: { room: string }) {
 /**
  * Presenter cockpit for the audience-participation features: start/close a poll,
  * open a put-it-in-order activity (with a timed answer reveal), moderate the Q&A
- * queue, and reject individual entries — rejected content never reaches the
- * audience, which sees only a blocked count.
+ * queue, and hide individual entries — hidden content never reaches the
+ * audience, which sees neither the content nor a count (the console keeps the row).
  */
 export default function AudienceControls({ room }: { room: string }) {
   return (

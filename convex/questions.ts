@@ -59,8 +59,8 @@ export const ask = mutation({
 });
 
 /**
- * Public: the audience-visible queue (non-rejected), ordered by priority.
- * Rejected (hidden) questions are omitted entirely — the audience is shown
+ * Public: the audience-visible queue (non-hidden), ordered by priority.
+ * Hidden questions are omitted entirely — the audience is shown
  * neither their content nor a count (the presenter tracks those on the console).
  */
 export const list = query({

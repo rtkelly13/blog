@@ -29,6 +29,7 @@ default wrong.
    component. This PR introduces the Convex *components* system to the repo
    (`convex/convex.config.ts` + `app.use`); we accept a hand-rolled limiter would
    duplicate, and subtly mis-handle, what the component already solves.
+   *(Superseded — see Amendment below.)*
 
 The per-feature enable pattern is extended to the new features too: `qa`, `poll`,
 and `activities` become `talkConfig` toggles whose writes are dropped server-side
@@ -41,4 +42,19 @@ when disabled, matching the existing `presence`/`reactions`/`follow` contract.
 - **This is best-effort, not a security boundary.** `machineId` is a resettable
   localStorage value; a determined user clears it or opens tabs. The real trust
   boundary remains the presenter's allowlisted-admin moderation controls
-  (`hidden` / reject). Do not treat these limits as anti-fraud.
+  (Hide). Do not treat these limits as anti-fraud.
+
+## Amendment (2026-07-07): layer 3 shipped hand-rolled, not the component
+
+What shipped is a hand-rolled fixed-window limiter (`convex/lib/rateLimit.ts` +
+the `rateLimits` table), not `@convex-dev/rate-limiter`; the components system
+(`convex.config.ts`) was never introduced. The reversal is accepted rather than
+migrated: the fixed-window math is a small pure function with unit coverage
+(`tests/rate-limit.test.ts`), the table is bounded (one row per machine+kind,
+patched in place), and staying component-free keeps the backend surface smaller.
+Revisit only if limits outgrow fixed windows (e.g. token buckets per feature).
+
+Note: activity `submit` deliberately has **no per-attendee cap** (unlike polls'
+`maxAnswersPerAttendee`) — multiple entries from one device are legitimate
+(group exercises share a device); the rate limit is the only backstop and the
+presenter moderates the rest.

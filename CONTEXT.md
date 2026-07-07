@@ -59,8 +59,10 @@ _Avoid_: censor, filter, block (blocking is the manual mechanism).
 **Hide**:
 The *manual* mechanism. The Presenter removes an entry from the audience-visible
 surface (`hidden: true`). The row is kept — the console still sees it — but the
-audience gets only a count, never the content.
-_Avoid_: reject, delete, remove, ban.
+audience sees nothing: neither the content nor any count. Hide is the one
+canonical verb across all moderation surfaces (questions, poll words, activity
+submissions).
+_Avoid_: reject, block, delete, remove, ban.
 
 **Blocked (count)**:
 A **console-only** tally of Hidden entries the Presenter sees; the audience is
@@ -106,13 +108,26 @@ beat); the following press advances. Tied to *presenting the deck*, not to
 follow-mode.
 _Avoid_: step, click.
 
+**Broadcast**:
+Driving the room's slide: an admin in Presenter or Console mode with
+follow-the-presenter enabled publishes each slide change to the Session
+(`setSlide`), and Attendee decks follow. Automatic — there is no manual
+broadcast toggle.
+_Avoid_: casting, streaming, projecting.
+
 ### Data lifecycle
 
 **Clear-down**:
 The Presenter manually purging one Session's generated data now. The Session
 record (the `talks` row) is kept, so the log persists showing zeroes. See
 [ADR-0003](docs/adr/0003-session-data-retention.md).
-_Avoid_: reset, wipe, delete session (the record survives).
+_Avoid_: reset, wipe, delete (Delete is the stronger, record-removing operation).
+
+**Delete (Session)**:
+The Presenter removing a Session *entirely*: purge its data **and** remove the
+Session record, so the run disappears from the log. The stronger sibling of
+Clear-down; like Clear-down it is blocked while the Session is live.
+_Avoid_: using "delete" for Clear-down or Hide.
 
 **Ephemeral / Persistent**:
 *Ephemeral* data is cron-reaped on a short TTL (presence, floating reactions,

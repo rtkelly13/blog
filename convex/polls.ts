@@ -87,7 +87,7 @@ export const active = query({
 
     const visible = words.filter((w) => !w.hidden);
     const total = visible.reduce((sum, w) => sum + w.count, 0);
-    // Blocked words are withheld from the audience entirely — no count either
+    // Hidden words are withheld from the audience entirely — no count either
     // (the presenter sees them on the console feed).
     return {
       _id: poll._id,
@@ -101,7 +101,7 @@ export const active = query({
   },
 });
 
-/** Presenter: the full word tally incl. blocked words, for moderation. */
+/** Presenter: the full word tally incl. hidden words, for moderation. */
 export const feed = query({
   args: { pollId: v.id('polls') },
   handler: async (ctx, { pollId }) => {
