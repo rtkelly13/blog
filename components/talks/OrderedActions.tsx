@@ -95,6 +95,7 @@ function Activity({
   const [steps, setSteps] = useState<string[]>(['']);
   const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const { secondsLeft, notify } = useRateLimitNotice();
 
   const consoleActivity = feedRes?.authorized ? feedRes.activity : null;
@@ -176,10 +177,18 @@ function Activity({
       if (res.ok === false && res.reason === 'rate_limited') {
         // Refused, not dropped: keep the typed steps and show when to retry.
         notify(res.retryAfterMs);
+      } else if (res.ok === false) {
+        // Any other refusal (activities toggled off mid-type): say so and keep
+        // the typed steps — a "✓ Submitted!" here would be a lie.
+        setSendError('Submissions are closed for this session.');
       } else {
         setSteps(['']);
         setSubmitted(true);
+        setSendError(null);
       }
+    } catch {
+      // e.g. the activity closed while typing (`submit` throws).
+      setSendError('This activity has closed — your steps were not sent.');
     } finally {
       setSending(false);
     }
@@ -236,6 +245,11 @@ function Activity({
               </div>
             ))}
             <RateLimitNotice secondsLeft={secondsLeft} />
+            {sendError && (
+              <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
+                {sendError}
+              </p>
+            )}
             <div className="flex flex-col gap-2 pt-1 sm:flex-row">
               <button
                 type="button"

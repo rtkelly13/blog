@@ -47,17 +47,24 @@ function Queue({
 }) {
   const mode = useDeckMode();
   const data = useQuery(api.questions.list, { room });
+  const current = useQuery(api.talks.current);
   const ask = useMutation(api.questions.ask);
   const upvote = useMutation(api.questions.upvote);
   const { voted, mark } = useVoted();
 
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [refused, setRefused] = useState<string | null>(null);
   const { secondsLeft, notify } = useRateLimitNotice();
+
+  // Q&A toggled off for this session: the server drops ask/upvote, so don't
+  // offer the form or live vote buttons — the queue stays readable (the server
+  // keeps `list` visible deliberately; see convex/questions.ts).
+  const qaOn = current?.room === room && current?.config.qa === true;
 
   // Projected/console decks (and any `display` embed) are read-only: no ask box,
   // votes shown as static badges. Students ask + upvote from /live.
-  const readOnly = display || mode !== 'attendee';
+  const readOnly = display || mode !== 'attendee' || !qaOn;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,9 +77,16 @@ function Queue({
       if (res.ok === false && res.reason === 'rate_limited') {
         // Refused, not dropped: keep the typed question and show when to retry.
         notify(res.retryAfterMs);
+      } else if (res.ok === false) {
+        // Any other refusal (Q&A toggled off mid-type): say so, keep the text —
+        // a cleared input reads as success.
+        setRefused('Q&A is closed for this session.');
       } else {
         setText('');
+        setRefused(null);
       }
+    } catch {
+      setRefused('Could not send your question — try again.');
     } finally {
       setSending(false);
     }
@@ -110,7 +124,20 @@ function Queue({
       {!readOnly && (
         <div className="mt-3 empty:hidden">
           <RateLimitNotice secondsLeft={secondsLeft} />
+          {refused && (
+            <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
+              {refused}
+            </p>
+          )}
         </div>
+      )}
+
+      {/* Mid-type toggle-off: the form vanishes (readOnly flips) — leave a
+          breadcrumb so an attendee who was about to ask isn't just confused. */}
+      {!display && mode === 'attendee' && !qaOn && (
+        <p className="font-mono text-xs uppercase text-zinc-500">
+          Q&A is closed for this session.
+        </p>
       )}
 
       <div className={`${readOnly ? '' : 'mt-5'} space-y-2`}>
