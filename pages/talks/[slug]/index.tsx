@@ -4,11 +4,13 @@ import Head from 'next/head';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import Link from '@/components/Link';
 import LiveTalkBanner from '@/components/LiveTalkBanner';
+import RecordingEmbed from '@/components/RecordingEmbed';
 import { PageSEO } from '@/components/SEO';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 import { getTalkMeta, getTalkStaticPaths } from '@/lib/talks';
 import formatDate from '@/lib/utils/formatDate';
+import { youtubeEmbedUrl } from '@/lib/utils/youtubeEmbed';
 
 export const getStaticPaths = getTalkStaticPaths;
 
@@ -42,6 +44,9 @@ export default function TalkLanding({
     pdf,
     draft,
   } = frontMatter;
+
+  // A YouTube videoUrl becomes an inline player; anything else stays a link.
+  const embeddable = videoUrl ? youtubeEmbedUrl(videoUrl) !== null : false;
 
   return (
     <>
@@ -124,7 +129,7 @@ export default function TalkLanding({
           >
             Download PDF
           </Link>
-          {videoUrl && (
+          {videoUrl && !embeddable && (
             <Link
               href={videoUrl}
               className="border-2 border-white bg-brutalist-pink px-6 py-3 font-mono font-bold uppercase text-black shadow-hard-md transition-all hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none"
@@ -136,6 +141,8 @@ export default function TalkLanding({
             {slideCount} slides
           </span>
         </div>
+
+        {videoUrl && <RecordingEmbed url={videoUrl} title={title} />}
       </article>
     </>
   );
