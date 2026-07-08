@@ -27,7 +27,11 @@ export type TalkFrontMatter = {
   durationMins?: number;
   /** Optional path to a pre-rendered PDF in /public (overrides the print export). */
   pdf?: string;
-  /** Optional link to a recording of the talk. */
+  /**
+   * Optional link to a recording of the talk. A YouTube URL (watch / youtu.be /
+   * live / shorts) renders as an inline player on the talk page; any other URL
+   * renders as a "Watch Recording" link. See lib/utils/youtubeEmbed.ts.
+   */
   videoUrl?: string;
   /**
    * Named background definitions. A slide picks one by name via a
