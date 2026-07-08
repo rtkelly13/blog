@@ -17,12 +17,14 @@ function frontmatterSnippet(
   opacity: number,
 ): string {
   return [
-    'background:',
-    `  generator: ${name}`,
-    `  seed: ${seed}`,
-    `  accent: '${accent}'`,
-    `  density: ${density.toFixed(2)}`,
-    `  opacity: ${opacity.toFixed(2)}`,
+    'backgrounds:',
+    `  ${name}:`,
+    `    generator: ${name}`,
+    `    seed: ${seed}`,
+    `    accent: '${accent}'`,
+    `    density: ${density.toFixed(2)}`,
+    `    opacity: ${opacity.toFixed(2)}`,
+    `background: ${name}`,
   ].join('\n');
 }
 
@@ -211,9 +213,9 @@ export default function GraphicsGallery() {
           <div className="space-y-3 font-mono text-xs text-white">
             <p>
               <span className="text-brutalist-cyan">&gt;</span> In a talk's MDX
-              frontmatter, add a{' '}
-              <code className="text-brutalist-yellow">background</code> block
-              (copy it from any card above):
+              frontmatter, define one or more named{' '}
+              <code className="text-brutalist-yellow">backgrounds</code> and
+              pick a deck-wide default (copy it from any card above):
             </p>
             <pre className="overflow-x-auto border-2 border-white bg-black p-3 text-brutalist-cyan">
               {frontmatterSnippet(
@@ -224,6 +226,14 @@ export default function GraphicsGallery() {
                 opacity,
               )}
             </pre>
+            <p className="text-zinc-400">
+              <span className="text-brutalist-cyan">&gt;</span> Any slide can
+              switch background by name with a directive — the backdrop only
+              transitions when the name changes:{' '}
+              <code className="text-brutalist-yellow">
+                {'{/* bg: intense */}'}
+              </code>
+            </p>
             <p className="text-zinc-400">
               <span className="text-brutalist-cyan">&gt;</span> Or render inline
               anywhere:{' '}

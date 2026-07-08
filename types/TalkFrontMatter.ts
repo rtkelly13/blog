@@ -1,6 +1,7 @@
 /**
- * Optional generated deck background (see components/graphics). Renders behind
- * every slide via a data-URI SVG, keyed to the talk's signature accent.
+ * One generated deck background (see components/graphics). Backgrounds are
+ * defined once, named, and referenced by name — so multiple slides can share a
+ * backdrop (which then stays fixed between them) or switch to a different one.
  */
 export type TalkBackground = {
   /** Generator id from the graphics registry (e.g. `node-network`). */
@@ -28,7 +29,13 @@ export type TalkFrontMatter = {
   pdf?: string;
   /** Optional link to a recording of the talk. */
   videoUrl?: string;
-  /** Optional generated deck background. */
-  background?: TalkBackground;
+  /**
+   * Named background definitions. A slide picks one by name via a
+   * `{/* bg: name *\/}` directive; `background` below is the deck-wide default.
+   * The backdrop only transitions when the active slide's name changes.
+   */
+  backgrounds?: Record<string, TalkBackground>;
+  /** Name of the default background (from `backgrounds`) applied to all slides. */
+  background?: string;
   slug: string;
 };
