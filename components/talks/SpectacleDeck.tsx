@@ -6,6 +6,7 @@ import {
   Deck,
   FlexBox,
   FullScreen,
+  fadeTransition,
   Notes,
   Progress,
   Slide,
@@ -226,7 +227,11 @@ function BaseDeck({
   return (
     <>
       {hasBg && <DeckBackground uris={uris} activeName={activeName} />}
-      <Deck theme={deckTheme(hasBg)} template={template}>
+      <Deck
+        theme={deckTheme(hasBg)}
+        template={template}
+        transition={hasBg ? fadeTransition : undefined}
+      >
         {renderSlides(slides, hasBg)}
       </Deck>
     </>
@@ -445,7 +450,11 @@ function LiveDeck({
 
   const deckEl = (
     <DeckModeProvider value={mode}>
-      <Deck theme={deckTheme(hasBg)} template={template}>
+      <Deck
+        theme={deckTheme(hasBg)}
+        template={template}
+        transition={hasBg ? fadeTransition : undefined}
+      >
         {renderSlides(slides, hasBg)}
       </Deck>
     </DeckModeProvider>
