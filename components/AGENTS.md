@@ -67,7 +67,9 @@ Actions registered via `kbar` API. Add new commands in SearchProvider.
 ## TALKS
 
 The live-talk UI, backed by Convex (see convex/AGENTS.md). Split into the deck
-itself and the embeddable audience widgets.
+itself and the embeddable audience widgets. Deck theming, the SVG **graphics
+generators** (`components/graphics/`), and **named per-slide backgrounds** are
+documented in [docs/talks-graphics.md](../docs/talks-graphics.md).
 
 | Component          | Purpose                                                       |
 | ------------------ | ------------------------------------------------------------ |

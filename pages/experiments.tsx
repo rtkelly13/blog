@@ -1,4 +1,4 @@
-import { Beaker, Palette, Terminal, Type } from 'lucide-react';
+import { Beaker, Palette, Sparkles, Terminal, Type } from 'lucide-react';
 import Link from '@/components/Link';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
@@ -20,6 +20,15 @@ const experiments = [
     icon: <Type className="w-12 h-12" />,
     status: 'active',
     components: 3,
+  },
+  {
+    name: 'Graphics Generators',
+    path: '/experiments/graphics',
+    description:
+      'Seed-driven SVG background + graphic generators for talks and heroes',
+    icon: <Sparkles className="w-12 h-12" />,
+    status: 'active',
+    components: 6,
   },
 ];
 

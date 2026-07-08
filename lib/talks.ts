@@ -215,7 +215,16 @@ export type TalkSlide = {
    * tag — drives the console's per-slide pacing indicator. Null = no window.
    */
   window: SlideWindow | null;
+  /**
+   * Name of the background this slide selects, parsed from a `{/* bg: name *\/}`
+   * directive in the slide body. Null falls back to the deck default. The deck
+   * only transitions the backdrop when this name changes between slides.
+   */
+  background: string | null;
 };
+
+/** Match a `{/* bg: name *\/}` directive (MDX comment — renders nothing). */
+const BG_DIRECTIVE = /\{\/\*\s*bg:\s*([\w-]+)\s*\*\/\}/;
 
 export async function getTalkBySlug(
   slug: string,
@@ -237,8 +246,11 @@ export async function getTalkBySlug(
     chunks.map(async (chunk) => {
       const [body, ...noteParts] = chunk.split(/^\?\?\?$/m);
       const notes = noteParts.join('\n').trim();
+      const background = body.match(BG_DIRECTIVE)?.[1] ?? null;
+      // Strip the directive so it never reaches the MDX compiler as content.
+      const cleanBody = body.replace(new RegExp(BG_DIRECTIVE, 'g'), '').trim();
       const [code, notesCode] = await Promise.all([
-        compileSlide(body.trim()),
+        compileSlide(cleanBody),
         notes ? compileSlide(notes) : Promise.resolve(null),
       ]);
       return {
@@ -246,6 +258,7 @@ export async function getTalkBySlug(
         notes: notes || null,
         notesCode,
         window: parseSlideWindow(notes),
+        background,
       };
     }),
   );

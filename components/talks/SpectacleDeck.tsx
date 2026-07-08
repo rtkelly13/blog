@@ -1,15 +1,18 @@
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Deck,
   FlexBox,
   FullScreen,
+  fadeTransition,
   Notes,
   Progress,
   Slide,
 } from 'spectacle';
+import type { TalkBackground } from 'types/TalkFrontMatter';
+import { graphicDataUri } from '@/components/graphics';
 import { api } from '@/convex/_generated/api';
 import { isConvexConfigured } from '@/lib/convexClient';
 import type { SlideWindow } from '@/lib/slideTiming';
@@ -29,6 +32,8 @@ export interface DeckSlide {
   notesCode: string | null;
   /** Per-slide `[⏱ a–b …]` timing window (minutes from talk start), if any. */
   window?: SlideWindow | null;
+  /** Name of the background this slide selects (frontmatter `backgrounds`). */
+  background?: string | null;
 }
 
 interface SpectacleDeckProps {
@@ -36,6 +41,10 @@ interface SpectacleDeckProps {
   slug: string;
   /** Target length (frontmatter durationMins) — drives the console pacing timer. */
   durationMins?: number;
+  /** Named background definitions (frontmatter `backgrounds`). */
+  backgrounds?: Record<string, TalkBackground>;
+  /** Deck-wide default background name (frontmatter `background`). */
+  defaultBackground?: string;
 }
 
 type Mode = 'attendee' | 'presenter' | 'console';
@@ -76,9 +85,98 @@ function Chrome({
   );
 }
 
-function renderSlides(slides: DeckSlide[]) {
+// A generated background is baked into a single data-URI SVG (opacity folded in).
+function backgroundUri(bg?: TalkBackground): string | undefined {
+  if (!bg?.generator) return undefined;
+  const uri = graphicDataUri(bg.generator, {
+    seed: bg.seed,
+    accent: bg.accent,
+    density: bg.density,
+    opacity: bg.opacity ?? 0.18,
+  });
+  return uri ? `url("${uri}")` : undefined;
+}
+
+/** Resolve each named background to a CSS `url(...)` once. */
+function buildBackgroundUris(
+  backgrounds?: Record<string, TalkBackground>,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [name, bg] of Object.entries(backgrounds ?? {})) {
+    const uri = backgroundUri(bg);
+    if (uri) out[name] = uri;
+  }
+  return out;
+}
+
+/**
+ * Fixed backdrop behind the whole deck: one layer per named background, shown
+ * via opacity. Only the active slide's background is opaque, so the backdrop
+ * stays put between slides that share a name and cross-fades only when the name
+ * actually changes — the content transitions, the backdrop mostly doesn't.
+ */
+function DeckBackground({
+  uris,
+  activeName,
+}: {
+  uris: Record<string, string>;
+  activeName: string | null;
+}) {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        backgroundColor: '#000000',
+      }}
+    >
+      {Object.entries(uris).map(([name, uri]) => (
+        <div
+          key={name}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: uri,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: name === activeName ? 1 : 0,
+            transition: 'opacity 500ms ease',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Reports the active slide index up from inside the persistent template. */
+function ActiveSlideReporter({
+  index,
+  onChange,
+}: {
+  index: number;
+  onChange: (i: number) => void;
+}) {
+  useEffect(() => {
+    onChange(index);
+  }, [index, onChange]);
+  return null;
+}
+
+// With backgrounds present the slides + deck backdrop go transparent so the
+// fixed DeckBackground shows through and stays put across transitions.
+function deckTheme(hasBackground: boolean): typeof brutalistTheme {
+  if (!hasBackground) return brutalistTheme;
+  return {
+    ...brutalistTheme,
+    backdropStyle: { backgroundColor: 'transparent' },
+  };
+}
+
+function renderSlides(slides: DeckSlide[], hasBackground: boolean) {
   return slides.map((slide, i) => (
-    <Slide key={i} backgroundColor="#000000">
+    <Slide key={i} backgroundColor={hasBackground ? 'transparent' : '#000000'}>
       <SlideBody code={slide.code} />
       {slide.notesCode ? (
         <Notes>
@@ -89,12 +187,54 @@ function renderSlides(slides: DeckSlide[]) {
   ));
 }
 
+/** The active slide's background name, or the deck default, or null. */
+function activeBackgroundName(
+  slides: DeckSlide[],
+  active: number,
+  defaultBackground?: string,
+): string | null {
+  return slides[active]?.background ?? defaultBackground ?? null;
+}
+
 /** Deck with no live layer — used when Convex isn't configured. */
-function BaseDeck({ slides }: { slides: DeckSlide[] }) {
+function BaseDeck({
+  slides,
+  backgrounds,
+  defaultBackground,
+}: {
+  slides: DeckSlide[];
+  backgrounds?: Record<string, TalkBackground>;
+  defaultBackground?: string;
+}) {
+  const uris = useMemo(() => buildBackgroundUris(backgrounds), [backgrounds]);
+  const hasBg = Object.keys(uris).length > 0;
+  const [active, setActive] = useState(0);
+  const activeName = activeBackgroundName(slides, active, defaultBackground);
+
+  const template = ({
+    slideNumber,
+    numberOfSlides,
+  }: {
+    slideNumber: number;
+    numberOfSlides: number;
+  }) => (
+    <>
+      <Chrome slideNumber={slideNumber} numberOfSlides={numberOfSlides} />
+      <ActiveSlideReporter index={slideNumber - 1} onChange={setActive} />
+    </>
+  );
+
   return (
-    <Deck theme={brutalistTheme} template={Chrome}>
-      {renderSlides(slides)}
-    </Deck>
+    <>
+      {hasBg && <DeckBackground uris={uris} activeName={activeName} />}
+      <Deck
+        theme={deckTheme(hasBg)}
+        template={template}
+        transition={hasBg ? fadeTransition : undefined}
+      >
+        {renderSlides(slides, hasBg)}
+      </Deck>
+    </>
   );
 }
 
@@ -117,7 +257,13 @@ function resolveMode(raw: unknown): Mode {
  * - `console` (admin) → follows + a presenter console sidebar (connection status,
  *   presence, reactions, live numbers, End talk) — the presenter's second screen.
  */
-function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
+function LiveDeck({
+  slides,
+  slug,
+  durationMins,
+  backgrounds,
+  defaultBackground,
+}: SpectacleDeckProps) {
   const router = useRouter();
   const current = useQuery(api.talks.current);
   const setSlide = useMutation(api.talks.setSlide);
@@ -127,6 +273,14 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
 
   const sessionIdRef = useRef('');
   if (!sessionIdRef.current) sessionIdRef.current = crypto.randomUUID();
+
+  // Named-background backdrop state (see BaseDeck for the model). `bgActive` is
+  // the visible slide reported by the template, independent of the live/console
+  // driving index so the backdrop tracks correctly in every mode.
+  const bgUris = useMemo(() => buildBackgroundUris(backgrounds), [backgrounds]);
+  const hasBg = Object.keys(bgUris).length > 0;
+  const [bgActive, setBgActive] = useState(0);
+  const bgName = activeBackgroundName(slides, bgActive, defaultBackground);
 
   // The console's Prev/Next drive the embedded deck (which then broadcasts),
   // and the deck reports its slide index up for the console's notes/preview.
@@ -273,6 +427,7 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
   }) => (
     <>
       <Chrome slideNumber={slideNumber} numberOfSlides={numberOfSlides} />
+      <ActiveSlideReporter index={slideNumber - 1} onChange={setBgActive} />
       {drivingDeck ? (
         <DeckDriver
           room={room}
@@ -295,8 +450,12 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
 
   const deckEl = (
     <DeckModeProvider value={mode}>
-      <Deck theme={brutalistTheme} template={template}>
-        {renderSlides(slides)}
+      <Deck
+        theme={deckTheme(hasBg)}
+        template={template}
+        transition={hasBg ? fadeTransition : undefined}
+      >
+        {renderSlides(slides, hasBg)}
       </Deck>
     </DeckModeProvider>
   );
@@ -412,40 +571,44 @@ function LiveDeck({ slides, slug, durationMins }: SpectacleDeckProps) {
 
   if (sidebar) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          width: '100vw',
-          height: '100dvh',
-          overflow: 'hidden',
-        }}
-      >
+      <>
+        {hasBg && <DeckBackground uris={bgUris} activeName={bgName} />}
         <div
           style={{
-            position: 'relative',
+            display: 'flex',
+            width: '100vw',
             height: '100dvh',
-            flex: '1 1 0%',
-            minWidth: 0,
+            overflow: 'hidden',
           }}
         >
-          {deckEl}
-          {hud}
+          <div
+            style={{
+              position: 'relative',
+              height: '100dvh',
+              flex: '1 1 0%',
+              minWidth: 0,
+            }}
+          >
+            {deckEl}
+            {hud}
+          </div>
+          <div
+            style={{
+              height: '100dvh',
+              flex: `0 0 ${sidebarWidth}`,
+              width: sidebarWidth,
+            }}
+          >
+            {sidebar}
+          </div>
         </div>
-        <div
-          style={{
-            height: '100dvh',
-            flex: `0 0 ${sidebarWidth}`,
-            width: sidebarWidth,
-          }}
-        >
-          {sidebar}
-        </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
+      {hasBg && <DeckBackground uris={bgUris} activeName={bgName} />}
       {deckEl}
       {hud}
     </>
@@ -464,7 +627,24 @@ export default function SpectacleDeck({
   slides,
   slug,
   durationMins,
+  backgrounds,
+  defaultBackground,
 }: SpectacleDeckProps) {
-  if (!isConvexConfigured) return <BaseDeck slides={slides} />;
-  return <LiveDeck slides={slides} slug={slug} durationMins={durationMins} />;
+  if (!isConvexConfigured)
+    return (
+      <BaseDeck
+        slides={slides}
+        backgrounds={backgrounds}
+        defaultBackground={defaultBackground}
+      />
+    );
+  return (
+    <LiveDeck
+      slides={slides}
+      slug={slug}
+      durationMins={durationMins}
+      backgrounds={backgrounds}
+      defaultBackground={defaultBackground}
+    />
+  );
 }
