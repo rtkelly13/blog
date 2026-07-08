@@ -13,20 +13,27 @@ function frontmatterSnippet(
   name: string,
   seed: number,
   accent: string,
+  density: number,
+  opacity: number,
 ): string {
   return [
     'background:',
     `  generator: ${name}`,
     `  seed: ${seed}`,
     `  accent: '${accent}'`,
-    '  opacity: 0.18',
+    `  density: ${density.toFixed(2)}`,
+    `  opacity: ${opacity.toFixed(2)}`,
   ].join('\n');
 }
 
 export default function GraphicsGallery() {
   const [accent, setAccent] = useState('#22d3ee');
   const [seed, setSeed] = useState(7);
+  // Reasonable defaults: half density, and an opacity that reads clearly in the
+  // gallery yet is a sane starting point for a talk backdrop (dial down to ~0.15
+  // for a whisper-quiet background, up towards 1 for hero art).
   const [density, setDensity] = useState(0.5);
+  const [opacity, setOpacity] = useState(0.5);
   const [selected, setSelected] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -35,7 +42,7 @@ export default function GraphicsGallery() {
   const copy = async (name: string) => {
     try {
       await navigator.clipboard.writeText(
-        frontmatterSnippet(name, seed, accent),
+        frontmatterSnippet(name, seed, accent, density, opacity),
       );
       setSelected(name);
       setCopied(true);
@@ -122,6 +129,21 @@ export default function GraphicsGallery() {
               className="w-full accent-brutalist-cyan"
             />
           </div>
+
+          <div className="min-w-[180px]">
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Opacity · {opacity.toFixed(2)}
+            </div>
+            <input
+              type="range"
+              min={0.05}
+              max={1}
+              step={0.05}
+              value={opacity}
+              onChange={(e) => setOpacity(Number(e.target.value))}
+              className="w-full accent-brutalist-cyan"
+            />
+          </div>
         </div>
 
         {/* Gallery grid */}
@@ -139,6 +161,7 @@ export default function GraphicsGallery() {
                   seed={seed}
                   accent={accent}
                   density={density}
+                  opacity={opacity}
                   background="#000000"
                   style={{
                     position: 'absolute',
@@ -193,7 +216,13 @@ export default function GraphicsGallery() {
               (copy it from any card above):
             </p>
             <pre className="overflow-x-auto border-2 border-white bg-black p-3 text-brutalist-cyan">
-              {frontmatterSnippet('node-network', seed, accent)}
+              {frontmatterSnippet(
+                'node-network',
+                seed,
+                accent,
+                density,
+                opacity,
+              )}
             </pre>
             <p className="text-zinc-400">
               <span className="text-brutalist-cyan">&gt;</span> Or render inline
