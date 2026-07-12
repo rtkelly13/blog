@@ -38,7 +38,7 @@ importers:
         version: 5.2.7
       '@rtkelly/mermaid-toolkit':
         specifier: github:rtkelly13/mermaid-toolkit#a91c9d3
-        version: git+https://git@github.com:rtkelly13/mermaid-toolkit.git#a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)
+        version: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)
       '@tailwindcss/forms':
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.3.1)
@@ -2150,8 +2150,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@rtkelly/mermaid-toolkit@git+https://git@github.com:rtkelly13/mermaid-toolkit.git#a91c9d35128550180b59a3d576d6e34a61875c58':
-    resolution: {commit: a91c9d35128550180b59a3d576d6e34a61875c58, repo: git@github.com:rtkelly13/mermaid-toolkit.git, type: git}
+  '@rtkelly/mermaid-toolkit@https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58':
+    resolution: {tarball: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58}
     version: 0.0.1
     peerDependencies:
       mermaid: ^11.0.0
@@ -7618,7 +7618,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.55.1':
     optional: true
 
-  '@rtkelly/mermaid-toolkit@git+https://git@github.com:rtkelly13/mermaid-toolkit.git#a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)':
+  '@rtkelly/mermaid-toolkit@https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)':
     dependencies:
       mermaid: 11.16.0
 
