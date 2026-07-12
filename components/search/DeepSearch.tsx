@@ -30,7 +30,23 @@ interface Doc {
 
 const SECTION = { blog: 'Blog Posts', talk: 'Talks' } as const;
 
-/** A short excerpt around the first matched term, else the summary/body head. */
+/**
+ * Sentinel wrapped around matched terms in a snippet. KBarModal splits on it to
+ * render <mark> highlights — kept as a plain-string marker so the value still
+ * satisfies kbar's `string` subtitle type.
+ */
+export const HL = '\u0000';
+
+/** Escape a term for safe use inside a RegExp. */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * A short excerpt centered on the first matched term, with every matched term
+ * inside the window wrapped in {@link HL} sentinels for highlighting. Falls back
+ * to the head of the body when nothing matched (e.g. a tags/title-only hit).
+ */
 function snippet(body: string, terms: string[]): string {
   const lower = body.toLowerCase();
   let at = -1;
@@ -38,10 +54,16 @@ function snippet(body: string, terms: string[]): string {
     const i = lower.indexOf(term.toLowerCase());
     if (i !== -1 && (at === -1 || i < at)) at = i;
   }
-  if (at === -1) return `${body.slice(0, 140)}…`;
-  const start = Math.max(0, at - 60);
-  const end = Math.min(body.length, at + 100);
-  return `${start > 0 ? '…' : ''}${body.slice(start, end)}${end < body.length ? '…' : ''}`;
+
+  const excerpt =
+    at === -1
+      ? `${body.slice(0, 140)}…`
+      : `${at > 60 ? '…' : ''}${body.slice(Math.max(0, at - 60), Math.min(body.length, at + 100))}${at + 100 < body.length ? '…' : ''}`;
+
+  const hits = terms.filter(Boolean).map(escapeRegExp);
+  if (hits.length === 0) return excerpt;
+  const re = new RegExp(`(${hits.join('|')})`, 'gi');
+  return excerpt.replace(re, `${HL}$1${HL}`);
 }
 
 export default function DeepSearch() {
