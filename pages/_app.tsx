@@ -31,7 +31,17 @@ export default function App({ Component, pageProps }: AppProps) {
     ((page: ReactElement) => <LayoutWrapper>{page}</LayoutWrapper>);
 
   const tree = (
-    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+      disableTransitionOnChange
+      themes={['dark', 'dim']}
+      // `dim` still carries the `dark` class so every existing `dark:` variant
+      // and the `.dark` diagram tokens keep applying; the extra `dim` class
+      // layers softened palette overrides on top (see css/tailwind.css).
+      value={{ dark: 'dark', dim: 'dark dim' }}
+    >
       <SearchProvider>
         <Head>
           <meta content="width=device-width, initial-scale=1" name="viewport" />

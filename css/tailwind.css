@@ -38,8 +38,13 @@
 
   body {
     font-family: var(--font-inter, Inter), system-ui, sans-serif;
-    background-color: #000000;
-    color: #ffffff;
+    /* Themeable surface tokens: the `dark` (default) theme keeps pure black /
+       white; the `dim` theme softens both (see the theme block below). These
+       resolve through Tailwind's own color variables so the hundreds of
+       `bg-black` / `text-white` / `border-white` utilities re-theme in lockstep
+       with the body. */
+    background-color: var(--color-black, #000000);
+    color: var(--color-white, #ffffff);
     overflow-x: clip;
   }
 
@@ -116,6 +121,59 @@ html {
   --diagram-text-light: #a1a1aa;
 }
 
+/* ── DIM THEME ───────────────────────────────────────────────────────────
+   A softened dark theme that keeps the brutalist look but takes the edge off
+   the pure-black / pure-white contrast. It layers on top of `.dark` (the html
+   element carries both classes — see pages/_app.tsx), so every `dark:` variant
+   still fires; we only re-point the palette tokens.
+
+   `--color-black` / `--color-white` are Tailwind's own color variables, so
+   overriding them here re-themes the ~140 `bg-black`, ~200 `text-white` and
+   ~200 `border-white` utilities across the site in one place. Bright accent
+   tokens (brutalist cyan/pink/yellow) are inlined literals and stay put, so
+   dark-text-on-accent buttons keep their contrast. */
+.dim {
+  /* Charcoal instead of true black; warm off-white instead of #fff. */
+  --color-black: #17171b;
+  --color-white: #d8d8d2;
+
+  /* Lift the near-black zinc surfaces one notch so panels stay legible
+     against the lighter charcoal background. */
+  --color-zinc-950: #17171b;
+  --color-zinc-900: #202024;
+  --color-zinc-800: #2a2a2f;
+
+  /* Softer offset shadows to match the reduced contrast. */
+  --brutalist-shadow-color: rgba(216, 216, 210, 0.85);
+
+  /* Reading surface: soften prose headings/emphasis that hardcode #fff, and
+     ease the body text a touch. `prose-invert` reads these variables. */
+  --tw-prose-invert-headings: #eaeae4;
+  --tw-prose-invert-bold: #eaeae4;
+  --tw-prose-invert-body: #c4c4be;
+
+  /* Diagrams follow the softened palette. */
+  --diagram-bg: #17171b;
+  --diagram-bg-secondary: #202024;
+  --diagram-stroke: #d8d8d2;
+  --diagram-fill-quaternary: #d8d8d2;
+  --diagram-text: #d8d8d2;
+}
+
+/* Prose headings, emphasis, blockquotes, table headers and rules hardcode
+   `#fff` via the typography config; re-point them to the dim off-white so the
+   reading surface doesn't reintroduce the harsh white the dim theme removes. */
+.dim
+  .prose
+  :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
+    :where([class~="not-prose"] *)
+  ) {
+  color: #eaeae4;
+}
+.dim .prose :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
+  border-color: #d8d8d2;
+}
+
 /* SVG diagrams using CSS variables */
 .svg-diagram .diagram-svg {
   max-width: 100%;
@@ -152,15 +210,15 @@ html {
   }
 
   .brutalist-shadow {
-    box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 1);
+    box-shadow: 4px 4px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-sm {
-    box-shadow: 2px 2px 0px 0px rgba(255, 255, 255, 1);
+    box-shadow: 2px 2px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-lg {
-    box-shadow: 6px 6px 0px 0px rgba(255, 255, 255, 1);
+    box-shadow: 6px 6px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-cyan {

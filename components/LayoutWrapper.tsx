@@ -6,6 +6,7 @@ import Link from './Link';
 import MobileNav from './MobileNav';
 import SectionContainer from './SectionContainer';
 import SearchButton from './search/SearchButton';
+import ThemeSwitch from './ThemeSwitch';
 
 interface Props {
   children: ReactNode;
@@ -53,6 +54,7 @@ const LayoutWrapper = ({ children }: Props) => {
               ))}
             </div>
             <SearchButton />
+            <ThemeSwitch />
             <MobileNav />
           </div>
         </header>

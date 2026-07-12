@@ -68,9 +68,15 @@ module.exports = {
         md: '0.375rem',
       },
       boxShadow: {
-        'hard-sm': '2px 2px 0px 0px rgba(255, 255, 255, 1)',
-        'hard-md': '4px 4px 0px 0px rgba(255, 255, 255, 1)',
-        'hard-lg': '6px 6px 0px 0px rgba(255, 255, 255, 1)',
+        // White offset shadows read through a themeable color token so the
+        // `dim` theme can soften them (see css/tailwind.css). Falls back to
+        // pure white for the default `dark` theme and non-themed contexts.
+        'hard-sm':
+          '2px 2px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
+        'hard-md':
+          '4px 4px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
+        'hard-lg':
+          '6px 6px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
         'hard-cyan': '4px 4px 0px 0px rgba(34, 211, 238, 1)',
         'hard-pink': '4px 4px 0px 0px rgba(236, 72, 153, 1)',
         'hard-yellow': '4px 4px 0px 0px rgba(250, 204, 21, 1)',

@@ -1,40 +1,50 @@
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
+// Two contrast levels. `dark` is the original high-contrast brutalist look
+// (pure white on pure black); `dim` softens both toward charcoal / off-white
+// to take the edge off. Both carry the `dark` class under the hood (see
+// pages/_app.tsx), so every `dark:` style keeps working in either mode.
+const LABELS: Record<string, string> = { dark: 'HIGH', dim: 'DIM' };
+
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
-  // When mounted on client, now we can show the UI
+  // Only trust the resolved theme after mount to avoid a hydration mismatch
+  // (the server always renders the default). Before then, assume `dark`.
   useEffect(() => setMounted(true), []);
+
+  const active = mounted && theme === 'dim' ? 'dim' : 'dark';
+  const next = active === 'dark' ? 'dim' : 'dark';
 
   return (
     <button
-      aria-label="Toggle Dark Mode"
       type="button"
-      className="w-8 h-8 p-1 ml-1 mr-1 rounded-sm sm:ml-4"
-      onClick={() =>
-        setTheme(
-          theme === 'dark' || resolvedTheme === 'dark' ? 'light' : 'dark',
-        )
-      }
+      aria-label={`Contrast: ${LABELS[active]}. Switch to ${LABELS[next]}.`}
+      title="Toggle contrast"
+      onClick={() => setTheme(next)}
+      className="flex items-center gap-2 p-1 font-mono font-bold sm:px-3 whitespace-nowrap text-white hover:text-brutalist-cyan transition-colors uppercase"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
-        fill="currentColor"
-        className="text-current"
+        className="w-5 h-5"
+        aria-hidden="true"
       >
-        {mounted && (theme === 'dark' || resolvedTheme === 'dark') ? (
-          <path
-            fillRule="evenodd"
-            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-            clipRule="evenodd"
-          />
-        ) : (
-          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-        )}
+        <circle
+          cx="10"
+          cy="10"
+          r="8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <path d="M10 2 A8 8 0 0 1 10 18 Z" fill="currentColor" />
       </svg>
+      <span className="hidden md:inline" suppressHydrationWarning>
+        [ {LABELS[active]} ]
+      </span>
     </button>
   );
 };
