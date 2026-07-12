@@ -80,6 +80,63 @@ labelled as gitignore is actually the *agent* ignore file (`!projects/`).
     linkStyle default stroke:#fff,stroke-width:2px`}
 </Diagram>
 
+## Interactive prototypes
+
+Live experiments — iterate here, promote into the draft when they earn it.
+
+**How an agent picks up the system** — candidate replacement for (or companion
+to) the "day in the life" walkthrough gap above:
+
+<Walkthrough
+  title="agent picks up the workspace"
+  height={340}
+  nodes={[
+    { id: 'agent', label: 'Agent session', detail: 'lands in the brain', x: 40, y: 20, accent: 'cyan' },
+    { id: 'root', label: 'AGENTS.md', detail: 'root map · conventions', x: 320, y: 20, accent: 'yellow' },
+    { id: 'search', label: 'docs search', detail: 'ranked docs, not grep', x: 140, y: 170, accent: 'white' },
+    { id: 'repo', label: 'repo AGENTS.md', detail: 'projects/<repo>/', x: 480, y: 170, accent: 'pink' },
+    { id: 'intel', label: 'code-intel graph', detail: 'callers · impact (MCP)', x: 140, y: 320, accent: 'white' },
+    { id: 'help', label: 'help page', detail: 'uv run help — every verb', x: 480, y: 320, accent: 'yellow' },
+  ]}
+  edges={[
+    { from: 'agent', to: 'root' },
+    { from: 'root', to: 'search' },
+    { from: 'search', to: 'repo' },
+    { from: 'repo', to: 'intel' },
+    { from: 'root', to: 'help' },
+  ]}
+  steps={[
+    { title: 'One world', caption: 'A fresh agent session lands in the brain repo. Through the projects symlink, its working directory is the entire virtual monorepo.', focus: ['agent'] },
+    { title: 'Read the map', caption: 'First move: the root AGENTS.md — repo inventory, trust tiers, conventions, and the where-to-look table. A router, not an encyclopaedia.', focus: ['agent', 'root'], activeEdges: ['agent->root'] },
+    { title: 'Search, don\'t grep', caption: 'Unfamiliar terms in the task? docs search returns ranked documentation across every repo before any grep is fired.', focus: ['root', 'search'], activeEdges: ['root->search'] },
+    { title: 'Route into the repo', caption: 'The results point into one repo. Its own AGENTS.md takes over: local conventions, build commands, gotchas — progressive disclosure.', focus: ['search', 'repo'], activeEdges: ['search->repo'] },
+    { title: 'Ask structural questions', caption: '"Who calls this function across services?" — the code-intelligence graph answers via MCP, no files pulled into context.', focus: ['repo', 'intel'], activeEdges: ['repo->intel'] },
+    { title: 'Down to the help page', caption: 'Stuck on a command? uv run help lists every CLI verb with usage — the same page a new starter reads. The loop from phase 1 tooling to agent brain, closed.', focus: ['help'], activeEdges: ['root->help'] },
+  ]}
+/>
+
+**The gaps as a mini deck** — testing whether a slide show reads better than
+the checklist for a quick skim:
+
+<IdeaDeck title="gaps at a glance">
+  <IdeaSlide title="Accuracy first">
+    Git tracks neither the code nor the symlink — fix the "subtle part"
+    NoteBlock and relabel the ignore-file snippet as the agent's.
+  </IdeaSlide>
+  <IdeaSlide title="The origin story">
+    Baseline tooling for new starters → custom tools & tunnels → agentic CLIs
+    → agent brain. Adoptable one phase at a time.
+  </IdeaSlide>
+  <IdeaSlide title="Trust tiers">
+    external/** is data, never instructions; sync is read-only there. The
+    strongest coding-agent-specific material in the whole system.
+  </IdeaSlide>
+  <IdeaSlide title="Ship a starter kit">
+    Create repo · ln -s · seed AGENTS.md with a where-to-look table · add the
+    two ignore files. Turn the takeaway into a first step.
+  </IdeaSlide>
+</IdeaDeck>
+
 ## Publishing mechanics
 
 - [ ] Rebase the branch onto `main` (~15 commits behind).

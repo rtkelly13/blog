@@ -44,6 +44,21 @@ Use these for imports:
 | `Button`            | Brutalist button          | `variant`, `size`, `shadow` props     |
 | `Card`              | Content card              | Brutalist borders, hard shadows       |
 
+## INTERACTIVE MDX (interactive/)
+
+Step-driven interactives usable in any MDX (posts, talks, ideas):
+
+- `IdeaDeck` + `IdeaSlide` — embedded mini slide show (Motion transitions,
+  arrow keys, square dots). Slides are `<IdeaSlide title="...">` children.
+- `Walkthrough` — guided node-graph tour (@xyflow/react): each step highlights
+  `focus` nodes, lights `activeEdges` ("from->to"), and pans the camera. No
+  free pan/zoom, so it never hijacks page scroll.
+
+Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
+motion/@xyflow/react ship as lazy chunks only on pages that mount them.
+`IdeaSlide` is the exception — a dependency-free static marker component.
+Both respect `prefers-reduced-motion` via `useReducedMotion`.
+
 ## DIAGRAMS
 
 Dispatcher pattern: `Diagram.tsx` routes by `type` prop.
