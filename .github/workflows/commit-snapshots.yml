@@ -1,0 +1,44 @@
+name: Commit visual snapshots
+
+# TEMPORARY — branch-scoped helper. Regenerates the Linux visual snapshots on
+# the CI runner (the same environment pr-checks' e2e-visual compares against)
+# and commits them back to this branch. This file is removed from the branch
+# once the regenerated snapshots are committed; it must never land on main.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-commit:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+        with:
+          install-playwright: "true"
+
+      - name: Build the site
+        working-directory: blog
+        run: pnpm build
+
+      - name: Update snapshots
+        working-directory: blog
+        run: pnpm exec playwright test --update-snapshots
+
+      - name: Commit and push snapshots
+        working-directory: blog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/__snapshots__
+          if git diff --cached --quiet; then
+            echo "No snapshot changes to commit"
+            exit 0
+          fi
+          git commit -m "Regenerate visual snapshots on CI runner"
+          git push
