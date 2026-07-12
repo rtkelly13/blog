@@ -115,12 +115,19 @@ jobs:
     name: E2E + visual regression
     runs-on: ubuntu-latest
     needs: build
+    # Needs write access so intentional visual changes can be committed back to
+    # the PR branch (see "Commit regenerated snapshots" below).
+    permissions:
+      contents: write
     outputs:
       outcome: ${{ steps.e2e.outcome }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: blog
+          # Check out the PR branch tip (not the detached pull_request merge
+          # ref) so regenerated snapshots commit cleanly back onto the branch.
+          ref: ${{ github.head_ref }}
       - uses: ./blog/.github/actions/setup-blog
         with:
           install-playwright: "true"
@@ -138,7 +145,32 @@ jobs:
         # Playwright's webServer config runs `pnpm run serve` (next start)
         # against the downloaded build; this includes visual.spec.ts /
         # visual-responsive.spec.ts regression specs.
-        run: pnpm exec playwright test
+        #
+        # --update-snapshots regenerates the visual baselines in place, so an
+        # intentional visual change is auto-accepted (and committed back to the
+        # branch below) instead of failing the gate. Functional E2E assertions
+        # still fail loudly — only image baselines are refreshed.
+        run: pnpm exec playwright test --update-snapshots
+      - name: Commit regenerated snapshots
+        # Runs on every ordinary PR commit, but NOT on the bot's own snapshot
+        # commits — so the push below can never trigger an endless loop. (A
+        # GITHUB_TOKEN push does not start new workflow runs anyway; the actor
+        # guard is the explicit backstop.) Skipped on forks, where we can't push.
+        if: >-
+          steps.e2e.outcome == 'success' &&
+          github.actor != 'github-actions[bot]' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        working-directory: blog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(git status --porcelain tests/__snapshots__)" ]; then
+            echo "No snapshot changes — baselines already current."
+            exit 0
+          fi
+          git add tests/__snapshots__
+          git commit -m "test: regenerate visual regression snapshots"
+          git push origin "HEAD:${{ github.head_ref }}"
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
