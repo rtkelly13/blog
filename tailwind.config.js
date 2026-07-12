@@ -26,16 +26,21 @@ module.exports = {
       },
       fontFamily: {
         // Proposal C — Editorial Three-Role
-        sans: ['Inter', ...defaultTheme.fontFamily.sans], // body / reading
-        display: ['"Space Grotesk"', ...defaultTheme.fontFamily.sans], // headings / display
+        // Families come from next/font/local (lib/fonts.ts) via CSS variables;
+        // the var() fallbacks keep non-Next contexts (Storybook) on sane fonts.
+        sans: ['var(--font-inter, Inter)', ...defaultTheme.fontFamily.sans], // body / reading
+        display: [
+          'var(--font-space-grotesk, "Space Grotesk")',
+          ...defaultTheme.fontFamily.sans,
+        ], // headings / display
         mono: [
-          '"IBM Plex Mono"',
+          'var(--font-ibm-plex-mono, "IBM Plex Mono")',
           'Courier New',
           'Courier',
           'monospace',
           ...defaultTheme.fontFamily.mono,
         ], // code + UI / metadata
-        pixel: ['"VT323"', 'monospace'], // decorative accent (hero/logo)
+        pixel: ['var(--font-vt323, "VT323")', 'monospace'], // decorative accent (hero/logo)
       },
       colors: {
         primary: colors.teal,

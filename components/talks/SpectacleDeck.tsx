@@ -49,7 +49,8 @@ interface SpectacleDeckProps {
 
 type Mode = 'attendee' | 'presenter' | 'console';
 
-const MONO = '"IBM Plex Mono", "Courier New", Courier, monospace';
+const MONO =
+  'var(--font-ibm-plex-mono, "IBM Plex Mono"), "Courier New", Courier, monospace';
 
 // Brutalist deck chrome: fullscreen toggle, progress dots, slide counter.
 function Chrome({
