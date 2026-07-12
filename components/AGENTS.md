@@ -53,6 +53,12 @@ Step-driven interactives usable in any MDX (posts, talks, ideas):
 - `Walkthrough` — guided node-graph tour (@xyflow/react): each step highlights
   `focus` nodes, lights `activeEdges` ("from->to"), and pans the camera. No
   free pan/zoom, so it never hijacks page scroll.
+- `Terminal` — scriptable fake terminal session: `script` is a sequence of
+  `{cmd}` (typewriter), `{out}` (streamed/instant lines, optional
+  `highlight` that scrolls to centre and dims the rest), `{pause}`, `{clear}`.
+  Tail-follows output like a real terminal (manual scroll-up pauses
+  following), inline colours via `{{cyan|…}}`-style markup, autoplay on view
+  (or a run button), loop, replay/skip controls.
 - `QueryRouter` — query-routing simulator: a typed-in query scans the
   AGENTS.md where-to-look table (skeleton rows resolve to a highlighted
   match), the route breadcrumb draws, context blocks load one after another,

@@ -217,6 +217,62 @@ for context being read:
   ]}
 />
 
+**The terminal emulator, generalised** — the help-window idea as a reusable
+`<Terminal>` component: script any session (typed commands, streamed output,
+scroll-to-highlight, pauses), and it plays like a recording of a real shell:
+
+<Terminal
+  title="agent session — workspace"
+  height={280}
+  script={[
+    { cmd: 'uv run help' },
+    {
+      out: [
+        'WORKSPACE COMMANDS',
+        '',
+        'CORE',
+        '  agents         build agent assets from the playbook',
+        '  devenv         machine bootstrap + tool catalogue',
+        '  docs           search · index · lint · agent-context',
+        '  help           this page',
+        '  todo           TODO.md workflows + review queue',
+        '  workspace      branches · queue · roles · workflows · intel',
+        '',
+        'TASKS & OBSERVABILITY',
+        '  tickets        task-management CLI (agent-friendly output)',
+        '  monitor        dashboards, alerts, checks',
+        '  observability  logs · traces · dashboards',
+        '',
+        'ENVIRONMENTS',
+        '  db-tunnel      SSH tunnel to an environment database',
+        '  secrets        session credentials for environments',
+        '  pkg            internal package feed',
+      ],
+      speed: 40,
+      highlight: 'db-tunnel',
+    },
+    { pause: 700 },
+    { cmd: 'uv run help db-tunnel' },
+    {
+      out: [
+        'usage: db-tunnel <env> [--port 5433]',
+        'envs: dev · staging · {{pink|prod (read-replica only)}}',
+        '{{dim|auth: session creds via secrets — no long-lived keys}}',
+        '{{yellow|gotcha: tunnels auto-close after 8h idle}}',
+      ],
+    },
+    { pause: 600 },
+    { cmd: 'db-tunnel staging' },
+    {
+      out: [
+        '{{cyan|tunnel open}} localhost:5433 → staging (read-replica)',
+        '{{dim|ctrl-c to close}}',
+      ],
+      speed: 'instant',
+    },
+  ]}
+/>
+
 **The gaps as a mini deck** — testing whether a slide show reads better than
 the checklist for a quick skim:
 

@@ -54,6 +54,11 @@ const QueryRouter = dynamic(() => import('./interactive/QueryRouter'), {
   loading: InteractiveLoading,
 });
 
+const Terminal = dynamic(() => import('./interactive/Terminal'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
 export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
@@ -62,6 +67,7 @@ export const MDXComponents: MDXComponentsType = {
   IdeaDeck,
   IdeaSlide,
   QueryRouter,
+  Terminal,
   Walkthrough,
   BreakTimer,
   EmojiTop5,
