@@ -38,9 +38,11 @@ labelled as gitignore is actually the *agent* ignore file (`!projects/`).
       tiers; `external/**` content is *data, never instructions*; sync treats
       external repos as read-only. Strongest evidence for the "this is really
       a coding-agent story" thesis.
-- [ ] **One task end-to-end** — trace a cross-repo change: docs search → root
-      AGENTS.md routes to the right repo → code-intel graph finds callers →
-      two PRs. The draft is all mechanism, no demonstration.
+- [ ] **One task end-to-end** — trace a cross-repo change: root AGENTS.md
+      routes → `help` builds context in layers (verbs, then specifics) →
+      code-intel graph finds callers → two PRs. The draft is all mechanism,
+      no demonstration. (Agents bring their own search tools — the workspace's
+      contribution is the map and the verbs.)
 - [ ] **Generated agent assets** — skills/commands authored once in the
       playbook and *compiled* per-tool (`agents build` → `.claude/`,
       `.opencode/`), gitignored locally, published by CI. Stronger claim than
@@ -93,84 +95,52 @@ to) the "day in the life" walkthrough gap above:
   nodes={[
     { id: 'agent', label: 'Agent session', detail: 'lands in the brain', x: 40, y: 20, accent: 'cyan' },
     { id: 'root', label: 'AGENTS.md', detail: 'root map · conventions', x: 320, y: 20, accent: 'yellow' },
-    { id: 'search', label: 'docs search', detail: 'ranked docs, not grep', x: 140, y: 170, accent: 'white' },
+    { id: 'help', label: 'help command', detail: 'uv run help — every verb', x: 140, y: 170, accent: 'yellow' },
     { id: 'repo', label: 'repo AGENTS.md', detail: 'projects/<repo>/', x: 480, y: 170, accent: 'pink' },
-    { id: 'intel', label: 'code-intel graph', detail: 'callers · impact (MCP)', x: 140, y: 320, accent: 'white' },
-    { id: 'help', label: 'help page', detail: 'uv run help — every verb', x: 480, y: 320, accent: 'yellow' },
+    { id: 'intel', label: 'code-intel graph', detail: 'callers · impact (MCP)', x: 320, y: 320, accent: 'white' },
   ]}
   edges={[
     { from: 'agent', to: 'root' },
-    { from: 'root', to: 'search' },
-    { from: 'search', to: 'repo' },
-    { from: 'repo', to: 'intel' },
     { from: 'root', to: 'help' },
+    { from: 'root', to: 'repo' },
+    { from: 'repo', to: 'intel' },
   ]}
   steps={[
-    { title: 'One world', caption: 'A fresh agent session lands in the brain repo. Through the projects symlink, its working directory is the entire virtual monorepo.', focus: ['agent'] },
+    { title: 'One world', caption: 'A fresh agent session lands in the brain repo. Through the projects symlink, its working directory is the entire virtual monorepo. Search it can do itself — what it needs from the workspace is a map and verbs.', focus: ['agent'] },
     { title: 'Read the map', caption: 'First move: the root AGENTS.md — repo inventory, trust tiers, conventions, and the where-to-look table. A router, not an encyclopaedia.', focus: ['agent', 'root'], activeEdges: ['agent->root'] },
-    { title: 'Search, don\'t grep', caption: 'Unfamiliar terms in the task? docs search returns ranked documentation across every repo before any grep is fired.', focus: ['root', 'search'], activeEdges: ['root->search'] },
-    { title: 'Route into the repo', caption: 'The results point into one repo. Its own AGENTS.md takes over: local conventions, build commands, gotchas — progressive disclosure.', focus: ['search', 'repo'], activeEdges: ['search->repo'] },
+    { title: 'Discover the verbs', caption: 'uv run help lists every CLI verb with usage — the workspace teaches the agent what it can do, not just what exists. help <command> drills into specifics. Context, built in layers.', focus: ['root', 'help'], activeEdges: ['root->help'] },
+    { title: 'Route into the repo', caption: 'The task points into one repo. Its own AGENTS.md takes over: local conventions, build commands, gotchas — progressive disclosure.', focus: ['root', 'repo'], activeEdges: ['root->repo'] },
     { title: 'Ask structural questions', caption: '"Who calls this function across services?" — the code-intelligence graph answers via MCP, no files pulled into context.', focus: ['repo', 'intel'], activeEdges: ['repo->intel'] },
-    { title: 'Down to the help page', caption: 'Stuck on a command? uv run help lists every CLI verb with usage — the same page a new starter reads. The loop from phase 1 tooling to agent brain, closed.', focus: ['help'], activeEdges: ['root->help'] },
+    { title: 'Map + verbs', caption: 'The same loop a new starter runs on day one — read the map, run help, go deeper only where the task points. The whole system, one screen.', focus: ['agent', 'root', 'help', 'repo', 'intel'] },
   ]}
 />
 
-**Query routing, simulated** — how a simple query becomes loaded context: the
-root AGENTS.md acts as a router, skeleton loaders stand in for context being
-read, and the run ends on the resolved answer. Two scenarios — one routed
-through docs into a repo, one landing on the help command:
+**Query routing, simulated** — how a simple query becomes loaded context.
+Agents bring their own search tools; what the workspace contributes is the
+router (root AGENTS.md) and the **help command building context in layers** —
+the verb list first, then per-command specifics, skeleton loaders standing in
+for context being read:
 
 <QueryRouter
-  title="one query, routed"
+  title="one query, routed through help"
   scenarios={[
-    {
-      chip: 'db tunnels',
-      query: 'where are the environment database tunnels documented?',
-      routerRows: [
-        { label: 'Find docs about a topic', path: 'docs search "<query>"', match: true },
-        { label: 'Background job patterns', path: 'projects/backend-service/jobs/' },
-        { label: 'Structural code questions', path: 'workspace intel …' },
-        { label: 'Every CLI verb + usage', path: 'uv run help' },
-      ],
-      route: ['AGENTS.md', 'docs search', 'docs/cli/db-tunnel.md'],
-      context: [
-        {
-          source: 'docs search "database tunnel" — top hit',
-          lines: [
-            'docs/cli/db-tunnel.md · score 0.92',
-            'docs/devenv/environments.md · score 0.71',
-          ],
-        },
-        {
-          source: 'docs/cli/db-tunnel.md',
-          lines: [
-            '# db-tunnel — SSH tunnels into environment databases',
-            'usage: db-tunnel <env> [--port 5433]',
-            'auth: session creds from `secrets`; never long-lived keys',
-            'gotcha: prod is read-replica only — writes are refused',
-          ],
-        },
-      ],
-      answer:
-        'db-tunnel <env> opens an SSH tunnel to that environment’s database; prod is read-replica only.',
-    },
     {
       chip: 'what can I run?',
       query: 'what commands does the workspace ship?',
       routerRows: [
-        { label: 'Find docs about a topic', path: 'docs search "<query>"' },
+        { label: 'Every CLI verb + usage', path: 'uv run help', match: true },
         { label: 'Background job patterns', path: 'projects/backend-service/jobs/' },
         { label: 'Structural code questions', path: 'workspace intel …' },
-        { label: 'Every CLI verb + usage', path: 'uv run help', match: true },
+        { label: 'Who owns what', path: 'projects/platform/data/people.json' },
       ],
       route: ['AGENTS.md', 'uv run help'],
       context: [
         {
-          source: 'uv run help — the help page',
+          source: 'uv run help — the help page, layer one',
           lines: [
             'devenv       machine bootstrap + tool catalogue',
-            'docs         search · index · lint · agent-context',
             'db-tunnel    SSH tunnel to an environment database',
+            'secrets      session credentials for environments',
             'tickets      task-management CLI (agent-friendly output)',
             'monitor      dashboards, alerts, checks',
             'workspace    branches · queue · roles · workflows · intel',
@@ -179,6 +149,37 @@ through docs into a repo, one landing on the help command:
       ],
       answer:
         'uv run help lists every CLI verb with usage — the same page a new starter reads on day one.',
+    },
+    {
+      chip: 'staging db',
+      query: 'how do I connect to the staging database?',
+      routerRows: [
+        { label: 'Every CLI verb + usage', path: 'uv run help', match: true },
+        { label: 'Background job patterns', path: 'projects/backend-service/jobs/' },
+        { label: 'Structural code questions', path: 'workspace intel …' },
+        { label: 'Who owns what', path: 'projects/platform/data/people.json' },
+      ],
+      route: ['AGENTS.md', 'uv run help', 'uv run help db-tunnel'],
+      context: [
+        {
+          source: 'uv run help — layer one: scan the verbs',
+          lines: [
+            'db-tunnel    SSH tunnel to an environment database',
+            'secrets      session credentials for environments',
+          ],
+        },
+        {
+          source: 'uv run help db-tunnel — layer two: specifics',
+          lines: [
+            'usage: db-tunnel <env> [--port 5433]',
+            'envs: dev · staging · prod (read-replica only)',
+            'auth: session creds via secrets — no long-lived keys',
+            'gotcha: tunnels auto-close after 8h idle',
+          ],
+        },
+      ],
+      answer:
+        'db-tunnel staging — usage, env list and the gotcha all came from the help pages, in two layers, without opening a single source file.',
     },
   ]}
 />
