@@ -2,12 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { bundleMDX } from 'mdx-bundler';
+import type { Reference } from '../types/Reference';
 import type { TalkFrontMatter } from '../types/TalkFrontMatter';
 import {
   getRehypePlugins,
   getRemarkPlugins,
   setEsbuildBinaryPath,
 } from './mdx';
+import { extractReferences } from './references';
 import { parseSlideWindow, type SlideWindow } from './slideTiming';
 import { show_drafts } from './utils/showDrafts';
 
@@ -153,10 +155,17 @@ export function getTalkStaticPaths() {
  * Lightweight metadata (front matter + slide count) without compiling any MDX.
  * Drafts are returned (with `draft: true` in the front matter) so the page can
  * render them behind a DRAFT badge; only a genuinely missing talk is null.
+ *
+ * Also extracts the deck's bibliography (`references`) from the whole talk
+ * body in one pass — slides compile individually and in parallel, so
+ * collecting during compilation would make the numbering non-deterministic.
+ * The landing page renders these as a links section (original + archived).
  */
-export function getTalkMeta(
-  slug: string,
-): { frontMatter: TalkFrontMatter; slideCount: number } | null {
+export function getTalkMeta(slug: string): {
+  frontMatter: TalkFrontMatter;
+  slideCount: number;
+  references: Reference[];
+} | null {
   const filePath = resolveTalkFile(slug);
   if (!filePath) return null;
 
@@ -166,6 +175,7 @@ export function getTalkMeta(
   return {
     frontMatter: normalizeFrontMatter(frontmatter, slug),
     slideCount: splitSlides(content).length,
+    references: extractReferences(content),
   };
 }
 

@@ -13,10 +13,12 @@ import remarkGfm from 'remark-gfm';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import remarkMath from 'remark-math';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
 import type { Pluggable } from 'unified';
 import { visit } from 'unist-util-visit';
 import remarkCodeTitles from './remark-code-title';
+import remarkReferences from './remark-references';
 import remarkTocHeadings from './remark-toc-headings';
 import getAllFilesRecursively from './utils/files';
 import { show_drafts } from './utils/showDrafts';
@@ -60,11 +62,25 @@ export function setEsbuildBinaryPath() {
 /**
  * Remark plugins shared across all MDX compilation (blog posts and talk slides).
  * Pass a `toc` ref to collect a table of contents; omit it for content that
- * doesn't need one (e.g. individual slides).
+ * doesn't need one (e.g. individual slides). Pass a `references` ref to collect
+ * a LaTeX-style bibliography of external links — the plugin also inserts inline
+ * `[n]` citation markers, so only blog posts opt in (talk slides stay clean and
+ * get their bibliography via `lib/references.ts` instead).
  */
-export function getRemarkPlugins(toc?: Toc): Pluggable[] {
+export function getRemarkPlugins(
+  toc?: Toc,
+  references?: Reference[],
+): Pluggable[] {
   return [
     ...(toc ? [[remarkTocHeadings, { exportRef: toc }] as Pluggable] : []),
+    ...(references
+      ? [
+          [
+            remarkReferences,
+            { exportRef: references, insertMarkers: true },
+          ] as Pluggable,
+        ]
+      : []),
     remarkGfm,
     remarkCodeTitles,
     remarkMath,
@@ -149,6 +165,10 @@ export async function getFileBySlug<_T>(
   setEsbuildBinaryPath();
 
   const toc: Toc = [];
+  // Only blog posts get a bibliography — author/series pages render no
+  // References section, so citation markers there would point nowhere.
+  const references: Reference[] = [];
+  const collectReferences = type === 'blog' ? references : undefined;
 
   const { frontmatter, code } = await bundleMDX({
     source,
@@ -157,7 +177,7 @@ export async function getFileBySlug<_T>(
     mdxOptions(options) {
       options.remarkPlugins = [
         ...(options.remarkPlugins ?? []),
-        ...getRemarkPlugins(toc),
+        ...getRemarkPlugins(toc, collectReferences),
       ];
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
@@ -177,6 +197,7 @@ export async function getFileBySlug<_T>(
   return {
     mdxSource: code,
     toc,
+    references,
     frontMatter: {
       readingTime: readingTime(code),
       slug: slug || null,

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
 import { MDXLayoutRenderer } from '@/components/MDXComponents';
 import PageTitle from '@/components/PageTitle';
@@ -31,7 +32,12 @@ export async function getStaticPaths() {
 
 // @ts-expect-error
 export const getStaticProps: GetStaticProps<{
-  post: { mdxSource: string; toc: Toc; frontMatter: PostFrontMatter };
+  post: {
+    mdxSource: string;
+    toc: Toc;
+    references: Reference[];
+    frontMatter: PostFrontMatter;
+  };
   authorDetails: AuthorFrontMatter[];
   prev?: { slug: string; title: string };
   next?: { slug: string; title: string };
@@ -108,7 +114,7 @@ export default function Blog({
   next,
   seriesData,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { mdxSource, toc, frontMatter } = post;
+  const { mdxSource, toc, references, frontMatter } = post;
 
   return (
     <>
@@ -117,6 +123,7 @@ export default function Blog({
         <MDXLayoutRenderer
           layout={frontMatter.layout || DEFAULT_LAYOUT}
           toc={toc}
+          references={references}
           mdxSource={mdxSource}
           frontMatter={frontMatter}
           authorDetails={authorDetails}

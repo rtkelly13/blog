@@ -3,12 +3,14 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
 import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import NewsletterForm from '@/components/NewsletterForm';
 import PageTitle from '@/components/PageTitle';
+import References from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import SeriesNavigation from '@/components/SeriesNavigation';
@@ -36,6 +38,7 @@ interface Props {
   prev?: { slug: string; title: string };
   children: ReactNode;
   toc?: Toc;
+  references?: Reference[];
   seriesData?: {
     prev: { slug: string; title: string; order: number } | null;
     next: { slug: string; title: string; order: number } | null;
@@ -58,6 +61,7 @@ export default function PostLayout({
   prev,
   children,
   toc,
+  references,
   seriesData,
 }: Props) {
   const { slug, fileName, date, title, tags } = frontMatter;
@@ -174,6 +178,8 @@ export default function PostLayout({
             <div className="pt-10 pb-8 prose prose-invert max-w-none">
               {children}
             </div>
+
+            {references && <References references={references} />}
 
             {seriesData && (
               <SeriesNavigation

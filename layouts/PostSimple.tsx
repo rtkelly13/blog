@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Reference } from 'types/Reference';
 import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
+import References from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
@@ -14,6 +16,7 @@ interface Props {
   children: ReactNode;
   next?: { slug: string; title: string };
   prev?: { slug: string; title: string };
+  references?: Reference[];
 }
 
 export default function PostLayout({
@@ -21,6 +24,7 @@ export default function PostLayout({
   next,
   prev,
   children,
+  references,
 }: Props) {
   const { slug, date, title } = frontMatter;
 
@@ -53,6 +57,7 @@ export default function PostLayout({
               <div className="pt-10 pb-8 prose prose-invert max-w-none">
                 {children}
               </div>
+              {references && <References references={references} />}
             </div>
             <Comments frontMatter={frontMatter} />
             <footer>
