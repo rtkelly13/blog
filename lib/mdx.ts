@@ -5,6 +5,7 @@ import { bundleMDX } from 'mdx-bundler';
 import readingTime from 'reading-time';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeKatex from 'rehype-katex';
+import rehypeKatexNoTranslate from 'rehype-katex-notranslate';
 import rehypePrismPlus from 'rehype-prism-plus';
 // Rehype packages
 import rehypeSlug from 'rehype-slug';
@@ -81,6 +82,7 @@ export function getRehypePlugins(): Pluggable[] {
     rehypeSlug,
     rehypeAutolinkHeadings,
     rehypeKatex,
+    rehypeKatexNoTranslate,
     [rehypePrismPlus, { ignoreMissing: true }] as Pluggable,
     (() => {
       return (tree: any) => {
