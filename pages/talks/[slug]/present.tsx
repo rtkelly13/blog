@@ -89,7 +89,7 @@ export default function Present({
             color: '#f472b6',
             background: '#000',
             padding: '0.2rem 0.5rem',
-            fontFamily: '"IBM Plex Mono", monospace',
+            fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
             fontSize: '0.7rem',
             fontWeight: 700,
             textTransform: 'uppercase',

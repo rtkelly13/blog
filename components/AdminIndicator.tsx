@@ -33,7 +33,7 @@ export default function AdminIndicator() {
         background: '#000',
         color: '#22d3ee',
         padding: '0.15rem 0.5rem',
-        fontFamily: '"IBM Plex Mono", monospace',
+        fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
         fontSize: '0.65rem',
         fontWeight: 700,
         textTransform: 'uppercase',

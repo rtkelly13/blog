@@ -220,7 +220,7 @@ export function Follower({
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 40,
-        fontFamily: '"IBM Plex Mono", monospace',
+        fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
         fontWeight: 700,
         textTransform: 'uppercase',
         fontSize: '0.8rem',
