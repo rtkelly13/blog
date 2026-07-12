@@ -27,7 +27,10 @@ export default function ListLayoutWithTags(props: Props) {
   const onAllPosts = !currentTag;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 xl:max-w-7xl xl:px-4">
+    // Below xl this wrapper must be a pure pass-through (no width/padding):
+    // ListLayout brings its own container, and doubling the padding shifted
+    // the sub-xl layouts. Constrain and pad only when the sidebar shows.
+    <div className="xl:mx-auto xl:max-w-7xl xl:px-4">
       <div className="xl:flex xl:gap-10">
         <aside className="hidden xl:block w-64 shrink-0 pt-28">
           <nav
