@@ -43,20 +43,12 @@ pnpm post:wizard             # Interactive post composer
 
 ## Environment
 
-Copy `.env.example` to `.env` and fill in what you need. Everything is optional
-for a basic build — the blog runs without any of it:
-
-| Variable                 | Purpose                                                   |
-| ------------------------ | --------------------------------------------------------- |
-| `NEXT_PUBLIC_GISCUS_*`    | Giscus comments (repo, category, and their IDs)           |
-| `BUTTONDOWN_API_KEY`      | Newsletter signups via Buttondown                         |
-| `NEXT_PUBLIC_CONVEX_URL`  | Convex deployment URL for the live-talk features          |
-| `CONVEX_DEPLOYMENT`       | Convex deployment name (set by `npx convex dev`/`deploy`) |
-
-Without a Convex deployment, the audience-activity pages show a "not configured"
-notice and the rest of the site builds and runs unchanged. The moderation secret
-is **not** a Next.js env var — it lives in Convex
-(`npx convex env set MODERATION_KEY <secret>`).
+Copy `.env.example` to `.env` and fill in what you need — everything is optional
+for a basic build. It covers Giscus comments, the Buttondown newsletter, and the
+Convex deployment (`NEXT_PUBLIC_CONVEX_URL` / `CONVEX_DEPLOYMENT`) that powers the
+live-talk features. Without Convex, the audience-activity pages show a "not
+configured" notice and the rest of the site runs unchanged. See `.env.example`
+for the full list and inline notes.
 
 ## Project Structure
 
@@ -121,28 +113,24 @@ terminal-style UI. Design tokens are defined in `tailwind.config.js`.
 ## Testing & Quality
 
 ```bash
-pnpm test                    # Vitest (watch)
-pnpm test:unit               # Vitest (run once)
-pnpm test:coverage           # Unit tests with coverage
+pnpm test:unit               # Vitest unit tests
 pnpm test:e2e                # Playwright end-to-end + visual tests
-pnpm test:regression         # Diff local build vs deployed main
 pnpm lint                    # Biome check
 pnpm typecheck               # tsc --noEmit
-pnpm format                  # Biome format
 ```
 
-Visual snapshots are regenerated on CI (via the `playwright.yml`
-`workflow_dispatch`) so they match the Linux runner the checks compare against.
+Coverage, regression, and snapshot commands are listed in [AGENTS.md](./AGENTS.md).
+Visual snapshots are regenerated on CI so they match the runner the checks
+compare against.
 
 ## Contributing
 
 `main` enforces linear history — rebase feature branches onto `main` (no merge
-commits) and land PRs via squash merge. The PR gate (lint, typecheck, unit,
-build, e2e-visual) must be green.
+commits) and land PRs via squash merge, with the PR gate green.
 
-See [AGENTS.md](./AGENTS.md) for the full development workflow, architecture, and
-deployment details. It's the root of a hierarchical knowledge base with deeper
-docs under `components/`, `lib/`, and `tests/`.
+See [AGENTS.md](./AGENTS.md) for the full workflow, architecture, and deployment
+details — it's the root of a doc hierarchy with deeper guides under `components/`,
+`lib/`, and `tests/`.
 
 ## License
 
