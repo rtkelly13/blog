@@ -6,6 +6,7 @@ import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
+import TLDR from '@/components/TLDR';
 import siteMetadata from '@/data/siteMetadata';
 import formatDate from '@/lib/utils/formatDate';
 
@@ -22,7 +23,7 @@ export default function PostLayout({
   prev,
   children,
 }: Props) {
-  const { slug, date, title } = frontMatter;
+  const { slug, date, title, tldr } = frontMatter;
 
   return (
     <SectionContainer>
@@ -51,6 +52,7 @@ export default function PostLayout({
           >
             <div className="xl:pb-0 xl:col-span-3 xl:row-span-2">
               <div className="pt-10 pb-8 prose prose-invert max-w-none">
+                {tldr && <TLDR text={tldr} />}
                 {children}
               </div>
             </div>

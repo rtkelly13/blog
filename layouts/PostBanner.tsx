@@ -7,6 +7,7 @@ import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
+import TLDR from '@/components/TLDR';
 import siteMetadata from '@/data/siteMetadata';
 import formatDate from '@/lib/utils/formatDate';
 
@@ -23,7 +24,7 @@ export default function PostBanner({
   prev,
   children,
 }: Props) {
-  const { slug, date, title, images } = frontMatter;
+  const { slug, date, title, images, tldr } = frontMatter;
 
   // Use first image from frontmatter, or fallback to placeholder
   const displayImage =
@@ -66,6 +67,7 @@ export default function PostBanner({
           </header>
 
           <div className="pb-8 pt-8 prose prose-invert max-w-none font-mono">
+            {tldr && <TLDR text={tldr} />}
             {children}
           </div>
 
