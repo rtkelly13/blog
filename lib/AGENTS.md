@@ -107,6 +107,8 @@ getMachineId(); // machineId.ts — stable per-browser id (localStorage)
 - `rehype-slug` - Heading IDs
 - `rehype-autolink-headings` - Heading links
 - `rehype-katex` - Math rendering
+- `rehype-citation` - Citations/bibliography (only when the post's frontmatter
+  sets `bibliography:` — a .bib/CSL-JSON filename relative to `data/`)
 - `rehype-prism-plus` - Syntax highlighting
 
 ## CUSTOM PLUGINS

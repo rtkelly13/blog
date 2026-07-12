@@ -92,6 +92,7 @@ layout: string # Optional (default: PostLayout)
 series: # Optional multi-part posts
   name: string
   order: number
+bibliography: string # Optional .bib/CSL-JSON in data/ for [@BibKey] citations
 ```
 
 ### Pages Router (Not App Router)
