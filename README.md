@@ -13,6 +13,9 @@ Personal blog for sharing technical knowledge, tutorials, and insights.
 - **Comments:** Giscus (GitHub Discussions)
 
 Based on [tailwind-nextjs-starter-blog](https://github.com/timlrx/tailwind-nextjs-starter-blog).
+The blog has diverged significantly from the template in both directions — see
+[docs/template-divergence.md](./docs/template-divergence.md) for a two-way diff of ideas
+unique to this blog (back-port candidates) and upstream ideas worth bringing in.
 
 ## Quick Start
 
