@@ -53,6 +53,10 @@ Step-driven interactives usable in any MDX (posts, talks, ideas):
 - `Walkthrough` — guided node-graph tour (@xyflow/react): each step highlights
   `focus` nodes, lights `activeEdges` ("from->to"), and pans the camera. No
   free pan/zoom, so it never hijacks page scroll.
+- `QueryRouter` — query-routing simulator: a typed-in query scans the
+  AGENTS.md where-to-look table (skeleton rows resolve to a highlighted
+  match), the route breadcrumb draws, context blocks stream in behind
+  skeleton loaders, and the answer lands. Scenarios are declarative props.
 
 Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
 motion/@xyflow/react ship as lazy chunks only on pages that mount them.

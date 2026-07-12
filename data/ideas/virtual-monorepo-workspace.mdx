@@ -115,6 +115,74 @@ to) the "day in the life" walkthrough gap above:
   ]}
 />
 
+**Query routing, simulated** — how a simple query becomes loaded context: the
+root AGENTS.md acts as a router, skeleton loaders stand in for context being
+read, and the run ends on the resolved answer. Two scenarios — one routed
+through docs into a repo, one landing on the help command:
+
+<QueryRouter
+  title="one query, routed"
+  scenarios={[
+    {
+      chip: 'db tunnels',
+      query: 'where are the environment database tunnels documented?',
+      routerRows: [
+        { label: 'Find docs about a topic', path: 'docs search "<query>"', match: true },
+        { label: 'Background job patterns', path: 'projects/backend-service/jobs/' },
+        { label: 'Structural code questions', path: 'workspace intel …' },
+        { label: 'Every CLI verb + usage', path: 'uv run help' },
+      ],
+      route: ['AGENTS.md', 'docs search', 'docs/cli/db-tunnel.md'],
+      context: [
+        {
+          source: 'docs search "database tunnel" — top hit',
+          lines: [
+            'docs/cli/db-tunnel.md · score 0.92',
+            'docs/devenv/environments.md · score 0.71',
+          ],
+        },
+        {
+          source: 'docs/cli/db-tunnel.md',
+          lines: [
+            '# db-tunnel — SSH tunnels into environment databases',
+            'usage: db-tunnel <env> [--port 5433]',
+            'auth: session creds from `secrets`; never long-lived keys',
+            'gotcha: prod is read-replica only — writes are refused',
+          ],
+        },
+      ],
+      answer:
+        'db-tunnel <env> opens an SSH tunnel to that environment’s database; prod is read-replica only.',
+    },
+    {
+      chip: 'what can I run?',
+      query: 'what commands does the workspace ship?',
+      routerRows: [
+        { label: 'Find docs about a topic', path: 'docs search "<query>"' },
+        { label: 'Background job patterns', path: 'projects/backend-service/jobs/' },
+        { label: 'Structural code questions', path: 'workspace intel …' },
+        { label: 'Every CLI verb + usage', path: 'uv run help', match: true },
+      ],
+      route: ['AGENTS.md', 'uv run help'],
+      context: [
+        {
+          source: 'uv run help — the help page',
+          lines: [
+            'devenv       machine bootstrap + tool catalogue',
+            'docs         search · index · lint · agent-context',
+            'db-tunnel    SSH tunnel to an environment database',
+            'tickets      task-management CLI (agent-friendly output)',
+            'monitor      dashboards, alerts, checks',
+            'workspace    branches · queue · roles · workflows · intel',
+          ],
+        },
+      ],
+      answer:
+        'uv run help lists every CLI verb with usage — the same page a new starter reads on day one.',
+    },
+  ]}
+/>
+
 **The gaps as a mini deck** — testing whether a slide show reads better than
 the checklist for a quick skim:
 

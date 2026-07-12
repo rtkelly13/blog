@@ -49,6 +49,11 @@ const Walkthrough = dynamic(() => import('./interactive/Walkthrough'), {
   loading: InteractiveLoading,
 });
 
+const QueryRouter = dynamic(() => import('./interactive/QueryRouter'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
 export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
@@ -56,6 +61,7 @@ export const MDXComponents: MDXComponentsType = {
   NoteBlock,
   IdeaDeck,
   IdeaSlide,
+  QueryRouter,
   Walkthrough,
   BreakTimer,
   EmojiTop5,
