@@ -7,30 +7,20 @@ import {
   useRef,
   useState,
 } from 'react';
+import {
+  highlightIndex,
+  materialize,
+  outLines,
+  parseSpans,
+  plainText,
+  type SpanColor,
+  type TerminalEvent,
+} from './terminalEngine';
 
-/**
- * One step of a scripted terminal session.
- *
- * - `cmd`  — type a command at the prompt (typewriter).
- * - `out`  — print output lines. `speed`: ms per line (default 70) or
- *            'instant'. `highlight` picks one line (substring or index): after
- *            the block prints, the window eases it to centre and highlights it
- *            while that block's other lines dim.
- * - `pause` — wait N ms.
- * - `clear` — clear the screen.
- *
- * Output lines support a tiny inline colour markup:
- * `{{cyan|text}}`, `{{pink|…}}`, `{{yellow|…}}`, `{{white|…}}`, `{{dim|…}}`.
- */
-export type TerminalEvent =
-  | { cmd: string }
-  | {
-      out: string | string[];
-      speed?: number | 'instant';
-      highlight?: string | number;
-    }
-  | { pause: number }
-  | { clear: true };
+// See terminalEngine.ts for the script event model ({cmd}/{out}/{pause}/
+// {clear}) and the {{color|text}} inline markup. The engine is pure and
+// unit-tested; this file is the React shell (timers, scrolling, chrome).
+export type { TerminalEvent } from './terminalEngine';
 
 interface TerminalProps {
   /** Window title, shown in the chrome bar. */
@@ -49,8 +39,7 @@ interface TerminalProps {
   typingSpeed?: number;
 }
 
-const SPAN_RE = /\{\{(cyan|pink|yellow|white|dim)\|(.*?)\}\}/g;
-const SPAN_CLASS: Record<string, string> = {
+const SPAN_CLASS: Record<SpanColor, string> = {
   cyan: 'text-brutalist-cyan',
   pink: 'text-brutalist-pink',
   yellow: 'text-brutalist-yellow',
@@ -58,101 +47,19 @@ const SPAN_CLASS: Record<string, string> = {
   dim: 'text-zinc-500',
 };
 
-/** Parse the {{color|text}} markup into styled spans. */
+/** Render the parsed colour spans as styled JSX. */
 function renderSpans(raw: string): ReactNode {
-  if (!raw.includes('{{')) return raw;
-  const parts: ReactNode[] = [];
-  let last = 0;
-  let i = 0;
-  for (const m of raw.matchAll(SPAN_RE)) {
-    if (m.index > last) parts.push(raw.slice(last, m.index));
-    parts.push(
-      <span key={`s${i++}`} className={SPAN_CLASS[m[1]]}>
-        {m[2]}
-      </span>,
-    );
-    last = m.index + m[0].length;
-  }
-  if (last < raw.length) parts.push(raw.slice(last));
-  return parts;
-}
-
-/** Strip the colour markup — used for highlight matching. */
-const plain = (raw: string) => raw.replace(SPAN_RE, '$2');
-
-interface RenderLine {
-  key: string;
-  kind: 'cmd' | 'out';
-  text: string;
-  highlight: boolean;
-  dim: boolean;
-}
-
-const outLines = (ev: { out: string | string[] }) =>
-  Array.isArray(ev.out) ? ev.out : [ev.out];
-
-function highlightIndex(
-  ev: { highlight?: string | number },
-  lines: string[],
-): number {
-  if (typeof ev.highlight === 'number') return ev.highlight;
-  if (ev.highlight) {
-    const needle = ev.highlight;
-    return lines.findIndex((l) => plain(l).includes(needle));
-  }
-  return -1;
-}
-
-/**
- * Pure projection of (script, eventIdx, progress) → visible lines. No
- * append-style side effects, so replays, skips and re-renders are idempotent.
- * For the current `out` event, `progress` counts emitted lines; one extra
- * tick past the end is the "focus" step where the highlight applies.
- */
-function materialize(
-  script: TerminalEvent[],
-  eventIdx: number,
-  progress: number,
-): { lines: RenderLine[]; typing: string | null } {
-  let lines: RenderLine[] = [];
-  let typing: string | null = null;
-
-  for (let i = 0; i <= Math.min(eventIdx, script.length - 1); i++) {
-    const ev = script[i];
-    const isCurrent = i === eventIdx;
-
-    if ('cmd' in ev) {
-      if (isCurrent && progress < ev.cmd.length) {
-        typing = ev.cmd.slice(0, progress);
-      } else {
-        lines.push({
-          key: `e${i}`,
-          kind: 'cmd',
-          text: ev.cmd,
-          highlight: false,
-          dim: false,
-        });
-      }
-    } else if ('out' in ev) {
-      const ls = outLines(ev);
-      const count = isCurrent ? Math.min(progress, ls.length) : ls.length;
-      const focused = !isCurrent || progress > ls.length;
-      const hIdx = highlightIndex(ev, ls);
-      for (let j = 0; j < count; j++) {
-        lines.push({
-          key: `e${i}l${j}`,
-          kind: 'out',
-          text: ls[j],
-          highlight: focused && j === hIdx,
-          dim: focused && hIdx >= 0 && j !== hIdx,
-        });
-      }
-    } else if ('clear' in ev) {
-      lines = [];
-    }
-    // pause: nothing to render
-  }
-  return { lines, typing };
+  const spans = parseSpans(raw);
+  if (spans.length === 1 && spans[0].color === null) return spans[0].text;
+  return spans.map((span, i) =>
+    span.color === null ? (
+      <span key={`${i}-${span.text}`}>{span.text}</span>
+    ) : (
+      <span key={`${i}-${span.text}`} className={SPAN_CLASS[span.color]}>
+        {span.text}
+      </span>
+    ),
+  );
 }
 
 /**
@@ -399,7 +306,7 @@ export default function Terminal({
               }`}
             >
               {line.highlight || line.dim
-                ? plain(line.text)
+                ? plainText(line.text)
                 : renderSpans(line.text)}
             </p>
           ),
