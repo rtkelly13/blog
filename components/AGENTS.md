@@ -55,8 +55,12 @@ Step-driven interactives usable in any MDX (posts, talks, ideas):
   free pan/zoom, so it never hijacks page scroll.
 - `QueryRouter` — query-routing simulator: a typed-in query scans the
   AGENTS.md where-to-look table (skeleton rows resolve to a highlighted
-  match), the route breadcrumb draws, context blocks stream in behind
-  skeleton loaders, and the answer lands. Scenarios are declarative props.
+  match), the route breadcrumb draws, context blocks load one after another,
+  and the answer lands. Two block styles: default streams lines behind
+  skeleton loaders; `terminal: true` renders an emulated terminal window that
+  scrolls down the command's full fake output and highlights the one relevant
+  line (`highlight: <substring|index>`) while the rest dims. Scenarios are
+  declarative props.
 
 Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
 motion/@xyflow/react ship as lazy chunks only on pages that mount them.
