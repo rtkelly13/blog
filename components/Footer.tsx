@@ -20,6 +20,16 @@ export default function Footer() {
             size={8}
           />
         </div>
+        {/* The header nav is at capacity (it already overflows its 1024px
+            container with seven links), so secondary destinations live here. */}
+        <div className="flex mb-4 space-x-4 text-sm font-mono font-bold uppercase">
+          <Link
+            href="/projects"
+            className="text-white hover:text-brutalist-cyan transition-colors"
+          >
+            [ Projects ]
+          </Link>
+        </div>
         <div className="flex space-x-2 text-sm font-mono text-white">
           <div>{siteMetadata.author}</div>
           <div>{` • `}</div>
