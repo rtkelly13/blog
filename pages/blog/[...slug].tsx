@@ -36,6 +36,7 @@ export const getStaticProps: GetStaticProps<{
     mdxSource: string;
     toc: Toc;
     references: Reference[];
+    hasManualReferences: boolean;
     frontMatter: PostFrontMatter;
   };
   authorDetails: AuthorFrontMatter[];
@@ -114,7 +115,7 @@ export default function Blog({
   next,
   seriesData,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { mdxSource, toc, references, frontMatter } = post;
+  const { mdxSource, toc, references, hasManualReferences, frontMatter } = post;
 
   return (
     <>
@@ -124,6 +125,7 @@ export default function Blog({
           layout={frontMatter.layout || DEFAULT_LAYOUT}
           toc={toc}
           references={references}
+          hasManualReferences={hasManualReferences}
           mdxSource={mdxSource}
           frontMatter={frontMatter}
           authorDetails={authorDetails}

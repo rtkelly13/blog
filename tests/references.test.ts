@@ -1,4 +1,5 @@
 import remarkGfm from 'remark-gfm';
+import remarkMdx from 'remark-mdx';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { describe, expect, it } from 'vitest';
@@ -9,12 +10,17 @@ import remarkReferences, {
 } from '../lib/remark-references';
 import type { Reference } from '../types/Reference';
 
-function runPlugin(markdown: string, insertMarkers = false) {
+function runPlugin(
+  markdown: string,
+  insertMarkers = false,
+  meta?: { manualPlacement: boolean },
+) {
   const references: Reference[] = [];
   const processor = unified()
     .use(remarkParse)
+    .use(remarkMdx)
     .use(remarkGfm)
-    .use(remarkReferences, { exportRef: references, insertMarkers });
+    .use(remarkReferences, { exportRef: references, insertMarkers, meta });
   const tree = processor.runSync(processor.parse(markdown)) as any;
   return { references, tree };
 }
@@ -97,6 +103,31 @@ describe('remarkReferences', () => {
 
   it('skips malformed URLs without crashing', () => {
     expect(buildReference('https://', 'broken', 1)).toBeNull();
+  });
+
+  it('gives each marker a hover tooltip with the full entry', () => {
+    const { tree } = runPlugin(
+      '[AWS Batch](https://aws.amazon.com/batch/) is a service.',
+      true,
+    );
+    const marker = tree.children[0].children.find(
+      (node: any) => node.type === 'link' && node.url?.startsWith('#ref-'),
+    );
+    expect(marker.data.hProperties.title).toBe(
+      '[1] AWS Batch — aws.amazon.com',
+    );
+  });
+
+  it('flags manual placement when the body renders <References />', () => {
+    const meta = { manualPlacement: false };
+    runPlugin('Intro [x](https://example.com)\n\n<References />\n', true, meta);
+    expect(meta.manualPlacement).toBe(true);
+  });
+
+  it('leaves manualPlacement false when no <References /> is present', () => {
+    const meta = { manualPlacement: false };
+    runPlugin('Just [x](https://example.com) here.', true, meta);
+    expect(meta.manualPlacement).toBe(false);
   });
 });
 

@@ -70,6 +70,7 @@ export function setEsbuildBinaryPath() {
 export function getRemarkPlugins(
   toc?: Toc,
   references?: Reference[],
+  referencesMeta?: { manualPlacement: boolean },
 ): Pluggable[] {
   return [
     ...(toc ? [[remarkTocHeadings, { exportRef: toc }] as Pluggable] : []),
@@ -77,7 +78,11 @@ export function getRemarkPlugins(
       ? [
           [
             remarkReferences,
-            { exportRef: references, insertMarkers: true },
+            {
+              exportRef: references,
+              insertMarkers: true,
+              meta: referencesMeta,
+            },
           ] as Pluggable,
         ]
       : []),
@@ -169,6 +174,9 @@ export async function getFileBySlug<_T>(
   // References section, so citation markers there would point nowhere.
   const references: Reference[] = [];
   const collectReferences = type === 'blog' ? references : undefined;
+  // Set true by the plugin if the body places `<References />` itself, so the
+  // layout knows to suppress its auto-appended section (see ADR-0006).
+  const referencesMeta = { manualPlacement: false };
 
   const { frontmatter, code } = await bundleMDX({
     source,
@@ -177,7 +185,7 @@ export async function getFileBySlug<_T>(
     mdxOptions(options) {
       options.remarkPlugins = [
         ...(options.remarkPlugins ?? []),
-        ...getRemarkPlugins(toc, collectReferences),
+        ...getRemarkPlugins(toc, collectReferences, referencesMeta),
       ];
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
@@ -198,6 +206,7 @@ export async function getFileBySlug<_T>(
     mdxSource: code,
     toc,
     references,
+    hasManualReferences: referencesMeta.manualPlacement,
     frontMatter: {
       readingTime: readingTime(code),
       slug: slug || null,

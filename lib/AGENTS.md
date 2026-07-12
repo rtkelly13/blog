@@ -146,6 +146,15 @@ after each link, anchored to the entry in the post's References section.
 - `scripts/archive-links.mjs` (`pnpm archive-links`) submits every referenced
   URL to the Wayback Machine's Save Page Now so the archived links resolve.
 
+**Author escape hatch — placement override.** By default the References section
+is appended after the post body. To place it mid-document, drop `<References />`
+anywhere in the MDX: the plugin sets `manualPlacement` (returned as
+`hasManualReferences` from `getFileBySlug`), the layout suppresses its
+auto-append, and the inline component reads the collected list from
+`ReferencesContext`. Markers also carry a `title` tooltip with the full entry.
+Rationale and the comparison to the upstream `rehype-citation` approach are in
+[ADR-0006](../docs/adr/0006-bibliography-and-durable-archive-links.md).
+
 ### remark-img-to-jsx.ts
 
 Converts markdown images to Next.js `<Image>` with dimensions.

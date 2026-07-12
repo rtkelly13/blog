@@ -1,9 +1,22 @@
 import { ArchiveRestore, ExternalLink } from 'lucide-react';
+import { createContext, useContext } from 'react';
 import type { Reference } from 'types/Reference';
 import Link from '@/components/Link';
 
+/**
+ * Lets an author drop `<References />` into MDX to place the bibliography
+ * mid-document. The layout provides the collected references here and wraps
+ * the post body, so the inline component needs no props (see ADR-0006).
+ */
+export const ReferencesContext = createContext<Reference[]>([]);
+
 interface Props {
-  references: Reference[];
+  /**
+   * The bibliography to render. Omit when used as an MDX component
+   * (`<References />`) — it then reads the post's references from
+   * `ReferencesContext` instead.
+   */
+  references?: Reference[];
   /**
    * Render a ↩ backlink to the first inline `[n]` citation marker. On for
    * blog posts (the MDX pipeline inserts markers); off for talk landing
@@ -20,10 +33,12 @@ interface Props {
  * Machine snapshot so the reference outlives link rot.
  */
 export default function References({
-  references,
+  references: referencesProp,
   backlinks = true,
   label = 'References',
 }: Props) {
+  const contextReferences = useContext(ReferencesContext);
+  const references = referencesProp ?? contextReferences;
   if (!references || references.length === 0) return null;
 
   return (

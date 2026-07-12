@@ -5,7 +5,7 @@ import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
-import References from '@/components/References';
+import References, { ReferencesContext } from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
@@ -17,6 +17,9 @@ interface Props {
   next?: { slug: string; title: string };
   prev?: { slug: string; title: string };
   references?: Reference[];
+  /** See ADR-0006 — suppresses the auto-appended section when the body
+   * renders `<References />` itself. */
+  hasManualReferences?: boolean;
 }
 
 export default function PostLayout({
@@ -25,6 +28,7 @@ export default function PostLayout({
   prev,
   children,
   references,
+  hasManualReferences,
 }: Props) {
   const { slug, date, title } = frontMatter;
 
@@ -54,10 +58,14 @@ export default function PostLayout({
             style={{ gridTemplateRows: 'auto 1fr' }}
           >
             <div className="xl:pb-0 xl:col-span-3 xl:row-span-2">
-              <div className="pt-10 pb-8 prose prose-invert max-w-none">
-                {children}
-              </div>
-              {references && <References references={references} />}
+              <ReferencesContext.Provider value={references ?? []}>
+                <div className="pt-10 pb-8 prose prose-invert max-w-none">
+                  {children}
+                </div>
+              </ReferencesContext.Provider>
+              {references && !hasManualReferences && (
+                <References references={references} />
+              )}
             </div>
             <Comments frontMatter={frontMatter} />
             <footer>

@@ -6,7 +6,7 @@ import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
-import References from '@/components/References';
+import References, { ReferencesContext } from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
@@ -18,6 +18,9 @@ interface Props {
   next?: { slug: string; title: string };
   prev?: { slug: string; title: string };
   references?: Reference[];
+  /** See ADR-0006 — suppresses the auto-appended section when the body
+   * renders `<References />` itself. */
+  hasManualReferences?: boolean;
 }
 
 export default function PostBanner({
@@ -26,6 +29,7 @@ export default function PostBanner({
   prev,
   children,
   references,
+  hasManualReferences,
 }: Props) {
   const { slug, date, title, images } = frontMatter;
 
@@ -69,11 +73,15 @@ export default function PostBanner({
             </div>
           </header>
 
-          <div className="pb-8 pt-8 prose prose-invert max-w-none font-mono">
-            {children}
-          </div>
+          <ReferencesContext.Provider value={references ?? []}>
+            <div className="pb-8 pt-8 prose prose-invert max-w-none font-mono">
+              {children}
+            </div>
+          </ReferencesContext.Provider>
 
-          {references && <References references={references} />}
+          {references && !hasManualReferences && (
+            <References references={references} />
+          )}
 
           <Comments frontMatter={frontMatter} />
 

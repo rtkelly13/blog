@@ -13,6 +13,16 @@ export interface RemarkReferencesOptions {
    * renders the bibliography).
    */
   insertMarkers?: boolean;
+  /**
+   * Placement-override signal. When the author drops a `<References />`
+   * component into the body, they've chosen where the bibliography renders,
+   * so the layout must suppress its own auto-appended section. The plugin
+   * sets `manualPlacement` here if it finds such a node; the caller reads it
+   * back after compilation (see `getFileBySlug`). Adapted from
+   * rehype-citation's `[^ref]` placement tag — we use an MDX component
+   * instead, since `[^ref]` collides with GFM footnote syntax in our pipeline.
+   */
+  meta?: { manualPlacement: boolean };
 }
 
 /** External means archivable: only http(s) links get bibliography entries. */
@@ -63,6 +73,21 @@ export default function remarkReferences(options: RemarkReferencesOptions) {
   return (tree: Parent) => {
     const byUrl = new Map<string, Reference>();
 
+    // Placement override: a `<References />` node anywhere in the body means
+    // the author is rendering the bibliography themselves, so the layout
+    // shouldn't also auto-append it.
+    if (options.meta) {
+      visit(tree, (node: any) => {
+        if (
+          (node.type === 'mdxJsxFlowElement' ||
+            node.type === 'mdxJsxTextElement') &&
+          node.name === 'References'
+        ) {
+          options.meta!.manualPlacement = true;
+        }
+      });
+    }
+
     visit(tree, 'link', (node: any, index, parent: any) => {
       if (!parent || index === undefined) return;
       if (!isExternalUrl(node.url)) return;
@@ -91,6 +116,8 @@ export default function remarkReferences(options: RemarkReferencesOptions) {
             // The bibliography's ↩ backlink targets the first citation only.
             ...(firstOccurrence ? { id: `cite-${ref.number}` } : {}),
             ariaLabel: `Jump to reference ${ref.number}`,
+            // Hover shows the full entry (rehype-citation's `showTooltips`).
+            title: `[${ref.number}] ${ref.title} — ${ref.domain}`,
           },
         },
         children: [{ type: 'text', value: `[${ref.number}]` }],
