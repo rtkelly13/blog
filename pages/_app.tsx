@@ -11,6 +11,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import AdminIndicator from '@/components/AdminIndicator';
 import Analytics from '@/components/analytics';
+import DisplayFontFlag from '@/components/DisplayFontFlag';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import SearchProvider from '@/components/search/SearchProvider';
 import { convex } from '@/lib/convexClient';
@@ -36,6 +37,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <meta content="width=device-width, initial-scale=1" name="viewport" />
         </Head>
         <style dangerouslySetInnerHTML={{ __html: fontRootVariables }} />
+        <DisplayFontFlag />
         <Analytics />
         {getLayout(<Component {...pageProps} />)}
       </SearchProvider>
