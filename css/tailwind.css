@@ -202,6 +202,23 @@ html {
     color: #facc15;
     font-weight: normal;
   }
+
+  /*
+   * Bracketed headings (`[ TEXT ]`, via components/BracketText.tsx). Space
+   * Grotesk draws square brackets taller than the caps and centered on the em
+   * box, so the brackets hang below the letters' baseline and read as
+   * misaligned. Nudge them up ~0.1em to optically center them on the caps.
+   * `em` scales the offset with the heading size; transform-only, so toggling
+   * it on causes no reflow.
+   *
+   * Gated on Space Grotesk actually being loaded (DisplayFontFlag sets the
+   * attribute on <html>): the size-adjusted swap fallback and any other
+   * display font sit differently and must not get this correction.
+   */
+  [data-display-font="space-grotesk"] .bracket-glyph {
+    display: inline-block;
+    transform: translateY(-0.1em);
+  }
 }
 
 /* Floating emoji reactions (see components/Reactions.tsx) */

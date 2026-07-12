@@ -118,6 +118,21 @@ export const vt323 = localFont({
  * variables. Rendered as a <style> tag in _app.tsx; :root scope (rather than
  * next/font's `variable` classes on a wrapper div) keeps portalled UI covered.
  */
+/**
+ * Primary family name next/font generated for Space Grotesk (the real webfont,
+ * without the size-adjusted `… Fallback` face it appends). Exposed so client
+ * code can ask `document.fonts` whether the real display font has loaded — see
+ * `components/DisplayFontFlag`. Space Grotesk's square brackets need an
+ * optical-centering nudge that its fallback fonts don't, so it's gated on this.
+ *
+ * The `Fallback` face never reports as loaded, so `document.fonts.check` must
+ * target only this primary family — hence we take the first entry of the stack.
+ */
+export const spaceGroteskFamily = spaceGrotesk.style.fontFamily
+  .split(',')[0]
+  .replace(/["']/g, '')
+  .trim();
+
 export const fontRootVariables = `:root {
   --font-inter: ${inter.style.fontFamily};
   --font-space-grotesk: ${spaceGrotesk.style.fontFamily};
