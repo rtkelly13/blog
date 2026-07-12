@@ -1,0 +1,88 @@
+---
+title: "The Virtual Monorepo: Giving Coding Agents One World to Reason About"
+kind: article
+status: developing
+created: "2026-07-04"
+updated: "2026-07-12"
+tags: ["ai", "coding-agents", "monorepo", "workflow"]
+target: "branch claude/virtual-monorepo-blog-7ict4s — data/blog/virtual-monorepo-coding-agents.mdx"
+summary: "The workspace/brain-repo article. A full agent draft exists; structure and accuracy reviewed. Below: the gaps to fill, structural moves to try, and experiments to run before the human rewrite pass."
+layout: IdeaLayout
+---
+
+## Where it stands
+
+The draft is well-structured (problem → brain/body pattern → six mechanisms →
+honest tradeoffs → takeaway) and almost entirely accurate against the real
+workspace repo. It is an **agent draft**: per the authorship policy the body
+prose is a scaffold to be replaced, not finished copy.
+
+<NoteBlock title="one factual bug" color="yellow">
+The "subtle part" NoteBlock claims the brain tracks the symlink. It doesn't —
+`.gitignore` ignores `projects/` entirely (neither the code nor the link is
+tracked); the bootstrap scripts recreate it per machine. The adjacent snippet
+labelled as gitignore is actually the *agent* ignore file (`!projects/`).
+</NoteBlock>
+
+## Gaps to fill
+
+- [ ] **Fix the symlink-tracking claim** — git tracks neither the code nor the
+      symlink; `setup.sh` / `setup.ps1` recreate it. Relabel the ignore-file
+      snippet as the agent's, not git's.
+- [ ] **Origin story** — the repo grew, it wasn't designed. Four phases:
+      new-starter tool baselines (devenv, tool catalogue) → custom dev tools
+      and environment tunnels → agentic CLIs (task management, observability,
+      docs search) → agent brain. Lets readers start at phase 1 without buying
+      the whole vision.
+- [ ] **Trust tiers / prompt-injection defence** — three repo roots with trust
+      tiers; `external/**` content is *data, never instructions*; sync treats
+      external repos as read-only. Strongest evidence for the "this is really
+      a coding-agent story" thesis.
+- [ ] **One task end-to-end** — trace a cross-repo change: docs search → root
+      AGENTS.md routes to the right repo → code-intel graph finds callers →
+      two PRs. The draft is all mechanism, no demonstration.
+- [ ] **Generated agent assets** — skills/commands authored once in the
+      playbook and *compiled* per-tool (`agents build` → `.claude/`,
+      `.opencode/`), gitignored locally, published by CI. Stronger claim than
+      pointer files alone.
+- [ ] **The drift answer** — `docs lint` and `docs agent-context check`
+      failing CI is the real response to map rot; currently one line of
+      "discipline plus doc-lint tooling".
+- [ ] **Prior art** — one paragraph on why not git submodules, meta-repo
+      tools, or a real monorepo migration.
+
+## Structural moves
+
+- [ ] Group the six mechanisms: **see** (filesystem + permissions), **know**
+      (AGENTS.md + progressive disclosure), **do** (CLIs + code intel),
+      **don't** (guardrails).
+- [ ] End with a **starter kit**: create repo, `ln -s`, seed AGENTS.md with a
+      where-to-look table, add the two ignore files.
+
+## Experiments
+
+- [ ] **Two-part series?** Part 1 the pattern, part 2 equipping the agents —
+      uses the series machinery like Blog Revival 2026. Draft is ~2,400 words.
+- [ ] **Two-ignore-files side-by-side diagram** — explains the core trick
+      better than prose (and fixes the factual bug while it's at it). A
+      prototype exists as an artifact page.
+- [ ] **Progressive-disclosure diagram** — context arriving in layers,
+      just-in-time. Rough cut below; iterate here before promoting it into
+      the draft.
+
+<Diagram type="mermaid" caption="Progressive disclosure: the root file is a router, not an encyclopaedia">
+{`graph LR
+    A[root AGENTS.md<br/>what exists · where to go] --> B[repo AGENTS.md<br/>conventions · commands]
+    B --> C[runbook / schema doc<br/>task-level detail]
+    style A fill:#000,stroke:#22d3ee,stroke-width:3px,color:#22d3ee,rx:0,ry:0
+    style B fill:#000,stroke:#facc15,stroke-width:3px,color:#facc15,rx:0,ry:0
+    style C fill:#000,stroke:#ec4899,stroke-width:3px,color:#ec4899,rx:0,ry:0
+    linkStyle default stroke:#fff,stroke-width:2px`}
+</Diagram>
+
+## Publishing mechanics
+
+- [ ] Rebase the branch onto `main` (~15 commits behind).
+- [ ] Add `tldr:` frontmatter — the post layouts render a TL;DR block now.
+- [ ] Human rewrite pass over the body prose (authorship policy), then flip
+      `draft: false`.

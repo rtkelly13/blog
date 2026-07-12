@@ -99,7 +99,7 @@ export function getRehypePlugins(): Pluggable[] {
   ];
 }
 
-export function getFiles(type: 'blog' | 'authors' | 'series') {
+export function getFiles(type: 'blog' | 'authors' | 'series' | 'ideas') {
   const prefixPaths = path.join(root, 'data', type);
   const files = getAllFilesRecursively(prefixPaths);
   return files.map((file) =>
@@ -137,7 +137,7 @@ export function sortPosts(a: PostFrontMatter, b: PostFrontMatter) {
 }
 
 export async function getFileBySlug<_T>(
-  type: 'authors' | 'blog' | 'series',
+  type: 'authors' | 'blog' | 'series' | 'ideas',
   slug: string | string[],
 ) {
   const mdxPath = path.join(root, 'data', type, `${slug}.mdx`);

@@ -1,5 +1,6 @@
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import dynamic from 'next/dynamic';
+import Link from '@/components/Link';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 import { getAllTalksFrontMatter } from '@/lib/talks';
@@ -34,9 +35,17 @@ export default function AdminPage({
     <>
       <PageSEO title={`Admin - ${siteMetadata.author}`} description="" />
       <article className="mx-auto max-w-4xl py-10">
-        <h1 className="mb-6 font-display text-3xl font-bold uppercase text-white">
-          [ Admin ]
-        </h1>
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-4">
+          <h1 className="font-display text-3xl font-bold uppercase text-white">
+            [ Admin ]
+          </h1>
+          <Link
+            href="/ideas"
+            className="font-mono text-sm font-bold uppercase text-brutalist-yellow transition-colors hover:text-white"
+          >
+            [ Ideas workbench &gt; ]
+          </Link>
+        </div>
         <AdminDashboard talkDurations={talkDurations} />
       </article>
     </>
