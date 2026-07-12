@@ -14,7 +14,7 @@ on:
         type: boolean
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   update-snapshots:
@@ -35,6 +35,24 @@ jobs:
       - name: Update snapshots
         working-directory: blog
         run: pnpm exec playwright test --update-snapshots
+
+      # Commit the regenerated snapshots straight back to the branch this run
+      # was dispatched on, so intentional visual changes don't need a manual
+      # download-and-commit round-trip. A GITHUB_TOKEN push deliberately does
+      # not retrigger pull_request checks — re-run the PR gate (or toggle the
+      # PR's ready/draft state) once this lands to pick the new baselines up.
+      - name: Commit updated snapshots
+        working-directory: blog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(git status --porcelain tests/__snapshots__)" ]; then
+            echo "No snapshot changes to commit."
+            exit 0
+          fi
+          git add tests/__snapshots__
+          git commit -m "test: regenerate visual regression snapshots"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
