@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
+import BracketText from '@/components/BracketText';
 import Image from '@/components/Image';
 import { PageSEO } from '@/components/SEO';
 import SocialIcon from '@/components/social-icons';
@@ -27,7 +28,7 @@ export default function AuthorLayout({ children, frontMatter }: Props) {
       <div className="divide-y divide-zinc-800 font-mono">
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <h1 className="text-3xl font-display font-bold leading-tight tracking-widest text-white uppercase sm:text-4xl md:text-6xl drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] pb-4 inline-block relative">
-            [ ABOUT_ME ]
+            <BracketText>ABOUT_ME</BracketText>
             <div className="absolute bottom-0 left-0 w-full h-[4px] bg-brutalist-pink shadow-glow-pink" />
           </h1>
         </div>

@@ -2,6 +2,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { type ComponentProps, useState } from 'react';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
 import type { SeriesMetadata } from 'types/Series';
+import BracketText from '@/components/BracketText';
 import Link from '@/components/Link';
 import Pagination from '@/components/Pagination';
 import formatDate from '@/lib/utils/formatDate';
@@ -204,7 +205,7 @@ export default function ListLayout({
                 href={`/blog/${slug}`}
                 className="text-white hover:text-brutalist-cyan transition-colors"
               >
-                [ {title} ]
+                <BracketText>{title}</BracketText>
               </Link>
             </h3>
             {renderTags(tags)}
@@ -229,7 +230,7 @@ export default function ListLayout({
         <div className="pt-6 pb-8 space-y-8">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-display font-bold leading-tight tracking-widest text-white uppercase sm:text-5xl md:text-7xl drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] pb-4 inline-block relative">
-              [ {title} ]
+              <BracketText>{title}</BracketText>
               <div className="absolute bottom-0 left-0 w-full h-[4px] bg-brutalist-cyan shadow-glow-cyan" />
             </h1>
           </div>
@@ -331,11 +332,11 @@ export default function ListLayout({
                           href={`/series/${seriesGroup.slug}`}
                           className="text-white hover:text-brutalist-pink transition-colors"
                         >
-                          [ {seriesGroup.name} ]
+                          <BracketText>{seriesGroup.name}</BracketText>
                         </Link>
                       ) : (
                         <span className="text-white">
-                          [ {seriesGroup.name} ]
+                          <BracketText>{seriesGroup.name}</BracketText>
                         </span>
                       )}
                     </h3>
