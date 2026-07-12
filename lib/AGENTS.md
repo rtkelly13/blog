@@ -152,6 +152,13 @@ anywhere in the MDX: the plugin sets `manualPlacement` (returned as
 `hasManualReferences` from `getFileBySlug`), the layout suppresses its
 auto-append, and the inline component reads the collected list from
 `ReferencesContext`. Markers also carry a `title` tooltip with the full entry.
+
+**Featured links (boosting).** Frontmatter `featuredLinks: [url | {title, url}]`
+promotes the most valuable sources to a pinned "★ Featured" group at the top of
+the References section (`mergeFeaturedLinks` in `remark-references.ts`). A
+featured link cited inline keeps its `[n]`/backlink; an uncited one is added as
+a numberless entry — the durable replacement for a hand-written "Links" list.
+
 Rationale and the comparison to the upstream `rehype-citation` approach are in
 [ADR-0006](../docs/adr/0006-bibliography-and-durable-archive-links.md).
 

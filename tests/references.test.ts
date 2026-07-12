@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { extractReferences } from '../lib/references';
 import remarkReferences, {
   buildReference,
+  mergeFeaturedLinks,
   toArchiveUrl,
 } from '../lib/remark-references';
 import type { Reference } from '../types/Reference';
@@ -136,6 +137,77 @@ describe('toArchiveUrl', () => {
     expect(toArchiveUrl('https://example.com')).toBe(
       'https://web.archive.org/web/https://example.com',
     );
+  });
+});
+
+describe('mergeFeaturedLinks', () => {
+  const collected = (): Reference[] => [
+    {
+      id: 'ref-1',
+      number: 1,
+      title: 'Batch',
+      url: 'https://aws.amazon.com/batch/',
+      domain: 'aws.amazon.com',
+      archiveUrl: 'https://web.archive.org/web/https://aws.amazon.com/batch/',
+    },
+  ];
+
+  it('returns the input unchanged when there are no featured links', () => {
+    const refs = collected();
+    expect(mergeFeaturedLinks(refs, undefined)).toBe(refs);
+    expect(mergeFeaturedLinks(refs, [])).toBe(refs);
+  });
+
+  it('flags an inline-cited link as featured and adopts the given title', () => {
+    const merged = mergeFeaturedLinks(collected(), [
+      { title: 'AWS Batch (official)', url: 'https://aws.amazon.com/batch/' },
+    ]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].featured).toBe(true);
+    expect(merged[0].title).toBe('AWS Batch (official)');
+    expect(merged[0].number).toBe(1); // still cited, keeps its number
+  });
+
+  it('appends an uncited featured link as a numberless entry with archive URL', () => {
+    const merged = mergeFeaturedLinks(collected(), [
+      { title: 'Older video', url: 'https://youtu.be/abc' },
+    ]);
+    expect(merged).toHaveLength(2);
+    const added = merged[1];
+    expect(added).toMatchObject({
+      id: 'featured-1',
+      number: null,
+      title: 'Older video',
+      url: 'https://youtu.be/abc',
+      domain: 'youtu.be',
+      featured: true,
+      archiveUrl: 'https://web.archive.org/web/https://youtu.be/abc',
+    });
+  });
+
+  it('accepts a bare URL string and falls back to the domain as title', () => {
+    const merged = mergeFeaturedLinks([], ['https://www.example.com/x']);
+    expect(merged[0]).toMatchObject({
+      title: 'example.com',
+      domain: 'example.com',
+      number: null,
+      featured: true,
+    });
+  });
+
+  it('does not mutate the input array or its references', () => {
+    const refs = collected();
+    mergeFeaturedLinks(refs, [{ url: 'https://aws.amazon.com/batch/' }]);
+    expect(refs[0].featured).toBeUndefined();
+    expect(refs).toHaveLength(1);
+  });
+
+  it('skips non-http and malformed featured URLs', () => {
+    const merged = mergeFeaturedLinks(
+      [],
+      ['mailto:a@b.com', '/internal', 'https://'],
+    );
+    expect(merged).toHaveLength(0);
   });
 });
 

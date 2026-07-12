@@ -56,6 +56,16 @@ We deliberately did **not** reuse `rehype-citation`'s `[^ref]` token for
 placement: `[^…]` is GFM footnote syntax in our remark pipeline and would
 collide. An MDX component is unambiguous and idiomatic here.
 
+- **Featured links** (a boost for the most valuable sources). A post/talk
+  frontmatter `featuredLinks: [url | { title, url }]` renders a pinned
+  "★ Featured" group at the top of the References section. A featured URL that
+  is also cited inline is flagged and shown there (keeping its `[n]` and
+  backlink); one that isn't cited is added as a numberless entry (like
+  rehype-citation's `noCite`). This exists to kill a redundancy: posts used to
+  hand-maintain a "Links" list at the end that then *duplicated* the auto
+  references. Authors delete that list and boost the same URLs instead —
+  they're highlighted, still carry an archived copy, and appear exactly once.
+
 ## Consequences
 
 - Zero authoring effort for the common case; any external link is a reference.

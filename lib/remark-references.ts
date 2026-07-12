@@ -1,5 +1,5 @@
 import { toString } from 'mdast-util-to-string';
-import type { Reference } from 'types/Reference';
+import type { FeaturedLink, Reference } from 'types/Reference';
 import type { Parent } from 'unist';
 import { SKIP, visit } from 'unist-util-visit';
 
@@ -61,6 +61,58 @@ export function buildReference(
     domain,
     archiveUrl: toArchiveUrl(url),
   };
+}
+
+/**
+ * Fold a document's frontmatter `featuredLinks` into its collected references
+ * (see ADR-0006). A featured URL already cited inline is flagged `featured`
+ * (and adopts the frontmatter title if given); one that isn't cited is added
+ * as a numberless entry — the durable replacement for a hand-written links
+ * list. Returns a new array; the input is left untouched.
+ */
+export function mergeFeaturedLinks(
+  references: Reference[],
+  featuredLinks: FeaturedLink[] | undefined,
+): Reference[] {
+  if (!featuredLinks || featuredLinks.length === 0) return references;
+
+  const merged = references.map((ref) => ({ ...ref }));
+  const byUrl = new Map(merged.map((ref) => [ref.url, ref]));
+  let extra = 0;
+
+  for (const item of featuredLinks) {
+    const url = typeof item === 'string' ? item : item.url;
+    const title = typeof item === 'string' ? undefined : item.title;
+    if (!isExternalUrl(url)) continue;
+
+    const existing = byUrl.get(url);
+    if (existing) {
+      existing.featured = true;
+      if (title) existing.title = title;
+      continue;
+    }
+
+    let domain: string;
+    try {
+      domain = new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      continue; // malformed URL — skip
+    }
+    extra += 1;
+    const ref: Reference = {
+      id: `featured-${extra}`,
+      number: null, // not cited inline, so no [n] marker points here
+      title: title && title.length > 0 ? title : domain,
+      url,
+      domain,
+      archiveUrl: toArchiveUrl(url),
+      featured: true,
+    };
+    merged.push(ref);
+    byUrl.set(url, ref);
+  }
+
+  return merged;
 }
 
 /**

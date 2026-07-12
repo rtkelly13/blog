@@ -13,12 +13,12 @@ import remarkGfm from 'remark-gfm';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import remarkMath from 'remark-math';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
-import type { Reference } from 'types/Reference';
+import type { FeaturedLink, Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
 import type { Pluggable } from 'unified';
 import { visit } from 'unist-util-visit';
 import remarkCodeTitles from './remark-code-title';
-import remarkReferences from './remark-references';
+import remarkReferences, { mergeFeaturedLinks } from './remark-references';
 import remarkTocHeadings from './remark-toc-headings';
 import getAllFilesRecursively from './utils/files';
 import { show_drafts } from './utils/showDrafts';
@@ -202,10 +202,17 @@ export async function getFileBySlug<_T>(
     },
   });
 
+  // Boost any frontmatter `featuredLinks` into a Featured group (and add
+  // uncited highlights). No-op when the post declares none. See ADR-0006.
+  const mergedReferences = mergeFeaturedLinks(
+    references,
+    (frontmatter as { featuredLinks?: FeaturedLink[] }).featuredLinks,
+  );
+
   return {
     mdxSource: code,
     toc,
-    references,
+    references: mergedReferences,
     hasManualReferences: referencesMeta.manualPlacement,
     frontMatter: {
       readingTime: readingTime(code),

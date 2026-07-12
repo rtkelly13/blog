@@ -10,6 +10,7 @@ import {
   setEsbuildBinaryPath,
 } from './mdx';
 import { extractReferences } from './references';
+import { mergeFeaturedLinks } from './remark-references';
 import { parseSlideWindow, type SlideWindow } from './slideTiming';
 import { show_drafts } from './utils/showDrafts';
 
@@ -175,7 +176,10 @@ export function getTalkMeta(slug: string): {
   return {
     frontMatter: normalizeFrontMatter(frontmatter, slug),
     slideCount: splitSlides(content).length,
-    references: extractReferences(content),
+    references: mergeFeaturedLinks(
+      extractReferences(content),
+      frontmatter.featuredLinks,
+    ),
   };
 }
 
