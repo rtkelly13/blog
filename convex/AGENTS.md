@@ -24,7 +24,6 @@ content; a **talk session** is one live run of it. They share only the `slug`.
 | Table                 | Purpose                                                              |
 | --------------------- | ------------------------------------------------------------------- |
 | `talks`               | Talk sessions; `status` live/ended, `config`, `currentSlide`. `_id` = room |
-| `counters`            | Hello-world demo counter (see hello.ts)                             |
 | `presence`            | One row per (room, machineId) heartbeat; reaped on TTL              |
 | `attendees`           | Persistent first-seen per (room, machineId); drives one-time join toasts + stats |
 | `presenters`          | Presenter heartbeats per (room, sessionId); detects ≥2 presenters (clash) |
@@ -52,7 +51,6 @@ content; a **talk session** is one live run of it. They share only the `slug`.
 | `polls.ts`        | Presenter `start`/`close`/`feed`/`hideWord`; audience `active`/`submit` |
 | `activities.ts`   | Presenter `open`/`revealNow`/`close`/`feed`; audience `active`/`submit`; scheduled `reveal` |
 | `sessions.ts`     | Admin hub: `list` (per-session data tallies) + `clearDown` (purge one session) |
-| `hello.ts`        | Hello-world reactive counter (`get`/`bump`)                       |
 | `auth.ts`         | GitHub-only Convex Auth; keeps `githubLogin` on the user row      |
 | `crons.ts`        | Scheduled TTL reapers (presence, reactions, presenters), every 1 min |
 | `lib/admin.ts`    | `isAdminUser` / `requireAdmin` — GitHub-login allowlist gate      |
