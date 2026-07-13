@@ -25,8 +25,7 @@ const DIM_FG = 'rgb(216, 216, 210)'; // #d8d8d2
 const DIM_HEADING = 'rgb(234, 234, 228)'; // #eaeae4
 const ACCENT_CYAN = 'rgb(34, 211, 238)'; // brutalist-cyan, must stay constant
 
-const toggle = (page: Page) =>
-  page.getByRole('button', { name: /^Contrast:/ });
+const toggle = (page: Page) => page.getByRole('button', { name: /^Contrast:/ });
 
 const bodyStyle = (page: Page, prop: string) =>
   page.evaluate(
@@ -36,7 +35,8 @@ const bodyStyle = (page: Page, prop: string) =>
 
 const htmlVar = (page: Page, name: string) =>
   page.evaluate(
-    (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(),
+    (n) =>
+      getComputedStyle(document.documentElement).getPropertyValue(n).trim(),
     name,
   );
 
@@ -113,7 +113,9 @@ test.describe('Theme toggle — homepage', () => {
     await expect(page.locator('html')).toHaveClass(/dim/);
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
     // next-themes records the *key*, not the mapped class list.
-    expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dim');
+    expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe(
+      'dim',
+    );
   });
 
   test('bright accent colours are unaffected by the dim overrides', async ({
