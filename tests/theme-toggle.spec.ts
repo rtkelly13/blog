@@ -1,31 +1,39 @@
 import { expect, type Page, test } from '@playwright/test';
 
 /**
- * Regression tests for the dark / dim contrast toggle (components/ThemeSwitch).
+ * Regression tests for the three-way theme toggle (components/ThemeSwitch):
+ * dark (HIGH) → dim → sketch → dark.
  *
  * These are functional (computed-style) assertions rather than pixel snapshots,
  * so they run on every platform and pin the *behaviour* of the theme system:
  *
- *  - the toggle exists and is reachable,
- *  - `dark` is the default and `dim` is opt-in,
- *  - switching actually re-themes the rendered surface (body + reading copy),
- *  - the softened palette matches the tokens defined in css/tailwind.css,
- *  - the choice persists across reloads (next-themes localStorage),
- *  - bright accent colours are NOT disturbed by the dim overrides.
+ *  - `dark` is the default; the toggle cycles through all three themes,
+ *  - each theme actually re-themes the rendered surface (body + reading copy),
+ *  - the palettes match the tokens defined in css/tailwind.css,
+ *  - accents stay put in dark/dim and become blue/red/green under sketch,
+ *  - the choice persists across reloads (next-themes localStorage).
  *
- * The exact RGB values below are the source of truth for the dim palette; if
+ * The exact RGB values below are the source of truth for the palettes; if
  * css/tailwind.css changes them, update here in lockstep.
  */
 
-// Expected palette (hex tokens from css/tailwind.css, as computed RGB).
+// Dark (default) + dim (softened dark) tokens.
 const DARK_BG = 'rgb(0, 0, 0)'; // --color-black default
 const DARK_FG = 'rgb(255, 255, 255)'; // --color-white default
 const DIM_BG = 'rgb(23, 23, 27)'; // #17171b
 const DIM_FG = 'rgb(216, 216, 210)'; // #d8d8d2
 const DIM_HEADING = 'rgb(234, 234, 228)'; // #eaeae4
-const ACCENT_CYAN = 'rgb(34, 211, 238)'; // brutalist-cyan, must stay constant
 
-const toggle = (page: Page) => page.getByRole('button', { name: /^Contrast:/ });
+// Sketch (light paper/ink) tokens.
+const SKETCH_BG = 'rgb(245, 243, 236)'; // #f5f3ec paper
+const SKETCH_FG = 'rgb(35, 38, 46)'; // #23262e ink
+const SKETCH_HEADING = 'rgb(28, 31, 39)'; // #1c1f27
+
+// Accents: constant cyan in dark/dim; blue under sketch.
+const ACCENT_CYAN = 'rgb(34, 211, 238)'; // #22d3ee (dark/dim)
+const ACCENT_BLUE = 'rgb(37, 99, 235)'; // #2563eb (sketch)
+
+const toggle = (page: Page) => page.getByRole('button', { name: /^Theme:/ });
 
 const bodyStyle = (page: Page, prop: string) =>
   page.evaluate(
@@ -33,12 +41,18 @@ const bodyStyle = (page: Page, prop: string) =>
     prop,
   );
 
-const htmlVar = (page: Page, name: string) =>
-  page.evaluate(
-    (n) =>
-      getComputedStyle(document.documentElement).getPropertyValue(n).trim(),
-    name,
-  );
+// Read the computed colour of a throwaway element painted with an accent
+// utility, so the assertion doesn't depend on incidental page content.
+const readAccentBg = (page: Page, className: string) =>
+  page.evaluate((cls) => {
+    const el = document.createElement('div');
+    el.className = cls;
+    el.style.display = 'none';
+    document.body.appendChild(el);
+    const bg = getComputedStyle(el).backgroundColor;
+    el.remove();
+    return bg;
+  }, className);
 
 test.describe('Theme toggle — homepage', () => {
   test('defaults to the high-contrast dark theme', async ({ page }) => {
@@ -57,10 +71,10 @@ test.describe('Theme toggle — homepage', () => {
 
     const button = toggle(page);
     await expect(button).toBeVisible();
-    // Default label announces the current level and the switch target.
+    // Label announces the current theme and the next one in the cycle.
     await expect(button).toHaveAttribute(
       'aria-label',
-      'Contrast: HIGH. Switch to DIM.',
+      'Theme: HIGH. Switch to DIM.',
     );
   });
 
@@ -79,26 +93,57 @@ test.describe('Theme toggle — homepage', () => {
 
     // The palette tokens themselves are re-pointed (the mechanism the whole
     // site relies on), not just the body.
-    expect(await htmlVar(page, '--color-black')).toBe('#17171b');
-    expect(await htmlVar(page, '--color-white')).toBe('#d8d8d2');
+    expect(
+      await page.evaluate(() =>
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--color-black')
+          .trim(),
+      ),
+    ).toBe('#17171b');
 
-    // Label now reflects the flipped state.
     await expect(toggle(page)).toHaveAttribute(
       'aria-label',
-      'Contrast: DIM. Switch to HIGH.',
+      'Theme: DIM. Switch to SKETCH.',
     );
   });
 
-  test('toggling back restores pure black-on-white contrast', async ({
+  test('switching to sketch inverts to light paper with blue accents', async ({
     page,
   }) => {
     await page.goto('/');
 
+    // dark → dim → sketch
     await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
+    await toggle(page).click();
 
-    await toggle(page).click();
+    await expect(page.locator('html')).toHaveClass(/sketch/);
+    await expect(page.locator('html')).not.toHaveClass(/dark/);
     await expect(page.locator('html')).not.toHaveClass(/dim/);
+
+    // Light paper background, dark ink text.
+    expect(await bodyStyle(page, 'background-color')).toBe(SKETCH_BG);
+    expect(await bodyStyle(page, 'color')).toBe(SKETCH_FG);
+
+    // The neon cyan accent becomes blue under sketch...
+    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_BLUE);
+
+    await expect(toggle(page)).toHaveAttribute(
+      'aria-label',
+      'Theme: SKETCH. Switch to HIGH.',
+    );
+  });
+
+  test('cycles all the way back to dark', async ({ page }) => {
+    await page.goto('/');
+
+    // dark → dim → sketch → dark
+    await toggle(page).click();
+    await toggle(page).click();
+    await toggle(page).click();
+
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).not.toHaveClass(/dim/);
+    await expect(page.locator('html')).not.toHaveClass(/sketch/);
     expect(await bodyStyle(page, 'background-color')).toBe(DARK_BG);
     expect(await bodyStyle(page, 'color')).toBe(DARK_FG);
   });
@@ -113,37 +158,21 @@ test.describe('Theme toggle — homepage', () => {
 
     await expect(page.locator('html')).toHaveClass(/dim/);
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
-    // next-themes records the *key*, not the mapped class list.
     expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe(
       'dim',
     );
   });
 
-  test('bright accent colours are unaffected by the dim overrides', async ({
-    page,
-  }) => {
+  test('accents stay constant in dark and dim', async ({ page }) => {
     await page.goto('/');
 
-    // Probe a real element painted with the brutalist-cyan accent. Injected
-    // into the page so the assertion does not depend on incidental content.
-    const readAccent = () =>
-      page.evaluate(() => {
-        const el = document.createElement('div');
-        el.className = 'bg-brutalist-cyan';
-        el.style.display = 'none';
-        document.body.appendChild(el);
-        const bg = getComputedStyle(el).backgroundColor;
-        el.remove();
-        return bg;
-      });
-
-    expect(await readAccent()).toBe(ACCENT_CYAN);
+    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_CYAN);
 
     await toggle(page).click();
     await expect(page.locator('html')).toHaveClass(/dim/);
 
-    // Same accent after switching — dim only re-points black/white/zinc tokens.
-    expect(await readAccent()).toBe(ACCENT_CYAN);
+    // dim only re-points the black/white/zinc tokens, not the accents.
+    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_CYAN);
   });
 });
 
@@ -166,10 +195,9 @@ test.describe('Theme toggle — blog post', () => {
 
     // Baseline: pure white heading on pure black in the default theme.
     expect(await bodyStyle(page, 'background-color')).toBe(DARK_BG);
-    const darkHeading = await heading.evaluate(
-      (el) => getComputedStyle(el).color,
+    expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(
+      DARK_FG,
     );
-    expect(darkHeading).toBe(DARK_FG);
 
     await toggle(page).click();
     await expect(page.locator('html')).toHaveClass(/dim/);
@@ -178,6 +206,23 @@ test.describe('Theme toggle — blog post', () => {
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
     expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(
       DIM_HEADING,
+    );
+  });
+
+  test('sketch turns the reading surface to ink on paper', async ({ page }) => {
+    await page.goto(POST);
+
+    const heading = page.locator('article .prose :is(h1, h2, h3)').first();
+    await expect(heading).toBeVisible();
+
+    // dark → dim → sketch
+    await toggle(page).click();
+    await toggle(page).click();
+    await expect(page.locator('html')).toHaveClass(/sketch/);
+
+    expect(await bodyStyle(page, 'background-color')).toBe(SKETCH_BG);
+    expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(
+      SKETCH_HEADING,
     );
   });
 

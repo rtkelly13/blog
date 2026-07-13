@@ -36,12 +36,13 @@ export default function App({ Component, pageProps }: AppProps) {
       defaultTheme="dark"
       enableSystem={false}
       disableTransitionOnChange
-      themes={['dark', 'dim']}
-      // Each theme maps to a single class on <html> (`dark` or `dim`) — a value
-      // with a space would break next-themes' classList calls. The `dark:`
-      // Tailwind variant is taught to also match `.dim` (see the
-      // `@custom-variant dark` rule in css/tailwind.css), so every existing
-      // `dark:` utility still applies under the softened dim theme.
+      themes={['dark', 'dim', 'sketch']}
+      // Each theme maps to a single class on <html> (`dark`, `dim`, `sketch`) —
+      // a value with a space would break next-themes' classList calls. `dark`
+      // and `dim` are dark; the `dark:` Tailwind variant is taught to match
+      // `.dim` too (see the `@custom-variant dark` rule in css/tailwind.css).
+      // `sketch` is light, so it is deliberately excluded — `dark:` utilities
+      // fall back to their light base styles under it.
     >
       <SearchProvider>
         <Head>

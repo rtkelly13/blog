@@ -1,11 +1,15 @@
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
-// Two contrast levels. `dark` is the original high-contrast brutalist look
-// (pure white on pure black); `dim` softens both toward charcoal / off-white
-// to take the edge off. Both carry the `dark` class under the hood (see
-// pages/_app.tsx), so every `dark:` style keeps working in either mode.
-const LABELS: Record<string, string> = { dark: 'HIGH', dim: 'DIM' };
+// Three themes cycled in order. `dark` is the original high-contrast brutalist
+// look (white on black); `dim` softens it toward charcoal / off-white; `sketch`
+// is a light paper-and-ink theme with blue / red / green accents.
+const THEMES = ['dark', 'dim', 'sketch'] as const;
+const LABELS: Record<string, string> = {
+  dark: 'HIGH',
+  dim: 'DIM',
+  sketch: 'SKETCH',
+};
 
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false);
@@ -15,8 +19,14 @@ const ThemeSwitch = () => {
   // (the server always renders the default). Before then, assume `dark`.
   useEffect(() => setMounted(true), []);
 
-  const active = mounted && theme === 'dim' ? 'dim' : 'dark';
-  const next = active === 'dark' ? 'dim' : 'dark';
+  const active =
+    mounted && theme && THEMES.includes(theme as (typeof THEMES)[number])
+      ? theme
+      : 'dark';
+  const next =
+    THEMES[
+      (THEMES.indexOf(active as (typeof THEMES)[number]) + 1) % THEMES.length
+    ];
 
   return (
     <button
@@ -25,8 +35,8 @@ const ThemeSwitch = () => {
       // stays compact and never widens the (already dense) header past the
       // viewport. `suppressHydrationWarning` because the label depends on the
       // resolved theme, which is only known client-side.
-      aria-label={`Contrast: ${LABELS[active]}. Switch to ${LABELS[next]}.`}
-      title={`Contrast: ${LABELS[active]} — switch to ${LABELS[next]}`}
+      aria-label={`Theme: ${LABELS[active]}. Switch to ${LABELS[next]}.`}
+      title={`Theme: ${LABELS[active]} — switch to ${LABELS[next]}`}
       onClick={() => setTheme(next)}
       suppressHydrationWarning
       className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center p-1 text-white transition-colors hover:text-brutalist-cyan sm:ml-4"

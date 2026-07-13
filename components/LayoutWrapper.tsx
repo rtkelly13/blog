@@ -18,7 +18,7 @@ const LayoutWrapper = ({ children }: Props) => {
       <div
         className="flex flex-col justify-between min-h-screen bg-black"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(var(--scanline-color, rgba(0, 255, 0, 0.03)) 1px, transparent 1px)`,
           backgroundSize: '100% 4px',
         }}
       >

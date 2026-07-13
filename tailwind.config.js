@@ -53,13 +53,17 @@ module.exports = {
           blue: '#93ddfd',
           white: '#fff',
         },
+        // Accent colours read through CSS variables (with the original values
+        // as fallbacks) so a theme can re-point them in one place — e.g. the
+        // `sketch` theme swaps the neon cyan/pink/yellow for blue/red/green.
+        // See the theme blocks in css/tailwind.css.
         brutalist: {
-          cyan: '#22d3ee',
-          pink: '#ec4899',
-          yellow: '#facc15',
-          neonGreen: '#39ff14',
-          neonCyan: '#00ffff',
-          cyberOrange: '#ff8c00',
+          cyan: 'var(--brutalist-cyan, #22d3ee)',
+          pink: 'var(--brutalist-pink, #ec4899)',
+          yellow: 'var(--brutalist-yellow, #facc15)',
+          neonGreen: 'var(--brutalist-neonGreen, #39ff14)',
+          neonCyan: 'var(--brutalist-neonCyan, #00ffff)',
+          cyberOrange: 'var(--brutalist-cyberOrange, #ff8c00)',
           darkBg: '#0a0a1a',
         },
       },
