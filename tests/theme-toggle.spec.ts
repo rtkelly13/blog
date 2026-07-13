@@ -69,9 +69,10 @@ test.describe('Theme toggle — homepage', () => {
 
     await toggle(page).click();
 
-    // `dim` layers on top of `dark` (so every `dark:` variant keeps working).
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    // Single `dim` class on <html> (not `dark`); the `dark:` variant is taught
+    // to also match `.dim`, so every `dark:` utility keeps applying.
     await expect(page.locator('html')).toHaveClass(/dim/);
+    await expect(page.locator('html')).not.toHaveClass(/dark/);
 
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
     expect(await bodyStyle(page, 'color')).toBe(DIM_FG);

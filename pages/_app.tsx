@@ -37,10 +37,11 @@ export default function App({ Component, pageProps }: AppProps) {
       enableSystem={false}
       disableTransitionOnChange
       themes={['dark', 'dim']}
-      // `dim` still carries the `dark` class so every existing `dark:` variant
-      // and the `.dark` diagram tokens keep applying; the extra `dim` class
-      // layers softened palette overrides on top (see css/tailwind.css).
-      value={{ dark: 'dark', dim: 'dark dim' }}
+      // Each theme maps to a single class on <html> (`dark` or `dim`) — a value
+      // with a space would break next-themes' classList calls. The `dark:`
+      // Tailwind variant is taught to also match `.dim` (see the
+      // `@custom-variant dark` rule in css/tailwind.css), so every existing
+      // `dark:` utility still applies under the softened dim theme.
     >
       <SearchProvider>
         <Head>
