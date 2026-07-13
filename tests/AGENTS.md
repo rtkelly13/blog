@@ -57,7 +57,10 @@ git add tests/__snapshots__ && git commit
 
 Option 1 is human-gated on purpose: you only comment `/update-snapshots` once
 you've confirmed the visual diff is intentional, so a genuine regression still
-fails the gate rather than being auto-absorbed.
+fails the gate rather than being auto-absorbed. It is also threshold-gated — it
+runs the visual suite first and regenerates only the snapshots that actually
+breach `maxDiffPixelRatio`, so runner re-encoding noise is never committed and a
+change that renders no differently produces no snapshot commit.
 
 **Snapshot path template:**
 
