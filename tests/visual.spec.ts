@@ -125,9 +125,56 @@ test.describe('Visual Regression - Dark Mode', () => {
   });
 });
 
-// NOTE: dim-theme visual snapshots were intentionally omitted. The dim theme's
-// rendered surface is covered functionally (computed styles) in
-// tests/theme-toggle.spec.ts, which is more robust and doesn't add net-new
-// baselines. New screenshot baselines also can't be created by the
-// `/update-snapshots` command until its regenerate step tolerates Playwright's
-// non-zero exit on first-time snapshot creation.
+// Set a specific theme (next-themes stores the key in localStorage) before the
+// first navigation, so the page renders in that theme from the initial paint.
+async function setTheme(
+  page: import('@playwright/test').Page,
+  theme: 'dark' | 'dim' | 'sketch',
+) {
+  await page.addInitScript((t) => {
+    localStorage.setItem('theme', t);
+  }, theme);
+}
+
+// Basic pathways exercised for the softened `dim` and light `sketch` themes.
+const THEMED_PATHWAYS = [
+  { name: 'homepage', path: '/' },
+  { name: 'blog', path: '/blog' },
+  { name: 'blog-post', path: '/blog/aws-batch/cookbook' },
+  { name: 'tags', path: '/tags' },
+  { name: 'about', path: '/about' },
+] as const;
+
+test.describe('Visual Regression - Dim Mode', () => {
+  test.beforeEach(async ({ page }) => {
+    await setTheme(page, 'dim');
+  });
+
+  for (const { name, path } of THEMED_PATHWAYS) {
+    test(name, async ({ page }) => {
+      await page.goto(path);
+      await waitForPageReady(page);
+      await expect(page.locator('html')).toHaveClass(/dim/);
+      await expect(page).toHaveScreenshot(`${name}-dim.png`, {
+        fullPage: true,
+      });
+    });
+  }
+});
+
+test.describe('Visual Regression - Sketch Mode', () => {
+  test.beforeEach(async ({ page }) => {
+    await setTheme(page, 'sketch');
+  });
+
+  for (const { name, path } of THEMED_PATHWAYS) {
+    test(name, async ({ page }) => {
+      await page.goto(path);
+      await waitForPageReady(page);
+      await expect(page.locator('html')).toHaveClass(/sketch/);
+      await expect(page).toHaveScreenshot(`${name}-sketch.png`, {
+        fullPage: true,
+      });
+    });
+  }
+});
