@@ -64,7 +64,7 @@ module.exports = {
           neonGreen: 'var(--brutalist-neonGreen, #39ff14)',
           neonCyan: 'var(--brutalist-neonCyan, #00ffff)',
           cyberOrange: 'var(--brutalist-cyberOrange, #ff8c00)',
-          darkBg: '#0a0a1a',
+          darkBg: 'var(--brutalist-darkBg, #0a0a1a)',
         },
       },
       borderRadius: {
@@ -81,13 +81,16 @@ module.exports = {
           '4px 4px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
         'hard-lg':
           '6px 6px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
-        'hard-cyan': '4px 4px 0px 0px rgba(34, 211, 238, 1)',
-        'hard-pink': '4px 4px 0px 0px rgba(236, 72, 153, 1)',
-        'hard-yellow': '4px 4px 0px 0px rgba(250, 204, 21, 1)',
+        // Coloured offset/glow shadows read through the accent variables so
+        // they follow the theme (blue/red/green under sketch) instead of
+        // staying neon. color-mix keeps the glow alpha while using the var.
+        'hard-cyan': '4px 4px 0px 0px var(--brutalist-cyan, #22d3ee)',
+        'hard-pink': '4px 4px 0px 0px var(--brutalist-pink, #ec4899)',
+        'hard-yellow': '4px 4px 0px 0px var(--brutalist-yellow, #facc15)',
         'glow-cyan':
-          '0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.3)',
+          '0 0 10px color-mix(in oklab, var(--brutalist-cyan, #22d3ee) 50%, transparent), 0 0 20px color-mix(in oklab, var(--brutalist-cyan, #22d3ee) 30%, transparent)',
         'glow-orange':
-          '0 0 20px rgba(255, 140, 0, 0.8), 0 0 40px rgba(255, 140, 0, 0.5)',
+          '0 0 20px color-mix(in oklab, var(--brutalist-cyberOrange, #ff8c00) 80%, transparent), 0 0 40px color-mix(in oklab, var(--brutalist-cyberOrange, #ff8c00) 50%, transparent)',
       },
       typography: (theme) => ({
         DEFAULT: {

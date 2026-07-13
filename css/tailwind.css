@@ -222,6 +222,16 @@ html {
   /* Faint ink grid instead of the green scanline (see LayoutWrapper). */
   --scanline-color: rgba(35, 38, 46, 0.04);
 
+  /* Hero (CyberHero): light panel with a faint ink grid instead of the dark
+     cyberpunk band + neon-green grid. */
+  --brutalist-darkBg: #eceadf;
+  --hero-grid: rgba(35, 38, 46, 0.08);
+  --hero-grid-strong: rgba(35, 38, 46, 0.14);
+  /* Slightly deeper pastel green + gentler glow so the ring reads on paper. */
+  --hero-ring: #34d399;
+  --hero-ring-glow: 0 0 22px rgba(52, 211, 153, 0.35);
+  --hero-ring-soft: rgba(52, 211, 153, 0.35);
+
   /* Reading surface: `prose prose-invert` reads the invert-* tokens, so point
      them at dark-on-light values (links blue, code green). */
   --tw-prose-invert-body: #33373f;
@@ -261,13 +271,35 @@ html {
 .sketch .prose :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
   border-color: #23262e;
 }
-.sketch .prose :where(code):not(:where([class~="not-prose"] *)) {
+/* Inline code (excluding code inside a <pre> block, which the code-block rule
+   below owns). The prose invert pre-bg token is redefined locally on `.prose`,
+   so the code block is styled directly here rather than via that token. */
+.sketch .prose :where(code):not(:where(pre *, [class~="not-prose"] *)) {
   background-color: #efeadf;
   border-color: #23262e;
+}
+.sketch .prose :where(pre):not(:where([class~="not-prose"] *)) {
+  background-color: #efeadf;
+  color: #23262e;
+  border: 1px solid #d8d3c4;
 }
 .sketch .prose :where(details):not(:where([class~="not-prose"] *)) {
   background-color: #efeadf;
   border-color: #23262e;
+}
+
+/* The typography config sets a literal light-grey body colour on `.prose`
+   (theme('colors.gray.200')), which overrides the themeable prose token and is
+   invisible on paper — restore a dark ink body colour under sketch. */
+.sketch .prose {
+  color: #33373f;
+}
+
+/* Light-grey text utilities (used as primary text on the dark themes) are
+   inlined literals, so re-point the light end of the grey scale to ink under
+   sketch so it stays legible on paper. */
+.sketch :is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400) {
+  color: #33373f;
 }
 
 /* SVG diagrams using CSS variables */
@@ -321,15 +353,15 @@ html {
   }
 
   .brutalist-shadow-cyan {
-    box-shadow: 4px 4px 0px 0px rgba(34, 211, 238, 1);
+    box-shadow: 4px 4px 0px 0px var(--brutalist-cyan, rgba(34, 211, 238, 1));
   }
 
   .brutalist-shadow-pink {
-    box-shadow: 4px 4px 0px 0px rgba(236, 72, 153, 1);
+    box-shadow: 4px 4px 0px 0px var(--brutalist-pink, rgba(236, 72, 153, 1));
   }
 
   .brutalist-shadow-yellow {
-    box-shadow: 4px 4px 0px 0px rgba(250, 204, 21, 1);
+    box-shadow: 4px 4px 0px 0px var(--brutalist-yellow, rgba(250, 204, 21, 1));
   }
 
   .brutalist-btn-press {

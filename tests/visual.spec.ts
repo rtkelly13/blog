@@ -65,6 +65,12 @@ test.describe('Visual Regression - Light Mode', () => {
     await expect(page).toHaveScreenshot('tags-light.png', { fullPage: true });
   });
 
+  test('talks page', async ({ page }) => {
+    await page.goto('/talks');
+    await waitForPageReady(page);
+    await expect(page).toHaveScreenshot('talks-light.png', { fullPage: true });
+  });
+
   test('404 page', async ({ page }) => {
     await page.goto('/this-page-does-not-exist');
     await waitForPageReady(page);
@@ -117,6 +123,13 @@ test.describe('Visual Regression - Dark Mode', () => {
     await expect(page).toHaveScreenshot('tags-dark.png', { fullPage: true });
   });
 
+  test('talks page', async ({ page }) => {
+    await page.goto('/talks');
+    await waitForPageReady(page);
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page).toHaveScreenshot('talks-dark.png', { fullPage: true });
+  });
+
   test('404 page', async ({ page }) => {
     await page.goto('/this-page-does-not-exist');
     await waitForPageReady(page);
@@ -143,6 +156,7 @@ const THEMED_PATHWAYS = [
   { name: 'blog-post', path: '/blog/aws-batch/cookbook' },
   { name: 'tags', path: '/tags' },
   { name: 'about', path: '/about' },
+  { name: 'talks', path: '/talks' },
 ] as const;
 
 test.describe('Visual Regression - Dim Mode', () => {
