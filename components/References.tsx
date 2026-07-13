@@ -6,7 +6,7 @@ import Link from '@/components/Link';
 /**
  * Lets an author drop `<References />` into MDX to place the bibliography
  * mid-document. The layout provides the collected references here and wraps
- * the post body, so the inline component needs no props (see ADR-0006).
+ * the post body, so the inline component needs no props (see ADR-0007).
  */
 export const ReferencesContext = createContext<Reference[]>([]);
 
@@ -90,7 +90,7 @@ function Entry({ ref, backlinks }: { ref: Reference; backlinks: boolean }) {
  * order of first appearance, each with the original URL and its Wayback
  * Machine snapshot so the reference outlives link rot. Links boosted via
  * frontmatter `featuredLinks` render in a pinned "Featured" group on top
- * (see ADR-0006).
+ * (see ADR-0007).
  */
 export default function References({
   references: referencesProp,

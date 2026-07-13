@@ -13,7 +13,7 @@ export type PostFrontMatter = {
   /**
    * Curated highlights boosted to a "Featured" group at the top of the auto
    * References section — the durable replacement for a hand-written links
-   * list. Cited links are matched by URL; uncited ones are added. See ADR-0006.
+   * list. Cited links are matched by URL; uncited ones are added. See ADR-0007.
    */
   featuredLinks?: FeaturedLink[];
   slug: string;

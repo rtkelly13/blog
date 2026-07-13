@@ -90,7 +90,7 @@ tags: string[] # Required
 summary: string # For SEO/cards
 draft: boolean # Hide from production
 layout: string # Optional (default: PostLayout)
-featuredLinks: # Optional — boost valuable links to a ★ Featured group (ADR-0006)
+featuredLinks: # Optional — boost valuable links to a ★ Featured group (ADR-0007)
   - { title: string, url: string } # or a bare url string
 series: # Optional multi-part posts
   name: string

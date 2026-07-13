@@ -18,7 +18,7 @@ interface Props {
   next?: { slug: string; title: string };
   prev?: { slug: string; title: string };
   references?: Reference[];
-  /** See ADR-0006 — suppresses the auto-appended section when the body
+  /** See ADR-0007 — suppresses the auto-appended section when the body
    * renders `<References />` itself. */
   hasManualReferences?: boolean;
 }

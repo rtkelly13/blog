@@ -46,7 +46,7 @@ export type TalkFrontMatter = {
   /**
    * Curated highlights boosted to a "Featured" group at the top of the deck's
    * Links section (durable replacement for a hand-written links slide). See
-   * ADR-0006.
+   * ADR-0007.
    */
   featuredLinks?: FeaturedLink[];
   slug: string;

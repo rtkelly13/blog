@@ -23,7 +23,7 @@ export type Reference = {
   archiveUrl: string;
   /**
    * Boosted via frontmatter `featuredLinks` — rendered in a pinned "Featured"
-   * group at the top of the References section (see ADR-0006).
+   * group at the top of the References section (see ADR-0007).
    */
   featured?: boolean;
 };
@@ -33,6 +33,6 @@ export type Reference = {
  * bare URL string (title falls back to the domain) or `{ title, url }` to give
  * it a friendly label. Featured links that aren't cited inline still appear in
  * the References section's Featured group — the durable replacement for a
- * hand-maintained "Links" list (see ADR-0006).
+ * hand-maintained "Links" list (see ADR-0007).
  */
 export type FeaturedLink = string | { title?: string; url: string };

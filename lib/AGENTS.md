@@ -160,7 +160,7 @@ featured link cited inline keeps its `[n]`/backlink; an uncited one is added as
 a numberless entry — the durable replacement for a hand-written "Links" list.
 
 Rationale and the comparison to the upstream `rehype-citation` approach are in
-[ADR-0006](../docs/adr/0006-bibliography-and-durable-archive-links.md).
+[ADR-0007](../docs/adr/0007-bibliography-and-durable-archive-links.md).
 
 ### remark-img-to-jsx.ts
 

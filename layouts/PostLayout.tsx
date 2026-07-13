@@ -40,7 +40,7 @@ interface Props {
   toc?: Toc;
   references?: Reference[];
   /** True when the body renders `<References />` itself — suppresses the
-   * layout's auto-appended section (see ADR-0006). */
+   * layout's auto-appended section (see ADR-0007). */
   hasManualReferences?: boolean;
   seriesData?: {
     prev: { slug: string; title: string; order: number } | null;

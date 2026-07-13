@@ -65,7 +65,7 @@ export function buildReference(
 
 /**
  * Fold a document's frontmatter `featuredLinks` into its collected references
- * (see ADR-0006). A featured URL already cited inline is flagged `featured`
+ * (see ADR-0007). A featured URL already cited inline is flagged `featured`
  * (and adopts the frontmatter title if given); one that isn't cited is added
  * as a numberless entry — the durable replacement for a hand-written links
  * list. Returns a new array; the input is left untouched.

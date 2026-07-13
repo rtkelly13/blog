@@ -175,7 +175,7 @@ export async function getFileBySlug<_T>(
   const references: Reference[] = [];
   const collectReferences = type === 'blog' ? references : undefined;
   // Set true by the plugin if the body places `<References />` itself, so the
-  // layout knows to suppress its auto-appended section (see ADR-0006).
+  // layout knows to suppress its auto-appended section (see ADR-0007).
   const referencesMeta = { manualPlacement: false };
 
   const { frontmatter, code } = await bundleMDX({
@@ -203,7 +203,7 @@ export async function getFileBySlug<_T>(
   });
 
   // Boost any frontmatter `featuredLinks` into a Featured group (and add
-  // uncited highlights). No-op when the post declares none. See ADR-0006.
+  // uncited highlights). No-op when the post declares none. See ADR-0007.
   const mergedReferences = mergeFeaturedLinks(
     references,
     (frontmatter as { featuredLinks?: FeaturedLink[] }).featuredLinks,
