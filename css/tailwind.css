@@ -163,8 +163,7 @@ html {
 /* Prose headings, emphasis, blockquotes, table headers and rules hardcode
    `#fff` via the typography config; re-point them to the dim off-white so the
    reading surface doesn't reintroduce the harsh white the dim theme removes. */
-.dim
-  .prose
+.dim .prose
   :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
     :where([class~="not-prose"] *)
   ) {
@@ -210,15 +209,18 @@ html {
   }
 
   .brutalist-shadow {
-    box-shadow: 4px 4px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
+    box-shadow: 4px 4px 0px 0px
+      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-sm {
-    box-shadow: 2px 2px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
+    box-shadow: 2px 2px 0px 0px
+      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-lg {
-    box-shadow: 6px 6px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
+    box-shadow: 6px 6px 0px 0px
+      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-cyan {
