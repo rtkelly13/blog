@@ -21,15 +21,20 @@ const ThemeSwitch = () => {
   return (
     <button
       type="button"
+      // Icon-only: the label lives in the aria-label / tooltip so the control
+      // stays compact and never widens the (already dense) header past the
+      // viewport. `suppressHydrationWarning` because the label depends on the
+      // resolved theme, which is only known client-side.
       aria-label={`Contrast: ${LABELS[active]}. Switch to ${LABELS[next]}.`}
-      title="Toggle contrast"
+      title={`Contrast: ${LABELS[active]} — switch to ${LABELS[next]}`}
       onClick={() => setTheme(next)}
-      className="flex items-center gap-2 p-1 font-mono font-bold sm:px-3 whitespace-nowrap text-white hover:text-brutalist-cyan transition-colors uppercase"
+      suppressHydrationWarning
+      className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center p-1 text-white transition-colors hover:text-brutalist-cyan sm:ml-4"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
-        className="w-5 h-5"
+        className="h-5 w-5"
         aria-hidden="true"
       >
         <circle
@@ -42,9 +47,6 @@ const ThemeSwitch = () => {
         />
         <path d="M10 2 A8 8 0 0 1 10 18 Z" fill="currentColor" />
       </svg>
-      <span className="hidden md:inline" suppressHydrationWarning>
-        [ {LABELS[active]} ]
-      </span>
     </button>
   );
 };
