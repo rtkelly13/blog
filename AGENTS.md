@@ -213,20 +213,24 @@ PR → .github/workflows/pr-checks.yml
 
 push main → .github/workflows/ci.yml   # full suite + uploads `coverage-main` baseline
 workflow_dispatch → playwright.yml      # manual-only: regenerate Linux snapshots
+PR comment `/update-snapshots`          # regenerate snapshots AND commit them
+  → update-snapshots-command.yml        #   back to the PR branch (see below)
 ```
 
 - Each feeder job runs its command with `continue-on-error` and exports its
   outcome; the `conclusion` job aggregates them and is the only merge-blocking check.
 - Visual regression (`visual.spec.ts` / `visual-responsive.spec.ts`) runs inside
   `e2e-visual` against a locally built site (no Vercel dependency). **Blocking** —
-  intentional visual changes must ship regenerated snapshots (via `playwright.yml`)
-  in the same PR.
+  intentional visual changes must ship regenerated snapshots in the same PR.
 - Coverage delta is computed deterministically by `scripts/ci/coverage-delta.mjs`
   against the `coverage-main` artifact published by `ci.yml` on each main push.
 - Shared setup (mermaid-toolkit checkout + build, pnpm/node install) lives in the
   repo-local composite action `.github/actions/setup-blog`.
-- Snapshots must be (re)generated on the CI runner via `playwright.yml`
-  (`workflow_dispatch`) so they match what `e2e-visual` compares against.
+- Snapshots must be (re)generated on the CI runner so they match what
+  `e2e-visual` compares against. On a PR, comment `/update-snapshots` and
+  `update-snapshots-command.yml` regenerates them and commits them back to the
+  branch; `playwright.yml` (`workflow_dispatch`) remains for the artifact-only
+  path. Both are maintainer-gated (the command checks author association).
 
 ### Branch workflow
 

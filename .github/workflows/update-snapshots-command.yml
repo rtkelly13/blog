@@ -1,0 +1,141 @@
+name: Update snapshots (command)
+
+# On-demand visual-snapshot integration, triggered by a PR comment.
+#
+# Comment `/update-snapshots` on a pull request and this workflow regenerates
+# the committed Linux visual-regression snapshots on a CI runner (so they match
+# what pr-checks.yml → e2e-visual compares against) and commits them straight
+# back to the PR branch. This replaces the manual dance of running
+# `pnpm test:snapshots:remote` locally, downloading the artifact, and
+# hand-committing the files.
+#
+# Human-gated by design: a maintainer decides when a visual diff is an
+# INTENTIONAL change worth baking in. CI never blindly accepts a diff, so a
+# genuine regression still fails the gate instead of being silently absorbed.
+#
+# Note on re-runs: pushes made with the default GITHUB_TOKEN do not themselves
+# re-trigger the `pull_request` gate. Set a `SNAPSHOT_PAT` repo secret (a PAT or
+# fine-grained token with `contents: write`) and the snapshot commit will push
+# under it so pr-checks re-runs automatically; without it, re-run "PR checks"
+# manually (or push any commit) to see the refreshed gate.
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: update-snapshots-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  update-snapshots:
+    name: Regenerate & commit snapshots
+    # Only on PR comments issuing the command, from someone who can push here.
+    if: >-
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/update-snapshots') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Acknowledge command
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket',
+            });
+
+      - name: Resolve PR head branch
+        id: pr
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const headRepo = pr.data.head.repo?.full_name ?? '';
+            const sameRepo = headRepo === `${context.repo.owner}/${context.repo.repo}`;
+            core.setOutput('ref', pr.data.head.ref);
+            core.setOutput('same_repo', String(sameRepo));
+
+      - name: Guard against fork PRs
+        if: steps.pr.outputs.same_repo != 'true'
+        run: |
+          echo "::error::/update-snapshots only supports PR branches in this repository (a fork's branch can't be pushed to)."
+          exit 1
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+          ref: ${{ steps.pr.outputs.ref }}
+          # Persisted so the snapshot commit can be pushed back. Prefer a PAT
+          # (SNAPSHOT_PAT) so the push re-triggers pr-checks; fall back to the
+          # default token, which commits fine but won't re-trigger workflows.
+          token: ${{ secrets.SNAPSHOT_PAT || secrets.GITHUB_TOKEN }}
+
+      - uses: ./blog/.github/actions/setup-blog
+        with:
+          install-playwright: "true"
+
+      - name: Build the site
+        working-directory: blog
+        run: pnpm build
+
+      - name: Regenerate snapshots
+        working-directory: blog
+        # Same command playwright.yml uses; webServer serves the build just built.
+        run: pnpm exec playwright test --update-snapshots
+
+      - name: Commit & push snapshots
+        id: commit
+        working-directory: blog
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- tests/__snapshots__; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Committed snapshots already match the freshly generated ones — nothing to commit."
+            exit 0
+          fi
+          git add tests/__snapshots__
+          git commit -m "test(visual): regenerate snapshots via /update-snapshots"
+          git push origin "HEAD:${{ steps.pr.outputs.ref }}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Report result
+        if: always()
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const changed = '${{ steps.commit.outputs.changed }}';
+            let body;
+            if (status !== 'success') {
+              body = '❌ `/update-snapshots` failed before it could commit — see the [workflow run](' +
+                `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})` +
+                ' for details.';
+            } else if (changed === 'true') {
+              body = '✅ Regenerated the visual snapshots and pushed them to this branch. ' +
+                'If the PR gate does not re-run on its own, re-run **PR checks** (a `SNAPSHOT_PAT` secret makes this automatic).';
+            } else {
+              body = 'ℹ️ Ran `--update-snapshots`, but the committed snapshots already matched — nothing to commit.';
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
