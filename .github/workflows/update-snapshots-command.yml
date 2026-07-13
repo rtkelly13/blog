@@ -9,6 +9,13 @@ name: Update snapshots (command)
 # `pnpm test:snapshots:remote` locally, downloading the artifact, and
 # hand-committing the files.
 #
+# Threshold-gated: it first runs the visual suite exactly as e2e-visual does, so
+# Playwright's `maxDiffPixelRatio` — not a byte comparison — decides what counts
+# as a real change. Only snapshots that actually breach the threshold are
+# regenerated and committed. Snapshots within tolerance are left alone, so runner
+# re-encoding noise never lands as a spurious re-baseline (e.g. on a docs-only PR
+# that renders no differently).
+#
 # Human-gated by design: a maintainer decides when a visual diff is an
 # INTENTIONAL change worth baking in. CI never blindly accepts a diff, so a
 # genuine regression still fails the gate instead of being silently absorbed.
@@ -93,10 +100,31 @@ jobs:
         working-directory: blog
         run: pnpm build
 
-      - name: Regenerate snapshots
+      - name: Detect snapshots that breach the threshold
+        id: detect
         working-directory: blog
-        # Same command playwright.yml uses; webServer serves the build just built.
-        run: pnpm exec playwright test --update-snapshots
+        # Run the visual suite the SAME way pr-checks → e2e-visual does, so
+        # Playwright's maxDiffPixelRatio decides what is a real change rather than
+        # a byte diff. A pass means every snapshot is within tolerance (nothing to
+        # re-baseline); a failure means one or more genuinely breached it. The
+        # "visual" filter targets visual.spec.ts + visual-responsive.spec.ts — the
+        # only specs with committed snapshots. webServer serves the build above.
+        run: |
+          set -uo pipefail
+          if pnpm exec playwright test visual; then
+            echo "over_threshold=false" >> "$GITHUB_OUTPUT"
+            echo "All visual snapshots are within maxDiffPixelRatio — nothing to regenerate."
+          else
+            echo "over_threshold=true" >> "$GITHUB_OUTPUT"
+            echo "One or more snapshots breach the threshold — regenerating only those."
+          fi
+
+      - name: Regenerate only the breaching snapshots
+        if: steps.detect.outputs.over_threshold == 'true'
+        working-directory: blog
+        # --last-failed scopes the update to exactly the tests that breached the
+        # threshold above, instead of rewriting every baseline from scratch.
+        run: pnpm exec playwright test --last-failed --update-snapshots
 
       - name: Commit & push snapshots
         id: commit
@@ -107,7 +135,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git diff --quiet -- tests/__snapshots__; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Committed snapshots already match the freshly generated ones — nothing to commit."
+            echo "No snapshots breached the threshold — nothing to commit."
             exit 0
           fi
           git add tests/__snapshots__
@@ -128,10 +156,10 @@ jobs:
                 `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})` +
                 ' for details.';
             } else if (changed === 'true') {
-              body = '✅ Regenerated the visual snapshots and pushed them to this branch. ' +
+              body = '✅ Regenerated the snapshots that breached `maxDiffPixelRatio` and pushed them to this branch. ' +
                 'If the PR gate does not re-run on its own, re-run **PR checks** (a `SNAPSHOT_PAT` secret makes this automatic).';
             } else {
-              body = 'ℹ️ Ran `--update-snapshots`, but the committed snapshots already matched — nothing to commit.';
+              body = 'ℹ️ Ran the visual suite, but every snapshot is within `maxDiffPixelRatio` — no re-baseline needed, nothing committed.';
             }
             await github.rest.issues.createComment({
               owner: context.repo.owner,

@@ -231,6 +231,10 @@ PR comment `/update-snapshots`          # regenerate snapshots AND commit them
   `update-snapshots-command.yml` regenerates them and commits them back to the
   branch; `playwright.yml` (`workflow_dispatch`) remains for the artifact-only
   path. Both are maintainer-gated (the command checks author association).
+  `/update-snapshots` is **threshold-gated**: it runs the visual suite first, so
+  only snapshots that actually breach `maxDiffPixelRatio` are regenerated and
+  committed. Sub-threshold re-encoding noise is never committed, so a change that
+  renders no differently (e.g. a docs-only PR) produces no snapshot commit.
 
 ### Branch workflow
 
