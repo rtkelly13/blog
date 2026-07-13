@@ -11,7 +11,6 @@
 import type * as activities from "../activities.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
-import type * as hello from "../hello.js";
 import type * as http from "../http.js";
 import type * as lib_admin from "../lib/admin.js";
 import type * as lib_profanity from "../lib/profanity.js";
@@ -34,7 +33,6 @@ declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   auth: typeof auth;
   crons: typeof crons;
-  hello: typeof hello;
   http: typeof http;
   "lib/admin": typeof lib_admin;
   "lib/profanity": typeof lib_profanity;
