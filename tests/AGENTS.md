@@ -39,17 +39,25 @@ tests/
 **Update flow:**
 
 ```bash
-# Option 1: Trigger CI workflow
+# Option 1 (PRs): comment on the PR — CI regenerates AND commits the
+# snapshots back to the branch for you (update-snapshots-command.yml).
+/update-snapshots
+
+# Option 2: trigger CI, then pull the artifact down locally
 pnpm test:update-snapshots
 
-# Option 2: Manual via GitHub Actions
+# Option 3: manual via GitHub Actions
 gh workflow run playwright.yml --ref <branch> -f update_snapshots=true
 
-# Then download and commit
+# For options 2 & 3, download and commit the regenerated files
 gh run download <run-id> -n playwright-snapshots
 cp -r playwright-snapshots/* tests/__snapshots__/
 git add tests/__snapshots__ && git commit
 ```
+
+Option 1 is human-gated on purpose: you only comment `/update-snapshots` once
+you've confirmed the visual diff is intentional, so a genuine regression still
+fails the gate rather than being auto-absorbed.
 
 **Snapshot path template:**
 
