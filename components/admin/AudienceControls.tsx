@@ -92,7 +92,7 @@ function PollControls({ room }: { room: string }) {
                       )
                     }
                   >
-                    {w.hidden ? 'unblock' : 'block'}
+                    {w.hidden ? 'restore' : 'hide'}
                   </button>
                 </div>
               ))}
@@ -342,12 +342,27 @@ function QAControls({ room }: { room: string }) {
               <span className="w-8 shrink-0 text-center font-bold text-brutalist-yellow">
                 {q.votes}
               </span>
-              <span
-                className={`min-w-0 flex-1 ${q.hidden ? 'line-through' : ''}`}
-              >
-                {q.text}
-                {q.nickname && (
-                  <span className="text-zinc-500"> — {q.nickname}</span>
+              <span className="min-w-0 flex-1">
+                <span className={q.hidden ? 'line-through' : ''}>
+                  {q.text}
+                  {q.nickname && (
+                    <span className="text-zinc-500"> — {q.nickname}</span>
+                  )}
+                </span>
+                {/* ADR-0002: the Mask fired — tag it (auto-hidden ≠ presenter-
+                    hidden) and show the pre-mask original, presenter-only. */}
+                {q.flagged && (
+                  <span className="ml-2 text-xs uppercase text-brutalist-cyan">
+                    ⚠ masked
+                  </span>
+                )}
+                {(q.original || q.originalNickname) && (
+                  <span className="mt-0.5 block border-l-2 border-brutalist-cyan pl-1.5 text-xs text-zinc-400">
+                    original: {q.original}
+                    {q.originalNickname && (
+                      <span> — “{q.originalNickname}”</span>
+                    )}
+                  </span>
                 )}
               </span>
               <div className="flex shrink-0 flex-col gap-1 text-xs uppercase">
@@ -377,7 +392,7 @@ function QAControls({ room }: { room: string }) {
                     )
                   }
                 >
-                  {q.hidden ? 'restore' : 'reject'}
+                  {q.hidden ? 'restore' : 'hide'}
                 </button>
               </div>
             </div>
@@ -392,8 +407,8 @@ function QAControls({ room }: { room: string }) {
 /**
  * Presenter cockpit for the audience-participation features: start/close a poll,
  * open a put-it-in-order activity (with a timed answer reveal), moderate the Q&A
- * queue, and reject individual entries — rejected content never reaches the
- * audience, which sees only a blocked count.
+ * queue, and hide individual entries — hidden content never reaches the
+ * audience, which sees neither the content nor a count (the console keeps the row).
  */
 export default function AudienceControls({ room }: { room: string }) {
   return (

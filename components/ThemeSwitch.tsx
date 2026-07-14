@@ -1,39 +1,61 @@
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
+// Three themes cycled in order. `dark` is the original high-contrast brutalist
+// look (white on black); `dim` softens it toward charcoal / off-white; `sketch`
+// is a light paper-and-ink theme with blue / red / green accents.
+const THEMES = ['dark', 'dim', 'sketch'] as const;
+const LABELS: Record<string, string> = {
+  dark: 'HIGH',
+  dim: 'DIM',
+  sketch: 'SKETCH',
+};
+
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
-  // When mounted on client, now we can show the UI
+  // Only trust the resolved theme after mount to avoid a hydration mismatch
+  // (the server always renders the default). Before then, assume `dark`.
   useEffect(() => setMounted(true), []);
+
+  const active =
+    mounted && theme && THEMES.includes(theme as (typeof THEMES)[number])
+      ? theme
+      : 'dark';
+  const next =
+    THEMES[
+      (THEMES.indexOf(active as (typeof THEMES)[number]) + 1) % THEMES.length
+    ];
 
   return (
     <button
-      aria-label="Toggle Dark Mode"
       type="button"
-      className="w-8 h-8 p-1 ml-1 mr-1 rounded-sm sm:ml-4"
-      onClick={() =>
-        setTheme(
-          theme === 'dark' || resolvedTheme === 'dark' ? 'light' : 'dark',
-        )
-      }
+      // Icon-only: the label lives in the aria-label / tooltip so the control
+      // stays compact and never widens the (already dense) header past the
+      // viewport. `suppressHydrationWarning` because the label depends on the
+      // resolved theme, which is only known client-side.
+      aria-label={`Theme: ${LABELS[active]}. Switch to ${LABELS[next]}.`}
+      title={`Theme: ${LABELS[active]} — switch to ${LABELS[next]}`}
+      onClick={() => setTheme(next)}
+      suppressHydrationWarning
+      className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center p-1 text-white transition-colors hover:text-brutalist-cyan sm:ml-4"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
-        fill="currentColor"
-        className="text-current"
+        className="h-5 w-5"
+        aria-hidden="true"
       >
-        {mounted && (theme === 'dark' || resolvedTheme === 'dark') ? (
-          <path
-            fillRule="evenodd"
-            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-            clipRule="evenodd"
-          />
-        ) : (
-          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-        )}
+        <circle
+          cx="10"
+          cy="10"
+          r="8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <path d="M10 2 A8 8 0 0 1 10 18 Z" fill="currentColor" />
       </svg>
     </button>
   );
