@@ -4,6 +4,7 @@ import matter from 'gray-matter';
 import { bundleMDX } from 'mdx-bundler';
 import readingTime from 'reading-time';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeCitation from 'rehype-citation';
 import rehypeKatex from 'rehype-katex';
 import rehypeKatexNoTranslate from 'rehype-katex-notranslate';
 import rehypePrismPlus from 'rehype-prism-plus';
@@ -77,12 +78,31 @@ export function getRemarkPlugins(toc?: Toc): Pluggable[] {
  * Rehype plugins shared across all MDX compilation. Includes the Prism token
  * class-name remapper that powers the brutalist code highlighting.
  */
-export function getRehypePlugins(): Pluggable[] {
+export function getRehypePlugins(
+  options: { bibliography?: string } = {},
+): Pluggable[] {
   return [
     rehypeSlug,
     rehypeAutolinkHeadings,
     rehypeKatex,
     rehypeKatexNoTranslate,
+    // Citations ([@BibKey]) resolve against the post's `bibliography`
+    // frontmatter — a .bib/CSL-JSON filename relative to data/. bundleMDX
+    // strips frontmatter before rehype runs, so the caller reads the field
+    // and passes it in rather than letting rehype-citation look it up. The
+    // filename must stay relative: rehype-citation path.joins it onto `path`.
+    ...(options.bibliography
+      ? [
+          [
+            rehypeCitation,
+            {
+              bibliography: options.bibliography,
+              path: path.join(root, 'data'),
+              linkCitations: true,
+            },
+          ] as Pluggable,
+        ]
+      : []),
     [rehypePrismPlus, { ignoreMissing: true }] as Pluggable,
     (() => {
       return (tree: any) => {
@@ -152,6 +172,13 @@ export async function getFileBySlug<_T>(
 
   const toc: Toc = [];
 
+  // bundleMDX strips frontmatter before plugins run, so read the optional
+  // bibliography field up front and hand it to the rehype pipeline explicitly.
+  const { data: rawFrontmatter } = matter(source);
+  const bibliography = rawFrontmatter.bibliography
+    ? String(rawFrontmatter.bibliography)
+    : undefined;
+
   const { frontmatter, code } = await bundleMDX({
     source,
     // mdx imports can be automatically source from the components directory
@@ -163,7 +190,7 @@ export async function getFileBySlug<_T>(
       ];
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
-        ...getRehypePlugins(),
+        ...getRehypePlugins({ bibliography }),
       ];
       return options;
     },

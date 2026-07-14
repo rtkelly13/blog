@@ -20,4 +20,10 @@ export type PostFrontMatter = {
     name: string;
     order: number;
   };
+  /**
+   * Bibliography file (.bib or CSL-JSON) relative to data/, e.g.
+   * "references-data.bib". Enables [@BibKey] citations via rehype-citation;
+   * a bibliography section is appended to the post.
+   */
+  bibliography?: string;
 };
