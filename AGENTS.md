@@ -47,7 +47,7 @@ blog/
 ├── convex/           # Realtime backend — talk sessions, presence, Q&A, polls (see convex/AGENTS.md)
 ├── lib/              # MDX pipeline, utilities, hooks (see lib/AGENTS.md)
 ├── tests/            # Playwright + Vitest (see tests/AGENTS.md)
-├── layouts/          # 6 MDX layouts (PostLayout, ListLayout, SeriesLayout, etc.)
+├── layouts/          # 7 MDX layouts (PostLayout, ListLayout, ListLayoutWithTags, SeriesLayout, etc.)
 ├── pages/            # Next.js pages router (incl. /talks, /live, /admin)
 ├── data/             # MDX content + siteMetadata.js
 │   ├── blog/         # Blog post MDX

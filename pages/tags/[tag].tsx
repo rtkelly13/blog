@@ -4,7 +4,7 @@ import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
 import { TagSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
-import ListLayout from '@/layouts/ListLayout';
+import ListLayoutWithTags from '@/layouts/ListLayoutWithTags';
 import generateRss from '@/lib/generate-rss';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
 import { getAllTags } from '@/lib/tags';
@@ -29,8 +29,10 @@ export async function getStaticPaths() {
 export const getStaticProps: GetStaticProps<{
   posts: PostFrontMatter[];
   tag: string;
+  tagCounts: Record<string, number>;
 }> = async (context) => {
   const tag = context.params.tag as string;
+  const tagCounts = await getAllTags('blog');
   const allPosts = await getAllFilesFrontMatter('blog');
   const filteredPosts = allPosts.filter(
     (post) =>
@@ -48,12 +50,13 @@ export const getStaticProps: GetStaticProps<{
   fs.mkdirSync(rssPath, { recursive: true });
   fs.writeFileSync(path.join(rssPath, 'feed.xml'), rss);
 
-  return { props: { posts: filteredPosts, tag } };
+  return { props: { posts: filteredPosts, tag, tagCounts } };
 };
 
 export default function Tag({
   posts,
   tag,
+  tagCounts,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   // Capitalize first letter and convert space to dash
   const title = tag[0].toUpperCase() + tag.split(' ').join('-').slice(1);
@@ -63,7 +66,7 @@ export default function Tag({
         title={`${tag} - ${siteMetadata.title}`}
         description={`${tag} tags - ${siteMetadata.author}`}
       />
-      <ListLayout posts={posts} title={title} />
+      <ListLayoutWithTags posts={posts} title={title} tagCounts={tagCounts} />
     </>
   );
 }
