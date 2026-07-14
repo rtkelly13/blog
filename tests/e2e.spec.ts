@@ -104,7 +104,7 @@ test.describe('404 Page', () => {
 });
 
 test.describe('Dark Mode', () => {
-  test('is always in dark mode', async ({ page }) => {
+  test('defaults to dark mode', async ({ page }) => {
     await page.goto('/');
 
     const html = page.locator('html');

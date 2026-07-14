@@ -23,8 +23,8 @@ const CyberHero = () => {
         style={{
           backgroundSize: '50px 50px',
           backgroundImage: `
-            linear-gradient(to right, rgba(57, 255, 20, 0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(57, 255, 20, 0.1) 1px, transparent 1px)
+            linear-gradient(to right, var(--hero-grid, rgba(57, 255, 20, 0.1)) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--hero-grid, rgba(57, 255, 20, 0.1)) 1px, transparent 1px)
           `,
           transform:
             'perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px)',
@@ -37,8 +37,8 @@ const CyberHero = () => {
         style={{
           backgroundSize: '50px 50px',
           backgroundImage: `
-            linear-gradient(to right, rgba(57, 255, 20, 0.2) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(57, 255, 20, 0.2) 1px, transparent 1px)
+            linear-gradient(to right, var(--hero-grid-strong, rgba(57, 255, 20, 0.2)) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--hero-grid-strong, rgba(57, 255, 20, 0.2)) 1px, transparent 1px)
           `,
           transform:
             'perspective(500px) rotateX(60deg) translateY(100px) translateZ(50px)',
@@ -47,15 +47,28 @@ const CyberHero = () => {
         }}
       />
 
-      {/* Glowing Circle */}
+      {/* Glowing Circle — soft pastel-green ring (themeable via --hero-ring*). */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-96 md:h-96">
-        <div className="absolute inset-0 rounded-full border-[6px] border-brutalist-cyberOrange shadow-glow-orange" />
-        <div className="absolute inset-0 rounded-full border-2 border-yellow-300 blur-[2px]" />
+        <div
+          className="absolute inset-0 rounded-full border-[6px]"
+          style={{
+            borderColor: 'var(--hero-ring, #86efac)',
+            boxShadow:
+              'var(--hero-ring-glow, 0 0 28px rgba(134, 239, 172, 0.5), 0 0 64px rgba(134, 239, 172, 0.28))',
+          }}
+        />
+        <div
+          className="absolute inset-0 rounded-full border-2 blur-[2px]"
+          style={{
+            borderColor: 'var(--hero-ring-soft, rgba(187, 247, 208, 0.55))',
+          }}
+        />
       </div>
 
       {/* Cyberpunk lines/circuits connecting to circle */}
       <svg
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-30 pointer-events-none stroke-brutalist-cyberOrange"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-30 pointer-events-none"
+        style={{ stroke: 'var(--hero-ring, #86efac)' }}
         viewBox="0 0 1000 1000"
       >
         <path

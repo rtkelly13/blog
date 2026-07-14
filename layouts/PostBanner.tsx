@@ -49,7 +49,7 @@ export default function PostBanner({
             src={displayImage}
             alt={title}
             fill
-            className="object-cover opacity-80 mix-blend-screen"
+            className="object-cover opacity-80 dark:mix-blend-screen"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />

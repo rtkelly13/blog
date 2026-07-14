@@ -49,5 +49,12 @@ export type TalkFrontMatter = {
    * ADR-0007.
    */
   featuredLinks?: FeaturedLink[];
+  /**
+   * Deck colour theme. `dark` (default) is the brutalist neon-on-black deck;
+   * `paper` renders a light ink-on-paper deck (matching the site's sketch
+   * theme) with blue/red/green accents. Projection decks stay dark unless a
+   * talk opts in.
+   */
+  deckTheme?: 'dark' | 'paper';
   slug: string;
 };

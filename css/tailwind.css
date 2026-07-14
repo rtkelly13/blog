@@ -7,6 +7,12 @@
 
 @config "../tailwind.config.js";
 
+/* The `dim` theme is a second dark theme: next-themes puts a single `dim` class
+   on <html> (not `dark`), so teach the `dark:` variant to match `.dim` too.
+   This keeps every existing `dark:` utility working under dim without needing a
+   multi-class value (which would break next-themes' classList handling). */
+@custom-variant dark (&:where(.dark, .dark *, .dim, .dim *));
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -38,8 +44,13 @@
 
   body {
     font-family: var(--font-inter, Inter), system-ui, sans-serif;
-    background-color: #000000;
-    color: #ffffff;
+    /* Themeable surface tokens: the `dark` (default) theme keeps pure black /
+       white; the `dim` theme softens both (see the theme block below). These
+       resolve through Tailwind's own color variables so the hundreds of
+       `bg-black` / `text-white` / `border-white` utilities re-theme in lockstep
+       with the body. */
+    background-color: var(--color-black, #000000);
+    color: var(--color-white, #ffffff);
     overflow-x: clip;
   }
 
@@ -128,6 +139,181 @@ html {
   --diagram-text-light: #a1a1aa;
 }
 
+/* ── DIM THEME ───────────────────────────────────────────────────────────
+   A softened dark theme that keeps the brutalist look but takes the edge off
+   the pure-black / pure-white contrast. It layers on top of `.dark` (the html
+   element carries both classes — see pages/_app.tsx), so every `dark:` variant
+   still fires; we only re-point the palette tokens.
+
+   `--color-black` / `--color-white` are Tailwind's own color variables, so
+   overriding them here re-themes the ~140 `bg-black`, ~200 `text-white` and
+   ~200 `border-white` utilities across the site in one place. Bright accent
+   tokens (brutalist cyan/pink/yellow) are inlined literals and stay put, so
+   dark-text-on-accent buttons keep their contrast. */
+.dim {
+  /* Charcoal instead of true black; warm off-white instead of #fff. */
+  --color-black: #17171b;
+  --color-white: #d8d8d2;
+
+  /* Lift the near-black zinc surfaces one notch so panels stay legible
+     against the lighter charcoal background. */
+  --color-zinc-950: #17171b;
+  --color-zinc-900: #202024;
+  --color-zinc-800: #2a2a2f;
+
+  /* Softer offset shadows to match the reduced contrast. */
+  --brutalist-shadow-color: rgba(216, 216, 210, 0.85);
+
+  /* Reading surface: soften prose headings/emphasis that hardcode #fff, and
+     ease the body text a touch. `prose-invert` reads these variables. */
+  --tw-prose-invert-headings: #eaeae4;
+  --tw-prose-invert-bold: #eaeae4;
+  --tw-prose-invert-body: #c4c4be;
+
+  /* Diagrams follow the softened palette. */
+  --diagram-bg: #17171b;
+  --diagram-bg-secondary: #202024;
+  --diagram-stroke: #d8d8d2;
+  --diagram-fill-quaternary: #d8d8d2;
+  --diagram-text: #d8d8d2;
+}
+
+/* Prose headings, emphasis, blockquotes, table headers and rules hardcode
+   `#fff` via the typography config; re-point them to the dim off-white so the
+   reading surface doesn't reintroduce the harsh white the dim theme removes. */
+.dim .prose
+  :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
+    :where([class~="not-prose"] *)
+  ) {
+  color: #eaeae4;
+}
+.dim .prose :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
+  border-color: #d8d8d2;
+}
+
+/* ── SKETCH THEME ─────────────────────────────────────────────────────────
+   A light "paper & ink" theme: warm-white background, graphite ink for text
+   and borders, and blue / red / green accents in place of the neon
+   cyan / pink / yellow. next-themes puts a single `sketch` class on <html>;
+   because it is NOT in the `dark` custom-variant list, every `dark:` utility
+   falls back to its light base styles here — which is exactly what a light
+   theme wants.
+
+   Mechanics mirror the dim theme: override Tailwind's own colour variables so
+   the `bg-black` / `text-white` / `border-white` surface flips, override the
+   `zinc-*` scale (inverted for light surfaces), and re-point the now
+   variable-driven `--brutalist-*` accents. */
+.sketch {
+  /* Paper background, graphite ink text/border (a full light inversion). */
+  --color-black: #f5f3ec;
+  --color-white: #23262e;
+
+  /* Zinc scale inverted: the near-black surfaces become light paper tones and
+     the light "muted text" tones become dark, so both keep their contrast. */
+  --color-zinc-950: #ffffff;
+  --color-zinc-900: #efeadf;
+  --color-zinc-800: #e4ddce;
+  --color-zinc-700: #c8c0ad;
+  --color-zinc-600: #8f8672;
+  --color-zinc-500: #6a6252;
+  --color-zinc-400: #565040;
+  --color-zinc-300: #3b362a;
+  --color-zinc-200: #2a2620;
+
+  /* Accents: blue / red / green (and the "neon" aliases follow suit). */
+  --brutalist-cyan: #2563eb;
+  --brutalist-pink: #dc2626;
+  --brutalist-yellow: #15803d;
+  --brutalist-neonGreen: #15803d;
+  --brutalist-neonCyan: #2563eb;
+  --brutalist-cyberOrange: #dc2626;
+
+  /* Hard offset shadows in ink so they read on the light background. */
+  --brutalist-shadow-color: rgba(35, 38, 46, 0.9);
+
+  /* Faint ink grid instead of the green scanline (see LayoutWrapper). */
+  --scanline-color: rgba(35, 38, 46, 0.04);
+
+  /* Hero (CyberHero): light panel with a faint ink grid instead of the dark
+     cyberpunk band + neon-green grid. */
+  --brutalist-darkBg: #eceadf;
+  --hero-grid: rgba(35, 38, 46, 0.08);
+  --hero-grid-strong: rgba(35, 38, 46, 0.14);
+  /* Slightly deeper pastel green + gentler glow so the ring reads on paper. */
+  --hero-ring: #34d399;
+  --hero-ring-glow: 0 0 22px rgba(52, 211, 153, 0.35);
+  --hero-ring-soft: rgba(52, 211, 153, 0.35);
+
+  /* Reading surface: `prose prose-invert` reads the invert-* tokens, so point
+     them at dark-on-light values (links blue, code green). */
+  --tw-prose-invert-body: #33373f;
+  --tw-prose-invert-headings: #1c1f27;
+  --tw-prose-invert-lead: #4a4f59;
+  --tw-prose-invert-links: #2563eb;
+  --tw-prose-invert-bold: #1c1f27;
+  --tw-prose-invert-quotes: #1c1f27;
+  --tw-prose-invert-captions: #6a6252;
+  --tw-prose-invert-counters: #6a6252;
+  --tw-prose-invert-code: #15803d;
+
+  /* Diagrams on paper: ink strokes, blue/red/green fills. */
+  --diagram-bg: #f5f3ec;
+  --diagram-bg-secondary: #ece7db;
+  --diagram-stroke: #23262e;
+  --diagram-stroke-light: #8f8672;
+  --diagram-fill-primary: #2563eb;
+  --diagram-fill-secondary: #dc2626;
+  --diagram-fill-tertiary: #15803d;
+  --diagram-fill-quaternary: #23262e;
+  --diagram-text: #23262e;
+  --diagram-text-light: #6a6252;
+}
+
+/* Prose bits that hardcode literal light-theme-hostile colours via the
+   typography config (headings/strong/thead/blockquote text = #fff; code block
+   bg = #000, border = #fff) need explicit ink-on-paper values under sketch.
+   Accent-driven prose colours (links, code text, list markers, blockquote
+   border) already follow the `--brutalist-*` variables. */
+.sketch .prose
+  :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
+    :where([class~="not-prose"] *)
+  ) {
+  color: #1c1f27;
+}
+.sketch .prose :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
+  border-color: #23262e;
+}
+/* Inline code (excluding code inside a <pre> block, which the code-block rule
+   below owns). The prose invert pre-bg token is redefined locally on `.prose`,
+   so the code block is styled directly here rather than via that token. */
+.sketch .prose :where(code):not(:where(pre *, [class~="not-prose"] *)) {
+  background-color: #efeadf;
+  border-color: #23262e;
+}
+.sketch .prose :where(pre):not(:where([class~="not-prose"] *)) {
+  background-color: #efeadf;
+  color: #23262e;
+  border: 1px solid #d8d3c4;
+}
+.sketch .prose :where(details):not(:where([class~="not-prose"] *)) {
+  background-color: #efeadf;
+  border-color: #23262e;
+}
+
+/* The typography config sets a literal light-grey body colour on `.prose`
+   (theme('colors.gray.200')), which overrides the themeable prose token and is
+   invisible on paper — restore a dark ink body colour under sketch. */
+.sketch .prose {
+  color: #33373f;
+}
+
+/* Light-grey text utilities (used as primary text on the dark themes) are
+   inlined literals, so re-point the light end of the grey scale to ink under
+   sketch so it stays legible on paper. */
+.sketch :is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400) {
+  color: #33373f;
+}
+
 /* SVG diagrams using CSS variables */
 .svg-diagram .diagram-svg {
   max-width: 100%;
@@ -164,27 +350,30 @@ html {
   }
 
   .brutalist-shadow {
-    box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 1);
+    box-shadow: 4px 4px 0px 0px
+      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-sm {
-    box-shadow: 2px 2px 0px 0px rgba(255, 255, 255, 1);
+    box-shadow: 2px 2px 0px 0px
+      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-lg {
-    box-shadow: 6px 6px 0px 0px rgba(255, 255, 255, 1);
+    box-shadow: 6px 6px 0px 0px
+      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
   }
 
   .brutalist-shadow-cyan {
-    box-shadow: 4px 4px 0px 0px rgba(34, 211, 238, 1);
+    box-shadow: 4px 4px 0px 0px var(--brutalist-cyan, rgba(34, 211, 238, 1));
   }
 
   .brutalist-shadow-pink {
-    box-shadow: 4px 4px 0px 0px rgba(236, 72, 153, 1);
+    box-shadow: 4px 4px 0px 0px var(--brutalist-pink, rgba(236, 72, 153, 1));
   }
 
   .brutalist-shadow-yellow {
-    box-shadow: 4px 4px 0px 0px rgba(250, 204, 21, 1);
+    box-shadow: 4px 4px 0px 0px var(--brutalist-yellow, rgba(250, 204, 21, 1));
   }
 
   .brutalist-btn-press {
