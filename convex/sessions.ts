@@ -89,6 +89,111 @@ export const list = query({
 });
 
 /**
+ * Admin: full JSON archive of one session's data — the escape hatch before
+ * clear-down / auto-expiry destroy it (Convex is not long-term storage; the
+ * presenter archives this to their own Google Drive). Returns the raw
+ * documents (not a projection) so the bundle stays complete as the schema
+ * grows — including the presenter-only pre-mask originals (ADR-0002), which is
+ * exactly why this is admin-gated. Bounded by one session's data (same scope
+ * `purgeSessionData` walks).
+ */
+export const exportSession = query({
+  args: { room: v.string() },
+  handler: async (ctx, { room }) => {
+    if (!(await isAdminUser(ctx))) return { authorized: false as const };
+
+    const session = await ctx.db.get(room as Id<'talks'>);
+    if (!session) return { authorized: true as const, session: null };
+
+    // Query each table with its literal index so row types stay precise (a
+    // generic helper would widen them into a union and lose the child ids).
+    const [
+      attendees,
+      reactionTotals,
+      questions,
+      polls,
+      activities,
+      activitySubmissions,
+    ] = await Promise.all([
+      ctx.db
+        .query('attendees')
+        .withIndex('by_room_firstSeen', (q) => q.eq('room', room))
+        .collect(),
+      ctx.db
+        .query('reactionTotals')
+        .withIndex('by_room', (q) => q.eq('room', room))
+        .collect(),
+      ctx.db
+        .query('questions')
+        .withIndex('by_room_created', (q) => q.eq('room', room))
+        .collect(),
+      ctx.db
+        .query('polls')
+        .withIndex('by_room_created', (q) => q.eq('room', room))
+        .collect(),
+      ctx.db
+        .query('activities')
+        .withIndex('by_room_created', (q) => q.eq('room', room))
+        .collect(),
+      ctx.db
+        .query('activitySubmissions')
+        .withIndex('by_room_created', (q) => q.eq('room', room))
+        .collect(),
+    ]);
+
+    // Child rows are keyed by parent, not room — gather them per parent.
+    const questionVotes = (
+      await Promise.all(
+        questions.map((q) =>
+          ctx.db
+            .query('questionVotes')
+            .withIndex('by_question_machine', (row) =>
+              row.eq('questionId', q._id),
+            )
+            .collect(),
+        ),
+      )
+    ).flat();
+    const pollWords = (
+      await Promise.all(
+        polls.map((p) =>
+          ctx.db
+            .query('pollWords')
+            .withIndex('by_poll', (row) => row.eq('pollId', p._id))
+            .collect(),
+        ),
+      )
+    ).flat();
+    const pollSubmitters = (
+      await Promise.all(
+        polls.map((p) =>
+          ctx.db
+            .query('pollSubmitters')
+            .withIndex('by_poll_machine', (row) => row.eq('pollId', p._id))
+            .collect(),
+        ),
+      )
+    ).flat();
+
+    return {
+      authorized: true as const,
+      session,
+      data: {
+        attendees,
+        reactionTotals,
+        questions,
+        questionVotes,
+        polls,
+        pollWords,
+        pollSubmitters,
+        activities,
+        activitySubmissions,
+      },
+    };
+  },
+});
+
+/**
  * Each room-scoped table paired with its room index. This single map is the
  * source of truth for `purgeByRoom`, so a table can only ever be purged through
  * its correct room-keyed index — a mismatched pairing is impossible to express
