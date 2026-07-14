@@ -22,6 +22,9 @@ lib/
 ├── remark-toc-headings.ts  # TOC extraction plugin
 ├── remark-references.ts    # Bibliography collection + [n] citation markers
 ├── remark-img-to-jsx.ts    # Image → JSX plugin
+├── og/                 # Deterministic header / OG-card image engine
+│   ├── headerImage.mjs # Source of truth: buildHeaderSvg() → SVG string
+│   └── headerImage.ts  # Thin typed re-export for .tsx imports
 └── utils/              # Small helpers
     ├── files.ts        # getAllFilesRecursively
     ├── kebabCase.ts    # Slug generation
@@ -29,6 +32,26 @@ lib/
     ├── htmlEscaper.ts  # RSS escaping
     └── showDrafts.ts   # Draft visibility check
 ```
+
+## HEADER / OG IMAGE ENGINE
+
+`og/headerImage.mjs` deterministically builds a brutalist SVG banner from post
+front matter (`title`, `slug`, `tags`, `date`). Output is a pure function of the
+seed (`slug`), so the same post always renders the same image. One engine backs
+two consumers, guaranteeing they match:
+
+- **On-page hero** — `components/PostHeaderImage.tsx` renders the SVG inline
+  (`variant="banner"`, 2:1). `PostLayout` shows it when a post has no explicit
+  `images`.
+- **Social/OG card** — `scripts/generate-og-images.mjs` rasterises the `og`
+  preset (1200×630) to `public/static/og/<slug>.png` at build time (part of
+  `pnpm build`; also `pnpm og:images`). `components/SEO.tsx` and `PostBanner`
+  fall back to `/static/og/<slug>.png` when front matter has no image.
+
+The `.mjs` + `.ts` split mirrors `utils/showDrafts.*`: the `.mjs` is the single
+implementation (importable by the Node build script), the `.ts` is a typed
+re-export for the React component. Wrapping uses a font-independent metric so
+inline and rasterised layouts are identical regardless of webfont load state.
 
 > **(#19) Hooks are a new `lib/` category.** `lib/` was originally scoped to the
 > MDX pipeline + utilities; it now also holds React hooks (`usePresence`,

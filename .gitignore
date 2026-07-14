@@ -58,6 +58,9 @@ storybook-static
 # temporary working files
 /temp/
 
+# build-generated per-post OG cards (produced by scripts/generate-og-images.mjs)
+/public/static/og/
+
 # git worktrees (scratch state for parallel branches)
 .worktrees/
 .claude/worktrees/

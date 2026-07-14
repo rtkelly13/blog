@@ -33,9 +33,10 @@ export default function PostBanner({
 }: Props) {
   const { slug, date, title, images } = frontMatter;
 
-  // Use first image from frontmatter, or fallback to placeholder
+  // Use first image from frontmatter, or fall back to the post's deterministic
+  // build-generated OG card (scripts/generate-og-images.mjs).
   const displayImage =
-    images && images.length > 0 ? images[0] : '/static/images/twitter-card.png';
+    images && images.length > 0 ? images[0] : `/static/og/${slug}.png`;
 
   return (
     <>
