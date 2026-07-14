@@ -342,6 +342,60 @@ html {
   height: auto;
 }
 
+/* Themeable mermaid node accents. Mermaid's `style` parser can't take `var()`,
+   so the diagram source assigns a semantic class (`class M1,M2 nodePink`) and
+   the colours live here — reading the `--diagram-*` tokens so nodes follow the
+   theme (neon on black in dark/dim, ink-on-paper with blue/red/green under
+   sketch) instead of the old hardcoded `fill:#000` + neon that stayed dark on
+   paper. `!important` beats the inline node styles mermaid emits. */
+.mermaid-diagram .node rect,
+.mermaid-diagram .node polygon,
+.mermaid-diagram .node circle {
+  fill: var(--diagram-bg) !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 8 4 !important;
+}
+.mermaid-diagram .node.nodeCyan rect,
+.mermaid-diagram .node.nodeCyan polygon,
+.mermaid-diagram .node.nodeCyan circle {
+  stroke: var(--diagram-fill-primary) !important;
+}
+.mermaid-diagram .node.nodePink rect,
+.mermaid-diagram .node.nodePink polygon,
+.mermaid-diagram .node.nodePink circle {
+  stroke: var(--diagram-fill-secondary) !important;
+}
+.mermaid-diagram .node.nodeYellow rect,
+.mermaid-diagram .node.nodeYellow polygon,
+.mermaid-diagram .node.nodeYellow circle {
+  stroke: var(--diagram-fill-tertiary) !important;
+}
+/* Node labels follow the same accent (mermaid renders them as spans/tspans). */
+.mermaid-diagram .node.nodeCyan .nodeLabel,
+.mermaid-diagram .node.nodeCyan span,
+.mermaid-diagram .node.nodeCyan tspan {
+  color: var(--diagram-fill-primary) !important;
+  fill: var(--diagram-fill-primary) !important;
+}
+.mermaid-diagram .node.nodePink .nodeLabel,
+.mermaid-diagram .node.nodePink span,
+.mermaid-diagram .node.nodePink tspan {
+  color: var(--diagram-fill-secondary) !important;
+  fill: var(--diagram-fill-secondary) !important;
+}
+.mermaid-diagram .node.nodeYellow .nodeLabel,
+.mermaid-diagram .node.nodeYellow span,
+.mermaid-diagram .node.nodeYellow tspan {
+  color: var(--diagram-fill-tertiary) !important;
+  fill: var(--diagram-fill-tertiary) !important;
+}
+/* Edges: white on black, ink on paper (was a hardcoded white linkStyle that
+   vanished on the sketch paper background). */
+.mermaid-diagram .flowchart-link,
+.mermaid-diagram .edgePath path {
+  stroke: var(--diagram-stroke) !important;
+}
+
 /* Brutalist Utilities */
 @layer utilities {
   .brutalist-border {

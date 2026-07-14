@@ -55,11 +55,9 @@ This is called _Job Dependencies_ in AWS Batch
     P --> S2
     S1 --> T
     S2 --> T
-    style P fill:#000,stroke:#22d3ee,stroke-width:3px,stroke-dasharray:8 4,color:#22d3ee,rx:0,ry:0
-    style S1 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
-    style S2 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
-    style T fill:#000,stroke:#facc15,stroke-width:3px,stroke-dasharray:8 4,color:#facc15,rx:0,ry:0
-    linkStyle default stroke:#fff,stroke-width:2px`}
+    class P nodeCyan
+    class S1,S2 nodePink
+    class T nodeYellow`}
   </Diagram>
 </div>
 
@@ -128,11 +126,8 @@ read an environment variable to determine which element is needed to be run and 
     M1 --> R
     M2 --> R
     M3 --> R
-    style M1 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
-    style M2 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
-    style M3 fill:#000,stroke:#ec4899,stroke-width:3px,stroke-dasharray:8 4,color:#ec4899,rx:0,ry:0
-    style R fill:#000,stroke:#facc15,stroke-width:3px,stroke-dasharray:8 4,color:#facc15,rx:0,ry:0
-    linkStyle default stroke:#fff,stroke-width:2px`}
+    class M1,M2,M3 nodePink
+    class R nodeYellow`}
   </Diagram>
 </div>
 

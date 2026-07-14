@@ -30,7 +30,7 @@ const PAPER_TEXTURE_CSS = `.sketch{--page-texture:url("${PAPER_TEXTURE}");--page
 
 const LayoutWrapper = ({ children }: Props) => {
   return (
-    <SectionContainer>
+    <>
       {/* Static, generated CSS string (no user input) — safe inline style. */}
       <style dangerouslySetInnerHTML={{ __html: PAPER_TEXTURE_CSS }} />
       <div
@@ -40,8 +40,11 @@ const LayoutWrapper = ({ children }: Props) => {
           backgroundSize: `var(--page-texture-size, 100% 4px)`,
         }}
       >
+        {/* Full-viewport-width header: the reading column (max-w-5xl) is too
+            narrow for the inline nav + wordmark + controls, so the header spans
+            the whole width while the content below stays inset. */}
         <header
-          className={`flex items-center justify-between py-6 px-4 border-b border-gray-800 ${
+          className={`flex items-center justify-between border-b border-gray-800 px-4 py-6 sm:px-6 ${
             siteMetadata.stickyNav
               ? 'sticky top-0 z-50 bg-black/90 backdrop-blur'
               : ''
@@ -49,18 +52,13 @@ const LayoutWrapper = ({ children }: Props) => {
         >
           <div>
             <Link href="/" aria-label="Ryan Kelly Blog">
-              <div className="flex items-center gap-4">
-                <div className="font-pixel text-4xl leading-none text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">
-                  RK
-                </div>
-                <span className="font-bold font-mono text-xl tracking-widest hidden md:block mt-1">
-                  RYAN_KELLY.DEV
-                </span>
-              </div>
+              <span className="block font-bold font-mono text-lg sm:text-xl tracking-widest text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">
+                RYAN_KELLY.DEV
+              </span>
             </Link>
           </div>
           <div className="flex items-center text-base leading-5 gap-4">
-            <div className="hidden sm:flex sm:items-center">
+            <div className="hidden lg:flex lg:items-center">
               {headerNavLinks.map((link) => (
                 <Link
                   key={link.title}
@@ -76,10 +74,14 @@ const LayoutWrapper = ({ children }: Props) => {
             <MobileNav />
           </div>
         </header>
-        <main className="mb-auto relative z-10">{children}</main>
-        <Footer />
+        <main className="mb-auto relative z-10">
+          <SectionContainer>{children}</SectionContainer>
+        </main>
+        <SectionContainer>
+          <Footer />
+        </SectionContainer>
       </div>
-    </SectionContainer>
+    </>
   );
 };
 

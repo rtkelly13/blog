@@ -1,3 +1,4 @@
+import { CloudMoon, type LucideIcon, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
@@ -9,6 +10,14 @@ const LABELS: Record<string, string> = {
   dark: 'HIGH',
   dim: 'DIM',
   sketch: 'SKETCH',
+};
+// A distinct glyph per theme so the current mode is legible at a glance
+// (moon = dark, cloud-moon = dim, sun = sketch) — the icon-only button used
+// the same half-disc for all three.
+const ICONS: Record<string, LucideIcon> = {
+  dark: Moon,
+  dim: CloudMoon,
+  sketch: Sun,
 };
 
 const ThemeSwitch = () => {
@@ -27,6 +36,7 @@ const ThemeSwitch = () => {
     THEMES[
       (THEMES.indexOf(active as (typeof THEMES)[number]) + 1) % THEMES.length
     ];
+  const Icon = ICONS[active] ?? Moon;
 
   return (
     <button
@@ -41,22 +51,7 @@ const ThemeSwitch = () => {
       suppressHydrationWarning
       className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center p-1 text-white transition-colors hover:text-brutalist-cyan sm:ml-4"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        className="h-5 w-5"
-        aria-hidden="true"
-      >
-        <circle
-          cx="10"
-          cy="10"
-          r="8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        <path d="M10 2 A8 8 0 0 1 10 18 Z" fill="currentColor" />
-      </svg>
+      <Icon className="h-5 w-5" aria-hidden="true" />
     </button>
   );
 };
