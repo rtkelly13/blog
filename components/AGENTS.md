@@ -69,6 +69,33 @@ mono `subtitle`. Drop it in as the first child of the standard page shell:
 - Detail pages use `PageTitle` (bordered bracket text), not `PageHeader`. Blog
   listing uses `ListLayoutWithTags`, which owns its own centred header.
 
+## DUAL-MODE THEMING (non-negotiable)
+
+The design system is **two first-class aesthetics driven by one token set**:
+the default **neon-terminal dark** mode (`dark`/`dim` — neon accents on black)
+and the **sketch** mode (paper-and-ink light, blue/red/green accents). They are
+not "a theme and its override" — every surface must read as intentional in
+both.
+
+This works because `.sketch` (and `.dim`) **remap the colour tokens
+themselves** in `css/tailwind.css` — `--color-black`, `--color-white`, the
+`--color-zinc-*` scale, and the `--brutalist-*` accents all flip to paper/ink
+values. So the rule for any new component is:
+
+- **Build only on the remapped tokens**: `bg-black` / `bg-zinc-900`,
+  `border-white`, `text-white`, `text-zinc-400`, `text-brutalist-cyan|pink|
+  yellow`, `shadow-hard-*`. These invert automatically — write the dark look
+  and sketch comes for free.
+- **Never hardcode** `text-gray-900`, `dark:*` pairs, or hex literals for
+  surfaces/text/borders — the grey scale and literals don't remap, so they
+  break sketch mode (this was exactly why the old `/tags` page was unreadable
+  on paper).
+- **No emoji as UI** — native emoji render as fixed full-colour OS glyphs that
+  ignore both themes; use lucide icons tinted with a `text-brutalist-*` accent
+  so they follow dark ↔ sketch.
+- Verify both: cycle the theme switch (HIGH → DIM → SKETCH) and confirm the
+  component reads on paper as well as on black.
+
 ## INTERACTIVE MDX (interactive/)
 
 Step-driven interactives usable in any MDX (posts, talks, ideas):
