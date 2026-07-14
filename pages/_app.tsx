@@ -2,6 +2,10 @@
 // (lib/fonts.ts; --font-* variables defined on :root below).
 // Display: Space Grotesk · Body: Inter · Code/UI: IBM Plex Mono · Logo: VT323
 import '@/css/tailwind.css';
+// Self-hosted KaTeX styles, version-matched to the katex that rehype-katex
+// renders with (a CDN stylesheet on a different major/minor silently breaks
+// math layout).
+import 'katex/dist/katex.min.css';
 
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import type { AppProps } from 'next/app';
