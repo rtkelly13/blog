@@ -24,6 +24,10 @@ jobs:
         with:
           install-playwright: "true"
 
+      - name: Lockfile protocol guard
+        working-directory: blog
+        run: node scripts/ci/check-lockfile-protocol.mjs
+
       - name: Lint
         working-directory: blog
         run: pnpm lint
