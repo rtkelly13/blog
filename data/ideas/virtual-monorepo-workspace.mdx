@@ -72,9 +72,10 @@ labelled as gitignore is actually the *agent* ignore file (`!projects/`).
       A companion provisioning piece is already scoped:
       [Provisioning the Dev Environment](/ideas/workspace-devenv) (devenv +
       editor integration + the bespoke-vs-vendored tooling axis).
-- [ ] **Two-ignore-files side-by-side diagram** — explains the core trick
-      better than prose (and fixes the factual bug while it's at it). A
-      prototype exists as an artifact page.
+- [x] **Two-ignore-files, animated** — done, and better than a static diagram:
+      the `<FileTree>` prototype below wires the symlink and toggles git-view
+      vs agent-view on one path. Also encodes the factual fix (git tracks
+      neither the code nor the symlink) in the git-view caption.
 - [ ] **Progressive-disclosure diagram** — context arriving in layers,
       just-in-time. Rough cut below; iterate here before promoting it into
       the draft.
@@ -92,6 +93,13 @@ labelled as gitignore is actually the *agent* ignore file (`!projects/`).
 ## Interactive prototypes
 
 Live experiments — iterate here, promote into the draft when they earn it.
+
+**The trick, on disk** — the one representation the other three don't give:
+the structure itself. Wire the `projects → ../company` symlink to mirror the
+body into the brain, then flip git-view vs agent-view to see the same path
+ignored by git yet traversable by the agent — the whole pattern in one widget:
+
+<FileTree title="the trick, on disk" />
 
 **How an agent picks up the system** — candidate replacement for (or companion
 to) the "day in the life" walkthrough gap above:

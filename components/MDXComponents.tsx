@@ -59,11 +59,17 @@ const Terminal = dynamic(() => import('./interactive/Terminal'), {
   loading: InteractiveLoading,
 });
 
+const FileTree = dynamic(() => import('./interactive/FileTree'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
 export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
   Diagram,
   NoteBlock,
+  FileTree,
   IdeaDeck,
   IdeaSlide,
   QueryRouter,

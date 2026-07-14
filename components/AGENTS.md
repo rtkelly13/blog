@@ -67,6 +67,12 @@ Step-driven interactives usable in any MDX (posts, talks, ideas):
   scrolls down the command's full fake output and highlights the one relevant
   line (`highlight: <substring|index>`) while the rest dims. Scenarios are
   declarative props.
+- `FileTree` — animated filesystem view of the virtual monorepo: a "wire the
+  symlink" toggle mirrors the body repos into the brain's `projects/`, and a
+  git-view / agent-view toggle shows the same subtree ignored-by-git vs
+  traversable-by-agent (the two-ignore-files trick). Trust-tier dots
+  (brain/trusted/untrusted). Pure model + rules in `fileTreeModel.ts`
+  (unit-tested); no props needed — the workspace layout is baked in.
 
 Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
 motion/@xyflow/react ship as lazy chunks only on pages that mount them.
