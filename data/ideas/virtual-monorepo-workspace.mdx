@@ -44,9 +44,9 @@ labelled as gitignore is actually the *agent* ignore file (`!projects/`).
       a coding-agent story" thesis.
 - [ ] **One task end-to-end** — trace a cross-repo change: root AGENTS.md
       routes → `help` builds context in layers (verbs, then specifics) →
-      code-intel graph finds callers → two PRs. The draft is all mechanism,
-      no demonstration. (Agents bring their own search tools — the workspace's
-      contribution is the map and the verbs.)
+      routed into the repo's own AGENTS.md → two PRs. The draft is all
+      mechanism, no demonstration. (Agents bring their own search tools — the
+      workspace's contribution is the map and the verbs.)
 - [ ] **Generated agent assets** — skills/commands authored once in the
       playbook and *compiled* per-tool (`agents build` → `.claude/`,
       `.opencode/`), gitignored locally, published by CI. Stronger claim than
@@ -57,10 +57,18 @@ labelled as gitignore is actually the *agent* ignore file (`!projects/`).
 - [ ] **Prior art** — one paragraph on why not git submodules, meta-repo
       tools, or a real monorepo migration.
 
+<NoteBlock title="out of scope: code-intelligence" color="red">
+Drop the code-intelligence / code-graph material entirely — it's out of scope
+for this article. The embedded draft below still leans on it (the "verbs"
+section headlines a code-intelligence command); in the rewrite, rebuild that
+section around the verbs that stay — `docs`, `help`, `sync`, task/observability
+CLIs — and don't reintroduce the graph in any diagram or walkthrough.
+</NoteBlock>
+
 ## Structural moves
 
-- [ ] Group the six mechanisms: **see** (filesystem + permissions), **know**
-      (AGENTS.md + progressive disclosure), **do** (CLIs + code intel),
+- [ ] Group the mechanisms: **see** (filesystem + permissions), **know**
+      (AGENTS.md + progressive disclosure), **do** (the CLIs / verbs),
       **don't** (guardrails).
 - [ ] End with a **starter kit**: create repo, `ln -s`, seed AGENTS.md with a
       where-to-look table, add the two ignore files.
@@ -110,23 +118,20 @@ to) the "day in the life" walkthrough gap above:
   nodes={[
     { id: 'agent', label: 'Agent session', detail: 'lands in the brain', x: 40, y: 20, accent: 'cyan' },
     { id: 'root', label: 'AGENTS.md', detail: 'root map · conventions', x: 320, y: 20, accent: 'yellow' },
-    { id: 'help', label: 'help command', detail: 'uv run help — every verb', x: 140, y: 170, accent: 'yellow' },
-    { id: 'repo', label: 'repo AGENTS.md', detail: 'projects/<repo>/', x: 480, y: 170, accent: 'pink' },
-    { id: 'intel', label: 'code-intel graph', detail: 'callers · impact (MCP)', x: 320, y: 320, accent: 'white' },
+    { id: 'help', label: 'help command', detail: 'uv run help — every verb', x: 140, y: 190, accent: 'yellow' },
+    { id: 'repo', label: 'repo AGENTS.md', detail: 'projects/<repo>/', x: 460, y: 190, accent: 'pink' },
   ]}
   edges={[
     { from: 'agent', to: 'root' },
     { from: 'root', to: 'help' },
     { from: 'root', to: 'repo' },
-    { from: 'repo', to: 'intel' },
   ]}
   steps={[
     { title: 'One world', caption: 'A fresh agent session lands in the brain repo. Through the projects symlink, its working directory is the entire virtual monorepo. Search it can do itself — what it needs from the workspace is a map and verbs.', focus: ['agent'] },
     { title: 'Read the map', caption: 'First move: the root AGENTS.md — repo inventory, trust tiers, conventions, and the where-to-look table. A router, not an encyclopaedia.', focus: ['agent', 'root'], activeEdges: ['agent->root'] },
     { title: 'Discover the verbs', caption: 'uv run help lists every CLI verb with usage — the workspace teaches the agent what it can do, not just what exists. help <command> drills into specifics. Context, built in layers.', focus: ['root', 'help'], activeEdges: ['root->help'] },
-    { title: 'Route into the repo', caption: 'The task points into one repo. Its own AGENTS.md takes over: local conventions, build commands, gotchas — progressive disclosure.', focus: ['root', 'repo'], activeEdges: ['root->repo'] },
-    { title: 'Ask structural questions', caption: '"Who calls this function across services?" — the code-intelligence graph answers via MCP, no files pulled into context.', focus: ['repo', 'intel'], activeEdges: ['repo->intel'] },
-    { title: 'Map + verbs', caption: 'The same loop a new starter runs on day one — read the map, run help, go deeper only where the task points. The whole system, one screen.', focus: ['agent', 'root', 'help', 'repo', 'intel'] },
+    { title: 'Route into the repo', caption: 'The task points into one repo. Its own AGENTS.md takes over: local conventions, build commands, gotchas — progressive disclosure, the map handing off to the repo that owns the detail.', focus: ['root', 'repo'], activeEdges: ['root->repo'] },
+    { title: 'Map + verbs', caption: 'The same loop a new starter runs on day one — read the map, run help, go deeper only where the task points. The whole system, one screen.', focus: ['agent', 'root', 'help', 'repo'] },
   ]}
 />
 
@@ -145,7 +150,6 @@ for context being read:
       routerRows: [
         { label: 'Every CLI verb + usage', path: 'uv run help', match: true },
         { label: 'Background job patterns', path: 'projects/backend-service/jobs/' },
-        { label: 'Structural code questions', path: 'workspace intel …' },
         { label: 'Who owns what', path: 'projects/platform/data/people.json' },
       ],
       route: ['AGENTS.md', 'uv run help'],
@@ -162,7 +166,7 @@ for context being read:
             '  docs           search · index · lint · agent-context',
             '  help           this page',
             '  todo           TODO.md workflows + review queue',
-            '  workspace      branches · queue · roles · workflows · intel',
+            '  workspace      branches · queue · roles · workflows',
             '',
             'TASKS & OBSERVABILITY',
             '  tickets        task-management CLI (agent-friendly output)',
@@ -185,7 +189,6 @@ for context being read:
       routerRows: [
         { label: 'Every CLI verb + usage', path: 'uv run help', match: true },
         { label: 'Background job patterns', path: 'projects/backend-service/jobs/' },
-        { label: 'Structural code questions', path: 'workspace intel …' },
         { label: 'Who owns what', path: 'projects/platform/data/people.json' },
       ],
       route: ['AGENTS.md', 'uv run help', 'uv run help db-tunnel'],
@@ -203,7 +206,7 @@ for context being read:
             '  docs           search · index · lint · agent-context',
             '  help           this page',
             '  todo           TODO.md workflows + review queue',
-            '  workspace      branches · queue · roles · workflows · intel',
+            '  workspace      branches · queue · roles · workflows',
             '',
             'TASKS & OBSERVABILITY',
             '  tickets        task-management CLI (agent-friendly output)',
@@ -251,7 +254,7 @@ scroll-to-highlight, pauses), and it plays like a recording of a real shell:
         '  docs           search · index · lint · agent-context',
         '  help           this page',
         '  todo           TODO.md workflows + review queue',
-        '  workspace      branches · queue · roles · workflows · intel',
+        '  workspace      branches · queue · roles · workflows',
         '',
         'TASKS & OBSERVABILITY',
         '  tickets        task-management CLI (agent-friendly output)',
