@@ -44,6 +44,30 @@ Use these for imports:
 | `SeriesNavigation`  | Multi-part post nav       | Prev/next within series               |
 | `Button`            | Brutalist button          | `variant`, `size`, `shadow` props     |
 | `Card`              | Content card              | Brutalist borders, hard shadows       |
+| `PageHeader`        | Listing/index page header | `{title, subtitle?, icon?, accent?}` — the one header primitive for index pages (see below) |
+| `PageTitle`         | Detail page title         | Bracketed double-border `<h1>` for post/series/idea **detail** pages |
+
+## PAGE HEADERS
+
+Index/listing pages (`/blog`, `/talks`, `/projects`, `/tags`, `/ideas`,
+`/design-sandbox`) share **one** header via `PageHeader` — a `bg-zinc-900`
+block with an optional lucide `icon`, a bracketed `[ TITLE ]`, and a `>`-prompt
+mono `subtitle`. Drop it in as the first child of the standard page shell:
+
+```tsx
+<div className="divide-y divide-white border-2 border-white bg-black">
+  <PageHeader title="TALKS" icon={Presentation} accent="pink" subtitle="…" />
+  {/* page content */}
+</div>
+```
+
+- **`accent` is the per-section colour rule, in one place** — `cyan` (default,
+  blog/projects/sandbox), `pink` (talks — matches its card borders), `yellow`
+  (ideas). It themes the icon + prompt glyph through the `--brutalist-*` tokens.
+- **Icons are lucide only — no emoji.** Native emoji break the ASCII/brutalist
+  aesthetic (they render as full-colour OS glyphs).
+- Detail pages use `PageTitle` (bordered bracket text), not `PageHeader`. Blog
+  listing uses `ListLayoutWithTags`, which owns its own centred header.
 
 ## INTERACTIVE MDX (interactive/)
 

@@ -1,5 +1,7 @@
+import { Tags as TagsIcon } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Link from '@/components/Link';
+import PageHeader from '@/components/PageHeader';
 import { PageSEO } from '@/components/SEO';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
@@ -24,21 +26,25 @@ export default function Tags({
         title={`Tags - ${siteMetadata.author}`}
         description="Things I blog about"
       />
-      <div className="flex flex-col items-start justify-start divide-y divide-gray-200 dark:divide-gray-700 md:justify-center md:items-center md:divide-y-0 md:flex-row md:space-x-6 md:mt-24">
-        <div className="pt-6 pb-8 space-x-2 md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 md:border-r-2 md:px-6">
-            Tags
-          </h1>
-        </div>
-        <div className="flex flex-wrap max-w-lg">
-          {Object.keys(tags).length === 0 && 'No tags found.'}
+      <div className="divide-y divide-white border-2 border-white bg-black">
+        <PageHeader
+          title="TAGS"
+          icon={TagsIcon}
+          subtitle="Browse posts by topic"
+        />
+        <div className="flex flex-wrap px-6 py-12">
+          {Object.keys(tags).length === 0 && (
+            <p className="font-mono text-zinc-400">
+              <span className="text-brutalist-pink">&gt;</span> No tags found.
+            </p>
+          )}
           {sortedTags.map((t) => {
             return (
               <div key={t} className="mt-2 mb-2 mr-5">
                 <Tag text={t} />
                 <Link
                   href={`/tags/${kebabCase(t)}`}
-                  className="-ml-2 text-sm font-semibold text-gray-600 uppercase dark:text-gray-300"
+                  className="-ml-2 font-mono text-sm font-semibold text-zinc-400 uppercase"
                 >
                   {` (${tags[t]})`}
                 </Link>

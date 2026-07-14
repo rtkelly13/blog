@@ -1,6 +1,7 @@
 import { Presentation } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
+import PageHeader from '@/components/PageHeader';
 import { PageSEO } from '@/components/SEO';
 import { TalkCard } from '@/components/talks';
 import siteMetadata from '@/data/siteMetadata';
@@ -24,18 +25,12 @@ function TalksContent({ visible }: { visible: TalkFrontMatter[] }) {
         description="Talks and presentations, hosted as interactive slide decks."
       />
       <div className="divide-y divide-white border-2 border-white bg-black">
-        <div className="bg-zinc-900 px-6 pt-8 pb-10">
-          <div className="mb-4 flex items-center gap-4">
-            <Presentation className="h-10 w-10 text-brutalist-cyan" />
-            <h1 className="font-display text-4xl font-bold uppercase text-white md:text-6xl">
-              [ TALKS ]
-            </h1>
-          </div>
-          <p className="mt-4 font-mono text-lg text-zinc-400">
-            <span className="text-brutalist-yellow">&gt;</span> Presentations
-            and slide decks, hosted live and exportable to PDF
-          </p>
-        </div>
+        <PageHeader
+          title="TALKS"
+          icon={Presentation}
+          accent="pink"
+          subtitle="Presentations and slide decks, hosted live and exportable to PDF"
+        />
 
         <div className="px-6 py-12">
           {visible.length === 0 ? (
