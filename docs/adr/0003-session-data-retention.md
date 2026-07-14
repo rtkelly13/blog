@@ -20,8 +20,15 @@ Two removal paths:
   record is kept.
 
 Both purge paths must cover **all** per-Session tables, including the dedup
-ledger and rate-limit rows introduced by ADR-0001 — a cleared/expired Session is
-truly zeroed, leaving only the log entry.
+ledgers introduced by ADR-0001 (`questionVotes`, `pollSubmitters`) — a
+cleared/expired Session is truly zeroed, leaving only the log entry.
+
+**Amendment (2026-07-07):** rate-limit rows are *not* per-Session and are
+deliberately outside both purge paths. The `rateLimits` table is keyed
+`(machineId, kind)` — machine-scoped, bounded (one row per machine+kind, patched
+in place, never grows with sessions), and contains no user text — so purging it
+per-Session would be meaningless. "Truly zeroed" applies to per-Session tables
+only.
 
 ## Consequences
 

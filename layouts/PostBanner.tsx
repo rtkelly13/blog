@@ -1,10 +1,12 @@
 import NextImage from 'next/image';
 import type { ReactNode } from 'react';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Reference } from 'types/Reference';
 import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
+import References, { ReferencesContext } from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
@@ -15,6 +17,10 @@ interface Props {
   children: ReactNode;
   next?: { slug: string; title: string };
   prev?: { slug: string; title: string };
+  references?: Reference[];
+  /** See ADR-0007 — suppresses the auto-appended section when the body
+   * renders `<References />` itself. */
+  hasManualReferences?: boolean;
 }
 
 export default function PostBanner({
@@ -22,12 +28,15 @@ export default function PostBanner({
   next,
   prev,
   children,
+  references,
+  hasManualReferences,
 }: Props) {
   const { slug, date, title, images } = frontMatter;
 
-  // Use first image from frontmatter, or fallback to placeholder
+  // Use first image from frontmatter, or fall back to the post's deterministic
+  // build-generated OG card (scripts/generate-og-images.mjs).
   const displayImage =
-    images && images.length > 0 ? images[0] : '/static/images/twitter-card.png';
+    images && images.length > 0 ? images[0] : `/static/og/${slug}.png`;
 
   return (
     <>
@@ -41,7 +50,7 @@ export default function PostBanner({
             src={displayImage}
             alt={title}
             fill
-            className="object-cover opacity-80 mix-blend-screen"
+            className="object-cover opacity-80 dark:mix-blend-screen"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
@@ -65,9 +74,15 @@ export default function PostBanner({
             </div>
           </header>
 
-          <div className="pb-8 pt-8 prose prose-invert max-w-none font-mono">
-            {children}
-          </div>
+          <ReferencesContext.Provider value={references ?? []}>
+            <div className="pb-8 pt-8 prose prose-invert max-w-none font-mono">
+              {children}
+            </div>
+          </ReferencesContext.Provider>
+
+          {references && !hasManualReferences && (
+            <References references={references} />
+          )}
 
           <Comments frontMatter={frontMatter} />
 

@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 import type { SeriesMetadata } from 'types/Series';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
-import ListLayout from '@/layouts/ListLayout';
+import ListLayoutWithTags from '@/layouts/ListLayoutWithTags';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
 import { getAllSeries } from '@/lib/series';
 import { getAllTags } from '@/lib/tags';
@@ -11,9 +11,11 @@ import { getAllTags } from '@/lib/tags';
 export const POSTS_PER_PAGE = 5;
 
 export const getStaticProps: GetStaticProps<{
-  posts: ComponentProps<typeof ListLayout>['posts'];
-  initialDisplayPosts: ComponentProps<typeof ListLayout>['initialDisplayPosts'];
-  pagination: ComponentProps<typeof ListLayout>['pagination'];
+  posts: ComponentProps<typeof ListLayoutWithTags>['posts'];
+  initialDisplayPosts: ComponentProps<
+    typeof ListLayoutWithTags
+  >['initialDisplayPosts'];
+  pagination: ComponentProps<typeof ListLayoutWithTags>['pagination'];
   seriesData: Record<string, SeriesMetadata>;
   tagCounts: Record<string, number>;
 }> = async () => {
@@ -48,7 +50,7 @@ export default function Blog({
         title={`Blog - ${siteMetadata.author}`}
         description={siteMetadata.description}
       />
-      <ListLayout
+      <ListLayoutWithTags
         posts={posts}
         initialDisplayPosts={initialDisplayPosts}
         pagination={pagination}

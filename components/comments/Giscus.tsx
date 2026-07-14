@@ -12,7 +12,8 @@ const Giscus = ({ mapping }: Props) => {
   const { theme, resolvedTheme } = useTheme();
   const commentsTheme =
     siteMetadata.comment.giscusConfig.themeURL === ''
-      ? theme === 'dark' || resolvedTheme === 'dark'
+      ? // `dim` is a softened dark theme, so treat it as dark here.
+        theme !== 'light' && resolvedTheme !== 'light'
         ? siteMetadata.comment.giscusConfig.darkTheme
         : siteMetadata.comment.giscusConfig.theme
       : siteMetadata.comment.giscusConfig.themeURL;

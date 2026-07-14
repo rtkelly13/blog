@@ -65,6 +65,12 @@ test.describe('Visual Regression - Light Mode', () => {
     await expect(page).toHaveScreenshot('tags-light.png', { fullPage: true });
   });
 
+  test('talks page', async ({ page }) => {
+    await page.goto('/talks');
+    await waitForPageReady(page);
+    await expect(page).toHaveScreenshot('talks-light.png', { fullPage: true });
+  });
+
   test('404 page', async ({ page }) => {
     await page.goto('/this-page-does-not-exist');
     await waitForPageReady(page);
@@ -117,10 +123,72 @@ test.describe('Visual Regression - Dark Mode', () => {
     await expect(page).toHaveScreenshot('tags-dark.png', { fullPage: true });
   });
 
+  test('talks page', async ({ page }) => {
+    await page.goto('/talks');
+    await waitForPageReady(page);
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page).toHaveScreenshot('talks-dark.png', { fullPage: true });
+  });
+
   test('404 page', async ({ page }) => {
     await page.goto('/this-page-does-not-exist');
     await waitForPageReady(page);
     await expect(page.locator('html')).toHaveClass(/dark/);
     await expect(page).toHaveScreenshot('404-dark.png', { fullPage: true });
   });
+});
+
+// Set a specific theme (next-themes stores the key in localStorage) before the
+// first navigation, so the page renders in that theme from the initial paint.
+async function setTheme(
+  page: import('@playwright/test').Page,
+  theme: 'dark' | 'dim' | 'sketch',
+) {
+  await page.addInitScript((t) => {
+    localStorage.setItem('theme', t);
+  }, theme);
+}
+
+// Basic pathways exercised for the softened `dim` and light `sketch` themes.
+const THEMED_PATHWAYS = [
+  { name: 'homepage', path: '/' },
+  { name: 'blog', path: '/blog' },
+  { name: 'blog-post', path: '/blog/aws-batch/cookbook' },
+  { name: 'tags', path: '/tags' },
+  { name: 'about', path: '/about' },
+  { name: 'talks', path: '/talks' },
+] as const;
+
+test.describe('Visual Regression - Dim Mode', () => {
+  test.beforeEach(async ({ page }) => {
+    await setTheme(page, 'dim');
+  });
+
+  for (const { name, path } of THEMED_PATHWAYS) {
+    test(name, async ({ page }) => {
+      await page.goto(path);
+      await waitForPageReady(page);
+      await expect(page.locator('html')).toHaveClass(/dim/);
+      await expect(page).toHaveScreenshot(`${name}-dim.png`, {
+        fullPage: true,
+      });
+    });
+  }
+});
+
+test.describe('Visual Regression - Sketch Mode', () => {
+  test.beforeEach(async ({ page }) => {
+    await setTheme(page, 'sketch');
+  });
+
+  for (const { name, path } of THEMED_PATHWAYS) {
+    test(name, async ({ page }) => {
+      await page.goto(path);
+      await waitForPageReady(page);
+      await expect(page.locator('html')).toHaveClass(/sketch/);
+      await expect(page).toHaveScreenshot(`${name}-sketch.png`, {
+        fullPage: true,
+      });
+    });
+  }
 });

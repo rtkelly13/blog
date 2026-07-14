@@ -113,7 +113,7 @@ async function waitForField(page, placeholderPart, opts) {
 }
 
 /**
- * Click the moderation button (verb "reject"/"block") in the row that contains
+ * Click the moderation button (canonical verb "hide") in the row that contains
  * `rowText`. Returns true if a matching button was found and clicked.
  */
 async function moderateRow(page, rowText, verb) {
@@ -296,7 +296,7 @@ async function main() {
   );
 
   // ── Q&A: ask, upvote, moderate ────────────────────────────────────────────
-  step('Q&A — ask, then moderate (block) a second question');
+  step('Q&A — ask, then moderate (hide) a second question');
   await typeByPlaceholder(attendee, 'question', 'What language first?', {
     submit: true,
   });
@@ -309,28 +309,23 @@ async function main() {
   });
   record('Q&A: question shows in attendee queue', Boolean(qOnAttendee));
 
-  // Ask a second, then block it from the cockpit.
+  // Ask a second, then hide it from the cockpit.
   await typeByPlaceholder(attendee, 'question', 'BLOCK ME spammy question', {
     submit: true,
   });
   await waitForText(admin, 'BLOCK ME spammy question', { timeout: 10000 });
-  // The reject button sits in the same row; find the row and click "reject".
-  const blocked = await moderateRow(
-    admin,
-    'BLOCK ME spammy question',
-    'reject',
-  );
-  record('Q&A: blocked the spam question from cockpit', blocked);
-  // Attendee should no longer see the text, but should see a blocked count.
-  const hiddenFromAttendee = await until(
-    async () =>
-      !(await pageHasText(attendee, 'BLOCK ME spammy question')) &&
-      (await pageHasText(attendee, 'blocked')),
+  // The hide button sits in the same row; find the row and click "hide".
+  const hid = await moderateRow(admin, 'BLOCK ME spammy question', '^hide$');
+  record('Q&A: hid the spam question from cockpit', hid);
+  // Hidden content is fully omitted for the audience — no content, no count
+  // (CONTEXT.md "Hide"; convex/questions.ts list).
+  const omittedFromAttendee = await until(
+    async () => !(await pageHasText(attendee, 'BLOCK ME spammy question')),
     { timeout: 10000 },
   );
   record(
-    'Q&A: blocked entry hidden from attendee + shown as count',
-    Boolean(hiddenFromAttendee),
+    'Q&A: hidden entry omitted from attendee (no content, no count)',
+    Boolean(omittedFromAttendee),
   );
 
   // Presenter deck tab is opened in the activity phase; declared here so the
@@ -339,7 +334,7 @@ async function main() {
 
   // ── Poll / word cloud ─────────────────────────────────────────────────────
   await guard('poll', async () => {
-    step('Poll — start, submit words, block one word');
+    step('Poll — start, submit words, hide one word');
     await typeByPlaceholder(admin, 'Poll prompt', 'One word: how do you feel?');
     await clickByText(admin, 'button', 'Start');
     // Attendee should now get the poll form.
@@ -355,22 +350,21 @@ async function main() {
     const wordOnAdmin = await waitForText(admin, 'excited', { timeout: 10000 });
     record('poll: submitted word reaches cockpit', Boolean(wordOnAdmin));
 
-    // Submit a word to block.
+    // Submit a word to hide.
     await clickByText(attendee, 'button', 'Add another').catch(() => {});
     await waitForField(attendee, 'One word', { timeout: 6000 });
     await typeByPlaceholder(attendee, 'One word', 'badword', { submit: true });
     await waitForText(admin, 'badword', { timeout: 10000 });
-    const wordBlocked = await moderateRow(admin, 'badword', '^block$');
-    record('poll: blocked a word from cockpit', wordBlocked);
-    const pollBlockedCount = await until(
-      async () =>
-        !(await pageHasText(attendee, 'badword')) &&
-        (await pageHasText(attendee, 'blocked')),
+    const wordHidden = await moderateRow(admin, 'badword', '^hide$');
+    record('poll: hid a word from cockpit', wordHidden);
+    // Hidden words are fully omitted from the audience cloud — no count.
+    const wordOmitted = await until(
+      async () => !(await pageHasText(attendee, 'badword')),
       { timeout: 10000 },
     );
     record(
-      'poll: blocked word hidden + counted for attendee',
-      Boolean(pollBlockedCount),
+      'poll: hidden word omitted for attendee (no content, no count)',
+      Boolean(wordOmitted),
     );
   });
 
