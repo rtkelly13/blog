@@ -4,13 +4,8 @@ import { useCountdown } from '@/components/talks/OrderedActions';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import ActivityEvalGrid from './ActivityEvalGrid';
+import ErrorLine from './ErrorLine';
 import { useRunAction } from './useRunAction';
-
-/** Shared error line for the admin panels. */
-function ErrorLine({ error }: { error: string | null }) {
-  if (!error) return null;
-  return <p className="font-mono text-xs text-brutalist-pink">{error}</p>;
-}
 
 // The presenter owns the reveal by default ("manual" arms no timer); the timed
 // presets are an opt-in fallback that can still be cancelled while pending.

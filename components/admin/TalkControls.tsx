@@ -17,18 +17,39 @@ const FEATURE_TOGGLES: { key: keyof TalkConfig; label: string }[] = [
 /**
  * Start / end a talk and choose its profile + feature toggles. Assumes it's
  * rendered inside an admin gate — the mutations are identity-gated server-side.
+ * `talkOptions` (real deck slugs from frontmatter) drives a picker so the
+ * Session can only target a deck that exists — a typo'd slug silently makes a
+ * room the deck never drives. Free-text only as a fallback when no options
+ * were baked in.
  */
-export default function TalkControls() {
+export default function TalkControls({
+  talkOptions,
+}: {
+  talkOptions?: { slug: string; title: string }[];
+}) {
   const current = useQuery(api.talks.current);
   const start = useMutation(api.talks.start);
   const end = useMutation(api.talks.end);
   const updateConfig = useMutation(api.talks.updateConfig);
 
-  const [slug, setSlug] = useState('so-you-want-to-build-software');
-  const [title, setTitle] = useState('So You Want To Build Software?');
+  const options = talkOptions ?? [];
+  const [slug, setSlug] = useState(
+    options[0]?.slug ?? 'so-you-want-to-build-software',
+  );
+  const [title, setTitle] = useState(
+    options[0]?.title ?? 'So You Want To Build Software?',
+  );
   const [presetId, setPresetId] = useState(TALK_PRESETS[0].id);
   const [config, setConfig] = useState<TalkConfig>(TALK_PRESETS[0].config);
   const { run, error } = useRunAction();
+
+  const pickTalk = (nextSlug: string) => {
+    setSlug(nextSlug);
+    const picked = options.find((o) => o.slug === nextSlug);
+    // Title follows the picked deck but stays editable (it's the Session's
+    // display name, e.g. "… — dry run").
+    if (picked) setTitle(picked.title);
+  };
 
   const applyPreset = (id: string) => {
     setPresetId(id);
@@ -95,12 +116,29 @@ export default function TalkControls() {
 
   return (
     <div className="space-y-3 font-mono">
-      <input
-        value={slug}
-        onChange={(e) => setSlug(e.target.value)}
-        placeholder="talk slug"
-        className="w-full border-2 border-white bg-black px-3 py-2 text-white"
-      />
+      {options.length > 0 ? (
+        <label className="block text-xs uppercase text-zinc-400">
+          Talk
+          <select
+            value={slug}
+            onChange={(e) => pickTalk(e.target.value)}
+            className="mt-1 w-full border-2 border-white bg-black px-3 py-2 text-white"
+          >
+            {options.map((o) => (
+              <option key={o.slug} value={o.slug}>
+                {o.title} ({o.slug})
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <input
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          placeholder="talk slug"
+          className="w-full border-2 border-white bg-black px-3 py-2 text-white"
+        />
+      )}
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}

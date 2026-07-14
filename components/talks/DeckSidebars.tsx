@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useRef, useState } from 'react';
 import ActivityEvalGrid from '@/components/admin/ActivityEvalGrid';
+import ErrorLine from '@/components/admin/ErrorLine';
+import { useRunAction } from '@/components/admin/useRunAction';
 import PresenceBadge from '@/components/PresenceBadge';
 import Reactions from '@/components/Reactions';
 import TalkStatsChart from '@/components/TalkStatsChart';
@@ -171,6 +173,7 @@ export function ConsoleSidebar({
   // so submissions can be evaluated from the console without leaving the deck.
   const activityFeed = useQuery(api.activities.feed, { room });
   const end = useMutation(api.talks.end);
+  const { run: runEnd, error: endError } = useRunAction();
 
   const last = slides.length - 1;
   const idx = Math.min(Math.max(currentSlide, 0), Math.max(last, 0));
@@ -316,13 +319,16 @@ export function ConsoleSidebar({
         <TalkStatsChart room={room} threshold={0} />
       </div>
 
-      <button
-        type="button"
-        onClick={() => end({}).catch(() => {})}
-        className="mt-auto border-2 border-white bg-brutalist-pink px-4 py-2 font-mono text-sm font-bold uppercase text-black shadow-hard-md"
-      >
-        End talk
-      </button>
+      <div className="mt-auto space-y-2">
+        <button
+          type="button"
+          onClick={() => runEnd(() => end({}))}
+          className="w-full border-2 border-white bg-brutalist-pink px-4 py-2 font-mono text-sm font-bold uppercase text-black shadow-hard-md"
+        >
+          End talk
+        </button>
+        <ErrorLine error={endError} />
+      </div>
     </aside>
   );
 }
