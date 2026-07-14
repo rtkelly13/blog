@@ -1,61 +1,79 @@
+import {
+  BarChart3,
+  CaseSensitive,
+  Compass,
+  CreditCard,
+  FileText,
+  Image as ImageIcon,
+  type LucideIcon,
+  MousePointerClick,
+  Tags as TagsIcon,
+  Type,
+} from 'lucide-react';
 import Link from '@/components/Link';
+import PageHeader from '@/components/PageHeader';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 
-const components = [
+const components: {
+  name: string;
+  path: string;
+  description: string;
+  icon: LucideIcon;
+}[] = [
   {
     name: 'Homepage Heroes',
     path: '/design-sandbox/homepage-heroes',
     description: 'Synth wave heroes for landing pages',
-    icon: '🌅',
+    icon: ImageIcon,
   },
   {
     name: 'Article Heroes',
     path: '/design-sandbox/article-heroes',
     description: 'Minimal heroes for content pages',
-    icon: '📄',
+    icon: FileText,
   },
   {
     name: 'Diagrams',
     path: '/design-sandbox/diagrams',
     description: 'Mermaid diagram style variations',
-    icon: '📊',
+    icon: BarChart3,
   },
   {
     name: 'Buttons',
     path: '/design-sandbox/buttons',
     description: 'All button variations and states',
-    icon: '🔘',
+    icon: MousePointerClick,
   },
   {
     name: 'Cards',
     path: '/design-sandbox/cards',
     description: 'Different card layouts and styles',
-    icon: '🃏',
+    icon: CreditCard,
   },
   {
     name: 'Typography',
     path: '/design-sandbox/typography',
     description: 'Font styles, headings, and text treatments',
-    icon: '📝',
+    icon: Type,
   },
   {
     name: 'Typography Proposals',
     path: '/design-sandbox/typography-proposals',
     description: 'Font pairing + weight proposals to evaluate',
-    icon: '🔤',
+    icon: CaseSensitive,
   },
   {
     name: 'Logos',
     path: '/design-sandbox/logos',
     description: 'ASCII art logo variations',
-    icon: '🏷️',
+    icon: TagsIcon,
   },
   {
     name: 'Navigation',
     path: '/design-sandbox/navigation',
     description: 'FAB interaction patterns and triggers',
-    icon: '🧭',
+    icon: Compass,
   },
 ];
 
@@ -66,22 +84,18 @@ export default function DesignSandbox() {
         title={`Design Sandbox - ${siteMetadata.author}`}
         description="Component showcase and design system playground"
       />
-      <div className="divide-y divide-white">
-        <div className="pt-6 pb-8 space-y-2 md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-white sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 font-display uppercase border-2 border-white inline-block px-4 py-2">
-            [ DESIGN_SANDBOX ]
-          </h1>
-          <p className="text-lg leading-7 text-zinc-400 font-mono">
-            {'>'} Component variations and design system showcase
-          </p>
-        </div>
+      <div className="divide-y divide-white border-2 border-white bg-black">
+        <PageHeader
+          title="DESIGN_SANDBOX"
+          subtitle="Component variations and design system showcase"
+        />
 
         <div className="container py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {components.map((component) => (
               <Link key={component.path} href={component.path}>
                 <div className="bg-zinc-900 border-2 border-white p-6 hover:border-brutalist-cyan transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 h-full cursor-pointer group">
-                  <div className="text-4xl mb-4">{component.icon}</div>
+                  <component.icon className="mb-4 h-10 w-10 text-brutalist-cyan" />
                   <h3 className="font-display font-bold text-xl text-white mb-2 uppercase group-hover:text-brutalist-cyan transition-colors">
                     {component.name}
                   </h3>

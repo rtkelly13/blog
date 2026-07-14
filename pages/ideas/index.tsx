@@ -1,8 +1,10 @@
+import { Lightbulb } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import dynamic from 'next/dynamic';
 import type { IdeaFrontMatter } from 'types/IdeaFrontMatter';
 import { IdeaKindBadge, IdeaStatusBadge } from '@/components/ideas/IdeaBadges';
 import Link from '@/components/Link';
+import PageHeader from '@/components/PageHeader';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 import { getAllIdeasFrontMatter } from '@/lib/ideas';
@@ -27,15 +29,12 @@ export default function Ideas({
     <>
       <PageSEO title={`Ideas - ${siteMetadata.author}`} description="" />
       <div className="divide-y divide-white border-2 border-white bg-black">
-        <div className="pt-6 pb-8 space-y-4 md:space-y-6 bg-zinc-900 px-6">
-          <h1 className="text-3xl font-display font-bold leading-9 tracking-tight text-white uppercase sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 border-4 border-double border-brutalist-yellow inline-block px-8 py-4">
-            &gt; IDEAS
-          </h1>
-          <p className="font-mono text-lg leading-7 text-gray-200 border-l-4 border-brutalist-pink pl-4">
-            <span className="text-brutalist-yellow">{'//'}</span> Post &amp;
-            series workbench — evolve ideas before drafting. Admin only.
-          </p>
-        </div>
+        <PageHeader
+          title="IDEAS"
+          icon={Lightbulb}
+          accent="yellow"
+          subtitle="Post & series workbench — evolve ideas before drafting. Admin only."
+        />
 
         <AdminGate>
           <ul className="divide-y divide-white">

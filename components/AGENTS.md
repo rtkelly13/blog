@@ -44,6 +44,57 @@ Use these for imports:
 | `SeriesNavigation`  | Multi-part post nav       | Prev/next within series               |
 | `Button`            | Brutalist button          | `variant`, `size`, `shadow` props     |
 | `Card`              | Content card              | Brutalist borders, hard shadows       |
+| `PageHeader`        | Listing/index page header | `{title, subtitle?, icon?, accent?}` — the one header primitive for index pages (see below) |
+| `PageTitle`         | Detail page title         | Bracketed double-border `<h1>` for post/series/idea **detail** pages |
+
+## PAGE HEADERS
+
+Index/listing pages (`/blog`, `/talks`, `/projects`, `/tags`, `/ideas`,
+`/design-sandbox`) share **one** header via `PageHeader` — a `bg-zinc-900`
+block with an optional lucide `icon`, a bracketed `[ TITLE ]`, and a `>`-prompt
+mono `subtitle`. Drop it in as the first child of the standard page shell:
+
+```tsx
+<div className="divide-y divide-white border-2 border-white bg-black">
+  <PageHeader title="TALKS" icon={Presentation} accent="pink" subtitle="…" />
+  {/* page content */}
+</div>
+```
+
+- **`accent` is the per-section colour rule, in one place** — `cyan` (default,
+  blog/projects/sandbox), `pink` (talks — matches its card borders), `yellow`
+  (ideas). It themes the icon + prompt glyph through the `--brutalist-*` tokens.
+- **Icons are lucide only — no emoji.** Native emoji break the ASCII/brutalist
+  aesthetic (they render as full-colour OS glyphs).
+- Detail pages use `PageTitle` (bordered bracket text), not `PageHeader`. Blog
+  listing uses `ListLayoutWithTags`, which owns its own centred header.
+
+## DUAL-MODE THEMING (non-negotiable)
+
+The design system is **two first-class aesthetics driven by one token set**:
+the default **neon-terminal dark** mode (`dark`/`dim` — neon accents on black)
+and the **sketch** mode (paper-and-ink light, blue/red/green accents). They are
+not "a theme and its override" — every surface must read as intentional in
+both.
+
+This works because `.sketch` (and `.dim`) **remap the colour tokens
+themselves** in `css/tailwind.css` — `--color-black`, `--color-white`, the
+`--color-zinc-*` scale, and the `--brutalist-*` accents all flip to paper/ink
+values. So the rule for any new component is:
+
+- **Build only on the remapped tokens**: `bg-black` / `bg-zinc-900`,
+  `border-white`, `text-white`, `text-zinc-400`, `text-brutalist-cyan|pink|
+  yellow`, `shadow-hard-*`. These invert automatically — write the dark look
+  and sketch comes for free.
+- **Never hardcode** `text-gray-900`, `dark:*` pairs, or hex literals for
+  surfaces/text/borders — the grey scale and literals don't remap, so they
+  break sketch mode (this was exactly why the old `/tags` page was unreadable
+  on paper).
+- **No emoji as UI** — native emoji render as fixed full-colour OS glyphs that
+  ignore both themes; use lucide icons tinted with a `text-brutalist-*` accent
+  so they follow dark ↔ sketch.
+- Verify both: cycle the theme switch (HIGH → DIM → SKETCH) and confirm the
+  component reads on paper as well as on black.
 
 ## INTERACTIVE MDX (interactive/)
 
