@@ -1,9 +1,18 @@
-import { Beaker, Palette, Sparkles, Terminal, Type } from 'lucide-react';
+import { Beaker, Boxes, Palette, Sparkles, Terminal, Type } from 'lucide-react';
 import Link from '@/components/Link';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 
 const experiments = [
+  {
+    name: 'Component Library',
+    path: '/design-sandbox/component-library',
+    description:
+      'Every core component rendered in both themes (dark + sketch) side by side',
+    icon: <Boxes className="w-12 h-12" />,
+    status: 'active',
+    components: 5,
+  },
   {
     name: 'Design Sandbox',
     path: '/design-sandbox',

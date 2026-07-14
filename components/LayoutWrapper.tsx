@@ -14,19 +14,22 @@ interface Props {
   children: ReactNode;
 }
 
-// Paper texture for the light `sketch` theme: a faint ink graph-paper dot-grid
-// straight from the site's own generator (deterministic ⇒ identical SSR/CSR).
-// Exposed as `--page-texture` scoped to `.sketch` so the switch is pure CSS (no
-// hydration flash); dark/dim fall back to the green scanline.
-const PAPER_TEXTURE = graphicDataUri('dot-grid', {
+// Paper texture for the light `sketch` theme: a faint ink diagonal-hatch — an
+// intermittent line system (a few rules pop, the rest stay ghostly) that reads
+// like technical-pencil paper, in place of the earlier dot-grid. Straight from
+// the site's own generator (deterministic ⇒ identical SSR/CSR) and exposed as
+// `--page-texture` scoped to `.sketch` so the switch is pure CSS (no hydration
+// flash); dark/dim fall back to the green scanline.
+const PAPER_TEXTURE = graphicDataUri('diagonal-hatch', {
   width: 480,
   height: 480,
   accent: PAPER_ACCENTS.ink,
   background: 'transparent',
-  density: 0.32,
-  opacity: 0.5,
+  density: 0.4,
+  opacity: 0.28,
+  strokeWidth: 1.5,
 });
-const PAPER_TEXTURE_CSS = `.sketch{--page-texture:url("${PAPER_TEXTURE}");--page-texture-size:240px 240px;}`;
+const PAPER_TEXTURE_CSS = `.sketch{--page-texture:url("${PAPER_TEXTURE}");--page-texture-size:360px 360px;}`;
 
 const LayoutWrapper = ({ children }: Props) => {
   return (

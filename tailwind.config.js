@@ -89,6 +89,8 @@ module.exports = {
         'hard-yellow': '4px 4px 0px 0px var(--brutalist-yellow, #facc15)',
         'glow-cyan':
           '0 0 10px color-mix(in oklab, var(--brutalist-cyan, #22d3ee) 50%, transparent), 0 0 20px color-mix(in oklab, var(--brutalist-cyan, #22d3ee) 30%, transparent)',
+        'glow-pink':
+          '0 0 10px color-mix(in oklab, var(--brutalist-pink, #ec4899) 50%, transparent), 0 0 20px color-mix(in oklab, var(--brutalist-pink, #ec4899) 30%, transparent)',
         'glow-orange':
           '0 0 20px color-mix(in oklab, var(--brutalist-cyberOrange, #ff8c00) 80%, transparent), 0 0 40px color-mix(in oklab, var(--brutalist-cyberOrange, #ff8c00) 50%, transparent)',
       },

@@ -33,7 +33,7 @@ export default function AuthorLayout({ children, frontMatter }: Props) {
           </h1>
         </div>
         <div className="items-start space-y-2 xl:grid xl:grid-cols-3 xl:gap-x-8 xl:space-y-0 mt-8 pt-8">
-          <div className="flex flex-col items-center pt-8 bg-black/80 border-2 border-brutalist-pink shadow-[0_0_10px_rgba(236,72,153,0.5)] p-6 rounded-md">
+          <div className="flex flex-col items-center pt-8 bg-black/80 border-2 border-brutalist-pink shadow-glow-pink p-6 rounded-md">
             <Image
               src={avatar}
               alt="avatar"

@@ -307,6 +307,22 @@ html {
   color: #33373f;
 }
 
+/* Neon glow shadows read as fuzzy coloured halos on the sketch paper — they're
+   a dark-mode device. Under sketch, swap them for the same crisp hard offset
+   ink drop shadow the rest of the brutalist UI uses, so cards read like the
+   TalkCard on paper. (Listing layouts use the named `shadow-glow-*` utilities
+   so they're all covered here.) */
+.sketch .shadow-glow-cyan,
+.sketch .shadow-glow-pink,
+.sketch .shadow-glow-orange {
+  box-shadow: 4px 4px 0px 0px var(--brutalist-shadow-color) !important;
+}
+.sketch .hover\:shadow-glow-cyan:hover,
+.sketch .hover\:shadow-glow-pink:hover,
+.sketch .hover\:shadow-glow-orange:hover {
+  box-shadow: 6px 6px 0px 0px var(--brutalist-shadow-color) !important;
+}
+
 /* Light-grey text utilities (used as primary text on the dark themes) are
    inlined literals, so re-point the light end of the grey scale to ink under
    sketch so it stays legible on paper. */
