@@ -190,7 +190,7 @@ function Queue({
 
 /**
  * Embedded live Q&A: anyone types a question, everyone upvotes to reorder the
- * queue, the presenter answers/rejects from the console. Rejected questions are
+ * queue, the presenter answers/hides from the console. Hidden questions are
  * omitted from the audience entirely (the presenter sees them on the console).
  * Resolves the live room automatically, or takes one. `display` (projected deck)
  * is read-only — no ask box, votes as static badges.

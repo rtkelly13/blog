@@ -22,7 +22,7 @@ export function useCountdown(
   return secs > 0 ? secs : null;
 }
 
-/** One submission on the wall. Blocked rows (console only) are greyed + tagged. */
+/** One submission on the wall. Hidden rows (console only) are greyed + tagged. */
 function SubmissionCard({
   nickname,
   steps,
@@ -46,7 +46,7 @@ function SubmissionCard({
         )}
         {hidden && (
           <span className="font-mono text-xs uppercase text-zinc-500">
-            🚫 blocked
+            🚫 hidden
           </span>
         )}
       </div>
@@ -82,7 +82,7 @@ function Activity({
   const isConsole = mode === 'console';
 
   // Console (presenter 2nd screen) reads the admin feed — the answer and every
-  // submission (including blocked ones) are ALWAYS visible for moderation. Every
+  // submission (including hidden ones) are ALWAYS visible for moderation. Every
   // other surface reads the reveal-gated audience view.
   const active = useQuery(api.activities.active, isConsole ? 'skip' : { room });
   const feedRes = useQuery(api.activities.feed, isConsole ? { room } : 'skip');
@@ -309,7 +309,7 @@ function Activity({
         </p>
       )}
 
-      {/* Live wall of submissions. On the console, blocked entries stay visible
+      {/* Live wall of submissions. On the console, hidden entries stay visible
           (greyed, tagged) so the presenter sees exactly what was moderated. */}
       <div className="mt-5">
         <p className="mb-2 font-mono text-xs uppercase text-zinc-400">
@@ -345,9 +345,9 @@ function Activity({
  * reveals when the presenter decides (the deck's next-key beat, the console's
  * reveal-now, or /admin) — an auto-reveal timer only runs if the slide opts in
  * via `revealAfterMs`. Mode-aware:
- * - attendee → reveal-gated + submission form (rejected entries are omitted),
+ * - attendee → reveal-gated + submission form (hidden entries are omitted),
  * - presenter (projected) → reveal-gated, display-only,
- * - console (2nd screen) → answer + every submission incl. blocked shown always.
+ * - console (2nd screen) → answer + every submission incl. hidden shown always.
  */
 export default function OrderedActions({
   room,

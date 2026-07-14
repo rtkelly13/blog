@@ -47,13 +47,6 @@ export default defineSchema({
     breakEndsAt: v.optional(v.number()),
   }).index('by_status', ['status']),
 
-  // Minimal "hello world" example: a single named counter, bumped by anyone,
-  // streamed live to every connected client. See convex/hello.ts.
-  counters: defineTable({
-    name: v.string(),
-    count: v.number(),
-  }).index('by_name', ['name']),
-
   // Pseudo-anonymous presence: one row per (room, machineId), refreshed by a
   // client heartbeat. `machineId` is a random UUID the browser keeps in
   // localStorage — no PII, and it de-duplicates a browser's tabs/reloads.

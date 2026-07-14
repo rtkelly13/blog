@@ -209,3 +209,6 @@ Deployed: `main` @ PR #30 (follow default on). CI + Deploy Convex green.
   this (`components/talks/DeckLive.tsx`); `Follower` needs the same. Not
   covered by PR #26. Workaround live: presenter taps forward/back once after
   people join.
+  - **Update 2026-07-07: fixed.** `Follower` now has the same 250ms retry loop
+    (`components/talks/DeckLive.tsx` join-align effect); mid-talk joiners align
+    without presenter action. Verify with the section-3 two-tab check.
