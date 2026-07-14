@@ -45,15 +45,16 @@ export default function ActivityEvalGrid({
               <span className="truncate font-mono text-xs text-brutalist-pink">
                 {s.nickname ?? 'anon'}
               </span>
-              {s.marked ? (
-                <span className="shrink-0 font-mono text-[10px] uppercase text-brutalist-yellow">
-                  ★ marked
-                </span>
-              ) : s.hidden ? (
-                <span className="shrink-0 font-mono text-[10px] uppercase text-zinc-500">
-                  hidden
-                </span>
-              ) : null}
+              <span className="flex shrink-0 gap-1.5 font-mono text-[10px] uppercase">
+                {s.marked && (
+                  <span className="text-brutalist-yellow">★ marked</span>
+                )}
+                {/* ADR-0002: auto-masked ≠ presenter-hidden — tag them apart. */}
+                {s.flagged && (
+                  <span className="text-brutalist-cyan">⚠ masked</span>
+                )}
+                {s.hidden && <span className="text-zinc-500">hidden</span>}
+              </span>
             </div>
             <ol
               className={`mb-2 space-y-0.5 ${s.hidden ? 'line-through' : ''}`}
@@ -65,6 +66,14 @@ export default function ActivityEvalGrid({
                 </li>
               ))}
             </ol>
+            {/* Pre-mask original (ADR-0002): presenter-only, so a false-positive
+                mask ("Scunthorpe") is judgeable at a glance. */}
+            {(s.originalSteps || s.originalNickname) && (
+              <p className="mb-2 border-l-2 border-brutalist-cyan pl-1.5 font-mono text-[10px] text-zinc-400">
+                original: {s.originalNickname && <>“{s.originalNickname}” · </>}
+                {s.originalSteps?.join(' → ')}
+              </p>
+            )}
             <div className="mt-auto flex gap-3 font-mono text-[10px] uppercase">
               <button
                 type="button"

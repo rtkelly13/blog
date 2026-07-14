@@ -25,8 +25,9 @@ export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
 
     const fetchSvg = async () => {
       try {
-        // Choose source based on theme if darkSrc is provided
-        const isDark = resolvedTheme === 'dark';
+        // Choose source based on theme if darkSrc is provided.
+        // `dim` is a softened dark theme, so it uses the dark asset too.
+        const isDark = resolvedTheme !== 'light';
         const svgSrc = darkSrc && isDark ? darkSrc : src;
 
         const response = await fetch(svgSrc);

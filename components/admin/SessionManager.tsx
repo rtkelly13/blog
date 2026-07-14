@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from 'convex/react';
+import { useConvex, useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import { useRunAction } from './useRunAction';
@@ -11,6 +11,63 @@ function when(ts: number): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+/** yyyy-mm-dd for a filesystem-safe archive filename. */
+function ymd(ts: number): string {
+  return new Date(ts).toISOString().slice(0, 10);
+}
+
+/**
+ * Download one session's full data as a JSON archive — the "afterlife" before
+ * clear-down/auto-expiry destroy it (Convex isn't long-term storage; the
+ * presenter files this in their own Drive). The bundle carries the raw
+ * documents, including presenter-only pre-mask originals, so it's admin-gated
+ * server-side; offered on every session so archiving-before-purge is one click.
+ */
+function ExportButton({ room, slug }: { room: string; slug: string }) {
+  const convex = useConvex();
+  const { run, error, busy } = useRunAction();
+
+  const download = () =>
+    run(async () => {
+      const res = await convex.query(api.sessions.exportSession, { room });
+      if (!res.authorized) throw new Error('Not authorized to export.');
+      if (!res.session) throw new Error('Session no longer exists.');
+      const bundle = {
+        exportedAt: new Date().toISOString(),
+        session: res.session,
+        data: res.data,
+      };
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `session-${slug}-${ymd(res.session.startedAt)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+  return (
+    <span className="flex items-center gap-2">
+      {error && (
+        <span className="font-mono text-xs uppercase text-brutalist-pink">
+          {error}
+        </span>
+      )}
+      <button
+        type="button"
+        disabled={busy}
+        onClick={download}
+        title="Download this session's data as JSON (to archive before clearing)"
+        className="border-2 border-brutalist-cyan px-3 py-1.5 font-mono text-xs font-bold uppercase text-brutalist-cyan hover:bg-brutalist-cyan hover:text-black disabled:opacity-40"
+      >
+        {busy ? '…' : 'Export'}
+      </button>
+    </span>
+  );
 }
 
 function ClearDownButton({
@@ -173,6 +230,7 @@ export default function SessionManager() {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            {s.hasData && <ExportButton room={s.room} slug={s.slug} />}
             <ClearDownButton
               room={s.room}
               live={s.status === 'live'}

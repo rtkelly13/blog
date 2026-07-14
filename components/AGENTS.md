@@ -40,6 +40,7 @@ Use these for imports:
 | `MDXLayoutRenderer` | Renders MDX with layout   | `{layout, mdxSource, ...frontMatter}` |
 | `LayoutWrapper`     | Site wrapper              | Header, footer, sticky nav            |
 | `BlogActions`       | Post floating actions     | TOC popover, scroll buttons           |
+| `References`        | LaTeX-style bibliography  | `{references, backlinks?, label?}` — original + archived link per entry (see lib/AGENTS.md → remark-references) |
 | `SeriesNavigation`  | Multi-part post nav       | Prev/next within series               |
 | `Button`            | Brutalist button          | `variant`, `size`, `shadow` props     |
 | `Card`              | Content card              | Brutalist borders, hard shadows       |

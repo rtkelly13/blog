@@ -1,10 +1,12 @@
 import { Calendar, MapPin, Play, Users } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
+import type { Reference } from 'types/Reference';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import Link from '@/components/Link';
 import LiveTalkBanner from '@/components/LiveTalkBanner';
 import RecordingEmbed from '@/components/RecordingEmbed';
+import References from '@/components/References';
 import { PageSEO } from '@/components/SEO';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
@@ -17,19 +19,25 @@ export const getStaticPaths = getTalkStaticPaths;
 export const getStaticProps: GetStaticProps<{
   frontMatter: TalkFrontMatter;
   slideCount: number;
+  references: Reference[];
 }> = async ({ params }) => {
   const slug = params.slug as string;
   const meta = getTalkMeta(slug);
   if (!meta) return { notFound: true };
 
   return {
-    props: { frontMatter: meta.frontMatter, slideCount: meta.slideCount },
+    props: {
+      frontMatter: meta.frontMatter,
+      slideCount: meta.slideCount,
+      references: meta.references,
+    },
   };
 };
 
 export default function TalkLanding({
   frontMatter,
   slideCount,
+  references,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const {
     slug,
@@ -143,6 +151,11 @@ export default function TalkLanding({
         </div>
 
         {videoUrl && <RecordingEmbed url={videoUrl} title={title} />}
+
+        {/* Every external link in the deck (slides + speaker notes), with a
+            Wayback Machine copy so the list outlives link rot. Slides carry
+            no inline [n] markers, hence no backlinks. */}
+        <References references={references} backlinks={false} label="Links" />
       </article>
     </>
   );

@@ -22,15 +22,18 @@ export function useCountdown(
   return secs > 0 ? secs : null;
 }
 
-/** One submission on the wall. Blocked rows (console only) are greyed + tagged. */
+/** One submission on the wall. Hidden rows (console only) are greyed + tagged. */
 function SubmissionCard({
   nickname,
   steps,
   hidden,
+  flagged,
 }: {
   nickname?: string;
   steps: string[];
   hidden?: boolean;
+  /** The profanity Mask fired (console only) — auto-hidden ≠ presenter-hidden. */
+  flagged?: boolean;
 }) {
   return (
     <div
@@ -44,11 +47,10 @@ function SubmissionCard({
         ) : (
           <span />
         )}
-        {hidden && (
-          <span className="font-mono text-xs uppercase text-zinc-500">
-            🚫 blocked
-          </span>
-        )}
+        <span className="flex gap-1.5 font-mono text-xs uppercase">
+          {flagged && <span className="text-brutalist-cyan">⚠ masked</span>}
+          {hidden && <span className="text-zinc-500">🚫 hidden</span>}
+        </span>
       </div>
       <ol className="space-y-0.5">
         {steps.map((step, i) => (
@@ -82,7 +84,7 @@ function Activity({
   const isConsole = mode === 'console';
 
   // Console (presenter 2nd screen) reads the admin feed — the answer and every
-  // submission (including blocked ones) are ALWAYS visible for moderation. Every
+  // submission (including hidden ones) are ALWAYS visible for moderation. Every
   // other surface reads the reveal-gated audience view.
   const active = useQuery(api.activities.active, isConsole ? 'skip' : { room });
   const feedRes = useQuery(api.activities.feed, isConsole ? { room } : 'skip');
@@ -95,6 +97,7 @@ function Activity({
   const [steps, setSteps] = useState<string[]>(['']);
   const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const { secondsLeft, notify } = useRateLimitNotice();
 
   const consoleActivity = feedRes?.authorized ? feedRes.activity : null;
@@ -176,10 +179,18 @@ function Activity({
       if (res.ok === false && res.reason === 'rate_limited') {
         // Refused, not dropped: keep the typed steps and show when to retry.
         notify(res.retryAfterMs);
+      } else if (res.ok === false) {
+        // Any other refusal (activities toggled off mid-type): say so and keep
+        // the typed steps — a "✓ Submitted!" here would be a lie.
+        setSendError('Submissions are closed for this session.');
       } else {
         setSteps(['']);
         setSubmitted(true);
+        setSendError(null);
       }
+    } catch {
+      // e.g. the activity closed while typing (`submit` throws).
+      setSendError('This activity has closed — your steps were not sent.');
     } finally {
       setSending(false);
     }
@@ -236,6 +247,11 @@ function Activity({
               </div>
             ))}
             <RateLimitNotice secondsLeft={secondsLeft} />
+            {sendError && (
+              <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
+                {sendError}
+              </p>
+            )}
             <div className="flex flex-col gap-2 pt-1 sm:flex-row">
               <button
                 type="button"
@@ -309,7 +325,7 @@ function Activity({
         </p>
       )}
 
-      {/* Live wall of submissions. On the console, blocked entries stay visible
+      {/* Live wall of submissions. On the console, hidden entries stay visible
           (greyed, tagged) so the presenter sees exactly what was moderated. */}
       <div className="mt-5">
         <p className="mb-2 font-mono text-xs uppercase text-zinc-400">
@@ -323,6 +339,7 @@ function Activity({
                   nickname={s.nickname}
                   steps={s.steps}
                   hidden={s.hidden}
+                  flagged={s.flagged}
                 />
               ))
             : audienceWall.map((s) => (
@@ -345,9 +362,9 @@ function Activity({
  * reveals when the presenter decides (the deck's next-key beat, the console's
  * reveal-now, or /admin) — an auto-reveal timer only runs if the slide opts in
  * via `revealAfterMs`. Mode-aware:
- * - attendee → reveal-gated + submission form (rejected entries are omitted),
+ * - attendee → reveal-gated + submission form (hidden entries are omitted),
  * - presenter (projected) → reveal-gated, display-only,
- * - console (2nd screen) → answer + every submission incl. blocked shown always.
+ * - console (2nd screen) → answer + every submission incl. hidden shown always.
  */
 export default function OrderedActions({
   room,

@@ -1,3 +1,5 @@
+import type { FeaturedLink } from './Reference';
+
 /**
  * One generated deck background (see components/graphics). Backgrounds are
  * defined once, named, and referenced by name — so multiple slides can share a
@@ -41,5 +43,18 @@ export type TalkFrontMatter = {
   backgrounds?: Record<string, TalkBackground>;
   /** Name of the default background (from `backgrounds`) applied to all slides. */
   background?: string;
+  /**
+   * Curated highlights boosted to a "Featured" group at the top of the deck's
+   * Links section (durable replacement for a hand-written links slide). See
+   * ADR-0007.
+   */
+  featuredLinks?: FeaturedLink[];
+  /**
+   * Deck colour theme. `dark` (default) is the brutalist neon-on-black deck;
+   * `paper` renders a light ink-on-paper deck (matching the site's sketch
+   * theme) with blue/red/green accents. Projection decks stay dark unless a
+   * talk opts in.
+   */
+  deckTheme?: 'dark' | 'paper';
   slug: string;
 };

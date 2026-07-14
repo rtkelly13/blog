@@ -250,6 +250,7 @@ export const submit = mutation({
       nicknameFlagged = cleaned.flagged;
     }
 
+    const flagged = stepsFlagged || nicknameFlagged;
     await ctx.db.insert('activitySubmissions', {
       activityId: args.activityId,
       room: activity.room,
@@ -258,7 +259,13 @@ export const submit = mutation({
       // Content that tripped the profanity filter is auto-hidden pending
       // presenter review — the masked text still reaches the console feed so it
       // can be restored, but it never lands on the audience wall.
-      hidden: stepsFlagged || nicknameFlagged,
+      hidden: flagged,
+      // ADR-0002: persist the flag and the pre-mask originals (presenter-only,
+      // only the parts that actually matched) so a false-positive mask is
+      // reviewable and auto-hidden ≠ presenter-hidden on the console.
+      flagged: flagged || undefined,
+      originalSteps: stepsFlagged ? trimmed : undefined,
+      originalNickname: nicknameFlagged ? rawNickname : undefined,
       createdAt: Date.now(),
     });
     return { ok: true as const };
