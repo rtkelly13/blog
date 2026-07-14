@@ -16,6 +16,7 @@ import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import SeriesNavigation from '@/components/SeriesNavigation';
 import Tag from '@/components/Tag';
+import TLDR from '@/components/TLDR';
 import siteMetadata from '@/data/siteMetadata';
 
 const editUrl = (fileName) =>
@@ -69,7 +70,7 @@ export default function PostLayout({
   hasManualReferences,
   seriesData,
 }: Props) {
-  const { slug, fileName, date, title, tags, images } = frontMatter;
+  const { slug, fileName, date, title, tags, images, tldr } = frontMatter;
   const hasExplicitImage = Array.isArray(images) && images.length > 0;
   const [activeId, setActiveId] = useState<string | undefined>(undefined);
 
@@ -195,6 +196,7 @@ export default function PostLayout({
 
             <ReferencesContext.Provider value={references ?? []}>
               <div className="pt-10 pb-8 prose prose-invert max-w-none">
+                {tldr && <TLDR text={tldr} />}
                 {children}
               </div>
             </ReferencesContext.Provider>

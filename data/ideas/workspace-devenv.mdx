@@ -1,0 +1,84 @@
+---
+title: "Provisioning the Dev Environment: Where Bespoke Tooling Lives"
+kind: article
+status: spark
+created: "2026-07-12"
+updated: "2026-07-12"
+tags: ["ai", "developer-tools", "onboarding", "workflow", "tooling"]
+target: "new post — companion to the virtual-monorepo article; likely part 2 of a series"
+summary: "The virtual-monorepo article is about how an agent reasons about the world. This companion is about the layer underneath: the workspace as the place a machine gets provisioned — a versioned dev-environment setup, editor integration generated from the same source, and a clear home for org-specific tooling (live here, or vendored in via a package feed)."
+layout: IdeaLayout
+---
+
+## The angle
+
+The [virtual-monorepo article](/ideas/virtual-monorepo-workspace) is the
+*reasoning* story — one world, a map, verbs. This is the *provisioning* story:
+the brain repo is also where a machine (human's or agent's) gets **set up**, and
+where the question "where does our bespoke tooling live?" gets a real answer.
+
+The thesis to land: **a config-only brain repo is the natural home for a
+developer environment.** Every new starter runs the same setup; the same
+catalogue drives the editor; and org-specific tools have exactly two honest
+homes — *in the brain*, or *vendored in* through a package feed. That axis is
+the spine of the piece.
+
+## What to cover
+
+### 1. devenv — the setup that isn't a wiki page
+
+- [ ] The bootstrap chain: `setup-scripts-bootstrap` (bare machine → Homebrew/
+      winget + gh + clone) hands off to `setup.sh`/`setup.ps1` (ensure `uv`,
+      `uv sync`) → `uv run devenv setup`. Onboarding as code, not a doc that rots.
+- [ ] Roles drive the install: roles saved to `~/.workspace/config.json`,
+      seeded from GitHub team membership, preselected on return. Express vs full
+      modes; classic vs **agent-guided** workflow (stops once the machine is
+      ready for an agent to take over — the onboarding path *designed for a
+      coding agent*).
+- [ ] The tool catalogue: a declared inventory (`devenv doctor tools manage
+      <tool>`, `devenv update`), per-platform availability. Baselines and
+      expectations expressed as data.
+- [ ] Persistent state under a shared `~/.workspace` home with a tool-author
+      contract for config/cache — the same discipline the CLIs follow.
+
+### 2. Editor integration — the monorepo for humans' editors
+
+- [ ] `workspace vscode` regenerates a multi-root `.code-workspace` from the
+      `projects/` symlinks — the same virtual-monorepo tree the agent traverses,
+      surfaced to the human's editor from the same source of truth.
+- [ ] The point: one catalogue → the shell, the editor, and the agent all see
+      the same world. Nothing is hand-maintained twice.
+
+### 3. The bespoke-vs-vendored axis (the payoff)
+
+- [ ] **Lives in the brain:** small cross-repo CLIs and setup logic that are
+      genuinely specific to your org and change with it. Cheap to edit, always
+      in sync, no release process.
+- [ ] **Vendored in via the feed:** heavier tools built and owned elsewhere,
+      consumed as a versioned artifact. The package feed (build repo → feed repo
+      → proxy entry point in the brain) — immutable content-addressed builds,
+      `beta`/`current` channel pointers, manifest-verified installs, a proxy
+      command that resolves + execs the real CLI at run time.
+- [ ] The decision rule to articulate: *own it and it changes with the org →
+      brain; own it elsewhere or it needs a release cadence → feed.* Both keep
+      the brain config-only — neither puts product code in it.
+
+## Experiments
+
+- [ ] `<Terminal>` for a first-run onboarding session: `./setup.sh` →
+      role pick → tool installs → "ready for an agent" handoff.
+- [ ] `<Walkthrough>` of the provisioning graph: bootstrap → setup → catalogue
+      → (editor · shell · agent) all fed from one source.
+- [ ] A `<QueryRouter>`-style pull: "how do I get `datalake`?" resolving through
+      the feed (proxy → channel pointer → verified build), as the vendored-tool
+      counterpart to the `help`/db-tunnel demo.
+
+## Open questions
+
+- [ ] Standalone post, or **part 2** of a virtual-monorepo series (part 1 the
+      pattern, part 2 provisioning + operating)?
+- [ ] How much of the *operating* layer (multi-repo `sync`, worktrees, the todo
+      review queue, gh-aw agents in CI) belongs here vs. its own third piece?
+      Keep this one about **getting set up**; leave day-to-day operation separate.
+- [ ] Abstract the names as the main article does (`../company`, generic tool
+      names) — same portability goal.

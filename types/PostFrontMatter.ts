@@ -7,6 +7,7 @@ export type PostFrontMatter = {
   lastmod?: string;
   draft?: boolean;
   summary?: string;
+  tldr?: string;
   images?: string[];
   authors?: string[];
   layout?: string;

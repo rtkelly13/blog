@@ -9,6 +9,7 @@ import PageTitle from '@/components/PageTitle';
 import References, { ReferencesContext } from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
+import TLDR from '@/components/TLDR';
 import siteMetadata from '@/data/siteMetadata';
 import formatDate from '@/lib/utils/formatDate';
 
@@ -31,7 +32,7 @@ export default function PostBanner({
   references,
   hasManualReferences,
 }: Props) {
-  const { slug, date, title, images } = frontMatter;
+  const { slug, date, title, images, tldr } = frontMatter;
 
   // Use first image from frontmatter, or fall back to the post's deterministic
   // build-generated OG card (scripts/generate-og-images.mjs).
@@ -76,6 +77,7 @@ export default function PostBanner({
 
           <ReferencesContext.Provider value={references ?? []}>
             <div className="pb-8 pt-8 prose prose-invert max-w-none font-mono">
+              {tldr && <TLDR text={tldr} />}
               {children}
             </div>
           </ReferencesContext.Provider>

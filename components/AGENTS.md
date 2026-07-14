@@ -45,6 +45,41 @@ Use these for imports:
 | `Button`            | Brutalist button          | `variant`, `size`, `shadow` props     |
 | `Card`              | Content card              | Brutalist borders, hard shadows       |
 
+## INTERACTIVE MDX (interactive/)
+
+Step-driven interactives usable in any MDX (posts, talks, ideas):
+
+- `IdeaDeck` + `IdeaSlide` — embedded mini slide show (Motion transitions,
+  arrow keys, square dots). Slides are `<IdeaSlide title="...">` children.
+- `Walkthrough` — guided node-graph tour (@xyflow/react): each step highlights
+  `focus` nodes, lights `activeEdges` ("from->to"), and pans the camera. No
+  free pan/zoom, so it never hijacks page scroll.
+- `Terminal` — scriptable fake terminal session: `script` is a sequence of
+  `{cmd}` (typewriter), `{out}` (streamed/instant lines, optional
+  `highlight` that scrolls to centre and dims the rest), `{pause}`, `{clear}`.
+  Tail-follows output like a real terminal (manual scroll-up pauses
+  following), inline colours via `{{cyan|…}}`-style markup, autoplay on view
+  (or a run button), loop, replay/skip controls.
+- `QueryRouter` — query-routing simulator: a typed-in query scans the
+  AGENTS.md where-to-look table (skeleton rows resolve to a highlighted
+  match), the route breadcrumb draws, context blocks load one after another,
+  and the answer lands. Two block styles: default streams lines behind
+  skeleton loaders; `terminal: true` renders an emulated terminal window that
+  scrolls down the command's full fake output and highlights the one relevant
+  line (`highlight: <substring|index>`) while the rest dims. Scenarios are
+  declarative props.
+- `FileTree` — animated filesystem view of the virtual monorepo: a "wire the
+  symlink" toggle mirrors the body repos into the brain's `projects/`, and a
+  git-view / agent-view toggle shows the same subtree ignored-by-git vs
+  traversable-by-agent (the two-ignore-files trick). Trust-tier dots
+  (brain/trusted/untrusted). Pure model + rules in `fileTreeModel.ts`
+  (unit-tested); no props needed — the workspace layout is baked in.
+
+Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
+motion/@xyflow/react ship as lazy chunks only on pages that mount them.
+`IdeaSlide` is the exception — a dependency-free static marker component.
+Both respect `prefers-reduced-motion` via `useReducedMotion`.
+
 ## DIAGRAMS
 
 Dispatcher pattern: `Diagram.tsx` routes by `type` prop.
