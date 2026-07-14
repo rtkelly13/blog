@@ -31,7 +31,19 @@ export default function App({ Component, pageProps }: AppProps) {
     ((page: ReactElement) => <LayoutWrapper>{page}</LayoutWrapper>);
 
   const tree = (
-    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+      disableTransitionOnChange
+      themes={['dark', 'dim', 'sketch']}
+      // Each theme maps to a single class on <html> (`dark`, `dim`, `sketch`) —
+      // a value with a space would break next-themes' classList calls. `dark`
+      // and `dim` are dark; the `dark:` Tailwind variant is taught to match
+      // `.dim` too (see the `@custom-variant dark` rule in css/tailwind.css).
+      // `sketch` is light, so it is deliberately excluded — `dark:` utilities
+      // fall back to their light base styles under it.
+    >
       <SearchProvider>
         <Head>
           <meta content="width=device-width, initial-scale=1" name="viewport" />

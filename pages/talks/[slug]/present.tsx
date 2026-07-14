@@ -105,6 +105,7 @@ export default function Present({
         durationMins={frontMatter.durationMins}
         backgrounds={frontMatter.backgrounds}
         defaultBackground={frontMatter.background}
+        deckTheme={frontMatter.deckTheme}
       />
     </>
   );

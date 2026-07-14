@@ -30,3 +30,27 @@ export const brutalistTheme: DeckProps['theme'] = {
     backgroundColor: '#000000',
   },
 };
+
+/**
+ * Light "paper" deck theme — ink on paper with blue/red/green accents, mirroring
+ * the site's `sketch` theme. Opt in per talk via frontmatter `deckTheme: paper`.
+ * Slide *content* re-themes automatically because the deck subtree is wrapped in
+ * `.sketch` (see SpectacleDeck); this covers Spectacle's own chrome/backdrop.
+ */
+export const paperTheme: DeckProps['theme'] = {
+  colors: {
+    primary: '#23262e',
+    secondary: '#2563eb',
+    tertiary: '#f5f3ec',
+    quaternary: '#dc2626',
+    quinary: '#15803d',
+  },
+  fonts: {
+    header: DISPLAY,
+    text: BODY,
+    monospace: MONO,
+  },
+  backdropStyle: {
+    backgroundColor: '#f5f3ec',
+  },
+};

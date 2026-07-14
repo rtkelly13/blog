@@ -2,23 +2,42 @@ import type { ReactNode } from 'react';
 import headerNavLinks from '@/data/headerNavLinks';
 import siteMetadata from '@/data/siteMetadata';
 import Footer from './Footer';
+import { PAPER_ACCENTS } from './graphics/palette';
+import { graphicDataUri } from './graphics/registry';
 import Link from './Link';
 import MobileNav from './MobileNav';
 import SectionContainer from './SectionContainer';
 import SearchButton from './search/SearchButton';
+import ThemeSwitch from './ThemeSwitch';
 
 interface Props {
   children: ReactNode;
 }
 
+// Paper texture for the light `sketch` theme: a faint ink graph-paper dot-grid
+// straight from the site's own generator (deterministic ⇒ identical SSR/CSR).
+// Exposed as `--page-texture` scoped to `.sketch` so the switch is pure CSS (no
+// hydration flash); dark/dim fall back to the green scanline.
+const PAPER_TEXTURE = graphicDataUri('dot-grid', {
+  width: 480,
+  height: 480,
+  accent: PAPER_ACCENTS.ink,
+  background: 'transparent',
+  density: 0.32,
+  opacity: 0.5,
+});
+const PAPER_TEXTURE_CSS = `.sketch{--page-texture:url("${PAPER_TEXTURE}");--page-texture-size:240px 240px;}`;
+
 const LayoutWrapper = ({ children }: Props) => {
   return (
     <SectionContainer>
+      {/* Static, generated CSS string (no user input) — safe inline style. */}
+      <style dangerouslySetInnerHTML={{ __html: PAPER_TEXTURE_CSS }} />
       <div
         className="flex flex-col justify-between min-h-screen bg-black"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px)`,
-          backgroundSize: '100% 4px',
+          backgroundImage: `var(--page-texture, linear-gradient(var(--scanline-color, rgba(0, 255, 0, 0.03)) 1px, transparent 1px))`,
+          backgroundSize: `var(--page-texture-size, 100% 4px)`,
         }}
       >
         <header
@@ -52,6 +71,7 @@ const LayoutWrapper = ({ children }: Props) => {
                 </Link>
               ))}
             </div>
+            <ThemeSwitch />
             <SearchButton />
             <MobileNav />
           </div>

@@ -11,7 +11,8 @@ const Utterances = ({ issueTerm }: Props) => {
   const [enableLoadComments, setEnabledLoadComments] = useState(true);
   const { theme, resolvedTheme } = useTheme();
   const commentsTheme =
-    theme === 'dark' || resolvedTheme === 'dark'
+    // `dim` is a softened dark theme, so treat it as dark here.
+    theme !== 'light' && resolvedTheme !== 'light'
       ? siteMetadata.comment.utterancesConfig.darkTheme
       : siteMetadata.comment.utterancesConfig.theme;
 

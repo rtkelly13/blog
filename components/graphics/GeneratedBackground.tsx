@@ -1,4 +1,6 @@
+import { useTheme } from 'next-themes';
 import { useMemo } from 'react';
+import { graphicThemeDefaults } from './palette';
 import { renderGraphic } from './registry';
 import type { GraphicParams } from './types';
 
@@ -27,13 +29,19 @@ export default function GeneratedBackground({
   width,
   height,
 }: GeneratedBackgroundProps) {
+  // When the caller doesn't pin an accent, follow the site theme: ink-on-paper
+  // under the light `sketch` theme, neon otherwise. An explicit `accent` (e.g.
+  // a talk's signature colour, or the gallery picker) always wins.
+  const { resolvedTheme } = useTheme();
+  const themedAccent = accent ?? graphicThemeDefaults(resolvedTheme).accent;
+
   // Memoise on the individual primitive params (not the rest object, which is a
   // fresh reference each render) so the SVG is only rebuilt when a value changes.
   const svg = useMemo(
     () =>
       renderGraphic(generator, {
         seed,
-        accent,
+        accent: themedAccent,
         background,
         density,
         opacity,
@@ -44,7 +52,7 @@ export default function GeneratedBackground({
     [
       generator,
       seed,
-      accent,
+      themedAccent,
       background,
       density,
       opacity,

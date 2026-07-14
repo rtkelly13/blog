@@ -103,7 +103,10 @@ series: # Optional multi-part posts
 
 ### Theme
 
-Dark mode forced (`forcedTheme="dark"` in \_app.tsx). ThemeProvider uses class-based switching.
+Three themes via a header toggle: `dark` (HIGH, default), `dim` (softened dark),
+and `sketch` (a light paper/ink theme with blue/red/green accents). `next-themes`
+puts a single class on `<html>`; re-theming is done by overriding CSS variables
+in `css/tailwind.css`, not per-component edits. **See [docs/theming.md](./docs/theming.md).**
 
 ## ANTI-PATTERNS (THIS PROJECT)
 
