@@ -1,5 +1,14 @@
 # Interactivity on the blog with Convex
 
+> **Historical design note (pre-build).** This document is the original
+> evaluation written *before* the live-talk platform existed. Much of the
+> "worth building first" list has since shipped with different shapes than
+> sketched here (config-gated `ResolvedRoom` instead of bare `isConvexConfigured`
+> guards, ordered-actions activities, break countdown, follow-the-presenter,
+> moderation console, session clear-down/retention). For current state, read
+> `CONTEXT.md`, `convex/AGENTS.md`, and `docs/adr/`. Kept as design history —
+> do not treat as a description of the codebase.
+
 An evaluation of what this Convex foundation makes possible, and which ideas are
 worth building first.
 

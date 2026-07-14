@@ -7,7 +7,7 @@ import type { PostFrontMatter } from 'types/PostFrontMatter';
 import type { SeriesMetadata } from 'types/Series';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
-import ListLayout from '@/layouts/ListLayout';
+import ListLayoutWithTags from '@/layouts/ListLayoutWithTags';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
 import { getAllSeries } from '@/lib/series';
 import { getAllTags } from '@/lib/tags';
@@ -77,7 +77,7 @@ export default function PostPage({
         title={siteMetadata.title}
         description={siteMetadata.description}
       />
-      <ListLayout
+      <ListLayoutWithTags
         posts={posts}
         initialDisplayPosts={initialDisplayPosts}
         pagination={pagination}

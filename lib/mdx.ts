@@ -4,7 +4,9 @@ import matter from 'gray-matter';
 import { bundleMDX } from 'mdx-bundler';
 import readingTime from 'reading-time';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeCitation from 'rehype-citation';
 import rehypeKatex from 'rehype-katex';
+import rehypeKatexNoTranslate from 'rehype-katex-notranslate';
 import rehypePrismPlus from 'rehype-prism-plus';
 // Rehype packages
 import rehypeSlug from 'rehype-slug';
@@ -13,10 +15,12 @@ import remarkGfm from 'remark-gfm';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import remarkMath from 'remark-math';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { FeaturedLink, Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
 import type { Pluggable } from 'unified';
 import { visit } from 'unist-util-visit';
 import remarkCodeTitles from './remark-code-title';
+import remarkReferences, { mergeFeaturedLinks } from './remark-references';
 import remarkTocHeadings from './remark-toc-headings';
 import getAllFilesRecursively from './utils/files';
 import { show_drafts } from './utils/showDrafts';
@@ -60,11 +64,30 @@ export function setEsbuildBinaryPath() {
 /**
  * Remark plugins shared across all MDX compilation (blog posts and talk slides).
  * Pass a `toc` ref to collect a table of contents; omit it for content that
- * doesn't need one (e.g. individual slides).
+ * doesn't need one (e.g. individual slides). Pass a `references` ref to collect
+ * a LaTeX-style bibliography of external links — the plugin also inserts inline
+ * `[n]` citation markers, so only blog posts opt in (talk slides stay clean and
+ * get their bibliography via `lib/references.ts` instead).
  */
-export function getRemarkPlugins(toc?: Toc): Pluggable[] {
+export function getRemarkPlugins(
+  toc?: Toc,
+  references?: Reference[],
+  referencesMeta?: { manualPlacement: boolean },
+): Pluggable[] {
   return [
     ...(toc ? [[remarkTocHeadings, { exportRef: toc }] as Pluggable] : []),
+    ...(references
+      ? [
+          [
+            remarkReferences,
+            {
+              exportRef: references,
+              insertMarkers: true,
+              meta: referencesMeta,
+            },
+          ] as Pluggable,
+        ]
+      : []),
     remarkGfm,
     remarkCodeTitles,
     remarkMath,
@@ -76,11 +99,31 @@ export function getRemarkPlugins(toc?: Toc): Pluggable[] {
  * Rehype plugins shared across all MDX compilation. Includes the Prism token
  * class-name remapper that powers the brutalist code highlighting.
  */
-export function getRehypePlugins(): Pluggable[] {
+export function getRehypePlugins(
+  options: { bibliography?: string } = {},
+): Pluggable[] {
   return [
     rehypeSlug,
     rehypeAutolinkHeadings,
     rehypeKatex,
+    rehypeKatexNoTranslate,
+    // Citations ([@BibKey]) resolve against the post's `bibliography`
+    // frontmatter — a .bib/CSL-JSON filename relative to data/. bundleMDX
+    // strips frontmatter before rehype runs, so the caller reads the field
+    // and passes it in rather than letting rehype-citation look it up. The
+    // filename must stay relative: rehype-citation path.joins it onto `path`.
+    ...(options.bibliography
+      ? [
+          [
+            rehypeCitation,
+            {
+              bibliography: options.bibliography,
+              path: path.join(root, 'data'),
+              linkCitations: true,
+            },
+          ] as Pluggable,
+        ]
+      : []),
     [rehypePrismPlus, { ignoreMissing: true }] as Pluggable,
     (() => {
       return (tree: any) => {
@@ -149,6 +192,20 @@ export async function getFileBySlug<_T>(
   setEsbuildBinaryPath();
 
   const toc: Toc = [];
+  // Only blog posts get a bibliography — author/series pages render no
+  // References section, so citation markers there would point nowhere.
+  const references: Reference[] = [];
+  const collectReferences = type === 'blog' ? references : undefined;
+  // Set true by the plugin if the body places `<References />` itself, so the
+  // layout knows to suppress its auto-appended section (see ADR-0007).
+  const referencesMeta = { manualPlacement: false };
+
+  // bundleMDX strips frontmatter before plugins run, so read the optional
+  // bibliography field up front and hand it to the rehype pipeline explicitly.
+  const { data: rawFrontmatter } = matter(source);
+  const bibliography = rawFrontmatter.bibliography
+    ? String(rawFrontmatter.bibliography)
+    : undefined;
 
   const { frontmatter, code } = await bundleMDX({
     source,
@@ -157,11 +214,11 @@ export async function getFileBySlug<_T>(
     mdxOptions(options) {
       options.remarkPlugins = [
         ...(options.remarkPlugins ?? []),
-        ...getRemarkPlugins(toc),
+        ...getRemarkPlugins(toc, collectReferences, referencesMeta),
       ];
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
-        ...getRehypePlugins(),
+        ...getRehypePlugins({ bibliography }),
       ];
       return options;
     },
@@ -174,9 +231,18 @@ export async function getFileBySlug<_T>(
     },
   });
 
+  // Boost any frontmatter `featuredLinks` into a Featured group (and add
+  // uncited highlights). No-op when the post declares none. See ADR-0007.
+  const mergedReferences = mergeFeaturedLinks(
+    references,
+    (frontmatter as { featuredLinks?: FeaturedLink[] }).featuredLinks,
+  );
+
   return {
     mdxSource: code,
     toc,
+    references: mergedReferences,
+    hasManualReferences: referencesMeta.manualPlacement,
     frontMatter: {
       readingTime: readingTime(code),
       slug: slug || null,

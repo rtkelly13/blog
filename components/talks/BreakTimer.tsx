@@ -1,5 +1,7 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useState } from 'react';
+import ErrorLine from '@/components/admin/ErrorLine';
+import { useRunAction } from '@/components/admin/useRunAction';
 import { api } from '@/convex/_generated/api';
 import { breakView } from '@/lib/breakCountdown';
 import { useDeckMode } from './DeckModeContext';
@@ -26,22 +28,26 @@ const CONTROL_BTN =
 function BreakButtons({ room }: { room: string }) {
   const extendBreak = useMutation(api.talks.extendBreak);
   const endBreak = useMutation(api.talks.endBreak);
+  const { run, error } = useRunAction();
   return (
-    <div className="flex justify-center gap-2">
-      <button
-        type="button"
-        onClick={() => extendBreak({ room, byMs: EXTEND_MS }).catch(() => {})}
-        className={`${CONTROL_BTN} bg-brutalist-yellow`}
-      >
-        +1 min
-      </button>
-      <button
-        type="button"
-        onClick={() => endBreak({ room }).catch(() => {})}
-        className={`${CONTROL_BTN} bg-brutalist-pink`}
-      >
-        ✕ End break
-      </button>
+    <div className="space-y-2">
+      <div className="flex justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => run(() => extendBreak({ room, byMs: EXTEND_MS }))}
+          className={`${CONTROL_BTN} bg-brutalist-yellow`}
+        >
+          +1 min
+        </button>
+        <button
+          type="button"
+          onClick={() => run(() => endBreak({ room }))}
+          className={`${CONTROL_BTN} bg-brutalist-pink`}
+        >
+          ✕ End break
+        </button>
+      </div>
+      <ErrorLine error={error} />
     </div>
   );
 }
@@ -59,6 +65,7 @@ function Countdown({
   const isAdmin = useQuery(api.talks.isAdmin) === true;
   const status = useQuery(api.talks.breakStatus, { room });
   const startBreak = useMutation(api.talks.startBreak);
+  const { run, error } = useRunAction();
   const now = useNow(status != null);
   const view = status ? breakView(now, status.startedAt, status.endsAt) : null;
   // The projected deck (presenter mode) must stay clean — the room sees it. The
@@ -78,12 +85,13 @@ function Countdown({
         <button
           type="button"
           onClick={() =>
-            startBreak({ room, durationMs: minutes * 60_000 }).catch(() => {})
+            run(() => startBreak({ room, durationMs: minutes * 60_000 }))
           }
           className="border-2 border-white bg-brutalist-pink px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
         >
           ▶ Start {minutes} min break
         </button>
+        <ErrorLine error={error} />
       </div>
     );
   }
@@ -138,6 +146,7 @@ function Countdown({
 export function BreakControl({ room }: { room: string }) {
   const status = useQuery(api.talks.breakStatus, { room });
   const startBreak = useMutation(api.talks.startBreak);
+  const { run, error } = useRunAction();
   const [mins, setMins] = useState(5);
   const now = useNow(status != null);
   const view = status ? breakView(now, status.startedAt, status.endsAt) : null;
@@ -179,10 +188,12 @@ export function BreakControl({ room }: { room: string }) {
           <button
             type="button"
             onClick={() =>
-              startBreak({
-                room,
-                durationMs: Math.max(1, Math.floor(mins || 0)) * 60_000,
-              }).catch(() => {})
+              run(() =>
+                startBreak({
+                  room,
+                  durationMs: Math.max(1, Math.floor(mins || 0)) * 60_000,
+                }),
+              )
             }
             className={`${CONTROL_BTN} bg-brutalist-cyan`}
           >
@@ -190,6 +201,7 @@ export function BreakControl({ room }: { room: string }) {
           </button>
         </div>
       )}
+      <ErrorLine error={error} />
     </div>
   );
 }

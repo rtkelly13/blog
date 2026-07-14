@@ -17,19 +17,25 @@ const AdminDashboard = dynamic(
 
 // Talk targets come from deck frontmatter (build-time fs), which the
 // client-only dashboard can't read — so bake a slug → durationMins map into
-// the page props for the live-talk clock. Drafts included: admins run those.
+// the page props for the live-talk clock, plus the slug/title list so the
+// start form offers real decks instead of free-text (a typo'd slug makes a
+// room the deck never drives). Drafts included: admins run those.
 export const getStaticProps: GetStaticProps<{
   talkDurations: Record<string, number>;
+  talkOptions: { slug: string; title: string }[];
 }> = async () => {
   const talkDurations: Record<string, number> = {};
+  const talkOptions: { slug: string; title: string }[] = [];
   for (const talk of getAllTalksFrontMatter(true)) {
     if (talk.durationMins != null) talkDurations[talk.slug] = talk.durationMins;
+    talkOptions.push({ slug: talk.slug, title: talk.title });
   }
-  return { props: { talkDurations } };
+  return { props: { talkDurations, talkOptions } };
 };
 
 export default function AdminPage({
   talkDurations,
+  talkOptions,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
@@ -46,7 +52,10 @@ export default function AdminPage({
             [ Ideas workbench &gt; ]
           </Link>
         </div>
-        <AdminDashboard talkDurations={talkDurations} />
+        <AdminDashboard
+          talkDurations={talkDurations}
+          talkOptions={talkOptions}
+        />
       </article>
     </>
   );

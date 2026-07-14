@@ -4,6 +4,37 @@
 **Commit:** e6620e1
 **Branch:** main
 
+## AUTHORSHIP POLICY (READ FIRST)
+
+**The prose is human-authored. The words a reader reads are written by Ryan.**
+
+This blog is working toward *fully human-authored words*. The narrative body of
+every post and talk — the sentences and paragraphs in `data/blog/**` and
+`data/talks/**` — is written by the human author. Agents must **not** draft,
+ghostwrite, or rewrite that prose, and must not "polish" it into their own
+phrasing. When a post's body is still an AI-generated draft, treat it as a
+scaffold to be replaced by the author's own words, not as finished copy.
+
+**Agents assist with everything *around* the words** — this is not only allowed,
+it's the point:
+
+- **Shape, not sentences** — propose an outline, section order, or where an idea
+  belongs; suggest that a section is missing or overlong. Leave the actual
+  wording to the author.
+- **Peripheral & utility artifacts** — diagrams (`<Diagram>`/Mermaid), header and
+  OG images (`lib/og/`), code samples, tables, frontmatter, tags, file
+  scaffolding, MDX component wiring, links, and asset generation.
+- **Mechanics** — fix typos, broken links, Markdown/MDX syntax, and formatting;
+  never reword for content.
+- **Everything outside `data/`** — components, layouts, `lib/`, tests, build
+  tooling, CI — is normal agent territory.
+
+Reader-facing metadata that is prose (a post `summary`) may be *drafted* by an
+agent as a suggestion, but the author owns the final wording.
+
+Rule of thumb: **if a reader reads it as the author's voice, a human wrote it;
+if it's structure, code, or an asset, an agent can.**
+
 ## OVERVIEW
 
 Personal blog for Ryan Kelly (ryankelly.dev). Next.js 16 + React 19, Tailwind CSS v4, MDX content, brutalist design system.
@@ -16,7 +47,7 @@ blog/
 ├── convex/           # Realtime backend — talk sessions, presence, Q&A, polls (see convex/AGENTS.md)
 ├── lib/              # MDX pipeline, utilities, hooks (see lib/AGENTS.md)
 ├── tests/            # Playwright + Vitest (see tests/AGENTS.md)
-├── layouts/          # 6 MDX layouts (PostLayout, ListLayout, SeriesLayout, etc.)
+├── layouts/          # 7 MDX layouts (PostLayout, ListLayout, ListLayoutWithTags, SeriesLayout, etc.)
 ├── pages/            # Next.js pages router (incl. /talks, /live, /admin)
 ├── data/             # MDX content + siteMetadata.js
 │   ├── blog/         # Blog post MDX
@@ -44,8 +75,10 @@ Talk routes: `pages/talks/` (deck landing + `present` presenter view), `pages/li
 | Talk / live routes | `pages/talks/`, `pages/live/`, `pages/admin.tsx` | Deck, audience-join, presenter hub |
 | Talk components    | `components/talks/`, `components/admin/` | See components/AGENTS.md              |
 | Page layouts       | `layouts/*.tsx`        | PostLayout, ListLayout, SeriesLayout         |
-| Remark plugins     | `lib/remark-*.ts`      | Custom: code-title, toc-headings, img-to-jsx |
+| Remark plugins     | `lib/remark-*.ts`      | Custom: code-title, toc-headings, references, img-to-jsx |
+| Bibliography / durable links | `lib/remark-references.ts`, `components/References.tsx` | Auto [n] citations + References section (original + archived link); `pnpm archive-links` saves URLs to the Wayback Machine |
 | Design tokens      | `tailwind.config.js`   | Brutalist colors, shadows, typography        |
+| Header / OG images | `lib/og/headerImage.mjs` | Deterministic SVG engine (see lib/AGENTS.md) |
 | Global CSS         | `css/tailwind.css`     | Tailwind v4 imports, CSS vars, utilities     |
 | Tests              | `tests/*.spec.ts`      | See tests/AGENTS.md                          |
 | Build scripts      | `scripts/*.mjs`        | sitemap, search, tag-rss, create-post        |
@@ -89,9 +122,12 @@ tags: string[] # Required
 summary: string # For SEO/cards
 draft: boolean # Hide from production
 layout: string # Optional (default: PostLayout)
+featuredLinks: # Optional — boost valuable links to a ★ Featured group (ADR-0007)
+  - { title: string, url: string } # or a bare url string
 series: # Optional multi-part posts
   name: string
   order: number
+bibliography: string # Optional .bib/CSL-JSON in data/ for [@BibKey] citations
 ```
 
 ### Pages Router (Not App Router)
@@ -194,7 +230,8 @@ pnpm build
 ├── next build (Turbopack)
 ├── scripts/generate-sitemap.mjs
 ├── scripts/generate-search.mjs
-└── scripts/generate-tag-rss.mjs
+├── scripts/generate-tag-rss.mjs
+└── scripts/generate-og-images.mjs   # deterministic per-post OG cards → public/static/og/<slug>.png
 ```
 
 Custom: requires building external `@rtkelly/mermaid-toolkit` first in CI.

@@ -8,6 +8,11 @@ tldr: "AWS Batch runs arbitrary Docker containers for jobs too big for Lambda, w
 images: ["/static/batch/headers/cookbook-light.png"]
 layout: PostLayout
 authors: ["default"]
+featuredLinks:
+  - title: Older video about AWS Batch
+    url: https://youtu.be/H8bmHU_z8Ac
+  - title: Spot instance on Batch
+    url: https://www.youtube.com/watch?v=qPU9FzuAKIw&ab_channel=AmazonWebServices
 ---
 
 # Batch Intro
@@ -159,8 +164,3 @@ If you have a constrained resouce to which you want to achieve maximum throughpu
 Set off multiple array jobs with all jobs exhausting the maximum throughput of the system as sequential jobs. Or setup multiple job queues and compute environmets with different purposes,
 one for maxium throughput by having a much higher number of VCPUs and another which the maximum VCPUs is set based on the constrained resouce.
 Allocating jobs to the specific queues based on that criteria.
-
-# Links
-
-- [Older video about AWS Batch](https://youtu.be/H8bmHU_z8Ac)
-- [Spot instance on Batch](https://www.youtube.com/watch?v=qPU9FzuAKIw&ab_channel=AmazonWebServices)

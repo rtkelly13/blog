@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 /**
  * Runs an async admin action (typically a Convex mutation), surfacing any thrown
@@ -12,7 +12,9 @@ export function useRunAction() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const run = async (fn: () => Promise<unknown>) => {
+  // Stable identity so effects can list `run` as a dependency without
+  // re-registering listeners every render.
+  const run = useCallback(async (fn: () => Promise<unknown>) => {
     setError(null);
     setBusy(true);
     try {
@@ -22,7 +24,7 @@ export function useRunAction() {
     } finally {
       setBusy(false);
     }
-  };
+  }, []);
 
   return { run, error, busy };
 }

@@ -11,6 +11,7 @@ import IdeaSlide from './interactive/IdeaSlide';
 import CustomLink from './Link';
 import NoteBlock from './NoteBlock';
 import Pre from './Pre';
+import References from './References';
 import TalkStatsChart from './TalkStatsChart';
 import TOCInline from './TOCInline';
 import {
@@ -69,6 +70,7 @@ export const MDXComponents: MDXComponentsType = {
   TOCInline,
   Diagram,
   NoteBlock,
+  References,
   FileTree,
   IdeaDeck,
   IdeaSlide,

@@ -30,9 +30,11 @@ async function auditSEO() {
     if (!data.tags || !Array.isArray(data.tags) || data.tags.length === 0)
       issues.push('Missing or Invalid Tags');
 
-    // Warnings
+    // Warnings — no explicit social image is fine: the build falls back to a
+    // deterministic generated OG card (scripts/generate-og-images.mjs). This is
+    // informational only, not a failure.
     if (!data.images || data.images.length === 0)
-      warnings.push('No Social Image (images: [])');
+      warnings.push('No explicit social image — using generated OG card');
 
     if (issues.length > 0 || warnings.length > 0) {
       if (issues.length > 0) issuesFound++;

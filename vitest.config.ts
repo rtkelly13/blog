@@ -47,6 +47,22 @@ export default defineConfig({
         },
       },
       {
+        // Convex function tests via convex-test: exercise the real query/
+        // mutation handlers against an in-memory backend. Needs the edge
+        // runtime (per Convex's testing guidelines) and convex-test inlined so
+        // its import.meta.glob module map resolves. Colocated in convex/.
+        extends: true,
+        test: {
+          name: 'convex',
+          environment: 'edge-runtime',
+          include: ['convex/**/*.test.ts'],
+          server: { deps: { inline: ['convex-test'] } },
+          // requireAdmin reads this at module load; set it so the tests can
+          // mint an allowlisted identity (see convex/authz.test.ts).
+          env: { ADMIN_GITHUB_LOGINS: 'rtkelly13' },
+        },
+      },
+      {
         extends: true,
         plugins: [
           // The plugin will run tests for the stories defined in your Storybook config
