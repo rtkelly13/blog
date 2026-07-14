@@ -12,6 +12,73 @@ The site ships **three themes**, chosen from the header toggle
 `dark` is the default (and what server-rendered HTML assumes). The choice is
 persisted per-visitor by `next-themes` in `localStorage` under the `theme` key.
 
+## Design goals — terminal-neon vs. paper-ink
+
+The mechanics below explain *how* a theme is applied. This section is the
+*why* — the design intent each theme serves, so future colour/spacing/asset
+decisions stay coherent instead of drifting into a generic light/dark switch.
+
+### The two concepts
+
+**`dark` / `dim` — "terminal neon."** The site's native voice: a developer
+console / cyberpunk HUD. Near-black canvas, monospace-forward type, glowing
+accents (cyan/pink/yellow), a perspective grid and a pulsing ring, hard offset
+shadows, scanlines. Colour is **emitted light** — it glows *out of* the screen.
+The mood is high-energy, nocturnal, "a machine that is on." This is the brand;
+it should feel confident and a little loud.
+
+**`sketch` — "paper & ink."** The counterpoint: an engineer's notebook / a
+printed technical broadsheet. Warm paper canvas, graphite ink, and accents that
+read as **annotation pen** (blue/red/green) rather than glow — colour sits *on*
+the surface, it doesn't radiate. The mood is calm, legible, daylight, "a
+document you could print." This is the low-fatigue reading mode the toggle was
+added to provide.
+
+`dim` is not a third concept — it is `dark` with the volume down: same neon
+language, softer poles (charcoal canvas, off-white ink, muted shadows) for
+longer dark-room reading. It deliberately keeps the `dark:` semantics.
+
+### What stays constant across all three (the invariants)
+
+The theme changes the *material*, never the *structure*. These are brand, not
+skin, and must look intentional in every theme:
+
+- **Layout & density** — the same brutalist grid, borders, and generous
+  whitespace. No theme reflows content.
+- **Type system** — Space Grotesk display, Inter body, IBM Plex Mono for
+  code/labels/chrome. Monospace UI furniture (`[ BRACKETED ]` nav, `>` prompts,
+  `.exe`/`.deck` suffixes) is core identity and survives every theme.
+- **Bracket / terminal ornament** — `[ … ]`, `> _`, `//` captions. Even on
+  paper these stay; they become "ink annotations of a terminal" rather than
+  being removed.
+- **Accent *roles*** — the accent triad always maps to the same semantics:
+  primary/interactive (cyan→blue), alert/secondary (pink→red), highlight/tag
+  (yellow→green). Only the hue-and-value changes, never which role a colour
+  plays.
+
+### How decisions differ, dark vs. light
+
+The governing rule: **dark emits, light annotates.** When adding or tuning a
+surface, decide its treatment from this table rather than picking a colour
+per-theme ad hoc.
+
+| Element              | Dark / dim (emit)                        | Sketch (annotate)                             |
+| -------------------- | ---------------------------------------- | --------------------------------------------- |
+| Accent colour        | Saturated neon, glows                     | Muted primary ink (blue/red/green), flat      |
+| Glow / drop-shadow   | Signal — carries hierarchy                | Removed or → soft; never a light-blur halo     |
+| Hard offset shadow   | White/neon, high contrast                 | Ink, low contrast (structural, not decorative) |
+| Borders              | Neon or white hairlines                   | Graphite hairlines                             |
+| Fills                | Transparent-on-black (outline reads)      | Paper (outline reads); **avoid black fills**   |
+| Generative texture   | Green scanlines / neon perspective grid   | Faint ink dot-grid ("graph paper")             |
+| Hero ring            | Electric neon-green, heavy bloom          | Soft pastel green, minimal bloom               |
+| Contrast target      | Maximal, dramatic                         | Comfortable, print-like (not max, not muddy)   |
+
+Rule of thumb for a new element: **if it looks good as glowing light on black,
+it must also look good as flat ink on paper.** If it only works with a black
+fill or a glow, it will read as a foreign dark sticker on the sketch page (see
+the Mermaid backlog item) — route it through a variable and give it a real
+paper value instead.
+
 ## How a theme is applied
 
 `next-themes` (configured in `pages/_app.tsx`) puts **a single class** on
@@ -126,6 +193,37 @@ and it keeps the `dark` class semantics (all `dark:` styles still apply).
 - **Decorative text glows** (`drop-shadow-[…rgba(255,255,255,…)]` etc.) simply
   disappear on the light sketch background rather than re-tinting; the text
   underneath stays legible, so this is cosmetic.
+
+## Design backlog / next steps
+
+Evaluated against the goals above (dark is fully realised; the gaps are all in
+`sketch`, and roughly ordered by visible impact ÷ effort):
+
+1. **Theme Mermaid diagrams (highest impact).** Interactive Mermaid diagrams
+   (e.g. the Fan-In/Fan-Out and Map/Reduce charts in the AWS Batch post) render
+   with the fixed dark `retro-brutalist` palette in every theme, so on a paper
+   page they show as black-filled neon node chips — the single most jarring
+   break of "flat ink on paper." Fix: wire `@rtkelly/mermaid-toolkit`'s
+   `ThemeEngine` `themeVariables` (background / primary / line / text) to the
+   `--diagram-*` tokens and re-render on theme change (as `SvgDiagram` already
+   does). Until then they read as embedded dark editors by design.
+2. **`dim` softens surface but not signal.** `dim` dials down the canvas and
+   text poles, but the hero ring, perspective grid, and neon accents fire at
+   full `dark` intensity — so the "reduce aggressiveness" promise is only
+   half-kept. Consider routing hero bloom / accent saturation through a
+   `--glow-strength` (or per-theme accent values) so `dim` can genuinely lower
+   the glow, not just the background.
+3. **Decorative text glows vanish rather than convert.** White `drop-shadow`
+   halos on headings simply disappear under sketch (text stays legible, so it's
+   cosmetic). A subtle ink text-shadow would keep the same weight/hierarchy the
+   glow provides in dark.
+4. **Collapse the dead `light` visual suite.** `tests/visual.spec.ts`'s "Light
+   Mode" suite never sets a theme, so its `*-light.png` baselines are
+   byte-identical to `*-dark.png` (pure duplication). Either point it at a real
+   theme or drop it and keep `dark`/`dim`/`sketch` as the three tracked families.
+5. **Extend `sketch` visual coverage to a diagram-heavy post** once (1) lands,
+   so the paper diagram treatment is regression-protected (the current
+   `blog-post-sketch` baseline bakes in the un-themed Mermaid look).
 
 ## Tests
 
