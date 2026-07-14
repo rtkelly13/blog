@@ -1,6 +1,8 @@
 import {
   Background,
+  BackgroundVariant,
   Handle,
+  MarkerType,
   type Node,
   type NodeProps,
   Position,
@@ -48,11 +50,34 @@ interface WalkthroughProps {
   title?: string;
 }
 
-const ACCENTS: Record<Accent, { border: string; active: string }> = {
-  cyan: { border: 'border-brutalist-cyan', active: 'bg-brutalist-cyan' },
-  pink: { border: 'border-brutalist-pink', active: 'bg-brutalist-pink' },
-  yellow: { border: 'border-brutalist-yellow', active: 'bg-brutalist-yellow' },
-  white: { border: 'border-white', active: 'bg-white' },
+const ACCENTS: Record<
+  Accent,
+  { border: string; fill: string; text: string; hex: string }
+> = {
+  cyan: {
+    border: 'border-brutalist-cyan',
+    fill: 'bg-brutalist-cyan',
+    text: 'text-brutalist-cyan',
+    hex: '#22d3ee',
+  },
+  pink: {
+    border: 'border-brutalist-pink',
+    fill: 'bg-brutalist-pink',
+    text: 'text-brutalist-pink',
+    hex: '#ec4899',
+  },
+  yellow: {
+    border: 'border-brutalist-yellow',
+    fill: 'bg-brutalist-yellow',
+    text: 'text-brutalist-yellow',
+    hex: '#facc15',
+  },
+  white: {
+    border: 'border-white',
+    fill: 'bg-white',
+    text: 'text-white',
+    hex: '#ffffff',
+  },
 };
 
 type StepNode = Node<{
@@ -62,19 +87,41 @@ type StepNode = Node<{
   active: boolean;
 }>;
 
+/**
+ * A node in the map. Inactive: a crisp dark card with a thin accent rail on the
+ * left, so its identity reads without washing the whole box out. Active: the
+ * accent floods the card, black text, a hard offset shadow and a slight lift —
+ * the same high-contrast "this is the thing" treatment the Terminal uses for
+ * its highlighted line.
+ */
 function BrutalistNode({ data }: NodeProps<StepNode>) {
   const accent = ACCENTS[data.accent];
   return (
     <div
-      className={`border-2 px-3 py-2 font-mono transition-all duration-300 ${accent.border} ${
+      className={`relative min-w-[9.5rem] overflow-hidden border-2 py-2 pr-3 pl-3.5 font-mono transition-all duration-300 ${
         data.active
-          ? `${accent.active} text-black shadow-hard-md`
-          : 'bg-black text-white opacity-40'
+          ? `${accent.border} ${accent.fill} -translate-y-0.5 text-black shadow-hard-md`
+          : 'border-zinc-700 bg-black text-zinc-400'
       }`}
     >
       <Handle type="target" position={Position.Top} className="!opacity-0" />
-      <p className="text-xs font-bold uppercase">{data.label}</p>
-      {data.detail && <p className="text-[10px]">{data.detail}</p>}
+      {/* left accent rail — the node's colour identity even when inactive */}
+      <span
+        aria-hidden
+        className={`absolute inset-y-0 left-0 w-1 ${accent.fill} ${data.active ? 'opacity-0' : 'opacity-100'}`}
+      />
+      <p
+        className={`text-xs font-bold uppercase tracking-wide ${data.active ? 'text-black' : 'text-white'}`}
+      >
+        {data.label}
+      </p>
+      {data.detail && (
+        <p
+          className={`mt-0.5 text-[10px] leading-tight ${data.active ? 'text-black/70' : 'text-zinc-500'}`}
+        >
+          {data.detail}
+        </p>
+      )}
       <Handle type="source" position={Position.Bottom} className="!opacity-0" />
     </div>
   );
@@ -121,14 +168,19 @@ function WalkthroughCanvas({
       edges.map((edge) => {
         const id = `${edge.from}->${edge.to}`;
         const active = step.activeEdges?.includes(id) ?? false;
+        const stroke = active ? '#22d3ee' : '#3f3f46';
         return {
           id,
           source: edge.from,
           target: edge.to,
+          type: 'smoothstep',
           animated: active && !reduceMotion,
-          style: {
-            stroke: active ? '#22d3ee' : '#3f3f46',
-            strokeWidth: active ? 2.5 : 1.5,
+          style: { stroke, strokeWidth: active ? 2.5 : 1.5 },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 16,
+            height: 16,
+            color: stroke,
           },
         };
       }),
@@ -139,9 +191,9 @@ function WalkthroughCanvas({
     if (!nodesInitialized) return;
     void fitView({
       nodes: step.focus.map((id) => ({ id })),
-      padding: 0.45,
-      maxZoom: 1.2,
-      duration: reduceMotion ? 0 : 550,
+      padding: 0.3,
+      maxZoom: 1.5,
+      duration: reduceMotion ? 0 : 600,
     });
   }, [nodesInitialized, step, fitView, reduceMotion]);
 
@@ -178,7 +230,12 @@ function WalkthroughCanvas({
           minZoom={0.3}
           colorMode="dark"
         >
-          <Background gap={24} color="#27272a" />
+          <Background
+            variant={BackgroundVariant.Cross}
+            gap={28}
+            size={4}
+            color="#1c1c22"
+          />
         </ReactFlow>
       </div>
 
