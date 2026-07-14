@@ -27,10 +27,13 @@ function SubmissionCard({
   nickname,
   steps,
   hidden,
+  flagged,
 }: {
   nickname?: string;
   steps: string[];
   hidden?: boolean;
+  /** The profanity Mask fired (console only) — auto-hidden ≠ presenter-hidden. */
+  flagged?: boolean;
 }) {
   return (
     <div
@@ -44,11 +47,10 @@ function SubmissionCard({
         ) : (
           <span />
         )}
-        {hidden && (
-          <span className="font-mono text-xs uppercase text-zinc-500">
-            🚫 hidden
-          </span>
-        )}
+        <span className="flex gap-1.5 font-mono text-xs uppercase">
+          {flagged && <span className="text-brutalist-cyan">⚠ masked</span>}
+          {hidden && <span className="text-zinc-500">🚫 hidden</span>}
+        </span>
       </div>
       <ol className="space-y-0.5">
         {steps.map((step, i) => (
@@ -323,6 +325,7 @@ function Activity({
                   nickname={s.nickname}
                   steps={s.steps}
                   hidden={s.hidden}
+                  flagged={s.flagged}
                 />
               ))
             : audienceWall.map((s) => (

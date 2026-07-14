@@ -26,3 +26,20 @@ The audience only ever sees masked text — that is unchanged. But we now:
   presenter-only (`requireAdmin`) and it is purged by the Session clear-down like
   all other participation data. This is an accepted, scoped data-retention choice,
   not an oversight.
+
+## Amendment (2026-07-07): flagged entries are auto-Hidden, and what shipped
+
+Implemented as: `flagged` + presenter-only `original`/`originalNickname` on
+`questions`, and `flagged` + `originalSteps`/`originalNickname` on
+`activitySubmissions` — set on ingest only for the parts the Mask actually
+matched, surfaced exclusively through the admin `feed` queries, purged with the
+row.
+
+One deliberate divergence from the original text above: a flagged entry is
+**auto-Hidden pending presenter review**, not shown-masked to the audience.
+Masked profanity on a projected wall is still disruptive for the workshop
+audiences this runs in front of; the console tags flagged rows "⚠ masked"
+(distinguishing them from presenter-Hidden rows) and shows the original, so
+restoring a false positive is one click. If a future audience warrants the
+more permissive shown-masked behaviour, flip the `hidden:` ingest default —
+`flagged` and the originals already carry everything needed.

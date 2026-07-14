@@ -41,8 +41,10 @@ export const ask = mutation({
     const limited = await enforceRateLimit(ctx, machineId, 'question:ask');
     if (limited) return limited;
 
+    const rawText = text.trim().slice(0, MAX_TEXT_LEN);
     const rawNickname = nickname?.trim().slice(0, MAX_NICKNAME_LEN);
     const cleanedNickname = rawNickname ? cleanText(rawNickname) : undefined;
+    const flagged = cleaned.flagged || (cleanedNickname?.flagged ?? false);
     await ctx.db.insert('questions', {
       room,
       text: cleaned.text,
@@ -51,7 +53,13 @@ export const ask = mutation({
       answered: false,
       // Auto-hide anything the profanity filter flagged; the presenter sees it
       // in the moderation feed and can restore it, but the audience never does.
-      hidden: cleaned.flagged || (cleanedNickname?.flagged ?? false),
+      hidden: flagged,
+      // ADR-0002: persist the flag and the pre-mask originals (presenter-only,
+      // only the parts that actually matched) so a false-positive mask is
+      // reviewable and auto-hidden ≠ presenter-hidden on the console.
+      flagged: flagged || undefined,
+      original: cleaned.flagged ? rawText : undefined,
+      originalNickname: cleanedNickname?.flagged ? rawNickname : undefined,
       createdAt: Date.now(),
     });
     return { ok: true as const };
