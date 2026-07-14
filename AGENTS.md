@@ -44,7 +44,8 @@ Talk routes: `pages/talks/` (deck landing + `present` presenter view), `pages/li
 | Talk / live routes | `pages/talks/`, `pages/live/`, `pages/admin.tsx` | Deck, audience-join, presenter hub |
 | Talk components    | `components/talks/`, `components/admin/` | See components/AGENTS.md              |
 | Page layouts       | `layouts/*.tsx`        | PostLayout, ListLayout, SeriesLayout         |
-| Remark plugins     | `lib/remark-*.ts`      | Custom: code-title, toc-headings, img-to-jsx |
+| Remark plugins     | `lib/remark-*.ts`      | Custom: code-title, toc-headings, references, img-to-jsx |
+| Bibliography / durable links | `lib/remark-references.ts`, `components/References.tsx` | Auto [n] citations + References section (original + archived link); `pnpm archive-links` saves URLs to the Wayback Machine |
 | Design tokens      | `tailwind.config.js`   | Brutalist colors, shadows, typography        |
 | Global CSS         | `css/tailwind.css`     | Tailwind v4 imports, CSS vars, utilities     |
 | Tests              | `tests/*.spec.ts`      | See tests/AGENTS.md                          |
@@ -89,6 +90,8 @@ tags: string[] # Required
 summary: string # For SEO/cards
 draft: boolean # Hide from production
 layout: string # Optional (default: PostLayout)
+featuredLinks: # Optional — boost valuable links to a ★ Featured group (ADR-0007)
+  - { title: string, url: string } # or a bare url string
 series: # Optional multi-part posts
   name: string
   order: number

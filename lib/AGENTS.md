@@ -10,6 +10,7 @@ MDX processing pipeline, custom remark/rehype plugins, and utility functions.
 lib/
 ├── mdx.ts              # Core MDX bundler (getFileBySlug, getAllFilesFrontMatter)
 ├── talks.ts            # Talk deck loading (front matter, slide split, MDX compile)
+├── references.ts       # Bibliography extraction from raw MDX (extractReferences)
 ├── tags.ts             # Tag extraction (getAllTags)
 ├── series.ts           # Series navigation (getSeriesWithPosts, getSeriesNavigation)
 ├── generate-rss.ts     # RSS feed generation
@@ -19,6 +20,7 @@ lib/
 ├── machineId.ts        # Pseudo-anonymous localStorage machine id (dedup)
 ├── remark-code-title.ts    # Code block titles plugin
 ├── remark-toc-headings.ts  # TOC extraction plugin
+├── remark-references.ts    # Bibliography collection + [n] citation markers
 ├── remark-img-to-jsx.ts    # Image → JSX plugin
 └── utils/              # Small helpers
     ├── files.ts        # getAllFilesRecursively
@@ -45,7 +47,7 @@ getFileBySlug(type, slug)                       // Bundle single MDX file
 getAllFilesFrontMatter(folder: 'blog')          // All posts with frontmatter
 sortPosts(a, b)                                 // Date + series ordering
 // Shared plugin factories reused by talks.ts (so slides render like posts):
-getRemarkPlugins(toc?)                          // Shared remark stack
+getRemarkPlugins(toc?, references?)             // Shared remark stack
 getRehypePlugins()                              // Shared rehype stack
 setEsbuildBinaryPath()                          // esbuild binary resolution
 ```
@@ -126,6 +128,41 @@ const x = 1;
 ### remark-toc-headings.ts
 
 Extracts headings into `toc` array for table of contents.
+
+### remark-references.ts
+
+LaTeX-style bibliography. Collects every external (http/https) link into a
+numbered reference list (`types/Reference.ts`) — deduped by URL, ordered by
+first appearance, each with a Wayback Machine `archiveUrl` — and, when
+`insertMarkers` is set, inserts a `[n]` citation marker (`a.citation-ref`)
+after each link, anchored to the entry in the post's References section.
+
+- **Blog posts** opt in via `getFileBySlug` (markers + collection); the
+  `references` array flows to the layout, which renders
+  `components/References.tsx`.
+- **Talks** collect only (no markers on slides): `lib/references.ts`
+  (`extractReferences`) parses the whole raw talk body in one deterministic
+  pass (slides compile individually/in parallel, so collecting during
+  compilation would race the numbering). `getTalkMeta` exposes them; the deck
+  landing page renders the Links section.
+- `scripts/archive-links.mjs` (`pnpm archive-links`) submits every referenced
+  URL to the Wayback Machine's Save Page Now so the archived links resolve.
+
+**Author escape hatch — placement override.** By default the References section
+is appended after the post body. To place it mid-document, drop `<References />`
+anywhere in the MDX: the plugin sets `manualPlacement` (returned as
+`hasManualReferences` from `getFileBySlug`), the layout suppresses its
+auto-append, and the inline component reads the collected list from
+`ReferencesContext`. Markers also carry a `title` tooltip with the full entry.
+
+**Featured links (boosting).** Frontmatter `featuredLinks: [url | {title, url}]`
+promotes the most valuable sources to a pinned "★ Featured" group at the top of
+the References section (`mergeFeaturedLinks` in `remark-references.ts`). A
+featured link cited inline keeps its `[n]`/backlink; an uncited one is added as
+a numberless entry — the durable replacement for a hand-written "Links" list.
+
+Rationale and the comparison to the upstream `rehype-citation` approach are in
+[ADR-0007](../docs/adr/0007-bibliography-and-durable-archive-links.md).
 
 ### remark-img-to-jsx.ts
 

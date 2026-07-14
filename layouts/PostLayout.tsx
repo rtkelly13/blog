@@ -3,12 +3,14 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
 import BlogActions from '@/components/BlogActions';
 import Comments from '@/components/comments';
 import Link from '@/components/Link';
 import NewsletterForm from '@/components/NewsletterForm';
 import PageTitle from '@/components/PageTitle';
+import References, { ReferencesContext } from '@/components/References';
 import { BlogSEO } from '@/components/SEO';
 import SectionContainer from '@/components/SectionContainer';
 import SeriesNavigation from '@/components/SeriesNavigation';
@@ -36,6 +38,10 @@ interface Props {
   prev?: { slug: string; title: string };
   children: ReactNode;
   toc?: Toc;
+  references?: Reference[];
+  /** True when the body renders `<References />` itself — suppresses the
+   * layout's auto-appended section (see ADR-0007). */
+  hasManualReferences?: boolean;
   seriesData?: {
     prev: { slug: string; title: string; order: number } | null;
     next: { slug: string; title: string; order: number } | null;
@@ -58,6 +64,8 @@ export default function PostLayout({
   prev,
   children,
   toc,
+  references,
+  hasManualReferences,
   seriesData,
 }: Props) {
   const { slug, fileName, date, title, tags } = frontMatter;
@@ -171,9 +179,15 @@ export default function PostLayout({
               </dd>
             </dl>
 
-            <div className="pt-10 pb-8 prose prose-invert max-w-none">
-              {children}
-            </div>
+            <ReferencesContext.Provider value={references ?? []}>
+              <div className="pt-10 pb-8 prose prose-invert max-w-none">
+                {children}
+              </div>
+            </ReferencesContext.Provider>
+
+            {references && !hasManualReferences && (
+              <References references={references} />
+            )}
 
             {seriesData && (
               <SeriesNavigation

@@ -15,10 +15,12 @@ import remarkGfm from 'remark-gfm';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import remarkMath from 'remark-math';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
+import type { FeaturedLink, Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
 import type { Pluggable } from 'unified';
 import { visit } from 'unist-util-visit';
 import remarkCodeTitles from './remark-code-title';
+import remarkReferences, { mergeFeaturedLinks } from './remark-references';
 import remarkTocHeadings from './remark-toc-headings';
 import getAllFilesRecursively from './utils/files';
 import { show_drafts } from './utils/showDrafts';
@@ -62,11 +64,30 @@ export function setEsbuildBinaryPath() {
 /**
  * Remark plugins shared across all MDX compilation (blog posts and talk slides).
  * Pass a `toc` ref to collect a table of contents; omit it for content that
- * doesn't need one (e.g. individual slides).
+ * doesn't need one (e.g. individual slides). Pass a `references` ref to collect
+ * a LaTeX-style bibliography of external links — the plugin also inserts inline
+ * `[n]` citation markers, so only blog posts opt in (talk slides stay clean and
+ * get their bibliography via `lib/references.ts` instead).
  */
-export function getRemarkPlugins(toc?: Toc): Pluggable[] {
+export function getRemarkPlugins(
+  toc?: Toc,
+  references?: Reference[],
+  referencesMeta?: { manualPlacement: boolean },
+): Pluggable[] {
   return [
     ...(toc ? [[remarkTocHeadings, { exportRef: toc }] as Pluggable] : []),
+    ...(references
+      ? [
+          [
+            remarkReferences,
+            {
+              exportRef: references,
+              insertMarkers: true,
+              meta: referencesMeta,
+            },
+          ] as Pluggable,
+        ]
+      : []),
     remarkGfm,
     remarkCodeTitles,
     remarkMath,
@@ -171,6 +192,13 @@ export async function getFileBySlug<_T>(
   setEsbuildBinaryPath();
 
   const toc: Toc = [];
+  // Only blog posts get a bibliography — author/series pages render no
+  // References section, so citation markers there would point nowhere.
+  const references: Reference[] = [];
+  const collectReferences = type === 'blog' ? references : undefined;
+  // Set true by the plugin if the body places `<References />` itself, so the
+  // layout knows to suppress its auto-appended section (see ADR-0007).
+  const referencesMeta = { manualPlacement: false };
 
   // bundleMDX strips frontmatter before plugins run, so read the optional
   // bibliography field up front and hand it to the rehype pipeline explicitly.
@@ -186,7 +214,7 @@ export async function getFileBySlug<_T>(
     mdxOptions(options) {
       options.remarkPlugins = [
         ...(options.remarkPlugins ?? []),
-        ...getRemarkPlugins(toc),
+        ...getRemarkPlugins(toc, collectReferences, referencesMeta),
       ];
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
@@ -203,9 +231,18 @@ export async function getFileBySlug<_T>(
     },
   });
 
+  // Boost any frontmatter `featuredLinks` into a Featured group (and add
+  // uncited highlights). No-op when the post declares none. See ADR-0007.
+  const mergedReferences = mergeFeaturedLinks(
+    references,
+    (frontmatter as { featuredLinks?: FeaturedLink[] }).featuredLinks,
+  );
+
   return {
     mdxSource: code,
     toc,
+    references: mergedReferences,
+    hasManualReferences: referencesMeta.manualPlacement,
     frontMatter: {
       readingTime: readingTime(code),
       slug: slug || null,
