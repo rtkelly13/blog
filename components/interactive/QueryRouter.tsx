@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { highlightIndex, scrollTarget } from './terminalEngine';
 
 export interface RouterRow {
   /** Task column of the where-to-look table. */
@@ -172,21 +173,18 @@ function TerminalBlock({
   reduceMotion,
   onComplete,
 }: BlockProps) {
-  const highlightIdx =
-    typeof block.highlight === 'number'
-      ? block.highlight
-      : block.highlight
-        ? block.lines.findIndex((l) => l.includes(block.highlight as string))
-        : -1;
-
-  const maxOffset = Math.max(0, block.lines.length * LINE_H - WINDOW_H);
-  const target =
-    highlightIdx >= 0
-      ? Math.min(
-          maxOffset,
-          Math.max(0, highlightIdx * LINE_H - (WINDOW_H - LINE_H) / 2),
-        )
-      : maxOffset;
+  // Shared with <Terminal> via terminalEngine so the highlight-resolution and
+  // scroll-centring maths have one tested implementation.
+  const highlightIdx = highlightIndex(
+    { highlight: block.highlight },
+    block.lines,
+  );
+  const target = scrollTarget(
+    highlightIdx,
+    block.lines.length,
+    LINE_H,
+    WINDOW_H,
+  );
 
   const finalState = settled || reduceMotion;
   const [highlighted, setHighlighted] = useState(finalState);
