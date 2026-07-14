@@ -40,7 +40,7 @@ importers:
         specifier: ^5.2.7
         version: 5.2.7
       '@rtkelly/mermaid-toolkit':
-        specifier: github:rtkelly13/mermaid-toolkit#a91c9d3
+        specifier: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58
         version: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)
       '@tailwindcss/forms':
         specifier: ^0.5.11
