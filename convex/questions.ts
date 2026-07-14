@@ -111,6 +111,12 @@ export const upvote = mutation({
     }
     const talk = await liveTalkForRoom(ctx, q.room);
     if (!talk) return { ok: false as const, reason: 'not_counted' as const };
+    // Q&A toggled off mid-talk: writes drop, matching `ask` — the "disabled
+    // means closed" contract. (`list` deliberately stays visible: read-only
+    // history is harmless and yanking the queue mid-talk would be jarring.)
+    if (!resolveConfig(talk).qa) {
+      return { ok: false as const, reason: 'not_counted' as const };
+    }
 
     const already = await ctx.db
       .query('questionVotes')
