@@ -1,0 +1,55 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Paper & Ink" />
+
+# Paper & Ink — the SKETCH theme metaphor
+
+The design system ships one token set and three themes. **HIGH** (`dark`) leans
+into terminal devices: phosphor text on black, green scanlines, `//====//`
+ASCII dividers, `>` prompts, neon glows. **SKETCH** (`sketch`) is not a
+"light mode" — it is the same brutalist system printed on paper, and every
+terminal device has an explicit paper analogue at the *token* level.
+
+Because components build only on remapped tokens (`bg-black`, `text-white`,
+`text-brutalist-*`, `shadow-hard-*`), you write the terminal look once and the
+paper look comes for free.
+
+## The analogy, token by token
+
+| Terminal device (HIGH)          | Token / mechanism                          | Paper analogue (SKETCH)                     |
+| ------------------------------- | ------------------------------------------ | ------------------------------------------- |
+| Black terminal screen           | `--color-black` → `#f5f3ec`                | Warm paper sheet                             |
+| White phosphor text & borders   | `--color-white` → `#23262e`                | Graphite ink                                 |
+| Neon cyan links                 | `--brutalist-cyan` → `#2563eb`             | Ballpoint-blue pen                           |
+| Neon pink highlights            | `--brutalist-pink` → `#dc2626`             | Red correction pen                           |
+| Neon yellow emphasis            | `--brutalist-yellow` → `#15803d`           | Green marker                                 |
+| Hard neon offset shadow         | `shadow-hard-*` + `--brutalist-shadow-color` | Letterpress ink offset                     |
+| Green CRT scanlines             | `--scanline-color` / `--page-texture`      | Diagonal pencil-hatch paper texture          |
+| Neon glow halos                 | `shadow-glow-*` (remapped under `.sketch`) | Crisp ink drop shadow (glow is a dark device)|
+| `//====//` ASCII divider        | `.ascii-divider`                           | Hand-ruled pencil dash line `· ─ ─ ─ ·`      |
+| `>` prompt glyph                | `.terminal-prompt`                         | Blue-pen margin prompt                       |
+| Solid vector strokes            | mermaid node strokes (`stroke-dasharray: 8 4`) | Pencil-sketched dashed outlines          |
+| Terminal block cursor selection | `::selection` (remapped under `.sketch`)   | Highlighter-marker swipe (yellow)            |
+| Dark cyberpunk hero grid        | `--hero-grid`                              | Faint ink graph-paper grid                   |
+
+## Atomic structure
+
+The Storybook is organised by composition tier:
+
+- **Foundations** — the tokens themselves (this section): colors, typography,
+  borders & shadows, and this metaphor page.
+- **Atoms** — single-purpose components built directly on tokens: `Button`,
+  `Tag`, `Link`, `BracketText`, `PageTitle`, `NoteBlock`, `TLDR`.
+- **Molecules** — compositions of atoms: `Card`, `PageHeader`, `Pagination`.
+- **Design Sandbox** — exploratory catalogs ported from `/design-sandbox`.
+
+## The discipline
+
+- Build only on remapped tokens — never `text-gray-900`, `dark:` pairs, or hex
+  literals for surface/text/border colour.
+- Verify every story in both HIGH and SKETCH with the theme toolbar: it must
+  read as intentional on the terminal *and* on paper.
+- No rounded corners, no blurred shadows, no emoji as UI — these hold in every
+  theme.
+
+Full mechanics: `docs/theming.md`; token tables: `docs/design-system.md`.

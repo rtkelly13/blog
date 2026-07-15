@@ -1,6 +1,6 @@
 # Storybook Design System
 
-This directory contains Storybook stories for the blog's design system components.
+This directory contains Storybook stories for the blog's design system.
 
 ## Running Storybook
 
@@ -14,30 +14,42 @@ pnpm build-storybook
 
 Storybook runs on http://localhost:6006 in development mode.
 
-## Stories Organization
+## Theme toolbar
 
-### Design Sandbox Stories
+The toolbar (paintbrush icon) cycles **HIGH (dark) / DIM / SKETCH** by setting
+the theme class on `<html>`, exactly as `next-themes` does on the site. Every
+story must read as intentional in both HIGH and SKETCH — see
+`Foundations/Paper & Ink` for the paper ↔ terminal token analogy.
 
-These stories are ported from the `/design-sandbox` pages and showcase the brutalist design system:
+## Organization (composition tiers)
 
-- **Buttons.stories.tsx** - All button variations with different colors, sizes, and shadow effects
-- **Cards.stories.tsx** - Card component variations (basic, with images, with ASCII art)
-- **Typography.stories.tsx** - Typography system including headings, body text, terminal prompts, code blocks, links, and tags
-
-### Component Stories
-
-- **Button.stories.tsx** - Individual Button component with interactive controls
+- **Foundations** (`stories/foundations/`) — the tokens themselves:
+  - `Colors.stories.tsx` — accent / surface / muted-text swatches, built on
+    token classes so they re-map per theme
+  - `Typography.stories.tsx` (in `stories/`) — font roles, headings, body,
+    terminal prompts, code, links, tags
+  - `BordersAndShadows.stories.tsx` — borders, hard shadows, press
+    interaction, terminal-vs-paper motifs
+  - `PaperAndInk.mdx` — the SKETCH metaphor, token by token
+- **Atoms** (colocated in `components/`) — `Button`, `Tag`, `Link`,
+  `BracketText`, `PageTitle`, `NoteBlock`, `TLDR`
+- **Molecules** (colocated in `components/`) — `Card`, `PageHeader`,
+  `Pagination`, `PostHeaderImage`
+- **Design Sandbox** (`stories/`) — exploratory catalogs ported from
+  `/design-sandbox` (`Buttons`, `Cards`)
 
 ## Adding New Stories
 
-Stories use the CSF (Component Story Format) 3.0 syntax:
+Stories use the CSF (Component Story Format) 3.0 syntax. Colocate component
+stories next to the component (`components/Foo.stories.tsx`) and title them by
+tier (`Atoms/Foo`, `Molecules/Foo`):
 
 ```tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Component from "../components/Component";
 
 const meta = {
-  title: "Category/ComponentName",
+  title: "Atoms/ComponentName",
   component: Component,
   parameters: {
     layout: "padded", // or 'centered', 'fullscreen'
@@ -55,16 +67,14 @@ export const Default: Story = {
 };
 ```
 
-## Styling
-
-Tailwind CSS v4 is configured in `.storybook/preview.ts` by importing `../css/tailwind.css`. All Tailwind classes and custom brutalist utilities are available in stories.
-
-The dark background (`#000000`) is set as the default in the preview configuration.
+Build only on remapped tokens (`bg-black`, `text-white`, `text-zinc-400`,
+`text-brutalist-*`, `shadow-hard-*`) — never hex literals or `dark:` pairs —
+and verify the story under both HIGH and SKETCH before committing.
 
 ## Configuration Files
 
 - **.storybook/main.ts** - Storybook configuration (framework, addons, story locations)
-- **.storybook/preview.ts** - Global preview settings (backgrounds, Tailwind import)
+- **.storybook/preview.tsx** - Theme toolbar + decorator, Tailwind import, a11y config
 - **.storybook/vitest.setup.ts** - Vitest integration setup
 
 ## Addons
@@ -77,6 +87,6 @@ The dark background (`#000000`) is set as the default in the preview configurati
 ## Notes
 
 - Stories follow the same brutalist aesthetic as the main site
-- All components use monospace fonts and hard borders
-- Terminal prefixes (`>`, `$`, `//`, `[  ]`) are used throughout
-- Color palette: cyan (#22d3ee), pink (#ec4899), yellow (#facc15), neon green (#39ff14)
+- Terminal prefixes (`>`, `$`, `//`, `[  ]`) are used throughout in HIGH;
+  SKETCH renders their paper analogues (pencil dashes, blue-pen prompts)
+- The audit behind this structure: `docs/design-system-evaluation.md`

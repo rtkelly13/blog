@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {
-  title: 'Design Sandbox/Typography',
+  title: 'Foundations/Typography',
   parameters: {
     layout: 'padded',
   },
@@ -11,6 +11,44 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+export const FontRoles: Story = {
+  render: () => (
+    <div className="bg-black border-2 border-white p-8 space-y-6">
+      <div>
+        <p className="font-mono text-xs text-zinc-500 uppercase">
+          font-display — Space Grotesk (headings, uppercase + tight tracking)
+        </p>
+        <p className="font-display text-3xl font-bold uppercase text-white">
+          [ Display Face ]
+        </p>
+      </div>
+      <div>
+        <p className="font-mono text-xs text-zinc-500 uppercase">
+          font-sans — Inter (body / reading copy)
+        </p>
+        <p className="font-sans text-base text-white">
+          Body copy uses Inter for long-form reading. The quick brown fox jumps
+          over the lazy dog.
+        </p>
+      </div>
+      <div>
+        <p className="font-mono text-xs text-zinc-500 uppercase">
+          font-mono — IBM Plex Mono (code + UI / metadata)
+        </p>
+        <p className="font-mono text-base text-brutalist-cyan">
+          {'>'} const role = 'code_and_ui_metadata';
+        </p>
+      </div>
+      <div>
+        <p className="font-mono text-xs text-zinc-500 uppercase">
+          font-pixel — VT323 (logo + hero accents only)
+        </p>
+        <p className="font-pixel text-3xl text-white">RYAN_KELLY.DEV</p>
+      </div>
+    </div>
+  ),
+};
 
 export const Headings: Story = {
   render: () => (
