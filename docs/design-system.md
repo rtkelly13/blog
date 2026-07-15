@@ -65,6 +65,27 @@ tokens invert automatically. The discipline for any new component:
 
 Full mechanics and the per-token tables: **[docs/theming.md](./theming.md)**.
 
+### The paper ↔ terminal analogy
+
+Sketch is not a "light mode" — it is the same system printed on paper. Each
+terminal device has an explicit paper analogue at the token level:
+
+| Terminal (HIGH)            | Token / mechanism                | Paper (SKETCH)              |
+| -------------------------- | -------------------------------- | --------------------------- |
+| Black screen               | `--color-black`                  | Warm paper sheet            |
+| White phosphor text        | `--color-white`                  | Graphite ink                |
+| Neon cyan / pink / yellow  | `--brutalist-*`                  | Blue pen / red pen / green marker |
+| Hard neon shadow           | `--brutalist-shadow-color`       | Letterpress ink offset      |
+| Green scanlines            | `--scanline-color` / `--page-texture` | Pencil-hatch texture   |
+| `//====//` ASCII divider   | `.ascii-divider`                 | Hand-ruled pencil dashes    |
+| Solid strokes              | mermaid `stroke-dasharray`       | Pencil-sketched outlines    |
+| Block-cursor selection     | `::selection` (sketch remap)     | Highlighter-marker swipe    |
+
+The full table with atomic-structure notes lives in Storybook
+(`Foundations/Paper & Ink`, from `stories/foundations/PaperAndInk.mdx`); the
+audit that produced it is
+**[docs/design-system-evaluation.md](./design-system-evaluation.md)**.
+
 ## Components & primitives
 
 Component-level guidance (the `PageHeader` / `PageTitle` header primitives, the

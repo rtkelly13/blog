@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import PostHeaderImage from './PostHeaderImage';
 
 const meta = {
-  title: 'Components/PostHeaderImage',
+  title: 'Molecules/PostHeaderImage',
   component: PostHeaderImage,
   parameters: {
     layout: 'fullscreen',
