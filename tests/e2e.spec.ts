@@ -22,10 +22,10 @@ test.describe('Homepage', () => {
       page.getByRole('link', { name: '[ Blog ]', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: '[ Tags ]', exact: true }),
+      page.getByRole('link', { name: '[ Talks ]', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: '[ About ]', exact: true }),
+      page.getByRole('link', { name: '[ Tags ]', exact: true }),
     ).toBeVisible();
   });
 });
@@ -121,11 +121,11 @@ test.describe('Navigation', () => {
     await page.getByRole('link', { name: '[ Blog ]', exact: true }).click();
     await expect(page).toHaveURL(/\/blog/);
 
+    await page.getByRole('link', { name: '[ Talks ]', exact: true }).click();
+    await expect(page).toHaveURL(/\/talks/);
+
     await page.getByRole('link', { name: '[ Tags ]', exact: true }).click();
     await expect(page).toHaveURL(/\/tags/);
-
-    await page.getByRole('link', { name: '[ About ]', exact: true }).click();
-    await expect(page).toHaveURL(/\/about/);
 
     await page.locator('header a').first().click();
     await expect(page).toHaveURL('/');

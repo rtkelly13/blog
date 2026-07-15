@@ -177,7 +177,7 @@ export default function ListLayout({
     return (
       <li
         key={slug}
-        className={`my-6 rounded-md border-2 border-brutalist-cyan bg-black/80 shadow-glow-cyan transition-all hover:shadow-[0_0_15px_rgba(34,211,238,0.7),0_0_30px_rgba(34,211,238,0.5)] ${
+        className={`my-6 rounded-md border-2 border-brutalist-cyan bg-black/80 shadow-glow-cyan transition-all hover:shadow-glow-cyan ${
           isInSeries ? 'ml-6 border-l-4 border-l-brutalist-pink' : ''
         }`}
       >
@@ -279,7 +279,7 @@ export default function ListLayout({
             return (
               <li
                 key={`series-${seriesGroup.name}-${idx}`}
-                className="my-6 rounded-md border-2 border-brutalist-pink bg-black/80 shadow-[0_0_10px_rgba(236,72,153,0.5),0_0_20px_rgba(236,72,153,0.3)] transition-all"
+                className="my-6 rounded-md border-2 border-brutalist-pink bg-black/80 shadow-glow-pink transition-all"
               >
                 <article className="space-y-2 p-5">
                   <div className="font-mono text-sm leading-6 text-brutalist-cyberOrange flex items-center gap-2">

@@ -1,5 +1,7 @@
+import { Library } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Link from '@/components/Link';
+import PageHeader from '@/components/PageHeader';
 import { PageSEO } from '@/components/SEO';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
@@ -23,15 +25,11 @@ export default function Series({
         description="Blog post series and multi-part tutorials"
       />
       <div className="divide-y divide-white border-2 border-white bg-black">
-        <div className="pt-6 pb-8 space-y-4 md:space-y-6 bg-zinc-900 px-6">
-          <h1 className="text-3xl font-display font-bold leading-9 tracking-tight text-white uppercase sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 border-4 border-double border-brutalist-cyan inline-block px-8 py-4">
-            &gt; SERIES
-          </h1>
-          <p className="font-mono text-lg leading-7 text-gray-200 border-l-4 border-brutalist-pink pl-4">
-            <span className="text-brutalist-yellow">{'//'}</span> Multi-part
-            blog series and tutorials
-          </p>
-        </div>
+        <PageHeader
+          title="SERIES"
+          icon={Library}
+          subtitle="Multi-part blog series and tutorials"
+        />
 
         <ul className="divide-y divide-white">
           {!allSeries.length && (

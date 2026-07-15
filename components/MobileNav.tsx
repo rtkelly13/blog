@@ -17,7 +17,7 @@ const MobileNav = () => {
   };
 
   return (
-    <div className="sm:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         className="w-8 h-8 ml-1 mr-1 text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]"

@@ -94,14 +94,18 @@ test.describe('Tablet - iPad (768x1024)', () => {
   test('navigation is accessible', async ({ page }) => {
     await page.goto('/');
 
+    // At tablet width the inline nav collapses to the hamburger menu (the full
+    // inline nav only shows at lg+).
+    const hamburger = page.locator('button[aria-label="Toggle Menu"]');
+    await expect(hamburger).toBeVisible();
+    await hamburger.click();
+
+    const mobileNavMenu = page.locator('nav.fixed');
     await expect(
-      page.getByRole('link', { name: '[ Blog ]', exact: true }),
+      mobileNavMenu.getByRole('link', { name: 'Blog' }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: '[ Tags ]', exact: true }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('link', { name: '[ About ]', exact: true }),
+      mobileNavMenu.getByRole('link', { name: 'Tags' }),
     ).toBeVisible();
   });
 
@@ -215,10 +219,10 @@ test.describe('Tablet Landscape - iPad Pro (1024x768)', () => {
       page.getByRole('link', { name: '[ Blog ]', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: '[ Tags ]', exact: true }),
+      page.getByRole('link', { name: '[ Talks ]', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: '[ About ]', exact: true }),
+      page.getByRole('link', { name: '[ Tags ]', exact: true }),
     ).toBeVisible();
   });
 });

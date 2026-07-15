@@ -3,8 +3,6 @@ const headerNavLinks = [
   { href: '/series', title: 'Series' },
   { href: '/talks', title: 'Talks' },
   { href: '/tags', title: 'Tags' },
-  { href: '/experiments', title: 'Experiments' },
-  { href: '/about', title: 'About' },
 ];
 
 export default headerNavLinks;

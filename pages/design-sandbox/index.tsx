@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Boxes,
   CaseSensitive,
   Compass,
   CreditCard,
@@ -21,6 +22,12 @@ const components: {
   description: string;
   icon: LucideIcon;
 }[] = [
+  {
+    name: 'Component Library',
+    path: '/design-sandbox/component-library',
+    description: 'Every core component in both themes, side by side',
+    icon: Boxes,
+  },
   {
     name: 'Homepage Heroes',
     path: '/design-sandbox/homepage-heroes',

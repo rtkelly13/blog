@@ -32,8 +32,8 @@ export default function SearchButton() {
           d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
         />
       </svg>
-      <span className="hidden whitespace-nowrap sm:inline">search_system…</span>
-      <kbd className="ml-2 hidden whitespace-nowrap border-2 border-brutalist-pink bg-black px-1.5 py-0.5 text-xs font-bold uppercase leading-none tracking-wide text-brutalist-pink sm:inline-block">
+      <span className="hidden whitespace-nowrap xl:inline">search_system…</span>
+      <kbd className="ml-2 hidden whitespace-nowrap border-2 border-brutalist-pink bg-black px-1.5 py-0.5 text-xs font-bold uppercase leading-none tracking-wide text-brutalist-pink xl:inline-block">
         ⌘K
       </kbd>
     </button>
