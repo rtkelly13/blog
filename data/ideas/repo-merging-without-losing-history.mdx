@@ -1,0 +1,122 @@
+---
+title: "Merging Repos Without Losing a Single Commit"
+kind: article
+status: developing
+created: "2026-07-18"
+updated: "2026-07-18"
+tags: ["git", "monorepo", "migration", "tooling", "devex"]
+target: "future data/blog/repo-merging-without-losing-history.mdx"
+summary: "A repeatable, history-preserving repo-merge technique run twice at scale: filter-repo subdirectory rewrites, unrelated-histories merges, and cut-point branches as permanent markers. Promoted from the work-initiatives backlog; evidence verified against real history."
+layout: IdeaLayout
+---
+
+## Where it stands
+
+Promoted from the [work-initiatives backlog](/ideas/work-initiatives-backlog)
+(entry E3). The claims below are verified against real git history and two
+internal knowledge-base articles written at the time — this is
+reproducible material, not reconstruction. Per the authorship policy
+everything here is working material: structure and evidence to draft from,
+not copy. Per the org-specifics policy, repo/app names and internal
+identifiers are deliberately omitted; the private evidence trail lists
+them.
+
+**The thesis.** Most repo consolidations squash-import and lose the blame.
+This technique treats a repo merge as a *reversible, auditable, repeatable*
+operation: every commit survives, every branch survives, and the exact
+pre-merge state of each source repo is preserved as a named branch — one
+checkout away, forever. Done twice at scale, so it's a pattern, not a
+one-off.
+
+## The two campaigns (verified)
+
+### Campaign 1 — four satellite repos into one app repo
+
+Documented in an internal article at the time. Mechanics:
+
+1. Clone each of the four source repos.
+2. Rewrite each with `git-filter-repo --to-subdirectory-filter <name>` so
+   its entire history appears to have always lived in a subdirectory.
+3. Add each rewritten repo as a *local* remote, fetch, branch, and
+   `git merge --allow-unrelated-histories`.
+4. Preserve every source branch via a small script that re-pushed them
+   under an `old-original-repo-*` prefix.
+
+Includes a quotable observation: after stitching, **date-order beats
+topological order** for reading the combined history.
+
+### Campaign 2 — building the frontend monorepo (2025)
+
+Documented in a second internal article. Two moves:
+
+1. **The carve-out:** a `split-folder.sh` script — mirror-clone the old
+   app repo, `git filter-repo --path <folder>/ --path-rename` into a new
+   subdirectory name, then push **all branches and tags** to the new
+   monorepo. A folder becomes a repo line with its history intact.
+2. **The graft:** the second app (a newer React codebase) reset to a known
+   commit, `--to-subdirectory-filter`'d into its own directory, added as a
+   remote, and merged with `--allow-unrelated-histories`.
+
+The result, verifiable in today's tree:
+
+- The merge commit's **two parents are exactly the preserved cut-point
+  branches** — one per source line.
+- `git log --max-parents=0` shows **two root commits** — each app's
+  original initial commit (2021 and 2024).
+- `git log --follow` on any file walks back to its original repo's root.
+
+The article also records the **rejected first approach** — folder-by-folder
+`--invert-paths` cleanup — with the frank note that a better approach
+superseded it. Good material for an honest "how the technique evolved"
+beat.
+
+## Proposed shape
+
+1. **The problem** — consolidating repos is common; doing it without
+   destroying history/blame/branches is not. What squash-import costs you
+   (bisect, blame, archaeology, contributor record).
+2. **The idea** — three invariants: every commit survives; every branch
+   survives; the cut point is a named, permanent ref.
+3. **Campaign 1 walkthrough** — subdirectory-filter + unrelated-histories
+   merge + branch preservation script. Small diagrams of the DAG before and
+   after (two roots, one head).
+4. **Campaign 2 walkthrough** — the carve-out variant (folder → new repo,
+   all branches and tags), then the graft. Show the merge commit and its
+   two cut-point parents (sanitised names).
+5. **What breaks and how to handle it** — CI paths, tag collisions, blame
+   tooling, PR references, default-branch protection during the push,
+   `--force` semantics of a mirror push.
+6. **Why keep the cut branches** — rollback points, archaeology anchors,
+   and proof-of-provenance. Date-order vs topo-order for reading stitched
+   history.
+7. **The rejected approach** — and why iterating on the technique between
+   campaigns is the point: run twice, it's a pattern.
+
+## Gaps to fill
+
+- [ ] **Recover the reference links.** The first article's Resources
+      section cited a couple of external guides ("the original guide which
+      lines up with the specifics", a git-filter-repo filtering guide, the
+      basis of the branch-copy script) — the knowledge-base export stripped
+      the hyperlinks, leaving bare bullets. Pull the URLs from the original
+      internal articles; they're the citation trail and likely `[@BibKey]`
+      candidates.
+- [ ] **Re-run the DAG checks for the draft** — capture real (sanitised)
+      output of `git log --max-parents=0`, the merge-commit parents, and a
+      `--follow` walk for a `<Terminal>` component.
+- [ ] **Campaign 1 verification** — confirm the `old-original-repo-*`
+      branches still exist on the remote before claiming they survive.
+- [ ] **Decide naming** — whether to name the repos/apps with employer
+      sign-off, or keep them generic throughout (default: generic, per the
+      org-specifics policy).
+- [ ] **What-breaks section needs specifics** — dig for the actual CI/tag
+      fallout commits around the 2025 merge window to ground section 5.
+- [ ] **Prior art paragraph** — `git subtree`, `git submodule`, josh,
+      copybara; when each fits and why filter-repo + graft won here.
+
+## Evidence (private trail)
+
+Exact repo names, article IDs, commit SHAs, branch names, and doc paths are
+deliberately not recorded here — re-mine them from the internal
+knowledge base (Devops/CICD section, current + archive copies) and the
+frontend monorepo's history when drafting.

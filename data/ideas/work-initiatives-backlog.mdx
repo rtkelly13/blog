@@ -1,0 +1,442 @@
+---
+title: "Work Initiatives → Blog Posts: The Candidate Backlog (2019–2026)"
+kind: series
+status: spark
+created: "2026-07-18"
+updated: "2026-07-18"
+tags: ["backlog", "ai", "ci", "data-engineering", "platform-engineering", "testing", "devex", "dotnet", "aws"]
+target: "hub — each entry graduates to its own idea file in data/ideas/, then a post"
+summary: "Agent-produced survey of ~7 years of day-job and personal work, distilled into candidate posts organised by area and type of change. Every angle is engineering practice, not domain knowledge. Working material, not copy."
+layout: IdeaLayout
+---
+
+## What this is
+
+A survey of the major initiatives since joining the day job (first commit
+May 2019 — literally titled "My First Pulumi") across the work estate and
+the personal repos, filtered down to what travels: **agnostic tech
+utilisation, zero industry insider knowledge**. The business domain is
+off-limits as subject matter; the engineering built around it is the
+material.
+
+History was mined on **author dates** from full clones (~2,600 commits in
+the main application repo alone: 2019: 322, 2020: 817, 2021: 536,
+2022: 471, 2023: 242, 2024: 140, 2025: 45 — the 2026 shift to
+platform/agent work shows up in the other repos). Repo-topology note: the
+data-engineering infra history *originates in the main application repo*
+and was split out to the data repos in mid-2024, so several "data" stories
+trace back there.
+
+Per the authorship policy this whole file is working material — pitches,
+beats, and evidence pointers to react to, not prose to publish.
+
+<NoteBlock title="evidence pointers are deliberately vague" color="yellow">
+This file is source-controlled, so org specifics (repo names, ticket IDs,
+internal spec/article names, exact paths, colleague attribution) have been
+stripped. The detailed evidence trail — exact repos, doc paths, commit
+references — lives in the research session that produced this file;
+regenerate or re-mine per post when drafting. Also decide per post what
+internal figures (spend, GB-scanned) you're comfortable publishing.
+</NoteBlock>
+
+<NoteBlock title="attribution" color="red">
+Not everything in shared repos is yours to claim first-person. In the
+frontend monorepo the bundler migration and the UI library / build-tooling
+setup were led by a colleague; your defensible narratives there are CI/CD,
+feature flags, the CDN/DNS migration, and the repo merges — both product
+front-ends were folded into the monorepo by you, history intact (E3). The
+warehouse-vendor PoC in the data estate was others' work — cite it as "we
+prototyped", not "I built". Check each post's claims against git history
+before drafting.
+</NoteBlock>
+
+## Already covered / in flight (don't duplicate)
+
+- **Virtual monorepo for coding agents** — drafted;
+  [virtual-monorepo-workspace](/ideas/virtual-monorepo-workspace). Trust
+  tiers / prompt-injection-as-directory-layout is earmarked as a section
+  there.
+- **Devenv / tool provisioning** — [workspace-devenv](/ideas/workspace-devenv).
+- **Blog Revival 2026 series** — the 2022→2026 dormancy and revival.
+- **AWS Batch cookbook** (published 2022), ROP, SAFE stack, Paket talks.
+
+---
+
+## Index by type of change
+
+- **Greenfield builds:** A2, A4, A5, B1, D1, G1, F3, F5
+- **Migrations (incremental, live):** A3, B4, B5, C2, E2, E3 (★ repo merge, done twice)
+- **Reversals / roads not taken (adopt → remove, prototype → shelve):** B3, A6, B4
+- **Optimisation (cost / performance / memory):** A7, B2, F1
+- **Testing & quality engineering:** C3, C4, B6, T-seeds
+- **Governance / process-as-code:** D2, D3, D4, C5, D5
+- **War stories / incidents:** B2, B3, C1, A7, C4 (skip-as-green), B5 (the revert)
+- **AI-assisted engineering:** F1–F5
+- **Umbrella essays:** X1 (determinism), X2 (observability arc), series spines below
+
+★ = strongest candidates.
+
+---
+
+# Area A — Data engineering & analytics (2020 → 2026)
+
+The single best series arc in the estate. Natural six-part spine:
+*ad-hoc era → minimum viable lakehouse → growing it up → carving out the
+platform → medallion + Iceberg → paying the scan bill.*
+
+### A1. ★ Series spine: "From ad-hoc SQL to a lakehouse" (2020–2026)
+
+The full arc as a series hub. 2020–21: one-off SQL fix scripts against the
+operational DB and an Elasticsearch cluster doing analytics duty. 2021:
+batch jobs start emitting Parquet to S3; first Athena bolted on *after* the
+Elasticsearch step (Sep 2021). 2022: a real lake — Glue crawlers, KMS,
+bucket isolation, sync. 2023: SQL views become a version-controlled
+interface. 2024: platform split out of the monolith. 2025: medallion
+bronze/silver/gold on Iceberg. 2026: the cost reckoning. Each part below
+can stand alone.
+
+### A2. The cheapest possible data lake (2021–2022) — *greenfield*
+
+Start by writing Parquet from existing batch jobs and pointing Athena at
+the bucket; graduate to Glue catalogs, KMS, bucket isolation, and
+incremental sync only when each pain arrives ("Parquet Converter
+Implemented", Feb 2021; first Athena stack via Pulumi, Sep 2021).
+"Minimum viable lakehouse" as a sequencing story — what you can defer,
+what you can't.
+
+### A3. Running two analytics stores at once (2022–2023) — *migration*
+
+The Athena↔Elasticsearch dual-sync period: migrating query engines without
+a big-bang cutover — dual-write, historic backfill, verify jobs, then
+feature-flagged retirement. Pairs with B3 (the retirement's other half).
+
+### A4. ★ Your SQL view IS the table (2023–2025) — *greenfield / architecture*
+
+The medallion design where a version-controlled Athena view definition is
+the source of truth and a Python pipeline materialises it into an Iceberg
+table, orchestrated by Step Functions. Covers the 2023 "check your SQL into
+git" formalisation through the 2025 bronze/silver/gold build-out and
+metadata validation. Genuinely novel pattern, fully tech-transferable.
+Primary source: the medallion-architecture design doc.
+
+### A5. Building SCD2 history from scratch on an immutable lake — *greenfield*
+
+Temporal tables via generated pending-changes views + MERGE: tombstones,
+validity windows, per-key version ids, hash-pivoted change detection,
+non-destructive schema evolution — and the determinism dependency (a flappy
+source view silently fabricates history). Primary source: the history
+system-design doc.
+
+### A6. Query-over-S3 over a warehouse vendor — *road not taken*
+
+An honest platform-selection piece backed by receipts: a real
+warehouse-vendor PoC (IaC provider config, DDL — others' work, cite
+accordingly) that was shelved, no Redshift ever, and the reasoning that
+kept everything on query-over-S3 with open table formats.
+
+### A7. ★ We reverse-engineered our own cloud bill — *optimisation / war story*
+
+Cost attribution: CloudTrail query events joined to pricing data until the
+model reproduced ~99.8% of the actual Athena bill over 45 days — tracing
+~55% of spend to six SCD2 MERGEs sharing one codegen template, and one
+pending-changes view scanning hundreds of GB per run (3× over the history
+table) to apply a tiny delta. Fix levers: hash-only change detection (read
+2 columns, not 21), watermark incrementality, and the "a watermark can't
+see DELETEs" trap. The payoff post of the whole arc. Primary source: the
+cost-reduction plan doc.
+
+### A8. Timestamp-free CDC with content hashes — *pattern*
+
+Syncing a warehouse to a search index on a two-field contract: stable key +
+xxhash64 of everything else. No timestamps, no version columns. Short,
+sharp, searchable.
+
+### A9. Splitting the data platform out of the monolith (2024) — *re-org*
+
+Carving infra, batch utils, and the lake out of the application repo;
+migration boundaries; the guardrails ("do not reintroduce extracted code")
+and catalogue metadata that stop it re-merging. Pairs with the personal-repo
+Extraction Policy for a two-scale story.
+
+---
+
+# Area B — Backend & compute: the .NET estate (2019 → 2025)
+
+### B1. ★ Moving heavy compute off the web tier: AWS Batch in production (2019–2025) — *greenfield → optimisation*
+
+The production sequel to the 2022 talk and the published cookbook: adopting
+AWS Batch in 2019, array-job fan-out ("chunking up rows", 2022), Step
+Functions as orchestrator, trace-context propagation across the job graph
+(2021), the "empty file returned → lower parallelism" gotcha, chunk tuning
+("decrease chunk size to 2 million"), and 2025 right-sizing of compute
+environments. Ends the arc the talk started.
+
+### B2. ★ The memory & concurrency wars (2021–2024) — *war story*
+
+OOM hotfixes → streaming to Parquet for reduced memory → capping parallelism
+to dodge S3 exhaustion → a `Parallel.For` race condition removed → a
+connection-pool deadlock from releasing connections early → mutexes on
+contract loading → tuning job weights. A multi-year campaign against
+resource exhaustion in a data-heavy pipeline, with commit receipts
+throughout. Best pure war-story material in the estate.
+
+### B3. ★ We adopted Elasticsearch, then tore it out (2019 → 2023) — *reversal*
+
+Built the cluster and structured-logging pipeline in 2019, leaned on ES as
+an application data store through 2022 (conflict wrappers, verify jobs,
+backoff tuning — the friction accumulating in the log), then feature-flagged
+back to the relational DB in 2023 (a feature switch to swap from Elastic to
+DB; "forcibly failing the elasticsearch calls"). Credible because the same
+engineer built and removed it. Contrarian, honest, memorable.
+
+### B4. Re-architecting job orchestration: SQS workers → internal queues + Redis (2023) — *migration / reversal*
+
+Calling Batch directly instead of pushing to SQS, retiring the SQS worker
+deployment, Redis-backed internal queues, durable RabbitMQ with exponential
+backoff (2021) as the precursor. "We removed a distributed component and
+got simpler and more reliable."
+
+### B5. ★ Modernising a 10-year-old .NET Framework monolith — live (2024–2025) — *migration, marquee*
+
+EF6 → EF Core and net472 → net8 with **no big-bang**: cross-compiling the
+data layer, running both ORMs side-by-side, an EF Core migration checker in
+CI, and the tree still honestly split (73 net8 vs 36 net472 projects).
+Includes the production war story (an async fetch silently misbehaving on
+the new ORM in production) and the consolidation revert that taught pace.
+The dual solution files are the artefact.
+
+### B6. Integration tests that boot the real DI container — *testing*
+
+Resolve production objects from the real composition root; replace only the
+extremities with *strict* fail-fast mocks; assert behaviour, not
+invocations. Retrofitting harnesses onto a legacy estate (~1,900 lines in
+one PR). Primary source: the batch integration-test guide.
+
+### B7. A code-first registry as the single source of truth — *pattern*
+
+~100+ job types as immutable C# record descriptors carrying display
+metadata, feature flags, and type wiring — plus the CI guard for the classic
+"project on disk but not in the solution" trap.
+
+---
+
+# Area C — CI/CD, quality & release engineering (2019 → 2026)
+
+### C1. The .NET 5 upgrade we rolled back (2020) — *war story*
+
+Upgrade → break → hotfix rollback to Core 3.1 → *reinstate deliberately in a
+test lane to hunt the cause*. A small, honest post about upgrade discipline
+and keeping a reproduction path instead of just retreating.
+
+### C2. Release trains and reproducible local environments (2024) — *migration*
+
+A release-train pipeline plus Docker/Postgres local parity and
+locally-runnable migrations for a legacy estate; and CI that understands
+database migrations (the pipeline persists per-branch migration-timeout
+state across builds to gate deploys).
+
+### C3. ★ Coverage gates that can only go up (2024–2026) — *quality system*
+
+Union-merge multi-platform reports; diff per-file against a main baseline;
+one declarative config with `fixed` vs `ratchet` modes and a noise band;
+baseline-first rollout on legacy (threshold committed but disabled);
+unit-vs-integration partition to know which tier is thin. Featuring the
+**skip-as-green** footgun: a required check that gets *skipped* is reported
+green by branch protection — gates must fail closed with
+`if: ${{ !cancelled() }}` and "honest absence" semantics.
+
+### C4. ★ We built our own merge queue, and it fought back (2026) — *build + war story*
+
+GitHub's native queue can't do rebase-then-fast-forward linear history, so:
+a label-driven queue from reusable workflows — then an RFC-2119-style
+internal spec, and ~70 automated conformance PRs driving *real* runners and
+asserting invariants from label-event streams. Failure modes are the story:
+the "self-kick", FIFO starvation, stuck lock holders, and GitHub's compare
+API returning the pre-rebase relationship seconds after a force-push. Could
+be two posts (build it / prove it).
+
+### C5. RFC-2119 specs for internal systems — *governance*
+
+When internal engineering deserves a formal spec: spec vs ADR vs plan
+taxonomy, stable IDs, semver, named reference implementations, and
+conformance as the price of the word MUST. Natural companion act to C4.
+
+---
+
+# Area D — Platform engineering & governance (2019 → 2026)
+
+### D1. ★ "My First Pulumi": IaC from zero to governed estate (2019 → 2026) — *greenfield → governance*
+
+Literal first commit at the company. From one stack to S3-backed state, KMS
+secrets (late 2019), org-wide adoption — and eventually the hard rule set
+(self-hosted state only, vendor cloud banned, access-denied-means-stop
+encoded in repo guardrails agents obey). Seven years of IaC maturity in one
+first-person arc.
+
+### D2. Governance-as-code for a whole GitHub org (2025–2026) — *governance*
+
+From the first topics-enforcement reusable workflow (a central allow-list
+repo + `workflow_call`, late 2025) to declarative repo tiers driving
+audit/enforce for branch protection, rulesets, SHA-pinning, CODEOWNERS —
+dry-run-first, additive-by-default, destructive ops behind an explicit
+flag; billing seats modelled read-only because there's no API to buy them.
+Killer anecdote: the required check whose *producing workflow was disabled* —
+PRs pend forever while everything looks green (it happened).
+
+### D3. Your event bus won't validate your events (2026) — *governance / architecture*
+
+EventBridge validates nothing on publish, so the contract moves left: 13
+RFC-2119 rules with severities enforced at contract-authoring time, platform
+hard limits (256 KiB entries, Draft-4 registry, routing-key stability)
+encoded as lint rules, backward-compat diffs as a merge gate, generated
+types pushed outward via one continuously-refreshed PR per consumer with a
+`--check` drift guard. Legacy status + auditable waivers = the migration
+to-do list stays honest.
+
+### D4. Onboarding automation: the PowerShell → Python arc (2025–2026) — *devex*
+
+A 3,700-line PowerShell suite automating a dev machine end-to-end (winget,
+WSL, fonts, multi-account git), role-based selection, then a deliberate
+Python port with parallel validation — and Playwright driving SaaS
+provisioning. "Automate the first day" with an honest rewrite story.
+
+### D5. A git-tracked snapshot store + a throwaway DuckDB index — *pattern*
+
+History you can trust, queries you can rebuild: org-wide LOC analysis with
+snapshots as source of truth and a rebuildable local index; backfill via
+temporary worktrees.
+
+---
+
+# Area E — Frontend & delivery (2022 → 2025)
+
+*(See attribution note — these are the personally-defensible slices.)*
+
+### E1. Feature flags as an operational safety net (2022–2024) — *greenfield*
+
+Feature-flag platform introduction, env-driven config, maintenance mode
+behind a flag, tenant-based targeting (2024) — and flags as the retirement
+mechanism in B3's Elasticsearch removal. Release-engineering angle, not
+product-flag angle.
+
+### E2. Migrating a CDN without downtime (2023) — *migration*
+
+A concentrated fortnight moving CloudFront distributions, Route 53 records,
+and S3 buckets to new distributions live — cache invalidation, DNS cutover,
+rollback thinking. Compact, concrete, generic.
+
+### E3. ★ Merging repos without losing a single commit — *migration, novel technique* → **promoted**
+
+Now its own idea:
+[repo-merging-without-losing-history](/ideas/repo-merging-without-losing-history).
+Two verified campaigns, filter-repo mechanics, cut-point branches as
+permanent markers, and the reference-link recovery task all live there.
+
+### E4. Seeds
+
+- **Monitoring-as-code** — synthetic checks written as the same Playwright
+  specs the team already writes.
+- **Search on button press** — draft vs committed query state instead of
+  debounced reactive filtering.
+- **Version alignment as a disk optimisation** — version-sync tooling framed
+  as pnpm store dedup.
+
+---
+
+# Area F — AI-assisted engineering (2026)
+
+### F1. ★ Putting AI agents in CI without a surprise bill — *optimisation*
+
+An agentic PR-check workflow was quietly burning tokens — raw coverage XML
+(~5M tokens) was flowing into the model. Move deterministic computation to
+plain CI and narrate a few-KB digest instead; concurrency cancellation so
+push-bursts don't pay twice; credit caps in frontmatter; multi-model
+tiering (cheap model for chores, strong model for review). Principle: *the
+model should reason, not compute*.
+
+### F2. Documentation that maintains itself — *pattern*
+
+Skills with a maturity lifecycle and evolution counts; a post-task
+reflection loop that writes learnings back into the skill and commits;
+agents as deliberately-thin routers over that knowledge.
+
+### F3. One source, many AI tools — *build*
+
+Agent/skill/command config compiled per-tool (multiple coding agents) from
+one spec, with a `--check` CI drift guard so generated config can't rot.
+
+### F4. Night Shift: a state machine made of file renames — *workflow*
+
+Human architects by day, agents execute overnight; the hand-off protocol is
+renaming `draft-*.md` → `active-*.md` → `done-*.md`; plus the honest
+counterpoint — a workflow compiler that hangs headless, so the tool *emits
+a script for a human to run*. Credit Jamon Holmgren's pattern.
+
+### F5. Offload the heavy compute to CI; ship state via git refs — *pattern*
+
+Embeddings built incrementally on Actions runners (GGUF caching,
+WAL-checkpoint before artifact upload), distributed cross-device via a
+rolling GitHub Release tag; a shadow git repo mirroring a Drive-owned vault
+for diffs and CI triggers; same shape as code-graph artifacts and a private
+package feed for internal CLIs.
+
+---
+
+# Cross-cutting umbrellas
+
+### X1. ★ Determinism is a feature (test it like one)
+
+Five stack-diverse mini-cases converging on one principle: a pandas→Polars
+migration shipped as *byte-identical*; two data sources required to render
+byte-identical reports; deterministic codegen enabling CI drift guards;
+content-hash CDC (A8); SCD2's determinism dependency (A5); and a
+deliberately duplicated hash function kept honest by a fuzz-corpus parity
+test — "when DRY is impossible, test the duplication."
+
+### X2. An observability arc, 2019 → 2026
+
+Ripping out NLog for Serilog + Elasticsearch (2019), trace-context
+propagation across distributed batch jobs (2021), zero-code OTel
+auto-instrumentation as the org pattern (2025), and a local-first OTel
+stack — every CLI auto-connects when the collector is up; NDJSON queryable
+via DuckDB (2026). One thread, seven years.
+
+### Personal-tooling seeds (short posts)
+
+- **Reliability beats cleverness** — the Windows workspace-restore tool that
+  abandoned live-inference for a hand-authored plan with frank per-app
+  launch delays.
+- **The `common` package that ate my imports** — multiple repos shipping a
+  top-level `common` can never share a `sys.path`.
+- **Validate at the boundary — even when the boundary is you** — a renderer
+  treating its own pipeline's SQLite as untrusted, exhaustiveness as compile
+  errors.
+- **Visual-regression testing for architecture diagrams** — pixel-diffing
+  draw.io exports with a CI gate.
+- **"Why we couldn't add a third S3 event trigger"** — S3 rejects
+  ambiguous/subset notification filters; EventBridge doesn't.
+- **An extraction policy for the junk drawer** — a written rubric for when a
+  utility earns its own repo (pairs with A9).
+
+---
+
+## Series groupings
+
+- **"From ad-hoc SQL to a lakehouse"** — A1 spine: A2 → A3 → A9 → A4/A6 → A7,
+  anchored by the 2022 AWS Batch talk (B1). The strongest multi-post arc,
+  seven years of first-person evidence.
+- **"The Modernisation Diaries"** — B5, B3, B4, C1, C2, E2: incremental
+  migration and honest reversals on a long-lived estate.
+- **"The Paved Road"** — C3, C4/C5, D2, D3: governance, contracts, and gates
+  as code, with baseline-then-enforce as the recurring move.
+- **"Agents at Work"** — F1–F5 + the shipped virtual-monorepo post as anchor.
+
+## Next steps
+
+- [ ] Pick 2–3 winners and promote each to its own idea file with an outline.
+- [ ] For each winner, re-mine the exact evidence (repos, paths, commits)
+      privately — this file deliberately omits it — and verify claims,
+      especially attribution in shared repos.
+- [ ] Decide the sanitisation line for internal numbers per post.
+- [ ] Check employer comfort with naming systems publicly (the virtual
+      monorepo post sets the precedent).
