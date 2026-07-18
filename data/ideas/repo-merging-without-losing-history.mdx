@@ -98,9 +98,27 @@ beat.
       section cited a couple of external guides ("the original guide which
       lines up with the specifics", a git-filter-repo filtering guide, the
       basis of the branch-copy script) — the knowledge-base export stripped
-      the hyperlinks, leaving bare bullets. Pull the URLs from the original
+      the hyperlinks, leaving bare bullets. Confirm against the original
       internal articles; they're the citation trail and likely `[@BibKey]`
-      candidates.
+      candidates. **Web-search candidates** (contents unverified — the
+      research sandbox allowed search but blocked page fetches):
+      - *Python script for repo manipulation* — near-certain:
+        [newren/git-filter-repo](https://github.com/newren/git-filter-repo)
+        (the script the merge scripts invoke directly).
+      - *"The original guide which lines up with the specifics"* — the
+        popular recipes matching the exact flow (clone each repo →
+        `--to-subdirectory-filter` → local remote → merge
+        `--allow-unrelated-histories`):
+        [Chris Thompson, "Keeping git history when converting multiple repos into a monorepo"](https://medium.com/@chris_72272/keeping-git-history-when-converting-multiple-repos-into-a-monorepo-97641744d928),
+        [AlexV, "How to merge Git repositories and keep history"](https://alex-v.medium.com/how-to-merge-git-repositories-and-keep-history-587f973f06a0),
+        [knappi.org, "Git: Merging multiple repositories into a mono-repo"](https://blog.knappi.org/0009-mono-repo/).
+      - *"Interesting guide about filtering git repos"* — candidates:
+        [git-tower, "Git Filter-Repo: The Best Way to Rewrite Git History"](https://www.git-tower.com/learn/git/faq/git-filter-repo),
+        [ctooley, "Merging old repos into a monolithic git repo archive"](https://dev.to/ctooley/merging-old-repos-into-a-monolithic-git-repo-archive-4c7h).
+      - *Basis of the branch-copy script* — candidates for the
+        `git branch -r` loop:
+        [niksumeiko gist, "Moving git repository and all its branches, tags to a new remote"](https://gist.github.com/niksumeiko/8972566),
+        [alexlvovich, "Copy Git repository with branches to another server"](https://alexlvovich.com/blog/copy-git-repository-with-branches-to-another).
 - [ ] **Re-run the DAG checks for the draft** — capture real (sanitised)
       output of `git log --max-parents=0`, the merge-commit parents, and a
       `--follow` walk for a `<Terminal>` component.
