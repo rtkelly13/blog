@@ -1,0 +1,122 @@
+---
+title: "The Realities of Porting a Complex .NET Framework Codebase"
+kind: article
+status: developing
+created: "2026-07-18"
+updated: "2026-07-18"
+tags: ["dotnet", "migration", "ef-core", "legacy", "strangler-fig", "war-story"]
+target: "future data/blog/dotnet-framework-migration-realities.mdx"
+summary: "Migrating a ~10-year-old .NET Framework estate to .NET 8 while shipping features the whole time: paired projects compiling the same sources twice, two ORMs kept in lockstep, migrations written for both worlds, a revert that taught pace — and the honest accounting of what 'no big bang' actually costs. Working material, not copy."
+layout: IdeaLayout
+---
+
+## Where it stands
+
+Promoted from the [work-initiatives backlog](/ideas/work-initiatives-backlog)
+(entry B5). Verified against real history; per the org-specifics policy
+(ADR-0008) repo/app names, ticket IDs, and colleague names are omitted —
+dates, structural facts, and quoted commit fragments only. Per the
+authorship policy this is working material, not copy.
+
+**The thesis.** Everyone knows the strangler-fig theory. This post is the
+practice: what it actually takes to port a fairly complex, revenue-bearing
+codebase — one with a decade of history, two runtimes, and a team shipping
+features through the whole migration. The honest version is not "we
+migrated"; it's "we are still migrating, on purpose, and here's why that's
+the correct state to be in".
+
+## The verified facts (mine of the real tree/history)
+
+- **Scale, today:** ~73 modern (.NET 8) projects alongside ~36 legacy
+  (.NET Framework 4.7.2) projects, with **two solution files at the root** —
+  one per world — as the honest artefact of an in-flight migration.
+- **The cross-compilation mechanic:** not TFM multi-targeting (zero
+  `<TargetFrameworks>` in the tree) but **paired project files over the
+  same sources** — `X.csproj` (framework) and `X.Core.csproj` (modern)
+  side by side in one folder, compiling the same `.cs` files, with only
+  ~20 files needing `#if` conditionals. Worth a section on *why* pairs
+  beat multi-targeting here (legacy web tooling, packages, and build
+  chains that can't load SDK-style multi-target projects).
+- **Two ORMs in lockstep:** EF6 and EF Core running side by side against
+  one database — "EF Core copied over, compiling with existing DB types"
+  (Jul 2024), "cross compilation of the data factory for EF / EF Core"
+  (Aug 2024), mapping fix-up (Sep 2024), then an **EF Core migration
+  checker in CI** (Nov 2024). The lockstep is ongoing and explicit in the
+  log: "More EFCore match to EFFramework work" (Aug 2025), schema
+  migrations authored with an explicit ".NET Framework side of things"
+  (Sep 2025), alignment fixes still landing mid-2026.
+- **Production teaches you what tests don't:** "Looks like the GetAsync
+  method isn't working for EF Core in production" (hotfix, Nov 2024) —
+  the async path of the new ORM behaving differently under real load.
+- **The revert that taught pace:** a large project-consolidation change
+  reverted whole (Jan 2025) — consolidations of shared AWS/domain projects
+  into a `core/` layout succeeded when staged (file-scoped namespaces →
+  shared enums → merged entities → repositories relocated, Jul–Dec 2024),
+  and failed when batched.
+- **The runway before the leap:** .NET Core 3.1 (Dec 2019), the .NET 5
+  upgrade *rolled back* in production and then deliberately reinstated in
+  a test lane to hunt the cause (Nov–Dec 2020), .NET 6 (Dec 2021), first
+  "make it cross-compilable" groundwork (Mar 2022). The 2024 push was the
+  fifth year of runway, not a fresh start.
+- **The written plan is candid:** the internal migration outline debates
+  by-function vs by-domain structure ("this requires us to have code
+  separated by domain which may be a challenge"), flags the two
+  irreconcilable configuration systems (interface-over-XML-config vs
+  concrete objects from JSON), admits "there is a LOT of shared code…
+  being copied between the two", and prescribes "a huge spreadsheet of
+  every page and its status" for the eventual UI strangler. Great primary
+  source for the "plans meet reality" beat.
+
+## Proposed shape
+
+1. **The setup** — a decade-old estate, two runtimes, no option to stop
+   shipping. Why big-bang was never on the table (revenue-bearing, ~110
+   projects, one shared database).
+2. **Make the same code build twice** — the paired-project mechanic vs
+   multi-targeting; what the ~20 `#if` files say about how little truly
+   differs, and how much effort the remaining 99% of sameness still costs.
+3. **Two ORMs, one database, zero drift allowed** — the EF6/EF Core
+   lockstep: copied types, a cross-compiled data factory, migrations
+   written for both worlds, and a CI checker standing guard. The real cost
+   of "no big bang": every data-layer change lands twice.
+4. **Production is the final reviewer** — the async-method-misbehaving
+   hotfix; why dual-running catches drift that test suites structurally
+   can't.
+5. **Pace: the revert** — staged consolidation worked; the batched one got
+   reverted whole. Change internals before interfaces; make each step
+   individually shippable.
+6. **The plan vs the migration** — quoting the candid internal outline:
+   structure debates, config-system collisions, copied shared code, the
+   page-inventory spreadsheet. Plans are hypotheses.
+7. **Being honestly unfinished** — 73:36 is not failure; it's a stable
+   operating mode with a direction. What "done" would even mean, and
+   whether it matters.
+
+## Links to other posts/ideas
+
+- [Merging repos without losing a single commit](/ideas/repo-merging-without-losing-history)
+  — the Dec 2023 unification of the web and batch histories into one
+  monorepo is what made the shared `core/` consolidation (and honest
+  side-by-side solutions) possible; this post picks up where that
+  technique left off.
+- [Batch compute in production](/ideas/batch-compute-in-production) — the
+  batch tier led the modern-.NET move; the two posts bracket the same
+  codebase from different angles.
+- The 2020 .NET 5 rollback is beat 0 of this story and could stay here or
+  become its own short war-story post (backlog C1).
+
+## Gaps to fill
+
+- [ ] Re-mine exact figures privately: project counts per TFM over time
+      (plot the 36:73 ratio by year?), number of paired projects, `#if`
+      file count trend.
+- [ ] The paired-projects-vs-multi-targeting rationale needs verifying
+      with the actual constraint that forced it (old web project system?
+      packaging? build chain?) — don't guess in print.
+- [ ] Reconstruct the async-ORM production incident enough to tell it
+      accurately (symptom, blast radius, fix) without internal specifics.
+- [ ] Pull the exact staged-consolidation sequence and the revert scope to
+      make the "pace" section concrete.
+- [ ] Decide how much of the candid plan doc to quote and how to
+      anonymise its structure debate.
+- [ ] Check employer comfort per ADR-0008; all diagrams generic.
