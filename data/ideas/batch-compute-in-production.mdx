@@ -1,0 +1,115 @@
+---
+title: "Batch Compute in Production: Seven Years of Running the Heavy Stuff Elsewhere"
+kind: article
+status: developing
+created: "2026-07-18"
+updated: "2026-07-18"
+tags: ["aws", "aws-batch", "dotnet", "performance", "war-story", "architecture"]
+target: "future data/blog/batch-compute-in-production.mdx — possibly a two-parter (architecture / war stories)"
+summary: "The production sequel to the 2022 AWS Batch talk: adopting managed batch compute in 2019, scaling it through array jobs and Step Functions, and the seven-year war against memory, parallelism, and throttling — 181 commits of receipts. Working material, not copy."
+layout: IdeaLayout
+---
+
+## Where it stands
+
+Promoted from the [work-initiatives backlog](/ideas/work-initiatives-backlog)
+(entries B1 + B2, merged — the architecture and the war stories are one
+narrative). Verified against real history; per the org-specifics policy
+(ADR-0008) repo/app names, ticket IDs, and colleague names are omitted —
+dates and quoted commit fragments only. Per the authorship policy this is
+working material, not copy.
+
+**The thesis.** The 2022 talk and the published
+[AWS Batch cookbook](/blog/aws-batch/cookbook) showed the *patterns* —
+array jobs, dependent jobs, map-reduce. This post is what the patterns
+don't tell you: what seven years of running a data-heavy batch estate in
+production actually costs, and the specific ways it fights back.
+
+## The arc (verified against history)
+
+- **May–Jul 2019** — adoption: first Batch job definitions deployed via
+  IaC within weeks of joining; heavy file-matching work moved off the web
+  tier into managed batch compute. Early lesson lands the same year:
+  "errors on alternative threads aren't cleared properly, so we need to
+  avoid unmanaged threading" (Nov 2019).
+- **2021** — scale mechanics arrive: trace-context propagation *between*
+  batch jobs (Jul 2021), the array-job fan-out pattern debugged into shape
+  ("Batch array processing issue solved", Sep 2021), first
+  memory-pressure hotfixes (May 2021), Parquet adopted partly *as a
+  memory-reduction measure* (Aug 2021: "More Memory and Parquet files for
+  reduced memory usage").
+- **2022** — the map-reduce year (the talk's material, in production):
+  chunking large workloads ("chunking up rows", Apr 2022), Step Functions
+  orchestrating Batch, chunk-size tuning ("Decrease chunk size to
+  2 million", Oct 2022), and the great parallelism reckoning — "Limiting
+  simultaneous downloading of account data to avoid S3 exhaustion errors"
+  (Sep 2022), "Detect empty file returned → lower parallelism" (May 2022).
+- **2023** — orchestration simplification: calling Batch directly instead
+  of queueing through SQS, retiring the SQS worker deployment, internal
+  queues + Redis; a `Parallel.For` race condition found and removed
+  (Sep 2023).
+- **2024** — resource-lifecycle warfare: "Releasing connections early,
+  causing connection pooling deadlock" (Aug 2024), system-wide connection
+  timeouts, a mutex on hot-path loading, re-weighting jobs and reducing
+  array parallelism (Oct 2024).
+- **2025** — the cost pass: right-sizing instance sizes per job class,
+  deleting old compute environments, moving file processing to
+  streaming/async throughout.
+
+**~181 commits** in the estate match memory / parallelism / exhaustion /
+deadlock / timeout — the war was continuous, not episodic.
+
+## Proposed shape
+
+1. **Why batch compute at all** — the web tier is the wrong place for
+   hours-long, memory-hungry work; what managed batch buys you (spot
+   pricing, retries, job queues) and what it doesn't (your memory
+   problems come with you).
+2. **The architecture that emerged** — job definitions as IaC, array-job
+   fan-out, Step Functions as the reducer, trace context across the job
+   graph. Link back to the cookbook for the patterns; this is the
+   production configuration of them.
+3. **The war stories, thematically:**
+   - *Memory* — streaming over buffering, Parquet as a memory fix before
+     it was an analytics fix, OOM hotfix archaeology.
+   - *Parallelism* — every fan-out found a bottleneck downstream: S3
+     request rates, connection pools, the DB. "Add parallelism" is a loan,
+     not a gift; the empty-file→lower-parallelism gotcha.
+   - *Correctness under concurrency* — the `Parallel.For` race, unmanaged
+     threading and error handling, the mutex you eventually admit you
+     need.
+   - *Resource lifecycles* — the connection released early that deadlocked
+     the pool; disposal bugs in cloud SDK wrappers.
+4. **Simplify later** — the 2023 removal of the queueing middleman: the
+   orchestration you need at year one is not what you need at year five.
+5. **Pay the bill** — 2025 right-sizing; compute environments accrete like
+   everything else.
+6. **Takeaways** — batch compute moves the work, not the discipline; tune
+   chunk size empirically and write it down; cap parallelism where the
+   *victim* is, not where the work is.
+
+## Links to other posts/ideas
+
+- [AWS Batch cookbook](/blog/aws-batch/cookbook) — the published patterns
+  post this one sequels; the 2022 talk covers the same ground live.
+- [Merging repos without losing a single commit](/ideas/repo-merging-without-losing-history)
+  — the batch estate is one of the two histories grafted into the .NET
+  monorepo in Dec 2023; its full commit trail (and these war stories'
+  receipts) survive *because* of that technique.
+- The .NET migration idea (below) — the batch tier led the move to modern
+  .NET; the two posts bracket the same codebase from different angles.
+
+## Gaps to fill
+
+- [ ] Decide one post or two (architecture vs war stories). The war-story
+      half is the more distinctive; the architecture half overlaps the
+      cookbook.
+- [ ] Re-mine exact numbers privately: job counts, largest array sizes,
+      instance classes before/after right-sizing, and whether any
+      before/after run-time or cost figures are publishable.
+- [ ] The "chunk size 2 million" story deserves its full shape: what blew
+      up at larger sizes, what got slow at smaller ones.
+- [ ] Verify the threading-error claim from 2019 against the actual code
+      pattern (thread-local error state?) before quoting it.
+- [ ] Check employer comfort per ADR-0008 before naming any service or
+      showing real job graphs; diagrams should use generic job names.

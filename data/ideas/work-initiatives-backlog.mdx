@@ -162,23 +162,15 @@ Extraction Policy for a two-scale story.
 
 # Area B — Backend & compute: the .NET estate (2019 → 2025)
 
-### B1. ★ Moving heavy compute off the web tier: AWS Batch in production (2019–2025) — *greenfield → optimisation*
+### B1 + B2. ★ Batch compute in production: architecture + the wars → **promoted**
 
-The production sequel to the 2022 talk and the published cookbook: adopting
-AWS Batch in 2019, array-job fan-out ("chunking up rows", 2022), Step
-Functions as orchestrator, trace-context propagation across the job graph
-(2021), the "empty file returned → lower parallelism" gotcha, chunk tuning
-("decrease chunk size to 2 million"), and 2025 right-sizing of compute
-environments. Ends the arc the talk started.
-
-### B2. ★ The memory & concurrency wars (2021–2024) — *war story*
-
-OOM hotfixes → streaming to Parquet for reduced memory → capping parallelism
-to dodge S3 exhaustion → a `Parallel.For` race condition removed → a
-connection-pool deadlock from releasing connections early → mutexes on
-contract loading → tuning job weights. A multi-year campaign against
-resource exhaustion in a data-heavy pipeline, with commit receipts
-throughout. Best pure war-story material in the estate.
+Now one idea:
+[batch-compute-in-production](/ideas/batch-compute-in-production).
+The 2019 adoption → array-job/Step Functions scale mechanics → the
+memory/parallelism/resource-lifecycle war stories (~181 commits of
+receipts) → 2023 orchestration simplification → 2025 right-sizing. Sequels
+the published cookbook and the 2022 talk; links to the repo-merge and
+.NET-migration ideas.
 
 ### B3. ★ We adopted Elasticsearch, then tore it out (2019 → 2023) — *reversal*
 
@@ -196,14 +188,14 @@ deployment, Redis-backed internal queues, durable RabbitMQ with exponential
 backoff (2021) as the precursor. "We removed a distributed component and
 got simpler and more reliable."
 
-### B5. ★ Modernising a 10-year-old .NET Framework monolith — live (2024–2025) — *migration, marquee*
+### B5. ★ The realities of porting a complex .NET Framework codebase → **promoted**
 
-EF6 → EF Core and net472 → net8 with **no big-bang**: cross-compiling the
-data layer, running both ORMs side-by-side, an EF Core migration checker in
-CI, and the tree still honestly split (73 net8 vs 36 net472 projects).
-Includes the production war story (an async fetch silently misbehaving on
-the new ORM in production) and the consolidation revert that taught pace.
-The dual solution files are the artefact.
+Now its own idea:
+[dotnet-framework-migration-realities](/ideas/dotnet-framework-migration-realities).
+Paired projects compiling the same sources twice, EF6/EF Core in lockstep
+with migrations written for both worlds, the production async-ORM hotfix,
+the consolidation revert that taught pace, and the candid internal plan
+doc. Links to the repo-merge and batch ideas.
 
 ### B6. Integration tests that boot the real DI container — *testing*
 
