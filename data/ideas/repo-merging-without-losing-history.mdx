@@ -6,7 +6,7 @@ created: "2026-07-18"
 updated: "2026-07-18"
 tags: ["git", "monorepo", "migration", "tooling", "devex"]
 target: "future data/blog/repo-merging-without-losing-history.mdx"
-summary: "A repeatable, history-preserving repo-merge technique developed for a .NET monorepo unification (late 2023) and reapplied twice across the JS estate (2023–2025): filter-repo subdirectory rewrites, unrelated-histories merges, and cut-point branches as permanent markers. Promoted from the work-initiatives backlog; evidence verified against real history."
+summary: "A repeatable, history-preserving repo-merge technique applied three times across two tech estates (2023–2025): filter-repo subdirectory rewrites, unrelated-histories merges, and cut-point branches as permanent markers. Promoted from the work-initiatives backlog; evidence verified against real history."
 layout: IdeaLayout
 ---
 
@@ -25,46 +25,48 @@ them.
 This technique treats a repo merge as a *reversible, auditable, repeatable*
 operation: every commit survives, every branch survives, and the exact
 pre-merge state of each source repo is preserved as a named branch — one
-checkout away, forever. Developed first for a **.NET monorepo
-unification (late 2023)**, then reapplied to the **JS estate (2023–2025)** —
-three campaigns, so it's a pattern, not a one-off.
+checkout away, forever. **Applied three times across two tech estates
+(2023–2025)** — a JS consolidation, a .NET monorepo unification, and a JS
+monorepo rebuild — so it's a pattern, not a one-off.
 
 ## Timeline (verified against history)
 
+- **~H2 2023 (likely first)** — four satellite app repos merged into the
+  dashboard app repo (JS). Bounded ≥ Jul 2023 by the preserved cut
+  branches' newest commits; exact date lives in the source repo's history —
+  pin it when drafting. Likely the first outing: this campaign is the one
+  the *older* internal article documents, and the later .NET merges reuse
+  its commit-message convention.
 - **17 Oct 2023** — new .NET monorepo base created as an initial commit on
   an orphan branch.
 - **18 Dec 2023** — the .NET unification lands: **two unrelated-histories
   merges, five seconds apart**, grafting the web application's history
   (roots back to 2016) and the batch estate's history (roots back to 2018)
-  into the new monorepo — commit messages following the "Merge
-  &lt;source&gt; History" convention from the scripts. Every source branch
+  into the new monorepo — commit messages following the same "Merge
+  &lt;source&gt; History" convention as the scripts. Every source branch
   preserved under an `old-<source>/*` prefix (still on the remote today).
-- **2023–2024** — the technique reapplied in JS: four satellite app repos
-  merged into the dashboard app repo (bounded ≥ Jul 2023 by the preserved
-  cut branches' newest commits; exact date lives in the source repo's
-  history — pin it when drafting).
-- **Jul–Aug 2025** — the JS estate consolidated again into a frontend
-  monorepo: the dashboard UI carved out of its old repo with all branches
-  and tags, then the newer React app grafted in on 22 Aug 2025, the merge
-  commit's two parents being exactly the preserved cut-point branches.
+- **Jul–Aug 2025 (third time)** — the JS estate consolidated again into a
+  frontend monorepo: the dashboard UI carved out of its old repo with all
+  branches and tags, then the newer React app grafted in on 22 Aug 2025,
+  the merge commit's two parents being exactly the preserved cut-point
+  branches.
 
-The chronology matters for the narrative: **a .NET monorepo change first,
-then the JS ones** — the second and third campaigns reused and refined the
-first's scripts (same message convention, same `old-*` branch
-preservation), which is the strongest evidence this is a technique rather
-than an event.
+The chronology matters for the narrative: the technique crossed **from the
+JS estate to a .NET monorepo unification and back** — same message
+convention, same `old-*` branch preservation, refined mechanics each time
+(the 2025 campaign's mirror-clone carve-out superseding the original
+clone-and-filter). Reuse across estates is the strongest evidence this is
+a technique rather than an event. Ordering caveat: if the satellite merge
+turns out to postdate Dec 2023, the .NET unification was first — and there
+are hints (service folders already present in the dashboard repo before
+campaign 2's cleanup) of an even earlier consolidation wave worth checking
+when pinning dates.
 
 ## The campaigns in detail
 
-### Campaign 0 — unifying the .NET estate (Oct–Dec 2023)
+*(In likely chronological order — see the timeline caveat.)*
 
-Web and batch lived as separate repos with histories reaching back to 2016
-and 2018. A fresh monorepo was started on an orphan branch, then both
-histories were grafted in whole via unrelated-histories merges; the
-combined tree carries all the original roots, and `git log --follow` walks
-any file back to its origin. Source branches survive under `old-<source>/*`.
-
-### Campaign 1 — four satellite repos into one app repo (JS)
+### 1. The satellite consolidation — four repos into one app repo (JS, ~H2 2023)
 
 Documented in an internal article at the time. Mechanics:
 
@@ -79,7 +81,16 @@ Documented in an internal article at the time. Mechanics:
 Includes a quotable observation: after stitching, **date-order beats
 topological order** for reading the combined history.
 
-### Campaign 2 — building the frontend monorepo (JS, 2025)
+### 2. Unifying the .NET estate (Oct–Dec 2023)
+
+Web and batch lived as separate repos with histories reaching back to 2016
+and 2018. A fresh monorepo was started on an orphan branch (17 Oct 2023),
+then on 18 Dec 2023 both histories were grafted in whole via two
+unrelated-histories merges five seconds apart; the combined tree carries
+all the original roots, and `git log --follow` walks any file back to its
+origin. Source branches survive under `old-<source>/*`.
+
+### 3. Building the frontend monorepo (JS, 2025)
 
 Documented in a second internal article. Two moves:
 
@@ -111,23 +122,26 @@ beat.
    (bisect, blame, archaeology, contributor record).
 2. **The idea** — three invariants: every commit survives; every branch
    survives; the cut point is a named, permanent ref.
-3. **Origin: the .NET unification (Dec 2023)** — orphan-branch base, two
-   unrelated-histories grafts five seconds apart, `old-*` branch
-   preservation. Small diagrams of the DAG before and after (multiple
-   roots, one head).
-4. **Reapplying it in JS** — the satellite-repos merge, then the 2025
-   monorepo build: the carve-out variant (folder → new repo, all branches
-   and tags) and the graft whose merge commit's two parents are the
-   cut-point branches (sanitised names). Same convention across estates =
-   the "it's a technique" beat.
-5. **What breaks and how to handle it** — CI paths, tag collisions, blame
+3. **First outing: the satellite consolidation (JS, 2023)** —
+   subdirectory-filter, local remotes, unrelated-histories merges, and the
+   branch-copy script. Small diagrams of the DAG before and after
+   (multiple roots, one head).
+4. **Crossing estates: the .NET unification (Dec 2023)** — orphan-branch
+   base, two unrelated-histories grafts five seconds apart, same
+   conventions on a completely different stack. The "it's a technique"
+   beat.
+5. **Third time, refined: the 2025 monorepo build** — the carve-out
+   variant (folder → new repo, all branches and tags) and the graft whose
+   merge commit's two parents are the cut-point branches (sanitised
+   names).
+6. **What breaks and how to handle it** — CI paths, tag collisions, blame
    tooling, PR references, default-branch protection during the push,
    `--force` semantics of a mirror push.
-6. **Why keep the cut branches** — rollback points, archaeology anchors,
+7. **Why keep the cut branches** — rollback points, archaeology anchors,
    and proof-of-provenance. Date-order vs topo-order for reading stitched
    history.
-7. **The rejected approach** — and why iterating on the technique between
-   campaigns is the point: run twice, it's a pattern.
+8. **The rejected approach** — and why iterating on the technique between
+   campaigns is the point: run three times, it's a pattern.
 
 ## Gaps to fill
 
