@@ -4,25 +4,28 @@ import type { TerminalEvent } from '@/components/interactive/terminalEngine';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 
-// Client-only, mirroring how the interactives load in MDX.
-const load = { ssr: false as const };
+// Client-only, mirroring how the interactives load in MDX. next/dynamic's SWC
+// transform requires the options to be an inline object literal — a shared
+// variable fails the build (tsc-clean, next build-red), so each call inlines
+// `{ ssr: false }`.
 const MapReduceViz = dynamic(
   () => import('@/components/interactive/MapReduceViz'),
-  load,
+  { ssr: false },
 );
 const RailwayTrack = dynamic(
   () => import('@/components/interactive/RailwayTrack'),
-  load,
+  { ssr: false },
 );
-const MvuLoop = dynamic(() => import('@/components/interactive/MvuLoop'), load);
+const MvuLoop = dynamic(() => import('@/components/interactive/MvuLoop'), {
+  ssr: false,
+});
 const DepResolve = dynamic(
   () => import('@/components/interactive/DepResolve'),
-  load,
+  { ssr: false },
 );
-const Terminal = dynamic(
-  () => import('@/components/interactive/Terminal'),
-  load,
-);
+const Terminal = dynamic(() => import('@/components/interactive/Terminal'), {
+  ssr: false,
+});
 
 const PAKET_CONVERT: TerminalEvent[] = [
   { cmd: 'paket convert-from-nuget --force' },
