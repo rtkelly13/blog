@@ -115,7 +115,7 @@ export default function MapReduceViz({
   autoplay = true,
 }: MapReduceVizProps) {
   const reduceMotion = useReducedMotion() ?? false;
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
   const [mapperCount, setMapperCount] = useState(mappers);
   const [runKey, setRunKey] = useState(0);
   const [t, setT] = useState(0);
@@ -123,7 +123,12 @@ export default function MapReduceViz({
   const [started, setStarted] = useState(false);
 
   const plan = useMemo(
-    () => buildRun({ mappers: mapperCount, seed: runKey * 7919 + mapperCount, spotReclaim }),
+    () =>
+      buildRun({
+        mappers: mapperCount,
+        seed: runKey * 7919 + mapperCount,
+        spotReclaim,
+      }),
     [mapperCount, runKey, spotReclaim],
   );
   const frame: Frame = useMemo(() => stateAt(plan, t), [plan, t]);
@@ -199,9 +204,8 @@ export default function MapReduceViz({
 
   return (
     <figure className="my-6">
-      <div
+      <section
         ref={containerRef}
-        role="group"
         aria-label={`Animated map/reduce simulation: an input is split into ${chunkCount} chunks, processed by ${chunkCount} parallel map jobs, and merged by a reduce job. Current phase: ${PHASE_LABEL[frame.phase]}.`}
         className="border-2 border-white bg-black shadow-hard-lg"
       >
@@ -294,7 +298,6 @@ export default function MapReduceViz({
               <div className="flex flex-wrap gap-1">
                 {Array.from({ length: chunkCount }, (_, i) => (
                   <motion.span
-                    // biome-ignore lint/suspicious/noArrayIndexKey: chunks are positional by definition
                     key={i}
                     initial={false}
                     animate={{ opacity: i < visibleChunks ? 1 : 0.15 }}
@@ -352,7 +355,7 @@ export default function MapReduceViz({
             </div>
           </div>
         </div>
-      </div>
+      </section>
       {caption && (
         <figcaption className="mt-2 text-center font-mono text-xs text-zinc-500">
           {caption}
