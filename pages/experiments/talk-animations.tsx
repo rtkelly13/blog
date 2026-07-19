@@ -1,5 +1,6 @@
 import { Projector } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import type { TerminalEvent } from '@/components/interactive/terminalEngine';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 
@@ -23,7 +24,7 @@ const Terminal = dynamic(
   load,
 );
 
-const PAKET_CONVERT = [
+const PAKET_CONVERT: TerminalEvent[] = [
   { cmd: 'paket convert-from-nuget --force' },
   {
     out: [
