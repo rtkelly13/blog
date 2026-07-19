@@ -66,7 +66,7 @@ before drafting.
 
 - **Greenfield builds:** A2, A4, A5, B1, D1, G1, F3, F5
 - **Migrations (incremental, live):** A3, B4, B5, C2, E2, E3 (★ repo merge, done twice)
-- **Reversals / roads not taken (adopt → remove, prototype → shelve):** B3, A6, B4
+- **Reversals / roads not taken (workload move-offs, prototype → shelve):** B3 (partial — ES stayed), A6, B4
 - **Optimisation (cost / performance / memory):** A7, B2, F1
 - **Testing & quality engineering:** C3, C4, B6, T-seeds
 - **Governance / process-as-code:** D2, D3, D4, C5, D5
@@ -106,9 +106,10 @@ what you can't.
 
 ### A3. Running two analytics stores at once (2022–2023) — *migration*
 
-The Athena↔Elasticsearch dual-sync period: migrating query engines without
-a big-bang cutover — dual-write, historic backfill, verify jobs, then
-feature-flagged retirement. Pairs with B3 (the retirement's other half).
+The Athena↔Elasticsearch dual-sync period: migrating analytics queries
+without a big-bang cutover — dual-write, historic backfill, verify jobs,
+then feature-flagged switchover of specific workloads. Pairs with B3 (the
+data-path move-off; ES itself stayed).
 
 ### A4. ★ Your SQL view IS the table (2023–2025) — *greenfield / architecture*
 
@@ -172,14 +173,18 @@ receipts) → 2023 orchestration simplification → 2025 right-sizing. Sequels
 the published cookbook and the 2022 talk; links to the repo-merge and
 .NET-migration ideas.
 
-### B3. ★ We adopted Elasticsearch, then tore it out (2019 → 2023) — *reversal*
+### B3. ★ Right-sizing Elasticsearch's job (2019 → today) — *partial reversal*
 
-Built the cluster and structured-logging pipeline in 2019, leaned on ES as
-an application data store through 2022 (conflict wrappers, verify jobs,
-backoff tuning — the friction accumulating in the log), then feature-flagged
-back to the relational DB in 2023 (a feature switch to swap from Elastic to
-DB; "forcibly failing the elasticsearch calls"). Credible because the same
-engineer built and removed it. Contrarian, honest, memorable.
+**Correction: Elasticsearch was never removed — it's still in use.** The
+real story is sharper: built the cluster and structured-logging pipeline
+in 2019, let ES accrete *application data-store* duties through 2022
+(conflict wrappers, verify jobs, backoff tuning — the friction
+accumulating in the log), then in 2023 moved specific data-path workloads
+back to the relational DB behind a feature switch — while keeping ES for
+what it's actually good at. Angle: "what belongs in your search cluster" —
+adopting a tool broadly, then paying down the workloads that never
+belonged there, without throwing the tool out. Credible because the same
+engineer drove both directions.
 
 ### B4. Re-architecting job orchestration: SQS workers → internal queues + Redis (2023) — *migration / reversal*
 
@@ -257,13 +262,15 @@ conformance as the price of the word MUST. Natural companion act to C4.
 
 # Area D — Platform engineering & governance (2019 → 2026)
 
-### D1. ★ "My First Pulumi": IaC from zero to governed estate (2019 → 2026) — *greenfield → governance*
+### D1. ★ Seven years of Pulumi: the good and the bad → **promoted**
 
-Literal first commit at the company. From one stack to S3-backed state, KMS
-secrets (late 2019), org-wide adoption — and eventually the hard rule set
-(self-hosted state only, vendor cloud banned, access-denied-means-stop
-encoded in repo guardrails agents obey). Seven years of IaC maturity in one
-first-person arc.
+Now its own idea: [pulumi-good-and-bad](/ideas/pulumi-good-and-bad).
+From "My First Pulumi" (the literal first commit, May 2019, including the
+week-three state-file-in-git mistake) to a three-language org standard
+with a self-hosted state backend and hard guardrails (2026) — framed as an
+honest good/bad ledger: real languages and polyglot adoption on the good
+side; state management, deploy contention, drift, and version churn on the
+bad.
 
 ### D2. Governance-as-code for a whole GitHub org (2025–2026) — *governance*
 
