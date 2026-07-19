@@ -78,8 +78,10 @@ Vercel preview build** (`NEXT_PUBLIC_VERCEL_ENV === 'preview'`; ADR-0004's
 recommended preview-bypass path), so feature-branch previews can view the
 admin-gated pages (/ideas, /admin). It reads the secret from
 `NEXT_PUBLIC_E2E_BYPASS_SECRET` (set in the Vercel Preview env —
-`pnpm provision vercel-preview`) — i.e. **the secret is embedded in those
-bundles**. Acceptable for dev/CI (the secret is worthless against prod) but
+`pnpm provision vercel-preview`; until per-branch preview deployments are
+wired, previews point at the shared **dev** deployment, so the value must
+equal dev's `AUTH_E2E_BYPASS_SECRET`) — i.e. **the secret is embedded in
+those bundles**. Acceptable for dev/CI (the secret is worthless against prod) but
 it's a view-source leak on any publicly reachable preview. The session-init
 CLI (§5) supersedes it; once that lands, the button and both `NEXT_PUBLIC_*`
 vars are deleted and test bundles become byte-identical to production's.
