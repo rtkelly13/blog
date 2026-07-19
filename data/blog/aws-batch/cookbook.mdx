@@ -141,6 +141,8 @@ There are obviously other steps you could add such as a phase which breaks up yo
 Another feature of Map/Reduce is a mechanism to move data in and out of the compute nodes as necessary, [S3](https://aws.amazon.com/s3/) can be used for such purposes
 if you wish to store files or one of the many [Databases provided on AWS](https://aws.amazon.com/products/databases/) for state of the system.
 
+<MapReduceViz caption="Map/Reduce as an array job — split, parallel map (with a spot reclaim + retry), reduce (Interactive simulation)" />
+
 ## Compute/ Memory Intensive applications
 
 When you have a horizontally scalable workload there are a number of different mechanisms within AWS you can use to scale those workloads.

@@ -65,6 +65,11 @@ const FileTree = dynamic(() => import('./interactive/FileTree'), {
   loading: InteractiveLoading,
 });
 
+const MapReduceViz = dynamic(() => import('./interactive/MapReduceViz'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
 export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
@@ -74,6 +79,7 @@ export const MDXComponents: MDXComponentsType = {
   FileTree,
   IdeaDeck,
   IdeaSlide,
+  MapReduceViz,
   QueryRouter,
   Terminal,
   Walkthrough,

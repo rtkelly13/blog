@@ -99,6 +99,23 @@ deadlock / timeout — the war was continuous, not episodic.
 - The .NET migration idea (below) — the batch tier led the move to modern
   .NET; the two posts bracket the same codebase from different angles.
 
+## Visualisation plan
+
+- **`<MapReduceViz>` — built and live in the cookbook post.** Reuse here
+  with different props per section (e.g. `mappers={12}` for the scale beats;
+  `spotReclaim` on for the resilience section). The component is the house
+  pattern for animated sims: seeded pure model (`buildRun` →
+  `stateAt(plan, t)`), rAF clock, autoplay-on-view, reduced-motion phase
+  stepper, tests over the model.
+- **"Parallelism is a loan" sim (to build)** — the war-story centrepiece: a
+  fan-out slider (4→64 workers) against a shared-resource meter (S3 request
+  rate / connection pool) that starts throttling and failing lanes as
+  fan-out climbs; capping parallelism at the *victim* recovers throughput.
+  Same model-first pattern as MapReduceViz.
+- **`<Terminal>` for hotfix archaeology** — a scripted `git log --grep`
+  session streaming the real (sanitised) OOM/exhaustion commit trail,
+  highlighting one commit per war-story theme.
+
 ## Gaps to fill
 
 - [ ] Decide one post or two (architecture vs war stories). The war-story
