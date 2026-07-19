@@ -37,7 +37,7 @@ design and identity is enforced where writes happen.
 |---|---|---|---|---|
 | Production (ryankelly.dev) | `fiery-minnow-77` (prod) | ✅ own OAuth app | ❌ **hard-coded impossible** | Bypass provider excluded by a source constant, not config |
 | Local dev (localhost:3002) | `keen-shark-231` (dev) | ✅ own OAuth app | ✅ enabled | `SITE_URL=http://localhost:3002`; dev server **must run on 3002** |
-| Feature-branch previews (Vercel) | Convex **preview deployments**, one per branch | ❌ (ephemeral callback URL — ADR-0004) | ✅ via project-default env vars | The recommended way to test feature branches; see §6 |
+| Feature-branch previews (Vercel) | Convex **preview deployments**, one per branch | ❌ (ephemeral callback URL — ADR-0004) | ✅ via project-default env vars; **sign-in button auto-offered** (`NEXT_PUBLIC_VERCEL_ENV === 'preview'`) | The recommended way to test feature branches — admin-gated pages (/ideas, /admin) are reachable on previews; see §6 |
 | CI (live-e2e workflow) | dedicated E2E deployment (or a preview) | ❌ | ✅ | Secrets in GitHub Actions; job self-activates when provisioned |
 | `test-github` branch | *none yet — deliberately* | (would be ✅) | ❌ hard-coded off in the client | Stable branch URL `https://my-blog-0j5s-git-test-github-rtkelly13s-projects.vercel.app` reserved for a pre-prod OAuth rehearsal env. With the per-ship prod OAuth check (§8) it may never be needed — dormant until decided |
 
@@ -73,8 +73,12 @@ provider catches and falls through to `createAccount`.
 ### Current client affordance (to be removed)
 
 The first iteration renders an "E2E dev sign-in" button on the AdminGate
-wall when built with `NEXT_PUBLIC_E2E_BYPASS=1`, reading the secret from
-`NEXT_PUBLIC_E2E_BYPASS_SECRET` — i.e. **the secret is embedded in those
+wall when built with `NEXT_PUBLIC_E2E_BYPASS=1` — or **automatically on any
+Vercel preview build** (`NEXT_PUBLIC_VERCEL_ENV === 'preview'`; ADR-0004's
+recommended preview-bypass path), so feature-branch previews can view the
+admin-gated pages (/ideas, /admin). It reads the secret from
+`NEXT_PUBLIC_E2E_BYPASS_SECRET` (set in the Vercel Preview env —
+`pnpm provision vercel-preview`) — i.e. **the secret is embedded in those
 bundles**. Acceptable for dev/CI (the secret is worthless against prod) but
 it's a view-source leak on any publicly reachable preview. The session-init
 CLI (§5) supersedes it; once that lands, the button and both `NEXT_PUBLIC_*`
