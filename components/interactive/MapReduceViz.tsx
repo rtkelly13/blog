@@ -37,11 +37,6 @@ const KIND_BAR: Record<JobKind, string> = {
   map: 'bg-brutalist-pink',
   reduce: 'bg-brutalist-yellow',
 };
-const KIND_TEXT: Record<JobKind, string> = {
-  prepare: 'text-brutalist-cyan',
-  map: 'text-brutalist-pink',
-  reduce: 'text-brutalist-yellow',
-};
 const KIND_BORDER: Record<JobKind, string> = {
   prepare: 'border-brutalist-cyan',
   map: 'border-brutalist-pink',
@@ -80,15 +75,13 @@ function JobChip({ job, note }: { job: JobFrame; note?: string }) {
           requeued ? 'bg-brutalist-cyberOrange' : KIND_BAR[job.kind]
         }`}
       />
-      <span
-        className={`font-mono text-[11px] ${
-          requeued ? 'text-brutalist-cyberOrange' : KIND_TEXT[job.kind]
-        }`}
-      >
-        {jobLabel(job)}
-      </span>
+      <span className="font-mono text-[11px] text-white">{jobLabel(job)}</span>
       {(note ?? (requeued ? 'RETRY' : undefined)) && (
-        <span className="ml-auto font-mono text-[10px] text-zinc-500">
+        <span
+          className={`ml-auto font-mono text-[10px] ${
+            requeued ? 'text-brutalist-cyberOrange' : 'text-zinc-500'
+          }`}
+        >
           {note ?? 'RETRY'}
         </span>
       )}
@@ -108,9 +101,11 @@ function SlotRow({
       <span className="w-14 shrink-0 text-zinc-600">vCPU_{slotIndex}</span>
       {job ? (
         <>
-          <span className={`w-20 shrink-0 ${KIND_TEXT[job.kind]}`}>
-            {jobLabel(job)}
-          </span>
+          <span
+            aria-hidden
+            className={`inline-block h-2.5 w-2.5 shrink-0 ${KIND_BAR[job.kind]}`}
+          />
+          <span className="w-20 shrink-0 text-white">{jobLabel(job)}</span>
           <div className="h-2 min-w-0 flex-1 border border-white bg-zinc-900">
             <div
               className={`h-full ${KIND_BAR[job.kind]}`}
