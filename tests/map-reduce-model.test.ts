@@ -43,7 +43,9 @@ describe('buildRun', () => {
     const plan = buildRun(CONFIG);
     const lastMapperEnd = Math.max(...plan.mappers.map((m) => m.end));
     expect(plan.reduceStart).toBeGreaterThan(lastMapperEnd - 1e-9);
-    expect(plan.total).toBeGreaterThan(plan.reduceStart + plan.reduceDuration - 1e-9);
+    expect(plan.total).toBeGreaterThan(
+      plan.reduceStart + plan.reduceDuration - 1e-9,
+    );
   });
 
   it('reclaims exactly one mapper when spotReclaim is on, none when off', () => {
@@ -74,9 +76,9 @@ describe('stateAt', () => {
   it('walks phases in order: idle → split → map → reduce → done', () => {
     expect(stateAt(plan, 0).phase).toBe('idle');
     expect(stateAt(plan, plan.splitDuration / 2).phase).toBe('split');
-    expect(
-      stateAt(plan, (plan.mapStart + plan.reduceStart) / 2).phase,
-    ).toBe('map');
+    expect(stateAt(plan, (plan.mapStart + plan.reduceStart) / 2).phase).toBe(
+      'map',
+    );
     expect(
       stateAt(plan, plan.reduceStart + plan.reduceDuration / 2).phase,
     ).toBe('reduce');

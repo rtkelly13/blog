@@ -7,7 +7,12 @@
 
 export type Phase = 'idle' | 'split' | 'map' | 'reduce' | 'done';
 
-export type MapperStatus = 'queued' | 'running' | 'reclaimed' | 'retrying' | 'done';
+export type MapperStatus =
+  | 'queued'
+  | 'running'
+  | 'reclaimed'
+  | 'retrying'
+  | 'done';
 
 export interface MapperFrame {
   index: number;
@@ -143,7 +148,12 @@ function mapperAt(plan: MapperPlan, t: number): MapperFrame {
       };
     }
     if (plan.retryStart !== undefined && t < plan.retryStart) {
-      return { index: plan.index, status: 'reclaimed', progress: 0, hasReclaim };
+      return {
+        index: plan.index,
+        status: 'reclaimed',
+        progress: 0,
+        hasReclaim,
+      };
     }
     if (plan.retryStart !== undefined && plan.retryDuration !== undefined) {
       return {
@@ -179,7 +189,9 @@ export function stateAt(plan: RunPlan, t: number): Frame {
 }
 
 /** Phase boundary times, used by the reduced-motion stepper. */
-export function phaseTimes(plan: RunPlan): Record<Exclude<Phase, 'idle'>, number> {
+export function phaseTimes(
+  plan: RunPlan,
+): Record<Exclude<Phase, 'idle'>, number> {
   return {
     split: plan.splitDuration * 0.55,
     map: plan.mapStart + (plan.reduceStart - plan.mapStart) * 0.6,
