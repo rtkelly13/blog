@@ -188,6 +188,22 @@ beat.
 - [ ] **Prior art paragraph** — `git subtree`, `git submodule`, josh,
       copybara; when each fits and why filter-repo + graft won here.
 
+## Visualisation plan
+
+- **Animated git-DAG graft (to build, the post's centrepiece)** — two
+  independent commit chains with their own roots; step 1 rewrites one chain
+  into a subdirectory (nodes re-label in place), step 2 draws the
+  unrelated-histories merge commit with **two parent edges**, step 3 pins
+  the cut-point branch flags to the pre-merge tips. Either a bespoke
+  `GitGraphViz` following the `MapReduceViz` pattern (seeded pure model +
+  `stateAt(t)` + reduced-motion stepper — see components/AGENTS.md) or a
+  `<Walkthrough>` (xyflow) if step-highlighting is enough.
+- **`<Terminal>` command walkthrough** — the real (sanitised) command
+  sequence: clone → `git filter-repo --to-subdirectory-filter` →
+  `git remote add` → `git merge --allow-unrelated-histories`, ending on
+  `git log --max-parents=0` showing two roots and the merge commit's two
+  parents. Output highlighting lands the "one checkout away" point.
+
 ## Related ideas
 
 - [The realities of porting a complex .NET Framework codebase](/ideas/dotnet-framework-migration-realities)

@@ -123,6 +123,22 @@ keep and where it cost real time.
   — same estate, same era; the infra programs moved through the monorepo
   unification too.
 
+## Visualisation plan
+
+- **State-backend journey timeline (to build)** — an animated horizontal
+  timeline: state starts as a file *inside the repo box* (2019), hops out
+  to a backend, and lands in the self-hosted bucket with a lock icon and
+  guardrail wall (2026); incident markers ping along the way. Small bespoke
+  component on the `MapReduceViz` house pattern (seeded pure model +
+  `stateAt(t)` + reduced-motion stepper — components/AGENTS.md).
+- **`<Terminal>`: clone-an-environment** — scripted `pulumi up` session for
+  the "real languages" beat: a loop parameterising N environments, preview
+  diff streaming, one lock-contention pause ("another update is in
+  progress…") for the bad-ledger section.
+- **Drift dial** — a simple animated gauge of "resources managed in IaC vs
+  handed back to manual", moving as the timeline plays; makes the "IaC
+  coverage is a dial, not a binary" section visual.
+
 ## Gaps to fill
 
 - [ ] **Verify the backend journey precisely** — which backend(s) were in

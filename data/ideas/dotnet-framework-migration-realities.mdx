@@ -105,6 +105,22 @@ the correct state to be in".
 - The 2020 .NET 5 rollback is beat 0 of this story and could stay here or
   become its own short war-story post (backlog C1).
 
+## Visualisation plan
+
+- **Paired-projects sim (to build)** — a `FileTree`-flavoured view: one
+  source folder, two project nodes (`X.csproj` / `X.Core.csproj`); pressing
+  "build" streams the same `.cs` files into both, with the ~20 `#if` files
+  flashing as they diverge per target. Lands the "same code, two worlds"
+  mechanic better than any prose.
+- **Migration ratio over time** — an animated stacked bar of legacy vs
+  modern project counts per year, ending at 36:73 (needs the private
+  re-mine; a static chart is acceptable fallback).
+- **Dual-ORM lockstep diagram** — `<Diagram type="mermaid">`: one schema
+  change fanning into two migration authoring paths with the CI checker as
+  the gate; animate only if the mermaid version reads poorly.
+- House pattern for any animated sim: seeded pure model + `stateAt(t)` +
+  reduced-motion stepper, as in `MapReduceViz` (components/AGENTS.md).
+
 ## Gaps to fill
 
 - [ ] Re-mine exact figures privately: project counts per TFM over time
