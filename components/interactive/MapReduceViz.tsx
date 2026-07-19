@@ -42,6 +42,18 @@ const KIND_TEXT: Record<JobKind, string> = {
   map: 'text-brutalist-pink',
   reduce: 'text-brutalist-yellow',
 };
+const KIND_BORDER: Record<JobKind, string> = {
+  prepare: 'border-brutalist-cyan',
+  map: 'border-brutalist-pink',
+  reduce: 'border-brutalist-yellow',
+};
+/** The active-phase highlight follows the job-type colour code. */
+const PHASE_ACTIVE: Record<Exclude<Phase, 'idle'>, string> = {
+  prepare: 'bg-brutalist-cyan',
+  map: 'bg-brutalist-pink',
+  reduce: 'bg-brutalist-yellow',
+  done: 'bg-white',
+};
 
 function jobLabel(job: JobFrame): string {
   if (job.kind === 'map') {
@@ -272,7 +284,7 @@ export default function MapReduceViz({
                 key={p}
                 className={`px-1 font-mono text-[10px] ${
                   frame.phase === p
-                    ? 'bg-brutalist-cyan font-bold text-black'
+                    ? `${PHASE_ACTIVE[p]} font-bold text-black`
                     : 'text-zinc-500'
                 }`}
               >
@@ -374,13 +386,12 @@ export default function MapReduceViz({
                     key={j.id}
                     layout
                     initial={false}
-                    animate={{ opacity: 0.35 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-center gap-2 border border-zinc-700 px-1.5 py-0.5"
+                    className="flex items-center gap-2 border border-dashed border-zinc-700 px-1.5 py-0.5"
                   >
                     <span
                       aria-hidden
-                      className={`inline-block h-2.5 w-2.5 shrink-0 ${KIND_BAR[j.kind]}`}
+                      className={`inline-block h-2.5 w-2.5 shrink-0 border-2 ${KIND_BORDER[j.kind]}`}
                     />
                     <span className="font-mono text-[11px] text-zinc-500">
                       {jobLabel(j)}
