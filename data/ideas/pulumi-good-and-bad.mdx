@@ -1,0 +1,156 @@
+---
+title: "Seven Years of Pulumi: The Good and the Bad"
+kind: article
+status: developing
+created: "2026-07-19"
+updated: "2026-07-19"
+tags: ["pulumi", "iac", "aws", "devops", "opinion", "war-story"]
+target: "future data/blog/pulumi-good-and-bad.mdx"
+summary: "From a first commit literally titled 'My First Pulumi' (May 2019) to a multi-language, multi-team IaC estate with a self-hosted state backend and hard guardrails (2026): an honest assessment of what Pulumi has been great at, and where it has bitten. Working material, not copy."
+layout: IdeaLayout
+---
+
+## Where it stands
+
+Promoted from the [work-initiatives backlog](/ideas/work-initiatives-backlog)
+(entry D1, sharpened into an opinion piece: **the good and the bad**).
+Verified against real history — ~165 Pulumi-touching commits in the main
+.NET estate alone, plus stacks across the data, frontend, and platform
+repos. Per the org-specifics policy (ADR-0008) repo names, bucket names,
+and ticket IDs are omitted. Per the authorship policy this is working
+material — and for an opinion piece the *verdicts* especially must be
+yours, not an agent's; treat the good/bad lists below as an evidence
+inventory to react to.
+
+**The thesis.** Most IaC content is either advocacy or a teardown. This is
+neither: seven years, one tool, from "My First Pulumi" (the literal first
+commit at the day job, May 2019) to an estate-wide standard with hard
+operational guardrails — and an honest ledger of where Pulumi earned its
+keep and where it cost real time.
+
+## Timeline (verified against history)
+
+- **May 2019** — "My First Pulumi": first IaC at the company. Within
+  weeks: batch job definitions deployed via Pulumi.
+- **May 2019** — the day-one mistake, preserved in the log: "removed the
+  state file from source" — state was briefly *committed to git*. Honest
+  beat 0 for the state-management thread.
+- **Oct 2019** — secrets management via KMS ("Pulumi now has secrets
+  management that uses KMS").
+- **2021–2022** — infra-as-product era: analytics stacks, data lake
+  buckets/Glue/KMS, recurring "missing KMS users" drift hotfixes.
+- **2023–2025** — estate-wide spread, multi-language: TypeScript stacks
+  (data lake, frontend domains, platform tooling), Python stacks (the
+  medallion pipeline infra), and a C# Pulumi program in the .NET estate.
+  Environment cloning matures ("added 5 new clones… work with any clone",
+  Oct 2024). Deploy contention appears: a lock and priority added to the
+  CI pipeline (Dec 2024). Version pain: "Updating Pulumi version to
+  recognise the latest version" (Feb 2025).
+- **Jun 2026** — the state-backend reckoning: live deployments switched to
+  a **self-hosted S3 backend** (clones/UAT first, then live), the global
+  deploy lock removed and rethought per-stack, KMS secrets-provider
+  configs standardised, pre-deploy KMS checks added — and **AI-agent
+  guardrails** written into the repos: never the vendor cloud backend,
+  access-denied-means-stop.
+
+## The good (evidence inventory — react, don't adopt verbatim)
+
+- **Real languages.** Loops, types, functions, refactoring: cloning five
+  environments by parameterising one program; wiring EventBridge triggers
+  to batch jobs; CloudWatch canary alerts as code. The "it's just
+  TypeScript/Python/C#" promise held across three languages in one org.
+- **Meets teams where they are.** The .NET estate writes infra in C#, the
+  data platform in Python and TS — same tool, same state model, no
+  retraining. Arguably the deciding advantage over the alternatives.
+- **Secrets story.** KMS-backed secrets from 2019, later standardised as
+  per-stack secrets providers — encrypted-at-rest config without a bolt-on
+  vault integration.
+- **Grew from one commit to the org standard organically** — no platform
+  mandate, no big rollout; it spread because each team could start small.
+
+## The bad (evidence inventory)
+
+- **State is the sharp edge, forever.** The arc never ends: committed to
+  git (2019, oops) → moved out → service backend → **self-hosted S3 with
+  custom lock semantics (2026)**. Every era had a state incident or a
+  state migration. The 2026 switch — and the guardrails written to stop
+  *agents* touching the wrong backend — are the strongest evidence that
+  state management remained an operational liability, not a solved
+  problem.
+- **Deploy contention at team scale.** One global lock in CI (2024) was
+  the blunt fix; removing it safely (2026) required per-stack rethinking.
+  Concurrent `pulumi up` across a shared estate is a real coordination
+  problem the tool doesn't solve for you.
+- **Drift and the "missing KMS users" class of bug.** Resources touched
+  outside IaC (or config living half-in, half-out) recur across the whole
+  window — including an explicit 2026 commit *removing* a resource from
+  Pulumi because it's "managed manually outside IaC". An honest section on
+  the drift you tolerate on purpose.
+- **Version/provider churn.** CLI and provider upgrades as their own
+  maintenance stream; a hotfix just to get the version recognised.
+- **Multi-language cuts both ways.** Three languages means three sets of
+  idioms, three dependency chains, and no single reference program;
+  sharing patterns across them is copy-paste, not import.
+- **Small config papercuts** — e.g. resource-name length limits surfacing
+  as production fixes (a cron job name too long, 2025).
+
+## Proposed shape
+
+1. **How it started** — "My First Pulumi", and committing the state file
+   to git in week three. Establishes credibility: this is a user's
+   history, not a review.
+2. **What real languages actually buy you** — the clone-an-environment
+   story; infra refactored like code because it *is* code.
+3. **One tool, three languages, one org** — the polyglot adoption
+   argument; why this beat standardising on one config language.
+4. **The state ledger** — every state era and what it cost; ending at
+   self-hosted S3 + KMS + rethought locking, and why we banned the vendor
+   backend (written as policy agents must obey).
+5. **The drift you keep** — missing-users hotfixes, the resource
+   deliberately handed back to manual management. IaC coverage is a
+   dial, not a binary.
+6. **Verdict** — would I pick it again in 2026, for whom, and what I'd do
+   differently from commit one (state backend and locking decided *first*,
+   not seventh-year).
+
+## Links to other posts/ideas
+
+- [Batch compute in production](/ideas/batch-compute-in-production) — the
+  first Pulumi commits existed to deploy batch job definitions; the two
+  stories start the same week.
+- [Merging repos without losing a single commit](/ideas/repo-merging-without-losing-history)
+  and [the .NET migration realities](/ideas/dotnet-framework-migration-realities)
+  — same estate, same era; the infra programs moved through the monorepo
+  unification too.
+
+## Visualisation plan
+
+- **State-backend journey timeline (to build)** — an animated horizontal
+  timeline: state starts as a file *inside the repo box* (2019), hops out
+  to a backend, and lands in the self-hosted bucket with a lock icon and
+  guardrail wall (2026); incident markers ping along the way. Small bespoke
+  component on the `MapReduceViz` house pattern (seeded pure model +
+  `stateAt(t)` + reduced-motion stepper — components/AGENTS.md).
+- **`<Terminal>`: clone-an-environment** — scripted `pulumi up` session for
+  the "real languages" beat: a loop parameterising N environments, preview
+  diff streaming, one lock-contention pause ("another update is in
+  progress…") for the bad-ledger section.
+- **Drift dial** — a simple animated gauge of "resources managed in IaC vs
+  handed back to manual", moving as the timeline plays; makes the "IaC
+  coverage is a dial, not a binary" section visual.
+
+## Gaps to fill
+
+- [ ] **Verify the backend journey precisely** — which backend(s) were in
+      use between "removed the state file from source" (2019) and the
+      self-hosted S3 switch (2026)? Don't publish the arc until each hop
+      is confirmed.
+- [ ] Re-mine privately: stack counts per language/repo, the clone
+      mechanism's shape, the exact lock semantics before/after 2026.
+- [ ] The "would I pick it again" verdict and any comparison to
+      Terraform/CDK must be written from experience — the evidence above
+      only covers Pulumi; avoid armchair comparisons.
+- [ ] Decide how to tell the 2026 backend-switch story without internal
+      operational detail (ADR-0008; the access-denied guardrail is fine
+      described generically).
+- [ ] Check employer comfort per ADR-0008.

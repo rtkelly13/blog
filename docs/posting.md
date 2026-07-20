@@ -32,6 +32,11 @@ a suggestion, but the author owns the final wording.
 Rule of thumb: **if a reader reads it as the author's voice, a human wrote it;
 if it's structure, code, or an asset, an agent can.**
 
+Related policy: organisational specifics (employer repo names, ticket IDs,
+internal identifiers, colleague attribution) are excluded from **all**
+source-controlled content, including `data/ideas/` — see
+[ADR-0008](adr/0008-no-organisational-specifics-in-source-controlled-content.md).
+
 ## Adding a post
 
 A post is one MDX file: `data/blog/<slug>.mdx`. `scripts/create-post.mjs`
