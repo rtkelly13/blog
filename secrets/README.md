@@ -26,7 +26,12 @@ convex.prod.env:     AUTH_GITHUB_ID, AUTH_GITHUB_SECRET (prod OAuth app),
                      SITE_URL=https://www.ryankelly.dev, ADMIN_GITHUB_LOGINS
 convex.preview.env:  AUTH_E2E_BYPASS_SECRET, ADMIN_GITHUB_LOGINS
 ci.env:              AUTH_E2E_BYPASS_SECRET, VERCEL_AUTOMATION_BYPASS_SECRET
-vercel.preview.env:  CONVEX_DEPLOY_KEY (preview deploy key)
+vercel.preview.env:  CONVEX_DEPLOY_KEY (preview deploy key),
+                     NEXT_PUBLIC_E2E_BYPASS_SECRET (arms the AdminGate
+                     bypass button on preview builds; must equal the
+                     AUTH_E2E_BYPASS_SECRET of whichever Convex deployment
+                     previews point at — the shared dev deployment until
+                     per-branch preview deployments are wired)
 ```
 
 Deliberately excluded: `JWKS` / `JWT_PRIVATE_KEY` — per-deployment signing
