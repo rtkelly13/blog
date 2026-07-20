@@ -1,0 +1,220 @@
+---
+title: "Merging Repos Without Losing a Single Commit"
+kind: article
+status: developing
+created: "2026-07-18"
+updated: "2026-07-18"
+tags: ["git", "monorepo", "migration", "tooling", "devex"]
+target: "future data/blog/repo-merging-without-losing-history.mdx"
+summary: "A repeatable, history-preserving repo-merge technique applied three times across two tech estates (2023–2025): filter-repo subdirectory rewrites, unrelated-histories merges, and cut-point branches as permanent markers. Promoted from the work-initiatives backlog; evidence verified against real history."
+layout: IdeaLayout
+---
+
+## Where it stands
+
+Promoted from the [work-initiatives backlog](/ideas/work-initiatives-backlog)
+(entry E3). The claims below are verified against real git history and two
+internal knowledge-base articles written at the time — this is
+reproducible material, not reconstruction. Per the authorship policy
+everything here is working material: structure and evidence to draft from,
+not copy. Per the org-specifics policy, repo/app names and internal
+identifiers are deliberately omitted; the private evidence trail lists
+them.
+
+**The thesis.** Most repo consolidations squash-import and lose the blame.
+This technique treats a repo merge as a *reversible, auditable, repeatable*
+operation: every commit survives, every branch survives, and the exact
+pre-merge state of each source repo is preserved as a named branch — one
+checkout away, forever. **Applied three times across two tech estates
+(2023–2025)** — a JS consolidation, a .NET monorepo unification, and a JS
+monorepo rebuild — so it's a pattern, not a one-off.
+
+## Timeline (verified against history)
+
+- **~H2 2023 (likely first)** — four satellite app repos merged into the
+  dashboard app repo (JS). Bounded ≥ Jul 2023 by the preserved cut
+  branches' newest commits; exact date lives in the source repo's history —
+  pin it when drafting. Likely the first outing: this campaign is the one
+  the *older* internal article documents, and the later .NET merges reuse
+  its commit-message convention.
+- **17 Oct 2023** — new .NET monorepo base created as an initial commit on
+  an orphan branch.
+- **18 Dec 2023** — the .NET unification lands: **two unrelated-histories
+  merges, five seconds apart**, grafting the web application's history
+  (roots back to 2016) and the batch estate's history (roots back to 2018)
+  into the new monorepo — commit messages following the same "Merge
+  &lt;source&gt; History" convention as the scripts. Every source branch
+  preserved under an `old-<source>/*` prefix (still on the remote today).
+- **Jul–Aug 2025 (third time)** — the JS estate consolidated again into a
+  frontend monorepo: the dashboard UI carved out of its old repo with all
+  branches and tags, then the newer React app grafted in on 22 Aug 2025,
+  the merge commit's two parents being exactly the preserved cut-point
+  branches.
+
+The chronology matters for the narrative: the technique crossed **from the
+JS estate to a .NET monorepo unification and back** — same message
+convention, same `old-*` branch preservation, refined mechanics each time
+(the 2025 campaign's mirror-clone carve-out superseding the original
+clone-and-filter). Reuse across estates is the strongest evidence this is
+a technique rather than an event. Ordering caveat: if the satellite merge
+turns out to postdate Dec 2023, the .NET unification was first — and there
+are hints (service folders already present in the dashboard repo before
+campaign 2's cleanup) of an even earlier consolidation wave worth checking
+when pinning dates.
+
+## The campaigns in detail
+
+*(In likely chronological order — see the timeline caveat.)*
+
+### 1. The satellite consolidation — four repos into one app repo (JS, ~H2 2023)
+
+Documented in an internal article at the time. Mechanics:
+
+1. Clone each of the four source repos.
+2. Rewrite each with `git-filter-repo --to-subdirectory-filter <name>` so
+   its entire history appears to have always lived in a subdirectory.
+3. Add each rewritten repo as a *local* remote, fetch, branch, and
+   `git merge --allow-unrelated-histories`.
+4. Preserve every source branch via a small script that re-pushed them
+   under an `old-original-repo-*` prefix.
+
+Includes a quotable observation: after stitching, **date-order beats
+topological order** for reading the combined history.
+
+### 2. Unifying the .NET estate (Oct–Dec 2023)
+
+Web and batch lived as separate repos with histories reaching back to 2016
+and 2018. A fresh monorepo was started on an orphan branch (17 Oct 2023),
+then on 18 Dec 2023 both histories were grafted in whole via two
+unrelated-histories merges five seconds apart; the combined tree carries
+all the original roots, and `git log --follow` walks any file back to its
+origin. Source branches survive under `old-<source>/*`.
+
+### 3. Building the frontend monorepo (JS, 2025)
+
+Documented in a second internal article. Two moves:
+
+1. **The carve-out:** a `split-folder.sh` script — mirror-clone the old
+   app repo, `git filter-repo --path <folder>/ --path-rename` into a new
+   subdirectory name, then push **all branches and tags** to the new
+   monorepo. A folder becomes a repo line with its history intact.
+2. **The graft:** the second app (a newer React codebase) reset to a known
+   commit, `--to-subdirectory-filter`'d into its own directory, added as a
+   remote, and merged with `--allow-unrelated-histories`.
+
+The result, verifiable in today's tree:
+
+- The merge commit's **two parents are exactly the preserved cut-point
+  branches** — one per source line.
+- `git log --max-parents=0` shows **two root commits** — each app's
+  original initial commit (2021 and 2024).
+- `git log --follow` on any file walks back to its original repo's root.
+
+The article also records the **rejected first approach** — folder-by-folder
+`--invert-paths` cleanup — with the frank note that a better approach
+superseded it. Good material for an honest "how the technique evolved"
+beat.
+
+## Proposed shape
+
+1. **The problem** — consolidating repos is common; doing it without
+   destroying history/blame/branches is not. What squash-import costs you
+   (bisect, blame, archaeology, contributor record).
+2. **The idea** — three invariants: every commit survives; every branch
+   survives; the cut point is a named, permanent ref.
+3. **First outing: the satellite consolidation (JS, 2023)** —
+   subdirectory-filter, local remotes, unrelated-histories merges, and the
+   branch-copy script. Small diagrams of the DAG before and after
+   (multiple roots, one head).
+4. **Crossing estates: the .NET unification (Dec 2023)** — orphan-branch
+   base, two unrelated-histories grafts five seconds apart, same
+   conventions on a completely different stack. The "it's a technique"
+   beat.
+5. **Third time, refined: the 2025 monorepo build** — the carve-out
+   variant (folder → new repo, all branches and tags) and the graft whose
+   merge commit's two parents are the cut-point branches (sanitised
+   names).
+6. **What breaks and how to handle it** — CI paths, tag collisions, blame
+   tooling, PR references, default-branch protection during the push,
+   `--force` semantics of a mirror push.
+7. **Why keep the cut branches** — rollback points, archaeology anchors,
+   and proof-of-provenance. Date-order vs topo-order for reading stitched
+   history.
+8. **The rejected approach** — and why iterating on the technique between
+   campaigns is the point: run three times, it's a pattern.
+
+## Gaps to fill
+
+- [ ] **Recover the reference links.** The first article's Resources
+      section cited a couple of external guides ("the original guide which
+      lines up with the specifics", a git-filter-repo filtering guide, the
+      basis of the branch-copy script) — the knowledge-base export stripped
+      the hyperlinks, leaving bare bullets. Confirm against the original
+      internal articles; they're the citation trail and likely `[@BibKey]`
+      candidates. **Web-search candidates** (contents unverified — the
+      research sandbox allowed search but blocked page fetches):
+      - *Python script for repo manipulation* — near-certain:
+        [newren/git-filter-repo](https://github.com/newren/git-filter-repo)
+        (the script the merge scripts invoke directly).
+      - *"The original guide which lines up with the specifics"* — the
+        popular recipes matching the exact flow (clone each repo →
+        `--to-subdirectory-filter` → local remote → merge
+        `--allow-unrelated-histories`):
+        [Chris Thompson, "Keeping git history when converting multiple repos into a monorepo"](https://medium.com/@chris_72272/keeping-git-history-when-converting-multiple-repos-into-a-monorepo-97641744d928),
+        [AlexV, "How to merge Git repositories and keep history"](https://alex-v.medium.com/how-to-merge-git-repositories-and-keep-history-587f973f06a0),
+        [knappi.org, "Git: Merging multiple repositories into a mono-repo"](https://blog.knappi.org/0009-mono-repo/).
+      - *"Interesting guide about filtering git repos"* — candidates:
+        [git-tower, "Git Filter-Repo: The Best Way to Rewrite Git History"](https://www.git-tower.com/learn/git/faq/git-filter-repo),
+        [ctooley, "Merging old repos into a monolithic git repo archive"](https://dev.to/ctooley/merging-old-repos-into-a-monolithic-git-repo-archive-4c7h).
+      - *Basis of the branch-copy script* — candidates for the
+        `git branch -r` loop:
+        [niksumeiko gist, "Moving git repository and all its branches, tags to a new remote"](https://gist.github.com/niksumeiko/8972566),
+        [alexlvovich, "Copy Git repository with branches to another server"](https://alexlvovich.com/blog/copy-git-repository-with-branches-to-another).
+- [ ] **Re-run the DAG checks for the draft** — capture real (sanitised)
+      output of `git log --max-parents=0`, the merge-commit parents, and a
+      `--follow` walk for a `<Terminal>` component.
+- [ ] **Pin the JS satellite-campaign date** — bounded ≥ Jul 2023 by the
+      preserved cut branches; the exact merge date lives in the dashboard
+      app repo's history (the UI-only carve-out pruned those merge commits
+      from the current monorepo).
+- [ ] **Campaign 1 verification** — the `old-<source>/*` branches are
+      confirmed on the remote for the .NET estate and the frontend
+      monorepo; confirm the satellite-campaign set too.
+- [ ] **Decide naming** — whether to name the repos/apps with employer
+      sign-off, or keep them generic throughout (default: generic, per the
+      org-specifics policy).
+- [ ] **What-breaks section needs specifics** — dig for the actual CI/tag
+      fallout commits around the 2025 merge window to ground section 5.
+- [ ] **Prior art paragraph** — `git subtree`, `git submodule`, josh,
+      copybara; when each fits and why filter-repo + graft won here.
+
+## Visualisation plan
+
+- **Animated git-DAG graft (to build, the post's centrepiece)** — two
+  independent commit chains with their own roots; step 1 rewrites one chain
+  into a subdirectory (nodes re-label in place), step 2 draws the
+  unrelated-histories merge commit with **two parent edges**, step 3 pins
+  the cut-point branch flags to the pre-merge tips. Either a bespoke
+  `GitGraphViz` following the `MapReduceViz` pattern (seeded pure model +
+  `stateAt(t)` + reduced-motion stepper — see components/AGENTS.md) or a
+  `<Walkthrough>` (xyflow) if step-highlighting is enough.
+- **`<Terminal>` command walkthrough** — the real (sanitised) command
+  sequence: clone → `git filter-repo --to-subdirectory-filter` →
+  `git remote add` → `git merge --allow-unrelated-histories`, ending on
+  `git log --max-parents=0` showing two roots and the merge commit's two
+  parents. Output highlighting lands the "one checkout away" point.
+
+## Related ideas
+
+- [The realities of porting a complex .NET Framework codebase](/ideas/dotnet-framework-migration-realities)
+  — the Dec 2023 unification here is what enabled that migration's shared
+  `core/` consolidation; natural follow-on post.
+- [Batch compute in production](/ideas/batch-compute-in-production) — the
+  batch estate's war-story receipts survive because of this technique.
+
+## Evidence (private trail)
+
+Exact repo names, article IDs, commit SHAs, branch names, and doc paths are
+deliberately not recorded here — re-mine them from the internal
+knowledge base (Devops/CICD section, current + archive copies) and the
+frontend monorepo's history when drafting.
