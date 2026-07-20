@@ -65,15 +65,39 @@ const FileTree = dynamic(() => import('./interactive/FileTree'), {
   loading: InteractiveLoading,
 });
 
+const MapReduceViz = dynamic(() => import('./interactive/MapReduceViz'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
+const RailwayTrack = dynamic(() => import('./interactive/RailwayTrack'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
+const MvuLoop = dynamic(() => import('./interactive/MvuLoop'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
+const DepResolve = dynamic(() => import('./interactive/DepResolve'), {
+  ssr: false,
+  loading: InteractiveLoading,
+});
+
 export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
   Diagram,
   NoteBlock,
   References,
+  DepResolve,
   FileTree,
   IdeaDeck,
   IdeaSlide,
+  MapReduceViz,
+  MvuLoop,
+  RailwayTrack,
   QueryRouter,
   Terminal,
   Walkthrough,
