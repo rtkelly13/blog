@@ -1,4 +1,12 @@
-import { Beaker, Boxes, Palette, Sparkles, Terminal, Type } from 'lucide-react';
+import {
+  Beaker,
+  Boxes,
+  Palette,
+  Projector,
+  Sparkles,
+  Terminal,
+  Type,
+} from 'lucide-react';
 import Link from '@/components/Link';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
@@ -38,6 +46,15 @@ const experiments = [
     icon: <Sparkles className="w-12 h-12" />,
     status: 'active',
     components: 6,
+  },
+  {
+    name: 'Talk Animations',
+    path: '/experiments/talk-animations',
+    description:
+      'Prototype interactive animations for the talk decks — map/reduce, ROP railway, MVU loop, dependency resolution',
+    icon: <Projector className="w-12 h-12" />,
+    status: 'active',
+    components: 5,
   },
 ];
 

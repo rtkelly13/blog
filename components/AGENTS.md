@@ -125,6 +125,16 @@ Step-driven interactives usable in any MDX (posts, talks, ideas):
   traversable-by-agent (the two-ignore-files trick). Trust-tier dots
   (brain/trusted/untrusted). Pure model + rules in `fileTreeModel.ts`
   (unit-tested); no props needed — the workspace layout is baked in.
+- `MapReduceViz` — animated AWS-Batch-style pipeline: colour-coded job types
+  (PREPARE cyan → MAP array pink → REDUCE yellow; spot-reclaim orange) flow
+  from a JOB_QUEUE through a slot-limited COMPUTE_ENV into a SUCCEEDED stack,
+  with dependencies (maps wait on prepare, reduce waits on all maps), visible
+  queuing when maps outnumber slots, and one map losing its spot instance and
+  re-queueing. Deterministic seeded discrete-event scheduler in
+  `mapReduceModel.ts` (`buildRun` → pure `stateAt(plan, t)`, unit-tested);
+  rAF clock, autoplay-on-view, fan-out presets (x4/x8/x12), replay. Reduced
+  motion swaps the clock for a PREPARE/MAP/REDUCE/DONE phase stepper. Props:
+  `mappers`, `slots`, `spotReclaim`, `caption`, `title`, `autoplay`.
 
 Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
 motion/@xyflow/react ship as lazy chunks only on pages that mount them.
