@@ -4,6 +4,7 @@ import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
 import type { Reference } from 'types/Reference';
 import type { Toc } from 'types/Toc';
+import DevEditor from '@/components/dev/DevEditor';
 import { MDXLayoutRenderer } from '@/components/MDXComponents';
 import PageTitle from '@/components/PageTitle';
 import generateRss from '@/lib/generate-rss';
@@ -142,6 +143,9 @@ export default function Blog({
             </span>
           </PageTitle>
         </div>
+      )}
+      {process.env.NODE_ENV === 'development' && (
+        <DevEditor type="blog" slug={frontMatter.slug} />
       )}
     </>
   );
