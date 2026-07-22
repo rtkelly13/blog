@@ -246,6 +246,7 @@ Gotchas:
 | GitHub OAuth (prod + dev) | ✅ live |
 | `e2e` bypass provider + guards | ✅ shipped (PR #48), prod-verified inert |
 | Harness headless bypass mode | ✅ shipped (button-based) |
+| UI bypass button on Vercel previews | ✅ `NEXT_PUBLIC_E2E_BYPASS_SECRET` set in Vercel Preview env (2026-07-22); matches dev deployment + `secrets/` files |
 | CI live-e2e workflow | ✅ merged; awaiting secrets (todo 33a) |
 | Session-init CLI (§5) | 📐 designed, not built |
 | Button + `NEXT_PUBLIC_*` removal | pending the CLI |
