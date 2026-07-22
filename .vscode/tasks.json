@@ -2,9 +2,30 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Convex Dev",
+      "type": "shell",
+      "command": "npx convex dev",
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Blog: Full Stack",
+      "dependsOn": ["Convex Dev", "Dev Server"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
       "label": "Dev Server",
       "type": "shell",
-      "command": "pnpm dev",
+      "command": "pnpm dev --port 3002",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -23,7 +44,7 @@
     {
       "label": "Dev Server (Debug)",
       "type": "shell",
-      "command": "NODE_OPTIONS='--inspect' pnpm dev",
+      "command": "NODE_OPTIONS='--inspect' pnpm dev --port 3002",
       "group": "build",
       "problemMatcher": ["$tsc-watch"],
       "isBackground": true,
