@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import type { PostFrontMatter } from 'types/PostFrontMatter';
@@ -7,7 +6,8 @@ import type { Toc } from 'types/Toc';
 import DevEditor from '@/components/dev/DevEditor';
 import { MDXLayoutRenderer } from '@/components/MDXComponents';
 import PageTitle from '@/components/PageTitle';
-import generateRss from '@/lib/generate-rss';
+import { PageSEO } from '@/components/SEO';
+import siteMetadata from '@/data/siteMetadata';
 import {
   formatSlug,
   getAllFilesFrontMatter,
@@ -80,10 +80,6 @@ export const getStaticProps: GetStaticProps<{
     allPosts,
   );
 
-  // rss
-  const rss = generateRss(allPosts);
-  fs.writeFileSync('./public/feed.xml', rss);
-
   return {
     props: {
       post,
@@ -120,8 +116,7 @@ export default function Blog({
 
   return (
     <>
-      {('draft' in frontMatter && frontMatter.draft !== true) ||
-      show_drafts() ? (
+      {frontMatter.draft !== true || show_drafts() ? (
         <MDXLayoutRenderer
           layout={frontMatter.layout || DEFAULT_LAYOUT}
           toc={toc}
@@ -135,14 +130,25 @@ export default function Blog({
           seriesData={seriesData}
         />
       ) : (
-        <div className="mt-24 text-center">
-          <PageTitle>
-            Under Construction{' '}
-            <span role="img" aria-label="roadwork sign">
-              🚧
-            </span>
-          </PageTitle>
-        </div>
+        // A page is built for every file in `data/blog`, drafts included, so
+        // this placeholder is live and crawlable. It carries no content worth
+        // indexing — and the post that replaces it will want a clean slate at
+        // this URL.
+        <>
+          <PageSEO
+            title={`Under construction - ${siteMetadata.title}`}
+            description="This post isn't published yet."
+            noindex
+          />
+          <div className="mt-24 text-center">
+            <PageTitle>
+              Under Construction{' '}
+              <span role="img" aria-label="roadwork sign">
+                🚧
+              </span>
+            </PageTitle>
+          </div>
+        </>
       )}
       {process.env.NODE_ENV === 'development' && (
         <DevEditor type="blog" slug={frontMatter.slug} />

@@ -39,7 +39,10 @@ export default function AdminPage({
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
-      <PageSEO title={`Admin - ${siteMetadata.author}`} description="" />
+      <PageSEO
+        title={`Admin - ${siteMetadata.author}`}
+        description="Presenter controls for live talks."
+      />
       <article className="mx-auto max-w-4xl py-10">
         <div className="mb-6 flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="font-display text-3xl font-bold uppercase text-white">

@@ -270,10 +270,11 @@ export async function getAllFilesFrontMatter(folder: 'blog') {
     const source = fs.readFileSync(file, 'utf8');
     const matterFile = matter(source);
     const frontmatter = matterFile.data as PostFrontMatter;
-    if (
-      ('draft' in frontmatter && frontmatter.draft !== true) ||
-      show_drafts()
-    ) {
+    // Absent `draft` means published. The old `'draft' in frontmatter &&` guard
+    // treated a missing key as a draft, which hid the post from every listing,
+    // feed and search index while `getStaticPaths` still built and indexed its
+    // page — live, crawlable, and linked from nowhere.
+    if (frontmatter.draft !== true || show_drafts()) {
       allFrontMatter.push({
         ...frontmatter,
         slug: formatSlug(fileName),

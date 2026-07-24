@@ -24,10 +24,11 @@ export function getAllSeries(): SeriesMetadata[] {
     const { data } = matter(content);
     const frontmatter = data as SeriesMetadata;
 
-    if (
-      ('draft' in frontmatter && frontmatter.draft !== true) ||
-      show_drafts()
-    ) {
+    // Absent `draft` means published — matching `getSeriesBySlug` below, which
+    // only hides an *explicit* `draft: true`. The two disagreeing meant a series
+    // without the key was reachable at `/series/<slug>` but missing from
+    // `/series`.
+    if (frontmatter.draft !== true || show_drafts()) {
       allSeries.push({
         ...frontmatter,
         fileName: file,

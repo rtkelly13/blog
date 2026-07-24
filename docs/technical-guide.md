@@ -26,7 +26,7 @@ pnpm dev                   # dev server (Turbopack)
 pnpm storybook             # design system at :6006
 
 # Build
-pnpm build                 # next build + sitemap + search + tag-rss + OG images
+pnpm build                 # next build + feeds + sitemap + search + OG images
 
 # Testing
 pnpm test                  # Vitest unit tests
@@ -46,11 +46,38 @@ pnpm format                # Biome format
 ```
 pnpm build
 ├── next build (Turbopack)
-├── scripts/generate-sitemap.mjs
+├── scripts/generate-rss.mjs         # public/feed.xml
+├── scripts/generate-tag-rss.mjs     # public/tags/<tag>/feed.xml
+├── scripts/generate-sitemap.mjs     # must follow generate-tag-rss: it reads the
+│                                    # generated tag feeds to derive /tags/<tag>
 ├── scripts/generate-search.mjs
-├── scripts/generate-tag-rss.mjs
+├── scripts/build-search-index.mjs
 └── scripts/generate-og-images.mjs   # deterministic per-post OG cards
 ```
+
+Order matters, and the feeds are build steps on purpose — `feed.xml` and the tag
+feeds used to be written as `fs.writeFileSync` side effects inside
+`getStaticProps`, so they existed only if a post or tag page happened to be
+built.
+
+## Indexing policy
+
+`lib/seo/routePolicy.mjs` is the single list of routes kept out of search
+results (admin and presenter surfaces, the design sandbox, experiment
+prototypes, the ideas workbench). Two consumers read it, and both must agree:
+
+- `components/SEO.tsx` emits the page's one `robots` meta from it. Content that
+  is unpublished rather than route-excluded — a `draft: true` post or talk —
+  passes `noindex` explicitly, since a draft shares its route with published
+  content.
+- `scripts/generate-sitemap.mjs` filters against it, so a noindexed page is
+  never advertised in `sitemap.xml`.
+
+A page that renders no SEO component gets no title, description or `robots`
+tag; `pnpm check:seo` fails on that, and on site-level regressions such as a
+placeholder `siteMetadata.description` or a `siteUrl` with a trailing slash.
+`public/robots.txt` blocks the auth-gated surfaces outright and points at the
+sitemap.
 
 Requires building the external `@rtkelly/mermaid-toolkit` first in CI (handled
 by the `.github/actions/setup-blog` composite action).

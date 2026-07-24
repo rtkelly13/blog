@@ -47,7 +47,13 @@ export default function IdeaPage({
   const { mdxSource, toc, frontMatter } = idea;
   return (
     <>
-      <PageSEO title={`Idea - ${siteMetadata.author}`} description="" />
+      {/* Deliberately generic: the title of an unpublished idea shouldn't leak
+          through a browser tab or a shared link. The page is noindexed and
+          admin-gated regardless (lib/seo/routePolicy.mjs). */}
+      <PageSEO
+        title={`Idea - ${siteMetadata.author}`}
+        description="Admin-only workbench for evolving post and series ideas before drafting."
+      />
       <AdminGate>
         <MDXLayoutRenderer
           layout={frontMatter.layout || DEFAULT_LAYOUT}

@@ -76,7 +76,11 @@ export default function Present({
     <>
       <Head>
         <title>{frontMatter.title}</title>
-        {frontMatter.draft && <meta name="robots" content="noindex,nofollow" />}
+        {/* The presenter view duplicates the talk page it belongs to, so it is
+            never indexed — draft or not. Mirrors `lib/seo/routePolicy.mjs`,
+            which also keeps it out of the sitemap; this page renders no SEO
+            component, so the tag is spelled out here. */}
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
       {frontMatter.draft && (
         <div
