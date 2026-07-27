@@ -46,6 +46,7 @@
     "@fontsource/share-tech-mono": "^5.2.7",
     "@fontsource/space-grotesk": "^5.2.10",
     "@fontsource/vt323": "^5.2.7",
+    "@rtkelly13/design-system": "file:../design-system",
     "@rtkelly/mermaid-toolkit": "https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.20",

@@ -42,6 +42,9 @@ importers:
       '@rtkelly/mermaid-toolkit':
         specifier: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58
         version: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)
+      '@rtkelly13/design-system':
+        specifier: file:../design-system
+        version: file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tailwindcss/forms':
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.3.1)
@@ -2214,6 +2217,12 @@ packages:
     version: 0.0.1
     peerDependencies:
       mermaid: ^11.0.0
+
+  '@rtkelly13/design-system@file:../design-system':
+    resolution: {directory: ../design-system, type: directory}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
 
   '@sinclair/typebox@0.27.10':
     resolution: {integrity: sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA==}
@@ -4428,6 +4437,11 @@ packages:
   lucia@3.2.2:
     resolution: {integrity: sha512-P1FlFBGCMPMXu+EGdVD9W4Mjm0DqsusmKgO7Xc33mI5X1bklmsQb0hfzPhXomQr9waWIBDsiOjvr1e6BTaUqpA==}
     deprecated: This package has been deprecated. Please see https://lucia-auth.com/lucia-v3/migrate.
+
+  lucide-react@0.474.0:
+    resolution: {integrity: sha512-CmghgHkh0OJNmxGKWc0qfPJCYHASPMVSyGY8fj3xgk4v84ItqDg64JNKFZn5hC6E0vHi6gxnbCgwhyVB09wQtA==}
+    peerDependencies:
+      react: 19.2.7
 
   lucide-react@1.22.0:
     resolution: {integrity: sha512-c9o3l0PiNcgOQDW4F31BEYHudE7kgxVt3o30qMl36ZPwTxXlGB4QnLilhERvVM4uh/pl5MDyY1/gzZSYcHDtBg==}
@@ -7787,6 +7801,12 @@ snapshots:
     dependencies:
       mermaid: 11.16.0
 
+  '@rtkelly13/design-system@file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      lucide-react: 0.474.0(react@19.2.7)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
   '@sinclair/typebox@0.27.10': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
@@ -10190,6 +10210,10 @@ snapshots:
     dependencies:
       '@oslojs/crypto': 1.0.1
       '@oslojs/encoding': 1.1.0
+
+  lucide-react@0.474.0(react@19.2.7):
+    dependencies:
+      react: 19.2.7
 
   lucide-react@1.22.0(react@19.2.7):
     dependencies:

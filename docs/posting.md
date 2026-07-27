@@ -58,6 +58,15 @@ series:              # Optional multi-part posts
 bibliography: string # Optional .bib / CSL-JSON in data/ for [@BibKey] citations
 ```
 
+### Inline editing on the dev server
+
+Every post page on `next dev` shows a floating **✎ edit** button
+(`components/dev/DevEditor.tsx`): a slide-over with the post's raw MDX,
+saved back to the file with ⌘S via `/api/dev/post-source` (blog + ideas).
+The rendered page refreshes on save. Dev-only by construction — the button
+is tree-shaken out of production builds and the API route 404s outside
+`NODE_ENV=development`.
+
 ## Content features
 
 - **MDX processing** — `lib/mdx.ts` (bundleMDX + custom remark/rehype plugins).
