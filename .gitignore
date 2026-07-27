@@ -70,3 +70,6 @@ todo.md
 
 # provisioning secrets (see secrets/README.md) — never commit values
 /secrets/*.env
+
+# Local TODO file
+TODO.md

@@ -39,12 +39,12 @@ importers:
       '@fontsource/vt323':
         specifier: ^5.2.7
         version: 5.2.7
-      '@rtkelly/design-system':
-        specifier: file:../design-system
-        version: file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@rtkelly/mermaid-toolkit':
         specifier: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58
         version: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)
+      '@rtkelly13/design-system':
+        specifier: file:../design-system
+        version: file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tailwindcss/forms':
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.3.1)
@@ -2212,17 +2212,17 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@rtkelly/design-system@file:../design-system':
-    resolution: {directory: ../design-system, type: directory}
-    peerDependencies:
-      react: 19.2.7
-      react-dom: 19.2.7
-
   '@rtkelly/mermaid-toolkit@https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58':
     resolution: {tarball: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58}
     version: 0.0.1
     peerDependencies:
       mermaid: ^11.0.0
+
+  '@rtkelly13/design-system@file:../design-system':
+    resolution: {directory: ../design-system, type: directory}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
 
   '@sinclair/typebox@0.27.10':
     resolution: {integrity: sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA==}
@@ -7797,15 +7797,15 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.55.1':
     optional: true
 
-  '@rtkelly/design-system@file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@rtkelly/mermaid-toolkit@https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)':
+    dependencies:
+      mermaid: 11.16.0
+
+  '@rtkelly13/design-system@file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       lucide-react: 0.474.0(react@19.2.7)
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
-
-  '@rtkelly/mermaid-toolkit@https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)':
-    dependencies:
-      mermaid: 11.16.0
 
   '@sinclair/typebox@0.27.10': {}
 
