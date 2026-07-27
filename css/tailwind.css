@@ -2,16 +2,14 @@
 
 @import "tailwindcss";
 
+/* Design-system token contract: brutalist @theme tokens, the .dark/.dim dark
+   variant, per-mode variable blocks, and @source for the DS components. */
+@import "@rtkelly13/design-system/theme.css";
+
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
 @config "../tailwind.config.js";
-
-/* The `dim` theme is a second dark theme: next-themes puts a single `dim` class
-   on <html> (not `dark`), so teach the `dark:` variant to match `.dim` too.
-   This keeps every existing `dark:` utility working under dim without needing a
-   multi-class value (which would break next-themes' classList handling). */
-@custom-variant dark (&:where(.dark, .dark *, .dim, .dim *));
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,

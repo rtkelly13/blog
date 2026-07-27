@@ -12,10 +12,13 @@ no auth needed anywhere (it publishes from the design-system repo via npm
 trusted publishing). To develop against the sibling `../design-system`
 checkout instead:
 
-- `pnpm ds:link` — overlays the local repo onto `node_modules` via `pnpm link`
-  (no `package.json` change). Rebuild the design system (`pnpm build` there)
-  to see changes; the link is a symlink, so no reinstall needed.
-- `pnpm ds:unlink` — removes the link and restores the registry version.
+- `pnpm ds:link` — links the local repo via `pnpm link`. **This writes a
+  `link:../design-system` override into `package.json` and the lockfile
+  (pnpm v10 behavior) — never commit those**; the lockfile protocol guard
+  rejects them. Rebuild the design system (`pnpm build` there) to see
+  changes; the link is a symlink, so no reinstall needed.
+- `pnpm ds:unlink` — removes the link/override and restores the registry
+  version. Run it before committing any dependency changes.
 
 Never commit a `file:../design-system` specifier — Vercel clones only this
 repo, so the path doesn't exist there and every deploy fails at `pnpm install`.
