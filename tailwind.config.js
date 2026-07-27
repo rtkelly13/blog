@@ -6,6 +6,7 @@ const colors = require('tailwindcss/colors');
 
 /** @type {import("tailwindcss/tailwind-config").TailwindConfig } */
 module.exports = {
+  presets: [require('@rtkelly13/design-system/tailwind-preset')],
   content: [
     './pages/**/*.tsx',
     './components/**/*.tsx',
