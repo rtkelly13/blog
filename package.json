@@ -35,7 +35,9 @@
     "prepare": "husky install",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "provision": "node scripts/provision.mjs"
+    "provision": "node scripts/provision.mjs",
+    "ds:link": "pnpm link ../design-system",
+    "ds:unlink": "pnpm unlink @rtkelly13/design-system && pnpm install"
   },
   "dependencies": {
     "@auth/core": "0.37.0",
@@ -46,7 +48,7 @@
     "@fontsource/share-tech-mono": "^5.2.7",
     "@fontsource/space-grotesk": "^5.2.10",
     "@fontsource/vt323": "^5.2.7",
-    "@rtkelly13/design-system": "file:../design-system",
+    "@rtkelly13/design-system": "^0.0.4",
     "@rtkelly/mermaid-toolkit": "https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.20",

@@ -40,6 +40,18 @@ const FORBIDDEN = [
   },
   { re: /^\s*repo:\s*git@/, label: 'git repo over SSH (repo: git@…)' },
   { re: /^\s*type:\s*git\b/, label: 'git-type resolution (type: git)' },
+  // `file:../…` deps resolve to a sibling checkout that only exists on a dev
+  // machine — Vercel clones the blog alone, so cold installs die with ENOENT
+  // (this took every deploy down on 2026-07-27). Consume sibling packages from
+  // GitHub Packages instead; use `pnpm ds:link` for local development.
+  {
+    re: /file:\.\.\//,
+    label: 'out-of-repo file: dependency (file:../…)',
+  },
+  {
+    re: /^\s*resolution:\s*\{directory:\s*\.\./,
+    label: 'out-of-repo directory resolution',
+  },
 ];
 
 let text;
