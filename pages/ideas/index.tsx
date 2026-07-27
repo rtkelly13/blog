@@ -27,7 +27,10 @@ export default function Ideas({
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
-      <PageSEO title={`Ideas - ${siteMetadata.author}`} description="" />
+      <PageSEO
+        title={`Ideas - ${siteMetadata.author}`}
+        description="Admin-only workbench for evolving post and series ideas before drafting."
+      />
       <div className="divide-y divide-white border-2 border-white bg-black">
         <PageHeader
           title="IDEAS"

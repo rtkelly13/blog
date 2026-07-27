@@ -5,7 +5,7 @@ import type { SeriesMetadata } from 'types/Series';
 import CyberHero from '@/components/CyberHero';
 import Link from '@/components/Link';
 import LiveTalkBanner from '@/components/LiveTalkBanner';
-import { PageSEO } from '@/components/SEO';
+import { PageSEO, SiteStructuredData } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 import ListLayout from '@/layouts/ListLayout';
 import { getAllFilesFrontMatter } from '@/lib/mdx';
@@ -38,6 +38,7 @@ export default function Home({
         title={siteMetadata.title}
         description={siteMetadata.description}
       />
+      <SiteStructuredData />
       <div className="relative">
         <CyberHero />
         <LiveTalkBanner />

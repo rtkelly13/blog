@@ -1,6 +1,5 @@
 import { Calendar, MapPin, Play, Users } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
-import Head from 'next/head';
 import type { Reference } from 'types/Reference';
 import type { TalkFrontMatter } from 'types/TalkFrontMatter';
 import Link from '@/components/Link';
@@ -58,16 +57,12 @@ export default function TalkLanding({
 
   return (
     <>
+      {/* Drafts are reachable by URL for admins but shouldn't be indexed. */}
       <PageSEO
         title={`${title} - ${siteMetadata.author}`}
         description={summary}
+        noindex={draft}
       />
-      {/* Drafts are reachable by URL for admins but shouldn't be indexed. */}
-      {draft && (
-        <Head>
-          <meta name="robots" content="noindex,nofollow" />
-        </Head>
-      )}
       <article className="mx-auto max-w-3xl py-10">
         {draft && (
           <p className="mb-6 border-2 border-brutalist-pink bg-black px-4 py-2 font-mono text-sm font-bold uppercase text-brutalist-pink">

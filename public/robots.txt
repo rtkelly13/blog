@@ -1,0 +1,14 @@
+# ryankelly.dev
+#
+# Author and presenter surfaces are disallowed outright. Everything else that
+# shouldn't rank (the design sandbox, experiment prototypes, the ideas
+# workbench) is left crawlable on purpose and carries `noindex` instead — a
+# crawler has to fetch a page to see that tag, so blocking it here would leave
+# those URLs indexable-but-unreadable. The list lives in lib/seo/routePolicy.mjs.
+
+User-agent: *
+Disallow: /admin
+Disallow: /api/
+Allow: /
+
+Sitemap: https://ryankelly.dev/sitemap.xml

@@ -1,4 +1,5 @@
 import Document, { Head, Html, Main, NextScript } from 'next/document';
+import siteMetadata from '@/data/siteMetadata';
 
 class MyDocument extends Document {
   // static async getInitialProps(ctx: DocumentContext) {
@@ -36,7 +37,15 @@ class MyDocument extends Document {
           />
           <meta name="msapplication-TileColor" content="#000000" />
           <meta name="theme-color" content="#000000" />
-          <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
+          {/* Site-wide feed. The `title` matters once tag feeds are in play
+              (components/SEO.tsx → TagSEO adds a second alternate link on tag
+              pages) — without it a reader shows two indistinguishable entries. */}
+          <link
+            rel="alternate"
+            type="application/rss+xml"
+            title={`${siteMetadata.title} - RSS feed`}
+            href={`${siteMetadata.siteUrl}/feed.xml`}
+          />
         </Head>
         <body className="antialiased text-white bg-black">
           <Main />

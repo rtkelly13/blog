@@ -2,16 +2,25 @@ const siteMetadata = {
   title: 'Ryan Kelly Blog',
   author: 'Ryan Kelly',
   headerTitle: '',
-  description: 'A blog created with Next.js and Tailwind.css',
+  // Used as the homepage meta description, og:description, and the RSS channel
+  // description. Drafted by an agent as a suggestion — the wording is the
+  // author's to own (docs/posting.md → authorship policy).
+  description:
+    'Ryan Kelly on software engineering — AWS, .NET, infrastructure as code, and working with coding agents. War stories from a decade of shipping.',
   language: 'en-us',
-  siteUrl: 'https://ryankelly.dev/',
+  // No trailing slash: this is concatenated with absolute paths (`/blog/…`,
+  // `/static/…`) in canonical, og:url and og:image tags, and a trailing slash
+  // there produces `https://ryankelly.dev//blog/…`.
+  siteUrl: 'https://ryankelly.dev',
   siteRepo: 'https://github.com/rtkelly13/blog',
   siteLogo: '/static/images/logo-square.svg',
-  image: '/static/images/avatar.png',
+  image: '/static/images/myprofile.jpg',
   socialBanner: '/static/images/og-card.png',
   email: 'me@ryankelly.dev',
   github: 'https://github.com/rtkelly13',
   x: 'https://x.com/RTKelly25',
+  // `twitter:site` wants an @handle, not a profile URL.
+  xHandle: '@RTKelly25',
   facebook: '',
   youtube: '',
   linkedin: 'https://www.linkedin.com/in/rtkelly94/',

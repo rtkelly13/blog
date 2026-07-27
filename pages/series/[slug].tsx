@@ -5,6 +5,8 @@ import type {
   InferGetStaticPropsType,
 } from 'next';
 import { useMemo } from 'react';
+import { PageSEO } from '@/components/SEO';
+import siteMetadata from '@/data/siteMetadata';
 import SeriesLayout from '@/layouts/SeriesLayout';
 import { getAllFilesFrontMatter, getFileBySlug } from '@/lib/mdx';
 import { getAllSeries, getSeriesWithPosts } from '@/lib/series';
@@ -49,8 +51,14 @@ export default function SeriesDetail({
   const Component = useMemo(() => getMDXComponent(mdxSource), [mdxSource]);
 
   return (
-    <SeriesLayout frontMatter={frontMatter} posts={series.posts}>
-      <Component />
-    </SeriesLayout>
+    <>
+      <PageSEO
+        title={`${frontMatter.title} - ${siteMetadata.title}`}
+        description={frontMatter.summary || frontMatter.description || ''}
+      />
+      <SeriesLayout frontMatter={frontMatter} posts={series.posts}>
+        <Component />
+      </SeriesLayout>
+    </>
   );
 }
