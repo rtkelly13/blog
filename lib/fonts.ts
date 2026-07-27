@@ -100,6 +100,12 @@ export const ibmPlexMono = localFont({
     },
   ],
   display: 'swap',
+  // No synthesized Arial fallback: the latin subset lacks box-drawing glyphs
+  // (U+2500–257F) used by ASCII diagrams, and the size-adjusted Arial face
+  // matches every codepoint, so those glyphs rendered proportionally and the
+  // diagrams collapsed. Missing glyphs must fall through to the real
+  // monospace fonts later in the font-mono stack.
+  adjustFontFallback: false,
 });
 
 export const vt323 = localFont({

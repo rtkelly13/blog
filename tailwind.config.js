@@ -54,46 +54,9 @@ module.exports = {
           blue: '#93ddfd',
           white: '#fff',
         },
-        // Accent colours read through CSS variables (with the original values
-        // as fallbacks) so a theme can re-point them in one place — e.g. the
-        // `sketch` theme swaps the neon cyan/pink/yellow for blue/red/green.
-        // See the theme blocks in css/tailwind.css.
-        brutalist: {
-          cyan: 'var(--brutalist-cyan, #22d3ee)',
-          pink: 'var(--brutalist-pink, #ec4899)',
-          yellow: 'var(--brutalist-yellow, #facc15)',
-          neonGreen: 'var(--brutalist-neonGreen, #39ff14)',
-          neonCyan: 'var(--brutalist-neonCyan, #00ffff)',
-          cyberOrange: 'var(--brutalist-cyberOrange, #ff8c00)',
-          darkBg: 'var(--brutalist-darkBg, #0a0a1a)',
-        },
       },
       borderRadius: {
-        none: '0px',
         md: '0.375rem',
-      },
-      boxShadow: {
-        // White offset shadows read through a themeable color token so the
-        // `dim` theme can soften them (see css/tailwind.css). Falls back to
-        // pure white for the default `dark` theme and non-themed contexts.
-        'hard-sm':
-          '2px 2px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
-        'hard-md':
-          '4px 4px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
-        'hard-lg':
-          '6px 6px 0px 0px var(--brutalist-shadow-color, rgba(255, 255, 255, 1))',
-        // Coloured offset/glow shadows read through the accent variables so
-        // they follow the theme (blue/red/green under sketch) instead of
-        // staying neon. color-mix keeps the glow alpha while using the var.
-        'hard-cyan': '4px 4px 0px 0px var(--brutalist-cyan, #22d3ee)',
-        'hard-pink': '4px 4px 0px 0px var(--brutalist-pink, #ec4899)',
-        'hard-yellow': '4px 4px 0px 0px var(--brutalist-yellow, #facc15)',
-        'glow-cyan':
-          '0 0 10px color-mix(in oklab, var(--brutalist-cyan, #22d3ee) 50%, transparent), 0 0 20px color-mix(in oklab, var(--brutalist-cyan, #22d3ee) 30%, transparent)',
-        'glow-pink':
-          '0 0 10px color-mix(in oklab, var(--brutalist-pink, #ec4899) 50%, transparent), 0 0 20px color-mix(in oklab, var(--brutalist-pink, #ec4899) 30%, transparent)',
-        'glow-orange':
-          '0 0 20px color-mix(in oklab, var(--brutalist-cyberOrange, #ff8c00) 80%, transparent), 0 0 40px color-mix(in oklab, var(--brutalist-cyberOrange, #ff8c00) 50%, transparent)',
       },
       typography: (theme) => ({
         DEFAULT: {
