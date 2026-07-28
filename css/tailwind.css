@@ -2,16 +2,14 @@
 
 @import "tailwindcss";
 
+/* Design-system token contract: brutalist @theme tokens, the .dark/.dim dark
+   variant, per-mode variable blocks, and @source for the DS components. */
+@import "@rtkelly13/design-system/theme.css";
+
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
 @config "../tailwind.config.js";
-
-/* The `dim` theme is a second dark theme: next-themes puts a single `dim` class
-   on <html> (not `dark`), so teach the `dark:` variant to match `.dim` too.
-   This keeps every existing `dark:` utility working under dim without needing a
-   multi-class value (which would break next-themes' classList handling). */
-@custom-variant dark (&:where(.dark, .dark *, .dim, .dim *));
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
@@ -154,6 +152,13 @@ html {
   /* Charcoal instead of true black; warm off-white instead of #fff. */
   --color-black: #17171b;
   --color-white: #d8d8d2;
+
+  /* The design-system's theme.css softens the accents under `.dim`; this blog
+     keeps them identical to dark (dim only re-points black/white/zinc) — see
+     tests/theme-toggle.spec.ts. Pin them back explicitly. */
+  --brutalist-cyan: #22d3ee;
+  --brutalist-pink: #ec4899;
+  --brutalist-yellow: #facc15;
 
   /* Lift the near-black zinc surfaces one notch so panels stay legible
      against the lighter charcoal background. */

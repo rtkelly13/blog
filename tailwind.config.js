@@ -6,7 +6,6 @@ const colors = require('tailwindcss/colors');
 
 /** @type {import("tailwindcss/tailwind-config").TailwindConfig } */
 module.exports = {
-  presets: [require('@rtkelly13/design-system/tailwind-preset')],
   content: [
     './pages/**/*.tsx',
     './components/**/*.tsx',
@@ -64,13 +63,13 @@ module.exports = {
             fontFamily: theme('fontFamily.sans'),
             color: theme('colors.gray.200'),
             a: {
-              color: theme('colors.brutalist.cyan'),
+              color: 'var(--brutalist-cyan, #22d3ee)',
               textDecoration: 'underline',
               fontWeight: '700',
               '&:hover': {
-                color: theme('colors.brutalist.pink'),
+                color: 'var(--brutalist-pink, #ec4899)',
               },
-              code: { color: theme('colors.brutalist.cyan') },
+              code: { color: 'var(--brutalist-cyan, #22d3ee)' },
             },
             h1: {
               fontFamily: theme('fontFamily.display'),
@@ -100,7 +99,7 @@ module.exports = {
             },
             code: {
               fontFamily: theme('fontFamily.mono'),
-              color: theme('colors.brutalist.neonGreen'),
+              color: 'var(--brutalist-neonGreen, #39ff14)',
               backgroundColor: theme('colors.black'),
               paddingLeft: '4px',
               paddingRight: '4px',
@@ -133,10 +132,10 @@ module.exports = {
             },
             'ol li:before': {
               fontWeight: '700',
-              color: theme('colors.brutalist.cyan'),
+              color: 'var(--brutalist-cyan, #22d3ee)',
             },
             'ul li:before': {
-              backgroundColor: theme('colors.brutalist.pink'),
+              backgroundColor: 'var(--brutalist-pink, #ec4899)',
             },
             strong: {
               color: theme('colors.white'),
@@ -144,7 +143,7 @@ module.exports = {
             },
             blockquote: {
               color: theme('colors.white'),
-              borderLeftColor: theme('colors.brutalist.pink'),
+              borderLeftColor: 'var(--brutalist-pink, #ec4899)',
               borderLeftWidth: '4px',
               fontStyle: 'normal',
             },
@@ -155,13 +154,13 @@ module.exports = {
             fontFamily: theme('fontFamily.sans'),
             color: theme('colors.gray.200'),
             a: {
-              color: theme('colors.brutalist.cyan'),
+              color: 'var(--brutalist-cyan, #22d3ee)',
               textDecoration: 'underline',
               fontWeight: '700',
               '&:hover': {
-                color: theme('colors.brutalist.pink'),
+                color: 'var(--brutalist-pink, #ec4899)',
               },
-              code: { color: theme('colors.brutalist.cyan') },
+              code: { color: 'var(--brutalist-cyan, #22d3ee)' },
             },
             h1: {
               fontFamily: theme('fontFamily.display'),
@@ -191,7 +190,7 @@ module.exports = {
             },
             code: {
               fontFamily: theme('fontFamily.mono'),
-              color: theme('colors.brutalist.neonGreen'),
+              color: 'var(--brutalist-neonGreen, #39ff14)',
               backgroundColor: theme('colors.black'),
               border: '1px solid',
               borderColor: theme('colors.white'),
@@ -210,10 +209,10 @@ module.exports = {
             },
             'ol li:before': {
               fontWeight: '700',
-              color: theme('colors.brutalist.cyan'),
+              color: 'var(--brutalist-cyan, #22d3ee)',
             },
             'ul li:before': {
-              backgroundColor: theme('colors.brutalist.pink'),
+              backgroundColor: 'var(--brutalist-pink, #ec4899)',
             },
             strong: {
               color: theme('colors.white'),
@@ -231,7 +230,7 @@ module.exports = {
             },
             blockquote: {
               color: theme('colors.white'),
-              borderLeftColor: theme('colors.brutalist.pink'),
+              borderLeftColor: 'var(--brutalist-pink, #ec4899)',
               borderLeftWidth: '4px',
               fontStyle: 'normal',
             },
@@ -240,5 +239,4 @@ module.exports = {
       }),
     },
   },
-  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
 };

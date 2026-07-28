@@ -1,5 +1,4 @@
 import { TLDR as SystemTLDR } from '@rtkelly13/design-system';
-import React from 'react';
 
 interface TLDRProps {
   text: string;
