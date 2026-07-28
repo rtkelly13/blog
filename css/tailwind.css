@@ -153,6 +153,13 @@ html {
   --color-black: #17171b;
   --color-white: #d8d8d2;
 
+  /* The design-system's theme.css softens the accents under `.dim`; this blog
+     keeps them identical to dark (dim only re-points black/white/zinc) — see
+     tests/theme-toggle.spec.ts. Pin them back explicitly. */
+  --brutalist-cyan: #22d3ee;
+  --brutalist-pink: #ec4899;
+  --brutalist-yellow: #facc15;
+
   /* Lift the near-black zinc surfaces one notch so panels stay legible
      against the lighter charcoal background. */
   --color-zinc-950: #17171b;

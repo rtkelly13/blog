@@ -1,5 +1,5 @@
 import { NoteBlock as SystemNoteBlock } from '@rtkelly13/design-system';
-import React, { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface NoteBlockProps {
   children: ReactNode;

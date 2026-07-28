@@ -58,7 +58,8 @@ const FORBIDDEN = [
   // `pnpm ds:unlink` before committing dependency changes.
   {
     re: /link:\.\.\//,
-    label: 'out-of-repo link: dependency (pnpm link leftover — run pnpm ds:unlink)',
+    label:
+      'out-of-repo link: dependency (pnpm link leftover — run pnpm ds:unlink)',
   },
 ];
 

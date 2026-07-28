@@ -1,4 +1,4 @@
-import { Boxes, Rocket } from 'lucide-react';
+import { Boxes } from 'lucide-react';
 import type { ReactNode } from 'react';
 import Button from '@/components/Button';
 import { IdeaKindBadge, IdeaStatusBadge } from '@/components/ideas/IdeaBadges';
