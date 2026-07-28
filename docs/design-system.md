@@ -25,8 +25,11 @@ repo, so the path doesn't exist there and every deploy fails at `pnpm install`.
 
 ## Tokens
 
-Defined in `tailwind.config.js` (accents read through CSS variables so themes
-can re-point them in one place — see `css/tailwind.css`).
+Defined in the design-system package's `theme.css` (`@theme` block; accents
+read through CSS variables so themes can re-point them in one place). The
+blog's `css/tailwind.css` overrides where its behavior deliberately diverges —
+e.g. `.dim` pins the accents back to the dark values, where the DS softens
+them (see `tests/theme-toggle.spec.ts`).
 
 | Token              | Value (dark)      | Usage               |
 | ------------------ | ----------------- | ------------------- |
@@ -54,8 +57,9 @@ can re-point them in one place — see `css/tailwind.css`).
 ```css
 /* css/tailwind.css — NOT @tailwind directives */
 @import "tailwindcss";
+@import "@rtkelly13/design-system/theme.css"; /* brutalist tokens, .dark/.dim variant, @source */
 @plugin "@tailwindcss/typography";
-@config "../tailwind.config.js";
+@config "../tailwind.config.js"; /* only for the typography() callback now */
 ```
 
 PostCSS uses `@tailwindcss/postcss` (not `tailwindcss`). Never use the v3

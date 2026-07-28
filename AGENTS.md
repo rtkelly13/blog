@@ -19,7 +19,7 @@ components, diagrams, assets, tooling, tests). Full policy:
 
 | Domain | Guide | Covers |
 | ------ | ----- | ------ |
-| **Design system** | [docs/design-system.md](./docs/design-system.md) | Brutalist tokens, dual-mode (neon-terminal + sketch) theming, anti-patterns, Tailwind v4 |
+| **Design system** | [docs/design-system.md](./docs/design-system.md) | Brutalist tokens, dual-mode (neon-terminal + sketch) theming, anti-patterns, Tailwind v4, the `@rtkelly13/design-system` npm package + `ds:link` local dev |
 | **Technical guide** | [docs/technical-guide.md](./docs/technical-guide.md) | Stack, commands, build pipeline, CI/CD, branch workflow, browser control, deps |
 | **Posting** | [docs/posting.md](./docs/posting.md) | Authorship policy, MDX frontmatter, citations/OG, the ideas workbench |
 | **Talks** | [docs/talks.md](./docs/talks.md) | Deck MDX, live/present/admin routes, Convex backend, auth, live E2E |
@@ -42,7 +42,8 @@ when you work there:
 | Evolve an idea pre-draft | `data/ideas/<slug>.mdx`, `/ideas` | [posting.md](./docs/posting.md#ideas-workbench-pre-drafting) |
 | Site config | `data/siteMetadata.js` | — |
 | Components / layouts | `components/`, `layouts/` | [components/AGENTS.md](./components/AGENTS.md) |
-| Colours, shadows, themes | `tailwind.config.js`, `css/tailwind.css` | [design-system.md](./docs/design-system.md) |
+| Colours, shadows, themes | `css/tailwind.css` (tokens come from `@rtkelly13/design-system/theme.css`) | [design-system.md](./docs/design-system.md) |
+| Design-system package dev | `pnpm ds:link` / `pnpm ds:unlink` (never commit the `link:` override) | [design-system.md](./docs/design-system.md#package-source--local-development) |
 | MDX / remark plugins | `lib/mdx.ts`, `lib/remark-*.ts` | [lib/AGENTS.md](./lib/AGENTS.md) |
 | Realtime backend | `convex/` | [convex/AGENTS.md](./convex/AGENTS.md) |
 | Talk / live routes | `pages/talks/`, `pages/live/`, `pages/admin.tsx` | [talks.md](./docs/talks.md) |
