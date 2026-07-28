@@ -5,6 +5,21 @@ border-radius, offset shadows with no blur, a tight neon palette on black, and
 `[ BRACKETED ]` display type. It ships as **two first-class modes driven by one
 token set** — see [Dual-mode theming](#dual-mode-theming).
 
+## Package source & local development
+
+`@rtkelly13/design-system` is installed from the public **npm registry** —
+no auth needed anywhere (it publishes from the design-system repo via npm
+trusted publishing). To develop against the sibling `../design-system`
+checkout instead:
+
+- `pnpm ds:link` — overlays the local repo onto `node_modules` via `pnpm link`
+  (no `package.json` change). Rebuild the design system (`pnpm build` there)
+  to see changes; the link is a symlink, so no reinstall needed.
+- `pnpm ds:unlink` — removes the link and restores the registry version.
+
+Never commit a `file:../design-system` specifier — Vercel clones only this
+repo, so the path doesn't exist there and every deploy fails at `pnpm install`.
+
 ## Tokens
 
 Defined in `tailwind.config.js` (accents read through CSS variables so themes

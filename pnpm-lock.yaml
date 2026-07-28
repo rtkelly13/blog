@@ -43,8 +43,8 @@ importers:
         specifier: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58
         version: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)
       '@rtkelly13/design-system':
-        specifier: file:../design-system
-        version: file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^0.0.4
+        version: 0.0.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tailwindcss/forms':
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.3.1)
@@ -2218,8 +2218,8 @@ packages:
     peerDependencies:
       mermaid: ^11.0.0
 
-  '@rtkelly13/design-system@file:../design-system':
-    resolution: {directory: ../design-system, type: directory}
+  '@rtkelly13/design-system@0.0.4':
+    resolution: {integrity: sha512-21O0CQpRkouGTvlhbuU07WC+vcH6rrFd5foB1XggC59HlkRQn+ofP0eG3s0uo9pQQvd284zWvwtlP/RRs+pbAg==}
     peerDependencies:
       react: 19.2.7
       react-dom: 19.2.7
@@ -7801,7 +7801,7 @@ snapshots:
     dependencies:
       mermaid: 11.16.0
 
-  '@rtkelly13/design-system@file:../design-system(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@rtkelly13/design-system@0.0.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       lucide-react: 0.474.0(react@19.2.7)
       react: 19.2.7
