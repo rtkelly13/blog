@@ -2,6 +2,18 @@
 
 This directory contains Storybook stories for the blog's design system.
 
+## Why Storybook is here
+
+Not for the published docs site — **for the tests.** `vitest.config.ts` has a
+`storybook` project that runs every story in this repo as a real browser test, so
+`pnpm test` covers 16 story files / 62 tests through Storybook. Each story is a
+render test, an interaction test (if it has `play`), and an axe a11y pass.
+
+That makes the stories load-bearing: removing Storybook would remove those tests.
+See [../tests/AGENTS.md](../tests/AGENTS.md#storybook-is-part-of-the-test-suite)
+for the full picture, including why the blog keeps stories for components that
+`@rtkelly13/design-system` also covers.
+
 ## Running Storybook
 
 ```bash

@@ -229,6 +229,12 @@ Components with `.stories.tsx` are documented in Storybook:
 
 Run: `pnpm storybook`
 
+A story is also a test, not only documentation: the `storybook` Vitest project
+runs each one in a real browser under `pnpm test` (render + `play` + axe a11y).
+So adding a story adds coverage, and a component left unstoried has none of it —
+which is what the deferred item below actually costs. See
+[../tests/AGENTS.md](../tests/AGENTS.md#storybook-is-part-of-the-test-suite).
+
 - **(#18) Talk components aren't storied (yet):** the talk/admin components are hard
   to story in the Storybook browser-test env — they depend on a Convex provider,
   `react-timer-hook` fails the dep-optimizer, and the `Link`→`data/siteMetadata`
