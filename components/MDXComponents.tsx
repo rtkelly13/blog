@@ -70,6 +70,11 @@ const MapReduceViz = dynamic(() => import('./interactive/MapReduceViz'), {
   loading: InteractiveLoading,
 });
 
+const MigrationRatioChart = dynamic(
+  () => import('./interactive/MigrationRatioChart'),
+  { ssr: false, loading: InteractiveLoading },
+);
+
 const RailwayTrack = dynamic(() => import('./interactive/RailwayTrack'), {
   ssr: false,
   loading: InteractiveLoading,
@@ -96,6 +101,7 @@ export const MDXComponents: MDXComponentsType = {
   IdeaDeck,
   IdeaSlide,
   MapReduceViz,
+  MigrationRatioChart,
   MvuLoop,
   RailwayTrack,
   QueryRouter,
