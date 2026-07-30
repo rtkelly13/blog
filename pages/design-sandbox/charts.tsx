@@ -9,6 +9,53 @@ const MigrationRatioChart = dynamic(
   { ssr: false },
 );
 
+const SeriesPaletteChart = dynamic(
+  () => import('@/components/charts/SeriesPaletteChart'),
+  { ssr: false },
+);
+
+/** 11 series against an 8-slot palette — the case that forces a fold. */
+const MANY_SERIES = (() => {
+  const names = [
+    'ALPHA',
+    'BRAVO',
+    'CHARLIE',
+    'DELTA',
+    'ECHO',
+    'FOXTROT',
+    'GOLF',
+    'HOTEL',
+    'INDIA',
+    'JULIET',
+    'KILO',
+  ];
+  const groups = ['Q1', 'Q2', 'Q3', 'Q4'];
+  // Fixed weights, no RNG — the sandbox must render identically every visit.
+  const weights = [30, 26, 23, 20, 17, 14, 11, 9, 6, 4, 2];
+  const drift = [1, 0.85, 1.15, 0.95];
+  return groups.flatMap((group, gi) =>
+    names.map((series, si) => ({
+      group,
+      series,
+      value: Math.round(weights[si] * drift[gi] + ((si * 7 + gi * 3) % 5)),
+    })),
+  );
+})();
+
+/** Ordered buckets — the case that wants the ramp, not identity colours. */
+const TIERS = (() => {
+  const tiers = ['0-1y', '1-2y', '2-3y', '3-5y', '5-8y', '8-12y', '12y+'];
+  const groups = ['2023', '2024', '2025'];
+  const weights = [8, 14, 19, 24, 18, 11, 6];
+  return groups.flatMap((group, gi) =>
+    tiers.map((series, si) => ({
+      group,
+      series,
+      value: weights[si] + ((si + gi * 2) % 4),
+    })),
+  );
+})();
+
 /**
  * ILLUSTRATIVE per-year shape. Only the final year (36 legacy : 73 modern) is a
  * figure from the migration write-up; the intermediate years are placeholders
@@ -132,6 +179,80 @@ export default function ChartsSandboxPage() {
           note="No rows renders nothing at all — no frame, no placeholder — matching how TalkStatsChart hides below its reveal threshold. Nothing should appear between this note and the next heading."
         >
           <MigrationRatioChart rows={[]} />
+        </Section>
+
+        <h2 className="mt-16 mb-2 font-display text-3xl font-bold text-white">
+          [ PALETTE ]
+        </h2>
+        <p className="mb-10 font-mono text-xs text-zinc-400">
+          Eight categorical slots in a fixed, derived order, plus a neutral
+          &ldquo;Other&rdquo; bucket and a single-hue sequential ramp. Values
+          live in <code className="text-brutalist-cyan">css/tailwind.css</code>;{' '}
+          <code className="text-brutalist-cyan">pnpm check:palette</code>{' '}
+          re-runs the colourblind-safety checks against every theme&rsquo;s real
+          surface.
+        </p>
+
+        <Section
+          title="ALL EIGHT SLOTS"
+          note="The full categorical palette. Slot order is the CVD-safety mechanism, not decoration — it was derived by search. Never reorder it; never add a ninth."
+        >
+          <SeriesPaletteChart
+            rows={MANY_SERIES.filter(
+              (r) => !['INDIA', 'JULIET', 'KILO'].includes(r.series),
+            )}
+            title="EIGHT_SERIES.CHART"
+          />
+        </Section>
+
+        <Section
+          title="FOLD TO OTHER — 11 SERIES, 8 SLOTS"
+          note="Cardinality past the palette is a data problem, not a colour problem. foldToOther() ranks by total, keeps the top eight, and sums the rest into one neutral bucket — no generated hues, no cycling. The bucket always sits last so it never takes an identity slot."
+        >
+          <SeriesPaletteChart rows={MANY_SERIES} title="FOLD_TO_OTHER.CHART" />
+        </Section>
+
+        <Section
+          title="ALL-PAIRS CAP — 4 SERIES"
+          note="Scatter, bubble, choropleth and small multiples let any two marks touch, so every pair must separate — a much harder test that caps those forms at four, not eight. Folding to that cap is the same call with keep: SERIES_CAP.allPairs."
+        >
+          <SeriesPaletteChart
+            rows={MANY_SERIES}
+            keep={4}
+            title="ALL_PAIRS_CAP.CHART"
+          />
+        </Section>
+
+        <Section
+          title="SEQUENTIAL RAMP — ORDERED BUCKETS"
+          note="Tenure bands: reordering these would change the meaning, so they are ordinal, not categorical. One hue, light to dark, so the reader sees the order in the colour. Using identity colours here would throw that ordering away."
+        >
+          <SeriesPaletteChart
+            rows={TIERS}
+            sequential
+            title="TENURE_BANDS.CHART"
+            legendLabel="[ TENURE ]"
+          />
+        </Section>
+
+        <Section
+          title="TEXTURE — IDENTITY WITHOUT COLOUR"
+          note="Directional hatch as a second channel, with the angle alternating by slot. For print, forced-colors mode, and any pair sitting in the CVD warn band. Patterns stroke var(--ts-chart-N), so they re-theme with everything else."
+        >
+          <SeriesPaletteChart
+            rows={MANY_SERIES.filter(
+              (r) => !['INDIA', 'JULIET', 'KILO'].includes(r.series),
+            )}
+            texture
+            title="TEXTURE.CHART"
+          />
+          <MigrationRatioChart
+            rows={SAMPLE_ROWS}
+            title="MIGRATION_RATIO.TEXTURED"
+            texture
+            autoplay={false}
+            height={260}
+          />
         </Section>
       </div>
     </>

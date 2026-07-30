@@ -26,6 +26,7 @@
     "post:create": "node scripts/create-post.mjs",
     "post:wizard": "node scripts/compose.mjs",
     "check:seo": "node scripts/audit-seo.mjs",
+    "check:palette": "node scripts/check-chart-palette.mjs",
     "archive-links": "node scripts/archive-links.mjs",
     "check:deploy": "node scripts/verify-deployment.mjs",
     "check:lockfile": "node scripts/ci/check-lockfile-protocol.mjs",

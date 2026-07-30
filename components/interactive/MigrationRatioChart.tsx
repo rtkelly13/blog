@@ -3,7 +3,17 @@ import { Chart } from '@tanstack/react-charts';
 import { scaleBand, scaleLinear, scaleOrdinal } from 'd3-scale';
 import { RotateCcw } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import ChartHatchDefs from '@/components/charts/ChartHatchDefs';
+import { hatchFill } from '@/lib/charts/hatch';
+import { chartTheme, seriesColors } from '@/lib/charts/palette';
 import {
   buildMigrationPlan,
   formatModernShare,
@@ -23,6 +33,8 @@ interface ChartInput {
   years: readonly number[];
   maxTotal: number;
   bandLabels: readonly [string, string];
+  /** Paint per band, already resolved to a solid slot or a hatch pattern. */
+  bandPaints: readonly [string, string];
   yLabel: string;
   legendLabel: string;
 }
@@ -32,11 +44,11 @@ interface ChartInput {
  * definition; the per-frame data arrives through `input`, so the growing bars
  * reuse one definition and reconcile against the segments' stable `key`.
  *
- * `theme.palette` comes from the build context, so the legend and the bars draw
- * from the same `--ts-chart-*` tokens the blog remaps per theme — the palette is
- * never restated here.
+ * Paint arrives through `input.bandPaints` rather than being read off
+ * `theme.palette` here, because the texture variant swaps solid slots for hatch
+ * patterns whose ids depend on the mounted instance.
  */
-const migrationChart = defineChart<ChartInput>()(({ input, theme }) => ({
+const migrationChart = defineChart<ChartInput>()(({ input }) => ({
   marks: [
     rect(input.segments, {
       x: 'year',
@@ -61,11 +73,11 @@ const migrationChart = defineChart<ChartInput>()(({ input, theme }) => ({
     grid: true,
   },
   color: {
-    // Legacy takes the secondary accent and modern the primary, so the eye
-    // tracks the block that grows. The legend keeps the stack's bottom-up order.
-    scale: scaleOrdinal(input.bandLabels, [theme.palette[1], theme.palette[0]]),
+    scale: scaleOrdinal(input.bandLabels, input.bandPaints),
     legend: colorLegend({ label: input.legendLabel }),
   },
+  // Widens the palette from the library's built-in six slots to the blog's eight.
+  theme: chartTheme,
 }));
 
 function ControlButton({
@@ -102,6 +114,12 @@ export interface MigrationRatioChartProps {
   duration?: number;
   height?: number;
   autoplay?: boolean;
+  /**
+   * Swap solid fills for directional hatch patterns. A second, non-colour
+   * channel for identity — for print, forced-colors mode, or wherever a series
+   * pair sits in the CVD warn band.
+   */
+  texture?: boolean;
 }
 
 /**
@@ -129,8 +147,11 @@ export default function MigrationRatioChart({
   duration = 1.6,
   height = 340,
   autoplay = true,
+  texture = false,
 }: MigrationRatioChartProps) {
   const reduceMotion = useReducedMotion() ?? false;
+  // Pattern ids are document-global; scope them so two charts can coexist.
+  const hatchPrefix = useId().replace(/[^\w-]/g, '');
   const containerRef = useRef<HTMLElement>(null);
   // Without autoplay the chart must already be readable — progress 0 would show
   // an empty plot area. Replay still animates it from the baseline.
@@ -209,6 +230,16 @@ export default function MigrationRatioChart({
     [legacyLabel, modernLabel],
   );
 
+  /**
+   * Legacy takes slot 2 and modern slot 1, so the eye tracks the block that
+   * grows. The legend still reads bottom-up with the stack.
+   */
+  const bandPaints = useMemo<[string, string]>(() => {
+    if (texture) return [hatchFill(hatchPrefix, 1), hatchFill(hatchPrefix, 0)];
+    const [first, second] = seriesColors(2);
+    return [second, first];
+  }, [texture, hatchPrefix]);
+
   const input = useMemo<ChartInput>(
     () => ({
       segments: frame.map((segment) => ({
@@ -218,6 +249,7 @@ export default function MigrationRatioChart({
       years: plan.years,
       maxTotal: plan.maxTotal,
       bandLabels,
+      bandPaints,
       yLabel,
       legendLabel,
     }),
@@ -226,6 +258,7 @@ export default function MigrationRatioChart({
       plan.years,
       plan.maxTotal,
       bandLabels,
+      bandPaints,
       legacyLabel,
       modernLabel,
       yLabel,
@@ -282,6 +315,7 @@ export default function MigrationRatioChart({
         {/* The chart. `font-mono` on the host makes the axes, legend and their
             measured guide margins use IBM Plex Mono like the rest of the frame. */}
         <div className="px-3 py-4 font-mono text-white">
+          {texture && <ChartHatchDefs prefix={hatchPrefix} />}
           <Chart
             definition={migrationChart}
             input={input}
