@@ -32,7 +32,7 @@ export async function liveTalkForRoom(ctx: QueryCtx, room: string) {
   const id = ctx.db.normalizeId('talks', room);
   if (!id) return null;
   const talk = await ctx.db.get(id as Id<'talks'>);
-  if (!talk || talk.status !== 'live') return null;
+  if (talk?.status !== 'live') return null;
   return talk;
 }
 

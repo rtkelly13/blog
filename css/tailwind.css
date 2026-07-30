@@ -186,7 +186,8 @@ html {
 /* Prose headings, emphasis, blockquotes, table headers and rules hardcode
    `#fff` via the typography config; re-point them to the dim off-white so the
    reading surface doesn't reintroduce the harsh white the dim theme removes. */
-.dim .prose
+.dim
+  .prose
   :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
     :where([class~="not-prose"] *)
   ) {
@@ -279,7 +280,8 @@ html {
    bg = #000, border = #fff) need explicit ink-on-paper values under sketch.
    Accent-driven prose colours (links, code text, list markers, blockquote
    border) already follow the `--brutalist-*` variables. */
-.sketch .prose
+.sketch
+  .prose
   :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
     :where([class~="not-prose"] *)
   ) {
