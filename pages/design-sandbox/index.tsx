@@ -6,6 +6,7 @@ import {
   CreditCard,
   FileText,
   Image as ImageIcon,
+  LineChart,
   type LucideIcon,
   MousePointerClick,
   Tags as TagsIcon,
@@ -45,6 +46,12 @@ const components: {
     path: '/design-sandbox/diagrams',
     description: 'Mermaid diagram style variations',
     icon: BarChart3,
+  },
+  {
+    name: 'Charts',
+    path: '/design-sandbox/charts',
+    description: 'TanStack Charts stacked bars across all three themes',
+    icon: LineChart,
   },
   {
     name: 'Buttons',

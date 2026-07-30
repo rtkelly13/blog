@@ -124,6 +124,31 @@ html {
   --diagram-text-light: #a1a1aa;
 }
 
+/* TanStack Charts palette bridge.
+   The library's default theme is `currentColor` for text/grid/axes plus six
+   `var(--ts-chart-N)` categorical series, so a chart needs no per-theme code of
+   its own — pointing these at the brutalist accents is the whole integration.
+
+   One block covers all three themes: next-themes puts `dark`/`dim`/`sketch` on
+   `<html>`, the same element as `:root`, so the theme class overrides
+   `--brutalist-*` here and these `var()` references resolve to the active
+   theme's value. Do not restate this block per theme.
+
+   Series 1-4 use tokens that stay distinct in every mode. 5-6 are literals
+   because the remaining brutalist aliases collapse onto cyan/pink/yellow under
+   sketch (`--brutalist-neonGreen` and `--brutalist-yellow` are both #15803d
+   there), which would make two series indistinguishable on paper. */
+:root {
+  --ts-chart-1: var(--brutalist-cyan);
+  --ts-chart-2: var(--brutalist-pink);
+  --ts-chart-3: var(--brutalist-yellow);
+  --ts-chart-4: var(--color-white);
+  --ts-chart-5: #a78bfa;
+  --ts-chart-6: #fb923c;
+  /* Focus/tooltip anchor dot: surface-filled so the currentColor ring reads. */
+  --ts-chart-focus-fill: var(--color-black);
+}
+
 .dark {
   --diagram-bg: #000000;
   --diagram-bg-secondary: #18181b;
@@ -272,6 +297,11 @@ html {
   --diagram-fill-quaternary: #23262e;
   --diagram-text: #23262e;
   --diagram-text-light: #6a6252;
+
+  /* Chart series 5-6 in ink-weight violet/amber. Series 1-4 follow the
+     brutalist accents automatically — see the palette bridge above. */
+  --ts-chart-5: #7c3aed;
+  --ts-chart-6: #b45309;
 }
 
 /* Prose bits that hardcode literal light-theme-hostile colours via the
