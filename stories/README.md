@@ -82,7 +82,9 @@ and verify the story under both HIGH and SKETCH before committing.
 - **@storybook/addon-a11y** - Accessibility testing
 - **@storybook/addon-docs** - Auto-generated documentation
 - **@storybook/addon-vitest** - Vitest integration for component testing
-- **@chromatic-com/storybook** - Visual regression testing with Chromatic
+
+Visual regression is handled by Playwright (`pnpm test:regression`), not
+Chromatic — there is no Chromatic project wired up to this repo.
 
 ## Notes
 
