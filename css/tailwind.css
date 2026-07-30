@@ -124,27 +124,62 @@ html {
   --diagram-text-light: #a1a1aa;
 }
 
-/* TanStack Charts palette bridge.
-   The library's default theme is `currentColor` for text/grid/axes plus six
-   `var(--ts-chart-N)` categorical series, so a chart needs no per-theme code of
-   its own — pointing these at the brutalist accents is the whole integration.
+/* ─── Chart palette (TanStack Charts) ──────────────────────────────────────────
+   THE SOURCE OF TRUTH for every chart colour. `tests/chart-palette.test.ts`
+   parses this file and re-runs the six categorical checks (and the ordinal
+   checks for the sequential ramp) against each theme's real surface, so editing
+   a value here without re-validating fails CI. Run the checks locally with
+   `pnpm check:palette`.
 
-   One block covers all three themes: next-themes puts `dark`/`dim`/`sketch` on
-   `<html>`, the same element as `:root`, so the theme class overrides
-   `--brutalist-*` here and these `var()` references resolve to the active
-   theme's value. Do not restate this block per theme.
+   Slot ORDER is the colourblind-safety mechanism, not decoration — it was
+   derived by search, not chosen. Never reorder, never cycle, and never generate
+   a 9th hue: past the caps below, fold the tail into "Other"
+   (`foldToOther` in lib/charts/series.ts) or facet into small multiples.
 
-   Series 1-4 use tokens that stay distinct in every mode. 5-6 are literals
-   because the remaining brutalist aliases collapse onto cyan/pink/yellow under
-   sketch (`--brutalist-neonGreen` and `--brutalist-yellow` are both #15803d
-   there), which would make two series indistinguishable on paper. */
+     bars / stacks / lines (only neighbours touch)  → 8 series
+     scatter / bubble / choropleth / small mults    → 4 series
+
+   Slots 1-3 are the brutalist accents at their exact values; charts must look
+   like the rest of the site. That choice costs the method's dark lightness band
+   (the neons sit at OKLCH L 0.71-0.86, above the 0.48-0.67 band) — a deliberate,
+   documented deviation. Every HARD gate still passes on both dark surfaces:
+   chroma floor, CVD ΔE 9.1 (target 8), normal-vision ΔE 26.8 (floor 15), and
+   all eight ≥ 3:1. Sketch needs no deviation — it passes all six.
+
+   These are literals rather than `var(--brutalist-*)` references on purpose.
+   The aliases collapse under sketch (`--brutalist-neonGreen` and
+   `--brutalist-yellow` are both #15803d there) and only three of them exist,
+   so slots 4-8 have no token to point at. A palette has to be validated as a
+   concrete set anyway. If you change a brutalist accent, update slot 1-3 here
+   and re-run the checks. */
 :root {
-  --ts-chart-1: var(--brutalist-cyan);
-  --ts-chart-2: var(--brutalist-pink);
-  --ts-chart-3: var(--brutalist-yellow);
-  --ts-chart-4: var(--color-white);
-  --ts-chart-5: #a78bfa;
-  --ts-chart-6: #fb923c;
+  /* Categorical — dark and dim share one set (validated on #000000 AND #17171b) */
+  --ts-chart-1: #22d3ee; /* cyan   — brand primary */
+  --ts-chart-2: #ec4899; /* pink   — brand */
+  --ts-chart-3: #facc15; /* yellow — brand */
+  --ts-chart-4: #a78bfa; /* violet */
+  --ts-chart-5: #4ade80; /* green */
+  --ts-chart-6: #ff8c00; /* orange */
+  --ts-chart-7: #60a5fa; /* blue */
+  --ts-chart-8: #f87171; /* red */
+
+  /* The "Other" bucket. Deliberately neutral and below the chroma floor: it is
+     not an identity colour, it is the absence of one. Still ≥ 3:1 on both dark
+     surfaces so the bucket stays readable. */
+  --ts-chart-other: #6b7280;
+
+  /* Sequential ramp — magnitude, one hue (cyan), light→dark. For ORDERED
+     categories (tiers, buckets, cohorts) and heatmaps; never for identity.
+     Passes monotone L, adjacent ΔL ≥ 0.06, and light-end contrast 2.05:1 on
+     #17171b (the harder of the two dark surfaces). */
+  --ts-chart-seq-1: #305057;
+  --ts-chart-seq-2: #36636c;
+  --ts-chart-seq-3: #3a7782;
+  --ts-chart-seq-4: #3b8b9a;
+  --ts-chart-seq-5: #38a1b3;
+  --ts-chart-seq-6: #2cb7cd;
+  --ts-chart-seq-7: #00cee9;
+
   /* Focus/tooltip anchor dot: surface-filled so the currentColor ring reads. */
   --ts-chart-focus-fill: var(--color-black);
 }
@@ -298,10 +333,36 @@ html {
   --diagram-text: #23262e;
   --diagram-text-light: #6a6252;
 
-  /* Chart series 5-6 in ink-weight violet/amber. Series 1-4 follow the
-     brutalist accents automatically — see the palette bridge above. */
-  --ts-chart-5: #7c3aed;
-  --ts-chart-6: #b45309;
+  /* Charts on paper: a separate hue set, not a restep of the dark one. Slots 1-3
+     are the blog's blue pen / red pen / green highlighter, so charts match the
+     rest of sketch mode; that means series identity changes hue family between
+     themes (cyan→blue, yellow→green), which is intentional here.
+
+     Unlike dark, this set needs no deviation — all six checks pass on #f5f3ec,
+     lightness band included. Slot 4 is the deep violet #5b21b6 rather than
+     #7c3aed: the lighter violet collapsed against slot 1 under deuteranopia
+     (ΔE 0.4, and 12.4 even for normal vision), which the adjacent pairlist hid
+     because they are not neighbours. Caught by --pairs all; do not undo it. */
+  --ts-chart-1: #2563eb; /* blue pen */
+  --ts-chart-2: #dc2626; /* red pen */
+  --ts-chart-3: #15803d; /* green highlighter */
+  --ts-chart-4: #5b21b6; /* deep violet — see note above */
+  --ts-chart-5: #b45309; /* amber */
+  --ts-chart-6: #0d9488; /* teal */
+  --ts-chart-7: #9d174d; /* magenta */
+  --ts-chart-8: #4d7c0f; /* olive */
+
+  --ts-chart-other: #57534e;
+
+  /* Sequential ramp on paper: blue hue, light→dark (reversed against the dark
+     ramp so magnitude still reads as "more ink = more"). */
+  --ts-chart-seq-1: #5f94ff;
+  --ts-chart-seq-2: #447df6;
+  --ts-chart-seq-3: #2a66ea;
+  --ts-chart-seq-4: #2055ca;
+  --ts-chart-seq-5: #1f489f;
+  --ts-chart-seq-6: #1c3a79;
+  --ts-chart-seq-7: #162c57;
 }
 
 /* Prose bits that hardcode literal light-theme-hostile colours via the

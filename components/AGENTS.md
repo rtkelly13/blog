@@ -162,19 +162,55 @@ layer into the DS once TanStack cuts a real version.
 `/design-sandbox/charts` is the canary page: exercise it (and cycle HIGH → DIM →
 SKETCH) after any upgrade.
 
-**Theming is a single CSS block, not per-component code.** The library's default
-theme is `currentColor` for text/grid/axes plus six `var(--ts-chart-N)`
-categorical series, so the whole integration is the palette bridge in
-`css/tailwind.css` pointing `--ts-chart-1..6` at the brutalist accents. One
-`:root` block covers all three themes, because next-themes puts the theme class
-on `<html>` — the same element as `:root` — so `--brutalist-*` is already
-remapped when these `var()`s resolve. **Do not restate the bridge per theme.**
-Series 5-6 are literals: the remaining brutalist aliases collapse onto
-cyan/pink/yellow under sketch, which would make two series identical on paper.
+### Colour
 
-Read the theme's palette from the build context (`({ input, theme }) => …`,
-`theme.palette[n]`) rather than restating colours in a component — that's how
-`MigrationRatioChart` colours both its bars and its legend.
+**Never write a hex or pick a colour in a chart component.** Every chart colour
+lives in the palette block in `css/tailwind.css` and is reached through
+`lib/charts/palette.ts` (`CHART_PALETTE`, `CHART_SEQUENTIAL`, `CHART_OTHER`,
+`chartTheme`). Text, grid and axes need nothing at all — the library defaults
+them to `currentColor`.
+
+`pnpm check:palette` re-runs the colourblind-safety checks against every theme's
+real surface; `tests/chart-palette.test.ts` asserts the same thing in CI by
+parsing the stylesheet. Change a colour and one of them will tell you.
+
+Eight categorical slots, in a **fixed order derived by search**. The order *is*
+the CVD-safety mechanism:
+
+- **Never reorder, never cycle, and never generate a ninth hue.** A generated
+  colour cannot be pre-validated, and past eight slots no ordering of any palette
+  clears the separation floors.
+- Series caps are per chart *form*, and the second one surprises people:
+  **8** for bars/stacks/lines (only neighbours touch), **4** for
+  scatter/bubble/choropleth/small multiples (any two marks can touch, so every
+  pair must separate). `SERIES_CAP` in `lib/charts/palette.ts`.
+- Past the cap, cardinality is a **data** problem: `foldToOther()` in
+  `lib/charts/series.ts` ranks by total, keeps the top N and sums the tail into
+  one neutral bucket. Fold once over the whole dataset, never per filter —
+  colour must follow the entity, not its rank.
+- **Ordered categories are not categorical.** Tiers, buckets, cohorts, year
+  bands, heatmap cells → `CHART_SEQUENTIAL` (one hue, light→dark, in the
+  caller's own order). If reordering the categories would change the meaning,
+  they belong on the ramp; identity colours would throw the ordering away.
+- `ChartHatchDefs` + `lib/charts/hatch.ts` give a directional hatch as a
+  **second, non-colour channel** — for print, forced-colors mode, or any pair in
+  the CVD warn band. Patterns stroke `var(--ts-chart-N)`, so they re-theme too.
+
+Slots 1-3 are the brutalist accents at their exact values, so charts look like
+the rest of the site. That knowingly costs the method's dark lightness band (the
+neons sit above it); every hard gate — chroma, CVD ΔE, normal-vision ΔE, contrast
+— still passes, and the deviation is recorded in the stylesheet and exempted by
+name in the test. Sketch needs no deviation. **Do not "fix" the band by dulling
+the accents.**
+
+Sketch is a separate hue set (blue pen / red pen / green highlighter), not a
+restep of the dark one, so series identity changes hue family between themes —
+intentional. One trap it caught: a slot can pass the adjacent pairlist and still
+collapse under `--pairs all` against a non-neighbour. That is why sketch slot 4
+is `#5b21b6` and not `#7c3aed`.
+
+The library's own default palette has only **six** slots, so a definition must
+pass `theme: chartTheme` to get all eight.
 
 Sharp edges, all found the hard way — every one fails **silently**, not loudly:
 
@@ -201,6 +237,12 @@ infer.
 Cost: the whole chart — core, React adapter, `d3-scale`, `d3-array`, model and
 component — is ~13.7 kB gzip in one lazy chunk, and nothing references it from a
 page entry chunk, so pages without a chart pay nothing.
+
+Files: `lib/charts/{palette,series,hatch}.ts` (pure), `components/charts/`
+(`ChartHatchDefs`, and `SeriesPaletteChart` — a sandbox-only fixture that
+exercises eight slots, folding, the ramp and texture),
+`scripts/check-chart-palette.mjs` + `scripts/vendor/` (vendored validator, do not
+edit), `tests/chart-{palette,series}.test.ts`.
 
 ## DIAGRAMS
 
