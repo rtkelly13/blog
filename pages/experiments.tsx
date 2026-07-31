@@ -1,6 +1,7 @@
 import {
   Beaker,
   Boxes,
+  Gavel,
   Palette,
   Projector,
   Sparkles,
@@ -44,6 +45,15 @@ const experiments = [
     description:
       'Seed-driven SVG background + graphic generators for talks and heroes',
     icon: <Sparkles className="w-12 h-12" />,
+    status: 'active',
+    components: 6,
+  },
+  {
+    name: 'NeanderBonk',
+    path: '/experiments/neanderbonk',
+    description:
+      'Automatic referee for Poetry for Neanderthals — listens to the poet, counts syllables, calls the bonk',
+    icon: <Gavel className="w-12 h-12" />,
     status: 'active',
     components: 6,
   },

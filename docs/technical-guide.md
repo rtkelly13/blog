@@ -39,6 +39,9 @@ pnpm test:snapshots:remote # regenerate visual snapshots on the CI runner (see b
 pnpm lint                  # Biome check
 pnpm typecheck             # tsc --noEmit
 pnpm format                # Biome format
+
+# Data generators (manual — need the network, output is committed)
+pnpm neanderbonk:lexicon   # public/neanderbonk/syllables.txt from CMUdict
 ```
 
 ## Build pipeline
