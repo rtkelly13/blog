@@ -23,7 +23,16 @@ const ContentSecurityPolicy = `
   frame-ancestors 'none';
 `;
 
-const securityHeaders = [
+// Every page is denied the microphone except one: /experiments/neanderbonk is a
+// speech-recognition prototype and cannot work without it. The grant is `self`,
+// so it reaches same-origin documents only — the giscus and YouTube frames are
+// cross-origin and stay excluded — and the browser still prompts the user.
+const MICROPHONE_ROUTE = '/experiments/neanderbonk';
+const PERMISSIONS_POLICY_DEFAULT = 'camera=(), microphone=(), geolocation=()';
+const PERMISSIONS_POLICY_MICROPHONE =
+  'camera=(), microphone=(self), geolocation=()';
+
+const securityHeaders = (permissionsPolicy) => [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   {
     key: 'Content-Security-Policy',
@@ -57,7 +66,7 @@ const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
   {
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()',
+    value: permissionsPolicy,
   },
 ];
 
@@ -82,7 +91,14 @@ module.exports = withBundleAnalyzer({
     return [
       {
         source: '/(.*)',
-        headers: securityHeaders,
+        headers: securityHeaders(PERMISSIONS_POLICY_DEFAULT),
+      },
+      // The microphone page overrides the blanket denial above. Order matters:
+      // where two rules set the same header key, Next.js emits one header and
+      // the *later* rule wins — verified against `next start`, not assumed.
+      {
+        source: MICROPHONE_ROUTE,
+        headers: securityHeaders(PERMISSIONS_POLICY_MICROPHONE),
       },
     ];
   },

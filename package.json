@@ -30,6 +30,7 @@
     "check:deploy": "node scripts/verify-deployment.mjs",
     "check:lockfile": "node scripts/ci/check-lockfile-protocol.mjs",
     "search:index": "node scripts/build-search-index.mjs",
+    "neanderbonk:lexicon": "node scripts/generate-neanderbonk-lexicon.mjs",
     "lint": "biome check .",
     "format": "biome format --write .",
     "prepare": "husky install",
