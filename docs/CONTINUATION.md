@@ -105,7 +105,15 @@ Non-goals for this page: speaker separation (impossible via Web Speech — see
 
 ---
 
-## 5. Preview subdomains — designed, not built
+## 5. Preview subdomains — partially built
+
+Done so far: `convex-preview` and `slot/1..3` exist on origin (all = main);
+PR #101 adds `convex-deploy-preview.yml` (deploys `convex-preview` to a stable
+named Convex preview deployment, skips until `CONVEX_DEPLOY_KEY_PREVIEW`
+exists) and `scripts/preview-slot.sh` (claim/release a slot as
+convex-preview + ref). Still to do by hand: Convex preview deploy key → repo
+secret, Vercel Preview-env `NEXT_PUBLIC_CONVEX_URL`, the three project domains
+bound to slot branches, and the DNS CNAMEs. The original design follows.
 
 Goal: stop hunting hash URLs; three stable subdomains testable in parallel.
 
