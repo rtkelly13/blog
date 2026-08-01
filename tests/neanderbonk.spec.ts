@@ -67,6 +67,17 @@ async function stubSpeechRecognition(page: import('@playwright/test').Page) {
   });
 }
 
+/**
+ * Presses and holds the clue button via its keyboard path. Open mic is gated
+ * to development builds — players hold to clue, so the tests do too. The key
+ * stays held; releasing is left to blur or the round ending, as in real play.
+ */
+async function holdToClue(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: /Hold to clue/ }).focus();
+  await page.keyboard.down(' ');
+  await expect(page.getByText('LISTENING', { exact: true })).toBeVisible();
+}
+
 /** Opens the page, waits for the lexicon, and starts a live round with `target`. */
 async function startRound(
   page: import('@playwright/test').Page,
@@ -79,9 +90,7 @@ async function startRound(
 
   await page.getByPlaceholder(/.+/).first().fill(target);
   await page.getByRole('button', { name: /Start .+ round/ }).click();
-  // Open mic hands microphone control to the round, so the fake starts itself.
-  await page.getByRole('button', { name: 'Open mic' }).click();
-  await expect(page.getByText('LISTENING')).toBeVisible();
+  await holdToClue(page);
 }
 
 test.describe('NeanderBonk', () => {
@@ -201,6 +210,60 @@ test.describe('NeanderBonk', () => {
     await expect(page.getByText(/2 syllables/)).toBeVisible();
   });
 
+  test('does not offer open mic outside development', async ({ page }) => {
+    // `pnpm run serve` is a production build; the mode picker is dev-only.
+    await page.goto(ROUTE, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('button', { name: 'Open mic' })).toHaveCount(0);
+  });
+
+  test('mic check echoes heard words without judging them', async ({
+    page,
+  }) => {
+    await stubSpeechRecognition(page);
+    await page.goto(ROUTE, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText(/WORDS$/)).toBeVisible({ timeout: 20_000 });
+
+    await page.getByRole('button', { name: /Hold to test the mic/ }).focus();
+    await page.keyboard.down(' ');
+    await expect(page.getByText('LISTENING', { exact: true })).toBeVisible();
+
+    // Three syllables would bonk in a round; the check must only echo.
+    await page.evaluate(() =>
+      (window as unknown as { __say: (t: string) => void }).__say(
+        'testing the banana',
+      ),
+    );
+
+    await expect(page.getByText(/Heard you: testing the banana/)).toBeVisible();
+    await expect(page.getByRole('alertdialog')).toHaveCount(0);
+
+    await page.keyboard.up(' ');
+    await expect(page.getByText('LISTENING', { exact: true })).toHaveCount(0);
+  });
+
+  test('scores and log survive a reload; reset clears them', async ({
+    page,
+  }) => {
+    await stubSpeechRecognition(page);
+    await startRound(page, 'cat');
+
+    await page.evaluate(() =>
+      (window as unknown as { __say: (t: string) => void }).__say(
+        'big grey building',
+      ),
+    );
+    await page.getByRole('button', { name: /Fair/ }).click();
+    await expect(page.getByText('[ RULING LOG ]')).toBeVisible();
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('[ RULING LOG ]')).toBeVisible();
+    await expect(page.getByText(/2 syllables/)).toBeVisible();
+
+    await page.getByRole('button', { name: /Reset game/ }).click();
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('[ RULING LOG ]')).toHaveCount(0);
+  });
+
   test('kid mode lets two syllables through', async ({ page }) => {
     await stubSpeechRecognition(page);
     await page.goto(ROUTE, { waitUntil: 'domcontentloaded' });
@@ -209,7 +272,7 @@ test.describe('NeanderBonk', () => {
     await page.getByRole('button', { name: 'kid', exact: true }).click();
     await page.getByPlaceholder(/.+/).first().fill('cat');
     await page.getByRole('button', { name: /Start .+ round/ }).click();
-    await page.getByRole('button', { name: 'Open mic' }).click();
+    await holdToClue(page);
 
     await page.evaluate(() =>
       (window as unknown as { __say: (t: string) => void }).__say(

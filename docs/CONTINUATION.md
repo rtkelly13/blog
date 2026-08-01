@@ -77,17 +77,17 @@ shipping it early costs nothing and makes it easier to test on real hardware.
 ## 4. NeanderBonk backlog, roughly by value
 
 1. **Whatever real play turns up.** Do this before anything below it.
-2. **Mic check before the round starts.** Right now the hold button only exists
-   once a round is live, so you discover a permissions problem with the clock
-   running. Add an idle-state "test mic" affordance.
-3. **Kill or gate open-mic mode.** It is a footgun: it judges guessers as the
-   poet and will produce exactly the false bonks the whole design avoids. It
-   currently exists mainly because the e2e tests drive it. Consider making it
-   dev-only and switching the tests to hold mode.
-4. **Stats screen.** Syllables-per-minute, worst offender, cleanest poet,
-   most-bonked word. All derivable from `log` already in component state; it was
-   in the original design and is the bit people screenshot.
-5. **Persistence.** A refresh loses the game. `localStorage` on scores + log.
+2. ~~Mic check before the round starts.~~ **Done** — idle-state hold-to-test
+   button; echoes heard words without judging them.
+3. ~~Kill or gate open-mic mode.~~ **Done** — the microphone mode picker is
+   development-only (`OPEN_MIC_AVAILABLE`); the e2e tests drive the hold button
+   via its keyboard path.
+4. **Stats screen — partially done.** Per-team guessed/bonked tallies and
+   most-bonked word now render in the ruling log. Syllables-per-minute still
+   needs timestamps on judged words, which nothing records yet.
+5. ~~Persistence.~~ **Done** — scores, log, and turn survive a refresh via
+   `localStorage` (`neanderbonk:game:v1`); live-round state deliberately resets;
+   Reset game clears the save.
 6. **Language setting.** `lang` is hardcoded `en-GB` in `NeanderBonk.tsx`.
 7. **Homophones** — *read this before starting it.* Detecting "bare" for BEAR
    needs phone sequences, and **the generated lexicon stores syllable counts

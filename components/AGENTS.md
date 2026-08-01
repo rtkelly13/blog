@@ -179,6 +179,15 @@ modules, split so the rules are testable without a browser:
   suspected ones, `clean` otherwise. Ambiguous pronunciations ("fire", "hour")
   and out-of-vocabulary words can only ever reach `flag`. This is deliberate: a
   missed violation costs nothing, a false accusation ruins the game. Preserve it.
+- **Hold-to-clue is the only mode players see.** Open mic judges the whole room
+  as the poet — the false-accusation failure mode — so the mode picker renders
+  in development builds only (`OPEN_MIC_AVAILABLE`). The e2e spec drives the
+  hold button through its keyboard path (`Space` down/up) instead.
+- **The game persists; the round does not.** Scores, log, and whose turn it is
+  live in `localStorage` (`neanderbonk:game:v1`) so a refresh keeps the game;
+  a live round's clock and transcript deliberately reset. Reset game clears the
+  saved state. Restored log ids seed the id counter — don't break that, or keys
+  collide.
 - **This is the one route allowed the microphone.** `next.config.js` grants
   `microphone=(self)` for `/experiments/neanderbonk` only, via a route rule
   placed *after* the site-wide denial — where two rules set the same header key,
