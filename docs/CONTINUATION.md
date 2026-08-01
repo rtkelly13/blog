@@ -12,7 +12,7 @@ real hardware) and **preview subdomains** (designed, not built).
 ## 1. State of play
 
 **PR #99** — <https://github.com/rtkelly13/blog/pull/99>
-Branch: `claude/android-microphone-isolation-poetry-89qin2`
+Branch: `feat/neanderbonk`
 All CI green, including the required `PR checks` gate and visual regression.
 
 **Preview:** <https://my-blog-0j5s-git-claude-android-micr-900d7f-rtkelly13s-projects.vercel.app/experiments/neanderbonk>
