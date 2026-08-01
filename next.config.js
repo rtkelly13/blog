@@ -27,7 +27,8 @@ const ContentSecurityPolicy = `
 // speech-recognition prototype and cannot work without it. The grant is `self`,
 // so it reaches same-origin documents only — the giscus and YouTube frames are
 // cross-origin and stay excluded — and the browser still prompts the user.
-const MICROPHONE_ROUTE = '/experiments/neanderbonk';
+// Both the game and its lab-bench page; path-to-regexp alternation, one rule.
+const MICROPHONE_ROUTE = '/experiments/:page(neanderbonk|neanderbonk-lab)';
 const PERMISSIONS_POLICY_DEFAULT = 'camera=(), microphone=(), geolocation=()';
 const PERMISSIONS_POLICY_MICROPHONE =
   'camera=(), microphone=(self), geolocation=()';

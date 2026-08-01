@@ -1,6 +1,7 @@
 import {
   Beaker,
   Boxes,
+  FlaskConical,
   Gavel,
   Palette,
   Projector,
@@ -56,6 +57,15 @@ const experiments = [
     icon: <Gavel className="w-12 h-12" />,
     status: 'active',
     components: 6,
+  },
+  {
+    name: 'NeanderBonk Lab',
+    path: '/experiments/neanderbonk-lab',
+    description:
+      'The NeanderBonk referee on the bench — type or speak words and see every ruling, without the game around it',
+    icon: <FlaskConical className="w-12 h-12" />,
+    status: 'active',
+    components: 1,
   },
   {
     name: 'Talk Animations',
