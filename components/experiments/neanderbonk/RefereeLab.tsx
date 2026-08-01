@@ -1,5 +1,6 @@
 import { Eraser, FlaskConical, Mic, MicOff, Type } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createBonker } from './bonk';
 import {
   explainRuling,
   judgeWord,
@@ -51,6 +52,15 @@ export default function RefereeLab() {
   const [lexiconFailed, setLexiconFailed] = useState(false);
 
   const nextIdRef = useRef(0);
+  const bonkerRef = useRef(createBonker());
+  const [muted, setMuted] = useState(false);
+  const mutedRef = useRef(muted);
+  mutedRef.current = muted;
+
+  useEffect(() => {
+    const bonker = bonkerRef.current;
+    return () => bonker.dispose();
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -75,19 +85,25 @@ export default function RefereeLab() {
       lexicon: lex,
     } = liveRef.current;
     if (words.length === 0) return;
-    setEntries((previous) =>
-      [
-        ...previous,
-        ...words.map((word) => {
-          nextIdRef.current += 1;
-          return {
-            ...judgeWord(word, liveTarget.trim(), mode, lex),
-            id: nextIdRef.current,
-            via,
-          };
-        }),
-      ].slice(-200),
-    );
+    const judged = words.map((word) => {
+      nextIdRef.current += 1;
+      return {
+        ...judgeWord(word, liveTarget.trim(), mode, lex),
+        id: nextIdRef.current,
+        via,
+      };
+    });
+    setEntries((previous) => [...previous, ...judged].slice(-200));
+
+    // Same sounds as the game: a bonk outranks a flag, one noise per batch.
+    if (!mutedRef.current) {
+      const live = judged.filter((entry) => !entry.exempt);
+      if (live.some((entry) => entry.verdict === 'bonk')) {
+        bonkerRef.current.bonk();
+      } else if (live.some((entry) => entry.verdict === 'flag')) {
+        bonkerRef.current.flag();
+      }
+    }
   }, []);
 
   const handleWords = useCallback(
@@ -100,6 +116,8 @@ export default function RefereeLab() {
   const unsupported = referee.status === 'unsupported';
 
   const judgeTyped = useCallback(() => {
+    // A submit is a user gesture — the one moment the browser lets audio start.
+    bonkerRef.current.arm();
     judge(tokenize(typed), 'typed');
     setTyped('');
   }, [judge, typed]);
@@ -202,6 +220,16 @@ export default function RefereeLab() {
           [ FEED IT WORDS ]
         </h2>
 
+        <label className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase text-zinc-400">
+          <input
+            type="checkbox"
+            checked={!muted}
+            onChange={(event) => setMuted(!event.target.checked)}
+            className="h-3 w-3 accent-brutalist-pink"
+          />
+          Bonk noise on violations
+        </label>
+
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -229,7 +257,10 @@ export default function RefereeLab() {
         {!unsupported ? (
           <button
             type="button"
-            onClick={listening ? referee.stop : referee.start}
+            onClick={() => {
+              bonkerRef.current.arm();
+              (listening ? referee.stop : referee.start)();
+            }}
             className={`mt-3 flex w-full items-center justify-center gap-2 border-2 px-4 py-3 font-mono text-xs font-bold uppercase transition-colors ${
               listening
                 ? 'border-brutalist-pink bg-brutalist-pink text-black'
