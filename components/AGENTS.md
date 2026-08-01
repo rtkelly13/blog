@@ -160,6 +160,7 @@ modules, split so the rules are testable without a browser:
 | `useSpeechReferee.ts`| Web Speech API → settled words, with restart handling        |
 | `bonk.ts`            | Web Audio buzzer + haptics                                  |
 | `NeanderBonk.tsx`    | The app: round/score state machine and UI                   |
+| `RefereeLab.tsx`     | `/experiments/neanderbonk-lab`: the judging pipeline alone — type or speak words, see every ruling (incl. fillers), no game state |
 
 - **`syllables.ts`, `rules.ts` and `words.ts` have no React or DOM imports**, so
   the entire ruling logic is unit-tested on the JVM-equivalent — plain Node —
