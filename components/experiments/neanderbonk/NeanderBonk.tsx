@@ -60,6 +60,8 @@ type LogEntry = {
   readonly detail: string;
   readonly points: number;
   readonly team: number;
+  /** The word that drew the bonk, when the outcome is a bonk. */
+  readonly word?: string;
 };
 
 type PendingBonk = {
@@ -72,6 +74,44 @@ type PendingBonk = {
 const ROUND_LENGTHS = [60, 90, 120] as const;
 const TEAM_NAMES = ['ROCK', 'STICK'] as const;
 const POINTS: Record<Tier, number> = { easy: 1, hard: 3 };
+
+/**
+ * Open mic judges everyone within earshot as the poet — guessers included —
+ * which produces exactly the false bonks the whole design exists to avoid. It
+ * survives only as a development convenience; players get hold-to-clue.
+ */
+const OPEN_MIC_AVAILABLE = process.env.NODE_ENV !== 'production';
+
+const STORAGE_KEY = 'neanderbonk:game:v1';
+
+type SavedGame = {
+  readonly scores: number[];
+  readonly log: LogEntry[];
+  readonly team: number;
+};
+
+/** A refresh should not lose the game. Anything malformed is a fresh game. */
+function loadSavedGame(): SavedGame | null {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SavedGame;
+    if (
+      !Array.isArray(parsed.scores) ||
+      parsed.scores.length !== TEAM_NAMES.length ||
+      !parsed.scores.every((score) => typeof score === 'number') ||
+      !Array.isArray(parsed.log) ||
+      typeof parsed.team !== 'number' ||
+      parsed.team < 0 ||
+      parsed.team >= TEAM_NAMES.length
+    ) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 const VERDICT_STYLE = {
   clean: 'border-zinc-600 text-zinc-400',
@@ -168,18 +208,44 @@ export default function NeanderBonk() {
   const target = customTarget.trim() || card[tier];
 
   // ── Round ────────────────────────────────────────────────────────────────
+  // Scores, log, and whose turn it is survive a refresh; live-round state
+  // (clock, transcript) deliberately does not — a reload mid-round is a reset
+  // of the round, not of the game.
+  const [saved] = useState(loadSavedGame);
   const [roundState, setRoundState] = useState<RoundState>('idle');
-  const [team, setTeam] = useState(0);
-  const [scores, setScores] = useState<number[]>([0, 0]);
+  const [team, setTeam] = useState(saved?.team ?? 0);
+  const [scores, setScores] = useState<number[]>(saved?.scores ?? [0, 0]);
   const [remaining, setRemaining] = useState(roundLength);
   const [words, setWords] = useState<JudgedWord[]>([]);
   const [pendingBonk, setPendingBonk] = useState<PendingBonk | null>(null);
-  const [log, setLog] = useState<LogEntry[]>([]);
+  const [log, setLog] = useState<LogEntry[]>(saved?.log ?? []);
 
   const bonkerRef = useRef(createBonker());
-  const nextIdRef = useRef(0);
+  // Ids must resume above anything restored, or restored log keys collide.
+  const nextIdRef = useRef(
+    saved ? Math.max(0, ...saved.log.map((entry) => entry.id)) : 0,
+  );
   const deadlineRef = useRef<number | null>(null);
   const overruleRef = useRef<HTMLButtonElement | null>(null);
+
+  // ── Mic check ────────────────────────────────────────────────────────────
+  // A permissions problem should surface before the round starts, not with the
+  // clock running. Held like the clue button; heard words echo back, unjudged.
+  const [micCheck, setMicCheck] = useState(false);
+  const [micCheckHeard, setMicCheckHeard] = useState<string[]>([]);
+
+  // Persist the game, not the round. Saving on every change is cheap at this
+  // size (40-entry log cap) and means there is no moment to forget.
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ scores, log, team } satisfies SavedGame),
+      );
+    } catch {
+      // Storage full or blocked — the game still works, it just won't survive.
+    }
+  }, [scores, log, team]);
 
   // Moves focus into the ruling dialog, and puts it on Overrule specifically: a
   // wrong call is the failure that matters, so undoing one should never involve
@@ -213,12 +279,19 @@ export default function NeanderBonk() {
   // ── Refs the speech callback reads ───────────────────────────────────────
   // The callback is created once and lives inside the recognition object, so
   // everything it needs has to be readable at call time rather than captured.
-  const liveRef = useRef({ target, strictness, lexicon, active: false });
+  const liveRef = useRef({
+    target,
+    strictness,
+    lexicon,
+    active: false,
+    checking: false,
+  });
   liveRef.current = {
     target,
     strictness,
     lexicon,
     active: roundState === 'live' && !pendingBonk,
+    checking: micCheck && roundState === 'idle',
   };
 
   const handleWords = useCallback((incoming: string[]) => {
@@ -227,8 +300,15 @@ export default function NeanderBonk() {
       strictness: mode,
       lexicon: lex,
       active,
+      checking,
     } = liveRef.current;
-    if (!active) return;
+    if (!active) {
+      // Mic check: prove the pipeline works by echoing, never by judging.
+      if (checking) {
+        setMicCheckHeard((previous) => [...previous, ...incoming].slice(-8));
+      }
+      return;
+    }
 
     const judged: JudgedWord[] = [];
     let firstBonk: JudgedWord | null = null;
@@ -270,6 +350,8 @@ export default function NeanderBonk() {
   // would cancel the press that started it.
   useEffect(() => {
     if (status === 'unsupported') return;
+    // During a mic check the test button owns the microphone.
+    if (micCheck) return;
 
     if (micMode === 'open') {
       if (roundState === 'live' && !pendingBonk) start();
@@ -277,7 +359,7 @@ export default function NeanderBonk() {
       return;
     }
     if (roundState !== 'live' || pendingBonk) stop();
-  }, [micMode, roundState, pendingBonk, status, start, stop]);
+  }, [micMode, roundState, pendingBonk, status, start, stop, micCheck]);
 
   // ── Actions ──────────────────────────────────────────────────────────────
   const nextCard = useCallback(() => {
@@ -296,6 +378,8 @@ export default function NeanderBonk() {
   const startRound = useCallback(() => {
     bonkerRef.current.arm();
     setWords([]);
+    setMicCheck(false);
+    setMicCheckHeard([]);
     setPendingBonk(null);
     setRemaining(roundLength);
     deadlineRef.current = performance.now() + roundLength * 1000;
@@ -339,6 +423,7 @@ export default function NeanderBonk() {
       detail: `"${pendingBonk.ruling.word}" — ${explainRuling(pendingBonk.ruling)}`,
       points: 0,
       team,
+      word: pendingBonk.ruling.word,
     });
     setPendingBonk(null);
     nextCard();
@@ -363,6 +448,11 @@ export default function NeanderBonk() {
   }, [pendingBonk, remaining]);
 
   const resetGame = useCallback(() => {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // The save effect will overwrite it with the reset state anyway.
+    }
     setScores([0, 0]);
     setLog([]);
     setWords([]);
@@ -380,7 +470,28 @@ export default function NeanderBonk() {
   const stats = useMemo(() => {
     const bonks = log.filter((entry) => entry.outcome === 'bonked').length;
     const wins = log.filter((entry) => entry.outcome === 'won').length;
-    return { bonks, wins, cards: log.length };
+
+    const bonkCounts = new Map<string, number>();
+    for (const entry of log) {
+      if (entry.outcome !== 'bonked' || !entry.word) continue;
+      bonkCounts.set(entry.word, (bonkCounts.get(entry.word) ?? 0) + 1);
+    }
+    let mostBonked: { word: string; count: number } | null = null;
+    for (const [word, count] of bonkCounts) {
+      if (!mostBonked || count > mostBonked.count) mostBonked = { word, count };
+    }
+
+    const teams = TEAM_NAMES.map((name, index) => ({
+      name,
+      bonks: log.filter(
+        (entry) => entry.team === index && entry.outcome === 'bonked',
+      ).length,
+      wins: log.filter(
+        (entry) => entry.team === index && entry.outcome === 'won',
+      ).length,
+    }));
+
+    return { bonks, wins, cards: log.length, mostBonked, teams };
   }, [log]);
 
   const listening = status === 'listening';
@@ -542,13 +653,80 @@ export default function NeanderBonk() {
       {/* ── The microphone ─────────────────────────────────────────────── */}
       <Panel title="CLUE" accent="pink">
         {roundState === 'idle' ? (
-          <button
-            type="button"
-            onClick={startRound}
-            className="w-full border-2 border-brutalist-pink bg-black px-6 py-6 font-display text-2xl font-bold uppercase text-brutalist-pink transition-colors hover:bg-brutalist-pink hover:text-black"
-          >
-            Start {TEAM_NAMES[team]}&apos;s round
-          </button>
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={startRound}
+              className="w-full border-2 border-brutalist-pink bg-black px-6 py-6 font-display text-2xl font-bold uppercase text-brutalist-pink transition-colors hover:bg-brutalist-pink hover:text-black"
+            >
+              Start {TEAM_NAMES[team]}&apos;s round
+            </button>
+
+            {/* A permission prompt mid-round costs the team their clock, so the
+                mic gets a dry run here, where time is free. Heard words echo
+                back unjudged — this proves the pipeline, not the rules. */}
+            {!unsupported ? (
+              <div>
+                <button
+                  type="button"
+                  onPointerDown={(event) => {
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    setMicCheck(true);
+                    start();
+                  }}
+                  onPointerUp={() => {
+                    setMicCheck(false);
+                    stop();
+                  }}
+                  onPointerCancel={() => {
+                    setMicCheck(false);
+                    stop();
+                  }}
+                  onLostPointerCapture={() => {
+                    setMicCheck(false);
+                    stop();
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key !== ' ' && event.key !== 'Enter') return;
+                    event.preventDefault();
+                    setMicCheck(true);
+                    start();
+                  }}
+                  onKeyUp={(event) => {
+                    if (event.key !== ' ' && event.key !== 'Enter') return;
+                    setMicCheck(false);
+                    stop();
+                  }}
+                  onBlur={() => {
+                    setMicCheck(false);
+                    stop();
+                  }}
+                  className={`w-full touch-none select-none border-2 px-4 py-3 font-mono text-xs font-bold uppercase transition-colors ${
+                    micCheck && listening
+                      ? 'border-brutalist-cyan bg-brutalist-cyan text-black'
+                      : 'border-brutalist-cyan bg-black text-brutalist-cyan'
+                  }`}
+                >
+                  {micCheck && listening
+                    ? 'Say something…'
+                    : 'Hold to test the mic'}
+                </button>
+                {micCheckHeard.length > 0 ? (
+                  <p className="mt-2 font-mono text-xs text-brutalist-cyan">
+                    <Check
+                      className="mr-1 inline h-3 w-3 align-[-2px]"
+                      aria-hidden
+                    />
+                    Heard you: {micCheckHeard.join(' ')}
+                  </p>
+                ) : status === 'denied' ? null : (
+                  <p className="mt-2 font-mono text-[10px] uppercase text-zinc-500">
+                    Sort the permission prompt out now, not on the clock
+                  </p>
+                )}
+              </div>
+            ) : null}
+          </div>
         ) : null}
 
         {live && micMode === 'hold' ? (
@@ -688,7 +866,10 @@ export default function NeanderBonk() {
           </p>
         </fieldset>
 
-        <fieldset className="mt-5">
+        {/* In production hold-to-clue is the only mode, so there is nothing to
+            choose; the picker exists for development, where open mic lets a
+            transcript be driven without holding a button. */}
+        <fieldset className={OPEN_MIC_AVAILABLE ? 'mt-5' : 'hidden'}>
           <legend className="mb-2 font-mono text-[10px] uppercase text-zinc-400">
             Microphone
           </legend>
@@ -716,7 +897,8 @@ export default function NeanderBonk() {
           </div>
           <p className="mt-2 font-mono text-xs text-zinc-400">
             Holding the phone and the button is the only thing separating the
-            poet&apos;s voice from six people shouting guesses.
+            poet&apos;s voice from six people shouting guesses. Open mic exists
+            for development; it judges the whole room as the poet.
           </p>
         </fieldset>
 
@@ -761,6 +943,33 @@ export default function NeanderBonk() {
           <p className="mb-3 font-mono text-xs text-zinc-400">
             {stats.cards} cards · {stats.wins} guessed · {stats.bonks} bonked
           </p>
+          <div className="mb-4 grid gap-2 sm:grid-cols-2">
+            {stats.teams.map((teamStats) => (
+              <p
+                key={teamStats.name}
+                className="border-l-2 border-zinc-700 pl-3 font-mono text-xs text-zinc-400"
+              >
+                <span className="text-white">TEAM {teamStats.name}</span> ·{' '}
+                {teamStats.wins} guessed ·{' '}
+                <span
+                  className={
+                    teamStats.bonks > 0 ? 'text-brutalist-pink' : undefined
+                  }
+                >
+                  {teamStats.bonks} bonked
+                </span>
+              </p>
+            ))}
+          </div>
+          {stats.mostBonked ? (
+            <p className="mb-3 font-mono text-xs text-zinc-400">
+              Most bonked:{' '}
+              <span className="uppercase text-brutalist-pink">
+                {stats.mostBonked.word}
+              </span>
+              {stats.mostBonked.count > 1 ? ` × ${stats.mostBonked.count}` : ''}
+            </p>
+          ) : null}
           <ol className="space-y-1.5">
             {log.map((entry) => (
               <li
