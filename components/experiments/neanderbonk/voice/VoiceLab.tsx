@@ -171,6 +171,9 @@ export default function VoiceLab() {
   // ── Enrolment ────────────────────────────────────────────────────────────
   const [enrolling, setEnrolling] = useState(false);
   const [profile, setProfile] = useState<VoiceProfile | null>(null);
+  /** Who the profile belongs to; pure labelling, the maths never sees it. */
+  const [poetName, setPoetName] = useState('');
+  const displayName = poetName.trim() || 'the poet';
   const [calibration, setCalibration] = useState<NearFieldCalibration | null>(
     null,
   );
@@ -393,6 +396,20 @@ export default function VoiceLab() {
           near-field level for the loudness gate and the voice profile for the
           similarity score.
         </p>
+        <label className="mb-3 block">
+          <span className="font-mono text-[10px] uppercase text-zinc-400">
+            Who is being enrolled?
+          </span>
+          <input
+            type="text"
+            value={poetName}
+            onChange={(event) => setPoetName(event.target.value)}
+            placeholder="e.g. Ryan"
+            autoComplete="off"
+            maxLength={24}
+            className="mt-1 w-full border-2 border-white bg-black px-3 py-2 font-mono text-sm text-white placeholder:text-zinc-600 focus:border-brutalist-cyan focus:outline-none"
+          />
+        </label>
         <button
           type="button"
           onPointerDown={(event) => {
@@ -452,7 +469,7 @@ export default function VoiceLab() {
             />
             Voice:{' '}
             {profile
-              ? `pitch ≈ ${profile.pitchHz.toFixed(0)} Hz over ${profile.frames} frames`
+              ? `${displayName} enrolled — pitch ≈ ${profile.pitchHz.toFixed(0)} Hz over ${profile.frames} frames`
               : 'no profile — too little voiced speech'}
           </p>
         </div>
@@ -480,8 +497,8 @@ export default function VoiceLab() {
 
         <fieldset className="mb-3">
           <legend className="mb-2 font-mono text-[10px] uppercase text-zinc-400">
-            Bonk noise gate — only buzz when the speech is attributed to the
-            poet by…
+            Bonk noise gate — only buzz when the speech is attributed to{' '}
+            {displayName} by…
           </legend>
           <div className="flex flex-wrap gap-2">
             {(
@@ -533,8 +550,8 @@ export default function VoiceLab() {
         ) : null}
 
         <p className="mt-3 font-mono text-[10px] uppercase text-zinc-500">
-          Try it: enrol yourself, then have someone else lean in and shout a
-          three-syllable word. Whose bonk is it?
+          Try it: enrol {poetName.trim() || 'yourself'}, then have someone else
+          lean in and shout a three-syllable word. Whose bonk is it?
         </p>
 
         <div className="mt-4 overflow-x-auto">
@@ -592,7 +609,9 @@ export default function VoiceLab() {
                     <td
                       className={`py-1.5 ${word.speaker ? CALL_STYLE[word.speaker] : 'text-zinc-600'}`}
                     >
-                      {word.speaker ?? 'not enrolled'}
+                      {word.speaker === 'poet'
+                        ? displayName
+                        : (word.speaker ?? 'not enrolled')}
                     </td>
                   </tr>
                 ))
