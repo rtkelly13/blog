@@ -141,6 +141,62 @@ motion/@xyflow/react ship as lazy chunks only on pages that mount them.
 `IdeaSlide` is the exception — a dependency-free static marker component.
 Both respect `prefers-reduced-motion` via `useReducedMotion`.
 
+## EXPERIMENTS (experiments/)
+
+Self-contained prototypes that live at `/experiments/<name>` and are **not** part
+of the site's component vocabulary. The rule for this directory: an experiment
+may cost its own route whatever it likes, and every other route nothing.
+
+### neanderbonk/ — automatic referee for Poetry for Neanderthals
+
+Listens through the microphone, counts syllables, and calls the bonk. Six
+modules, split so the rules are testable without a browser:
+
+| Module               | Purpose                                                     |
+| -------------------- | ----------------------------------------------------------- |
+| `syllables.ts`       | Lexicon lookup + vowel-group heuristic fallback (pure)      |
+| `rules.ts`           | Verdicts: syllable rule, answer rule, strictness (pure)     |
+| `words.ts`           | Original starter deck + shuffle (pure)                      |
+| `useSpeechReferee.ts`| Web Speech API → settled words, with restart handling        |
+| `bonk.ts`            | Web Audio buzzer + haptics                                  |
+| `NeanderBonk.tsx`    | The app: round/score state machine and UI                   |
+| `RefereeLab.tsx`     | `/experiments/neanderbonk-lab`: the judging pipeline alone — type or speak words, see every ruling (incl. fillers), no game state |
+| `voice/levelMeter.ts` | Approach A, loudness gate: mic level meter + pure near/far classification (pure parts unit-tested) |
+| `voice/voiceProfile.ts` | Approach B, speaker similarity: pure-DSP pitch/timbre profile + scoring (unit-tested; a baseline, not speaker recognition) |
+| `voice/VoiceLab.tsx` | `/experiments/neanderbonk-voice`: A vs B live on one mic, bonk-gate selector, two-mic-consumer feasibility probe. Approach C (d-vector embeddings) scoped in docs/neanderbonk-voice-approach-c.md |
+
+- **`syllables.ts`, `rules.ts` and `words.ts` have no React or DOM imports**, so
+  the entire ruling logic is unit-tested on the JVM-equivalent — plain Node —
+  in `tests/neanderbonk-{syllables,rules}.test.ts`. The e2e spec
+  (`tests/neanderbonk.spec.ts`) stubs `SpeechRecognition` to drive transcripts
+  deterministically; headless Chromium cannot really recognise speech.
+- **No barrel export, deliberately** — same reasoning as the `SpectacleDeck`
+  exclusion (#17). `pages/experiments/neanderbonk.tsx` reaches the app through
+  `next/dynamic` with `ssr: false`; routing it through an index would drag it
+  into every consumer of the module.
+- **The lexicon is a `public/` asset, never an import.**
+  `public/neanderbonk/syllables.txt` is 117k words derived from the CMU
+  Pronouncing Dictionary (~950 KB), fetched on mount. Regenerate with
+  `pnpm neanderbonk:lexicon` — it needs the network and is *not* part of
+  `pnpm build`; the output is committed.
+- **Three verdicts, not two.** `bonk` for certain violations, `flag` for
+  suspected ones, `clean` otherwise. Ambiguous pronunciations ("fire", "hour")
+  and out-of-vocabulary words can only ever reach `flag`. This is deliberate: a
+  missed violation costs nothing, a false accusation ruins the game. Preserve it.
+- **Hold-to-clue is the only mode players see.** Open mic judges the whole room
+  as the poet — the false-accusation failure mode — so the mode picker renders
+  in development builds only (`OPEN_MIC_AVAILABLE`). The e2e spec drives the
+  hold button through its keyboard path (`Space` down/up) instead.
+- **The game persists; the round does not.** Scores, log, and whose turn it is
+  live in `localStorage` (`neanderbonk:game:v1`) so a refresh keeps the game;
+  a live round's clock and transcript deliberately reset. Reset game clears the
+  saved state. Restored log ids seed the id counter — don't break that, or keys
+  collide.
+- **This is the one route allowed the microphone.** `next.config.js` grants
+  `microphone=(self)` for `/experiments/neanderbonk` only, via a route rule
+  placed *after* the site-wide denial — where two rules set the same header key,
+  the later one wins.
+
 ## DIAGRAMS
 
 Dispatcher pattern: `Diagram.tsx` routes by `type` prop.

@@ -1,4 +1,19 @@
 const path = require('node:path');
+const { execSync } = require('node:child_process');
+
+// The commit the running site was built from, for the footer link. Vercel
+// provides it as an env var; local builds fall back to asking git; anything
+// else (a tarball, say) shows no link rather than a wrong one.
+const commitSha = (() => {
+  if (process.env.VERCEL_GIT_COMMIT_SHA) {
+    return process.env.VERCEL_GIT_COMMIT_SHA;
+  }
+  try {
+    return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+  } catch {
+    return '';
+  }
+})();
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
@@ -23,7 +38,18 @@ const ContentSecurityPolicy = `
   frame-ancestors 'none';
 `;
 
-const securityHeaders = [
+// Every page is denied the microphone except one: /experiments/neanderbonk is a
+// speech-recognition prototype and cannot work without it. The grant is `self`,
+// so it reaches same-origin documents only — the giscus and YouTube frames are
+// cross-origin and stay excluded — and the browser still prompts the user.
+// Both the game and its lab-bench page; path-to-regexp alternation, one rule.
+const MICROPHONE_ROUTE =
+  '/experiments/:page(neanderbonk|neanderbonk-lab|neanderbonk-voice)';
+const PERMISSIONS_POLICY_DEFAULT = 'camera=(), microphone=(), geolocation=()';
+const PERMISSIONS_POLICY_MICROPHONE =
+  'camera=(), microphone=(self), geolocation=()';
+
+const securityHeaders = (permissionsPolicy) => [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   {
     key: 'Content-Security-Policy',
@@ -57,7 +83,7 @@ const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
   {
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()',
+    value: permissionsPolicy,
   },
 ];
 
@@ -66,6 +92,10 @@ const securityHeaders = [
  **/
 module.exports = withBundleAnalyzer({
   reactStrictMode: true,
+  env: {
+    // Inlined at build time; read via process.env.NEXT_PUBLIC_COMMIT_SHA.
+    NEXT_PUBLIC_COMMIT_SHA: commitSha,
+  },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   experimental: { esmExternals: true },
   // Bundle node_modules deps into the server output instead of externalizing
@@ -82,7 +112,14 @@ module.exports = withBundleAnalyzer({
     return [
       {
         source: '/(.*)',
-        headers: securityHeaders,
+        headers: securityHeaders(PERMISSIONS_POLICY_DEFAULT),
+      },
+      // The microphone page overrides the blanket denial above. Order matters:
+      // where two rules set the same header key, Next.js emits one header and
+      // the *later* rule wins — verified against `next start`, not assumed.
+      {
+        source: MICROPHONE_ROUTE,
+        headers: securityHeaders(PERMISSIONS_POLICY_MICROPHONE),
       },
     ];
   },

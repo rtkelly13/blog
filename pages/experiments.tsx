@@ -1,6 +1,9 @@
 import {
+  AudioLines,
   Beaker,
   Boxes,
+  FlaskConical,
+  Gavel,
   Palette,
   Projector,
   Sparkles,
@@ -46,6 +49,33 @@ const experiments = [
     icon: <Sparkles className="w-12 h-12" />,
     status: 'active',
     components: 6,
+  },
+  {
+    name: 'NeanderBonk',
+    path: '/experiments/neanderbonk',
+    description:
+      'Automatic referee for Poetry for Neanderthals — listens to the poet, counts syllables, calls the bonk',
+    icon: <Gavel className="w-12 h-12" />,
+    status: 'active',
+    components: 6,
+  },
+  {
+    name: 'NeanderBonk Lab',
+    path: '/experiments/neanderbonk-lab',
+    description:
+      'The NeanderBonk referee on the bench — type or speak words and see every ruling, without the game around it',
+    icon: <FlaskConical className="w-12 h-12" />,
+    status: 'active',
+    components: 1,
+  },
+  {
+    name: 'NeanderBonk Voice',
+    path: '/experiments/neanderbonk-voice',
+    description:
+      'Can the referee tell who is speaking? Loudness-gate vs voice-profile speaker attribution, live on one microphone',
+    icon: <AudioLines className="w-12 h-12" />,
+    status: 'active',
+    components: 3,
   },
   {
     name: 'Talk Animations',
