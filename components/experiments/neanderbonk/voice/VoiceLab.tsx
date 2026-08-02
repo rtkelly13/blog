@@ -174,19 +174,65 @@ export default function VoiceLab() {
   const [calibration, setCalibration] = useState<NearFieldCalibration | null>(
     null,
   );
+  /** Live while holding; final counts after release. Proof it can hear you. */
+  const [enrolStats, setEnrolStats] = useState<{
+    frames: number;
+    voiced: number;
+    db: number | null;
+    done: boolean;
+  } | null>(null);
   const enrolStartRef = useRef(0);
+  // The first press triggers the browser's permission prompt, which can steal
+  // the pointer before getUserMedia resolves — so releases are tracked by
+  // token and a stale begin never marks the page as enrolling.
+  const enrolTokenRef = useRef(0);
 
   const beginEnrol = useCallback(async () => {
-    await pump.start();
-    enrolStartRef.current = performance.now();
+    enrolTokenRef.current += 1;
+    const token = enrolTokenRef.current;
     setEnrolling(true);
+    await pump.start();
+    if (enrolTokenRef.current !== token) return; // released mid-prompt
+    enrolStartRef.current = performance.now();
   }, [pump]);
 
+  // While enrolling, show what the pipeline is actually capturing — the
+  // failure mode this prevents is talking for twenty seconds into a page
+  // that heard nothing and said nothing.
+  useEffect(() => {
+    if (!enrolling) return;
+    const id = window.setInterval(() => {
+      const frames = pump.recent(
+        performance.now() - (enrolStartRef.current || performance.now()),
+      );
+      setEnrolStats({
+        frames: frames.length,
+        voiced: frames.filter((f) => f.features.pitchHz !== null).length,
+        db: frames.length > 0 ? frames[frames.length - 1].db : null,
+        done: false,
+      });
+    }, 150);
+    return () => window.clearInterval(id);
+  }, [enrolling, pump]);
+
   const endEnrol = useCallback(() => {
+    enrolTokenRef.current += 1;
+    if (enrolStartRef.current === 0) {
+      // Released before the microphone ever started (permission prompt).
+      setEnrolling(false);
+      return;
+    }
     setEnrolling(false);
     const took = performance.now() - enrolStartRef.current;
+    enrolStartRef.current = 0;
     const frames = pump.recent(took);
     const voiced = frames.filter((f) => f.features.pitchHz !== null);
+    setEnrolStats({
+      frames: frames.length,
+      voiced: voiced.length,
+      db: null,
+      done: true,
+    });
     setProfile(buildProfile(frames.map((f) => f.features)));
     if (voiced.length > 0) {
       const dbs = voiced.map((f) => f.db).sort((a, b) => a - b);
@@ -370,8 +416,24 @@ export default function VoiceLab() {
           }`}
         >
           <Fingerprint className="mr-2 inline h-4 w-4" aria-hidden />
-          {enrolling ? 'Listening — keep talking' : 'Hold to enrol'}
+          {enrolling
+            ? enrolStats && !enrolStats.done
+              ? `Keep talking — ${enrolStats.voiced} voiced frames${
+                  enrolStats.db !== null
+                    ? ` · ${enrolStats.db.toFixed(0)} dB`
+                    : ''
+                }`
+              : 'Waiting for the microphone…'
+            : 'Hold to enrol'}
         </button>
+        {enrolStats?.done && !profile ? (
+          <p className="mt-2 border-2 border-brutalist-yellow bg-black p-3 font-mono text-xs text-brutalist-yellow">
+            Heard {enrolStats.frames} frames but only {enrolStats.voiced} were
+            voiced — a profile needs at least 20. Get the mic closer, speak
+            continuously while holding, and check the browser is using the
+            microphone you think it is.
+          </p>
+        ) : null}
         <div className="mt-3 grid gap-3 font-mono text-xs sm:grid-cols-2">
           <p className="text-zinc-400">
             <Volume2
