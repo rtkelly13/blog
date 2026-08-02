@@ -1,4 +1,5 @@
 import {
+  AudioLines,
   Beaker,
   Boxes,
   FlaskConical,
@@ -66,6 +67,15 @@ const experiments = [
     icon: <FlaskConical className="w-12 h-12" />,
     status: 'active',
     components: 1,
+  },
+  {
+    name: 'NeanderBonk Voice',
+    path: '/experiments/neanderbonk-voice',
+    description:
+      'Can the referee tell who is speaking? Loudness-gate vs voice-profile speaker attribution, live on one microphone',
+    icon: <AudioLines className="w-12 h-12" />,
+    status: 'active',
+    components: 3,
   },
   {
     name: 'Talk Animations',

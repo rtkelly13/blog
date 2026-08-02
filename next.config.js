@@ -28,7 +28,8 @@ const ContentSecurityPolicy = `
 // so it reaches same-origin documents only — the giscus and YouTube frames are
 // cross-origin and stay excluded — and the browser still prompts the user.
 // Both the game and its lab-bench page; path-to-regexp alternation, one rule.
-const MICROPHONE_ROUTE = '/experiments/:page(neanderbonk|neanderbonk-lab)';
+const MICROPHONE_ROUTE =
+  '/experiments/:page(neanderbonk|neanderbonk-lab|neanderbonk-voice)';
 const PERMISSIONS_POLICY_DEFAULT = 'camera=(), microphone=(), geolocation=()';
 const PERMISSIONS_POLICY_MICROPHONE =
   'camera=(), microphone=(self), geolocation=()';

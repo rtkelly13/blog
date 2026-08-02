@@ -161,6 +161,9 @@ modules, split so the rules are testable without a browser:
 | `bonk.ts`            | Web Audio buzzer + haptics                                  |
 | `NeanderBonk.tsx`    | The app: round/score state machine and UI                   |
 | `RefereeLab.tsx`     | `/experiments/neanderbonk-lab`: the judging pipeline alone — type or speak words, see every ruling (incl. fillers), no game state |
+| `voice/levelMeter.ts` | Approach A, loudness gate: mic level meter + pure near/far classification (pure parts unit-tested) |
+| `voice/voiceProfile.ts` | Approach B, speaker similarity: pure-DSP pitch/timbre profile + scoring (unit-tested; a baseline, not speaker recognition) |
+| `voice/VoiceLab.tsx` | `/experiments/neanderbonk-voice`: A vs B live on one mic, bonk-gate selector, two-mic-consumer feasibility probe. Approach C (d-vector embeddings) scoped in docs/neanderbonk-voice-approach-c.md |
 
 - **`syllables.ts`, `rules.ts` and `words.ts` have no React or DOM imports**, so
   the entire ruling logic is unit-tested on the JVM-equivalent — plain Node —
