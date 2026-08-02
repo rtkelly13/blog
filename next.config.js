@@ -1,4 +1,19 @@
 const path = require('node:path');
+const { execSync } = require('node:child_process');
+
+// The commit the running site was built from, for the footer link. Vercel
+// provides it as an env var; local builds fall back to asking git; anything
+// else (a tarball, say) shows no link rather than a wrong one.
+const commitSha = (() => {
+  if (process.env.VERCEL_GIT_COMMIT_SHA) {
+    return process.env.VERCEL_GIT_COMMIT_SHA;
+  }
+  try {
+    return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+  } catch {
+    return '';
+  }
+})();
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
@@ -66,6 +81,10 @@ const securityHeaders = [
  **/
 module.exports = withBundleAnalyzer({
   reactStrictMode: true,
+  env: {
+    // Inlined at build time; read via process.env.NEXT_PUBLIC_COMMIT_SHA.
+    NEXT_PUBLIC_COMMIT_SHA: commitSha,
+  },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   experimental: { esmExternals: true },
   // Bundle node_modules deps into the server output instead of externalizing
