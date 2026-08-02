@@ -55,8 +55,14 @@ export type SpeakerCall = 'poet' | 'other' | 'uncertain';
 const PITCH_MIN_HZ = 60;
 const PITCH_MAX_HZ = 400;
 
-/** A frame quieter than this is silence; don't even look for pitch. */
-const RMS_FLOOR = 0.01;
+/**
+ * A frame quieter than this is silence; don't even look for pitch. Set low
+ * (−54 dBFS) deliberately: the capture pipeline disables auto gain control so
+ * the loudness gate sees raw levels, and real microphones at default gain sit
+ * far below full scale — a floor of 0.01 silenced entire enrolment sessions.
+ * The autocorrelation voicing threshold does the real gatekeeping.
+ */
+const RMS_FLOOR = 0.002;
 
 /** Normalised autocorrelation peak below this is unvoiced (noise, fricatives). */
 const VOICING_THRESHOLD = 0.5;
