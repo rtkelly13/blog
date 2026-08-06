@@ -14,6 +14,18 @@ pnpm build-storybook
 
 Storybook runs on http://localhost:6006 in development mode.
 
+## Where it's hosted
+
+This Storybook is deployed by its own Vercel project (config in
+[`storybook-site/`](../storybook-site/README.md), so the blog's own deploy is
+untouched) and is **composed into the design system's Storybook** at
+[design-system.ryankelly.dev](https://design-system.ryankelly.dev), where it appears
+in the sidebar as **`ryankelly.dev (site)`**.
+
+That split mirrors the tiers: `@rtkelly13/design-system` publishes the tokens and
+primitives, and this Storybook documents what the site composes on top of them. If a
+story here belongs to the system rather than the site, it belongs in the package repo.
+
 ## Theme toolbar
 
 The toolbar (paintbrush icon) cycles **HIGH (dark) / DIM / SKETCH** by setting

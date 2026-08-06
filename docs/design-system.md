@@ -115,3 +115,19 @@ per-section accent rule, diagrams, search, talk widgets) lives in
 **[components/AGENTS.md](../components/AGENTS.md)**. Live component variations
 render in the **design sandbox** (`/design-sandbox`) and in Storybook
 (`pnpm storybook`, :6006).
+
+## Hosted Storybooks
+
+| URL | Shows |
+| --- | --- |
+| [design-system.ryankelly.dev](https://design-system.ryankelly.dev) | The package's Storybook, with this repo's composed in as `ryankelly.dev (site)` |
+| [preview.design-system.ryankelly.dev](https://preview.design-system.ryankelly.dev) | The same, built from the package repo's `preview` branch |
+
+This repo's Storybook is deployed by a second Vercel project reading
+[`storybook-site/vercel.json`](../storybook-site/README.md); the root `vercel.json`
+still owns the blog's own deploy. Both domains and both projects are declared in the
+design-system repo's `infra/` Pulumi program.
+
+> The package repo's own audit — including why this repo's `"^0.0.5"` dependency
+> range can never resolve past `0.0.5` — is in
+> [`docs/evaluation.md`](https://github.com/rtkelly13/design-system/blob/main/docs/evaluation.md).
