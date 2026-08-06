@@ -125,8 +125,10 @@ render in the **design sandbox** (`/design-sandbox`) and in Storybook
 
 This repo's Storybook is deployed by a second Vercel project reading
 [`storybook-site/vercel.json`](../storybook-site/README.md); the root `vercel.json`
-still owns the blog's own deploy. Both domains and both projects are declared in the
-design-system repo's `infra/` Pulumi program.
+still owns the blog's own deploy. Both projects and both domains are declared in
+`rtkelly13/shared-utilities` at
+[`infra/vercel/`](https://github.com/rtkelly13/shared-utilities/tree/main/infra/vercel) —
+one Pulumi stack covering every ryankelly.dev site (site key `blog-storybook`).
 
 > The package repo's own audit — including why this repo's `"^0.0.5"` dependency
 > range can never resolve past `0.0.5` — is in

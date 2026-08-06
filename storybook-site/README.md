@@ -38,5 +38,7 @@ it Vercel uploads only this directory and the build fails immediately. The Verce
 Pulumi provider does not expose that toggle, so it is the one setting that must be
 ticked by hand.
 
-The project itself is declared in the design-system repo's `infra/` Pulumi program
-(resource `blog-storybook`), alongside the domains for the composed Storybook.
+The project itself is declared in `rtkelly13/shared-utilities` at
+[`infra/vercel/sites.ts`](https://github.com/rtkelly13/shared-utilities/tree/main/infra/vercel)
+(site key `blog-storybook`) — one Pulumi stack covering every ryankelly.dev site,
+alongside the domains for the composed Storybook.
