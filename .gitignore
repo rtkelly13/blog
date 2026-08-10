@@ -54,6 +54,8 @@ node_modules/
 
 *storybook.log
 storybook-static
+# Where the blog-storybook Vercel project builds to (see storybook-site/README.md).
+storybook-site/dist
 
 # temporary working files
 /temp/
