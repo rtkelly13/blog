@@ -22,17 +22,14 @@ describe('validateTalkFrontMatter', () => {
     expect(() => validateTalkFrontMatter(base, 'ok')).not.toThrow();
   });
 
-  it.each([
-    0,
-    -5,
-    601,
-    Number.NaN,
-    'abc' as unknown as number,
-  ])('rejects invalid durationMins: %s', (bad) => {
-    expect(() =>
-      validateTalkFrontMatter({ ...base, durationMins: bad }, 't'),
-    ).toThrow(/durationMins/);
-  });
+  it.each([0, -5, 601, Number.NaN, 'abc' as unknown as number])(
+    'rejects invalid durationMins: %s',
+    (bad) => {
+      expect(() =>
+        validateTalkFrontMatter({ ...base, durationMins: bad }, 't'),
+      ).toThrow(/durationMins/);
+    },
+  );
 
   it('rejects an unparseable date', () => {
     expect(() =>

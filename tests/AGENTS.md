@@ -33,6 +33,51 @@ tests/
 | Playwright | `playwright.config.ts` | `pnpm test:e2e` | E2E, visual     |
 | Vitest     | `vitest.config.ts`     | `pnpm test`     | Unit, Storybook |
 
+`vitest.config.ts` defines three projects, and `pnpm test` runs all of them:
+
+| Project     | Environment    | Covers                                |
+| ----------- | -------------- | ------------------------------------- |
+| `unit`      | node           | `tests/**/*.test.ts`                  |
+| `convex`    | edge-runtime   | `convex/**/*.test.ts` via convex-test |
+| `storybook` | real chromium  | every `*.stories.tsx` in the repo     |
+
+Run one with `pnpm vitest run --project <name>`.
+
+## STORYBOOK IS PART OF THE TEST SUITE
+
+**Storybook is a test harness here, not just a docs site — do not remove it as
+"unused UI tooling".** The `storybook` Vitest project above uses
+`@storybook/addon-vitest`'s plugin to execute every story as a real browser test
+(chromium via `@vitest/browser-playwright`). Deleting Storybook would silently
+delete that whole project — currently 16 story files / 62 tests — from
+`pnpm test`.
+
+What each story gets for free by existing:
+
+- **A render test.** A story that throws, or whose component regresses into
+  an error boundary, fails the suite.
+- **An interaction test**, if it has a `play` function.
+- **An a11y (axe) pass**, wired in `.storybook/vitest.setup.ts` via
+  `@storybook/addon-a11y/preview`.
+
+**Caveat on a11y:** `.storybook/preview.tsx` sets `parameters.a11y.test = 'todo'`,
+which *reports* violations without failing. So a11y coverage exists but is not
+yet a gate — flip it to `'error'` when the current violations are cleaned up.
+
+**Why the blog has stories for components the design system already covers.**
+Several `components/*.tsx` are thin re-exports of `@rtkelly13/design-system`
+(`Button`, `Card`, `Tag`, `PageTitle`, `BracketText`, `PageHeader`), and the
+design system has its own stories plus its own Playwright visual regression. The
+blog's copies are not redundant: they exercise the component through *this*
+repo's Tailwind build, theme classes and Next context, so they are the check
+that catches a design-system version bump breaking the site. Keep them.
+
+**Sandbox note:** the `storybook` project needs the exact chromium build that the
+pinned Playwright expects. If browser downloads are blocked (e.g. an agent
+sandbox with a mismatched preinstalled chromium), point the provider at the local
+binary via `playwright({ launchOptions: { executablePath: '...' } })` in a
+throwaway config rather than editing `vitest.config.ts`.
+
 ## VISUAL SNAPSHOTS
 
 **Platform-specific**: Snapshots generated on Linux (CI). Tests skip on macOS/Windows.

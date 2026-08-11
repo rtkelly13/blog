@@ -135,7 +135,7 @@ export const active = query({
       .withIndex('by_room_created', (q) => q.eq('room', room))
       .order('desc')
       .first();
-    if (!activity || activity.status !== 'open') return null;
+    if (activity?.status !== 'open') return null;
 
     const submissions = await ctx.db
       .query('activitySubmissions')
@@ -176,7 +176,7 @@ export const feed = query({
       .withIndex('by_room_created', (q) => q.eq('room', room))
       .order('desc')
       .first();
-    if (!activity || activity.status !== 'open') {
+    if (activity?.status !== 'open') {
       return { authorized: true as const, activity: null };
     }
 
@@ -212,7 +212,7 @@ export const submit = mutation({
   },
   handler: async (ctx, args) => {
     const activity = await ctx.db.get(args.activityId);
-    if (!activity || activity.status !== 'open') {
+    if (activity?.status !== 'open') {
       throw new Error('This activity is closed.');
     }
     // Gate on the live talk owning this room (mirrors reactions/questions).

@@ -142,17 +142,53 @@ low: each tab holds a WebSocket, and piling them up can wedge new pages on
 
 ## Key dependencies
 
-| Package          | Version       | Purpose                 |
-| ---------------- | ------------- | ----------------------- |
-| next             | ^16.2.9       | Framework               |
-| react            | ^19.2.7       | UI                      |
-| tailwindcss      | ^4.3.1        | Styling                 |
-| mdx-bundler      | ^10.1.1       | MDX processing          |
-| @xyflow/react    | ^12.11.2      | Walkthrough node-graphs |
-| motion           | ^12.42.2      | Interactive transitions |
-| kbar             | 0.1.0-beta.48 | Command palette (Cmd+K) |
-| @playwright/test | ^1.61.1       | E2E + visual tests      |
-| storybook        | ^10.4.6       | Component docs          |
+| Package          | Version       | Purpose                        |
+| ---------------- | ------------- | ------------------------------ |
+| next             | ^16.2.12      | Framework                      |
+| react            | ^19.2.8       | UI                             |
+| tailwindcss      | ^4.3.3        | Styling                        |
+| mdx-bundler      | ^10.1.1       | MDX processing                 |
+| @xyflow/react    | ^12.11.2      | Walkthrough node-graphs        |
+| motion           | ^12.43.0      | Interactive transitions        |
+| kbar             | 0.1.0-beta.48 | Command palette (Cmd+K)        |
+| @playwright/test | ^1.61.1       | E2E + visual tests             |
+| storybook        | ^10.5.5       | Component docs **and tests**   |
+| typescript       | ^6.0.3        | Types                          |
+| @biomejs/biome   | 2.5.6         | Lint + format                  |
+
+Storybook is not optional tooling here — see
+[tests/AGENTS.md](../tests/AGENTS.md#storybook-is-part-of-the-test-suite).
+
+## Dependencies held back on purpose
+
+Anything in this list is **pinned below latest for a reason**. Check here before
+"just bumping it" — and if you clear a blocker, delete the row.
+
+| Package                  | Held at   | Latest | Why, and what unblocks it                                                                                                                                                                                                                                                                    |
+| ------------------------ | --------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `typescript`             | `^6.0.3`  | 7.0.2  | TS 7 removed `baseUrl`, and `rollup-plugin-dts` — which `tsup` vendors to emit `.d.ts` — declares `typescript: ^4.5 \|\| ^5.0 \|\| ^6.0` and crashes on TS 7 internals. That breaks `pnpm build` in **@rtkelly13/design-system**, so the blog stays on 6 to keep the pair aligned. Unblocked when `rollup-plugin-dts` supports TS 7 (or the design system moves off `tsup`, e.g. to `tsdown`). |
+| `katex`                  | `^0.16.47`| 0.18.1 | `rehype-katex@7.0.1` depends on `katex: ^0.16.0` and has no newer release. Unblocked when `rehype-katex` ships a katex 0.18-compatible major.                                                                                                                                                  |
+| `@playwright/test`, `playwright`, `playwright-core` | `1.61.1` (pnpm override) | 1.62.1 | Not a compatibility problem — a **deliberate** one. Bumping Playwright changes the bundled Chromium, which invalidates every committed visual baseline. Keeping it fixed means a snapshot diff reflects *our* CSS change, not a browser change. Bump it in a PR of its own, then `/update-snapshots`. |
+
+### Why some Biome rules are off for `css/tailwind.css`
+
+`biome.json` disables two CSS rules for that file only, and both exemptions are
+about the design system's architecture rather than sloppiness:
+
+- **`complexity/noImportantStyles`** — the token layer deliberately uses
+  `!important` to beat Tailwind's generated utilities.
+- **`style/noDescendingSpecificity`** — theme overrides like
+  `.sketch .ascii-divider::after` (specificity `0,2,1`) are declared *before* the
+  base `.ascii-divider::after` (`0,1,1`). Biome reads that as a descending-
+  specificity mistake, but it is the point: the higher-specificity theme rule
+  must win regardless of source order. Reordering to satisfy the rule would be
+  actively wrong here — see the Tailwind v4 ordering warnings in
+  [design-system.md](./design-system.md).
+
+`public/` is excluded from Biome entirely. It holds only generated artifacts
+(OG-image manifest, search indexes, exported draw.io SVGs); Biome 2.5.x lints
+CSS inside SVG `<style>` blocks, which produced ~150 diagnostics against
+machine-generated diagram exports.
 
 ## Notes
 

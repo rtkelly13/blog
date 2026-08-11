@@ -78,7 +78,7 @@ export const active = query({
       .withIndex('by_room_created', (q) => q.eq('room', room))
       .order('desc')
       .first();
-    if (!poll || poll.status !== 'open') return null;
+    if (poll?.status !== 'open') return null;
 
     const words = await ctx.db
       .query('pollWords')
@@ -137,7 +137,7 @@ export const submit = mutation({
   args: { pollId: v.id('polls'), word: v.string(), machineId: v.string() },
   handler: async (ctx, { pollId, word, machineId }) => {
     const poll = await ctx.db.get(pollId);
-    if (!poll || poll.status !== 'open') {
+    if (poll?.status !== 'open') {
       throw new Error('This poll is closed.');
     }
     const talk = await liveTalkForRoom(ctx, poll.room);
