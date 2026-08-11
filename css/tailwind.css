@@ -349,9 +349,9 @@ html {
    sketch so it stays legible on paper. Excludes nested `.dark`/`.dim` theme
    panels (design-sandbox component library), where light grey is correct. */
 .sketch
-  :is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400):not(
-    .sketch :is(.dark, .dim) *
-  ) {
+:is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400):not(
+  .sketch :is(.dark, .dim) *
+) {
   color: #33373f;
 }
 
