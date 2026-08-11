@@ -44,6 +44,7 @@ when you work there:
 | Components / layouts | `components/`, `layouts/` | [components/AGENTS.md](./components/AGENTS.md) |
 | Colours, shadows, themes | `css/tailwind.css` (tokens come from `@rtkelly13/design-system/theme.css`) | [design-system.md](./docs/design-system.md) |
 | Design-system package dev | `pnpm ds:link` / `pnpm ds:unlink` (never commit the `link:` override) | [design-system.md](./docs/design-system.md#package-source--local-development) |
+| Deploying this Storybook | `storybook-site/vercel.json` (second Vercel project) | [storybook-site/README.md](./storybook-site/README.md) |
 | MDX / remark plugins | `lib/mdx.ts`, `lib/remark-*.ts` | [lib/AGENTS.md](./lib/AGENTS.md) |
 | Realtime backend | `convex/` | [convex/AGENTS.md](./convex/AGENTS.md) |
 | Talk / live routes | `pages/talks/`, `pages/live/`, `pages/admin.tsx` | [talks.md](./docs/talks.md) |
