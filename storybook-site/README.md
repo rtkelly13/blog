@@ -22,10 +22,17 @@ The stories themselves live where they always did (`stories/`, `components/`,
 This Storybook is **composed into** the design system's sidebar, and Storybook
 resolves composition in the *browser*: the design system's manager fetches
 `/index.json` from this origin cross-origin. Without
-`Access-Control-Allow-Origin` on that route the ref fails as a CORS error and
-shows up as a permanently-erroring sidebar entry, with nothing wrong on this side
-in isolation. `index.json` is also served `must-revalidate` so a fresh deploy is
-picked up rather than composed from a cached index.
+`Access-Control-Allow-Origin` the ref fails as a CORS error and shows up as a
+permanently-erroring sidebar entry, with nothing wrong on this side in isolation.
+`index.json` is also served `must-revalidate` so a fresh deploy is picked up
+rather than composed from a cached index.
+
+The CORS header is set on **all paths**, not just `/index.json`. The manager also
+probes `stories.json` and `metadata.json`, which Storybook 10 no longer emits.
+Those requests are expected to fail and composition works without them — but
+scoped to `/index.json` they fail as *CORS errors* rather than 404s, because the
+browser blocks the response before the status can be read, and each one logs an
+error in the console of every page that composes this Storybook.
 
 `cleanUrls: false` is load-bearing for the same reason it is in the design
 system's `vercel.json`: clean URLs rewrite `/iframe.html` to `/iframe`, which

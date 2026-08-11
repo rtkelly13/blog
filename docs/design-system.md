@@ -115,3 +115,25 @@ per-section accent rule, diagrams, search, talk widgets) lives in
 **[components/AGENTS.md](../components/AGENTS.md)**. Live component variations
 render in the **design sandbox** (`/design-sandbox`) and in Storybook
 (`pnpm storybook`, :6006).
+
+## Hosted Storybooks
+
+| URL | Shows |
+| --- | --- |
+| [design-system.ryankelly.dev](https://design-system.ryankelly.dev) | The package's Storybook, with this repo's composed in as `ryankelly.dev (site)` |
+| [preview.design-system.ryankelly.dev](https://preview.design-system.ryankelly.dev) | The same, built from the package repo's `preview` branch |
+
+This repo's Storybook is deployed by a second Vercel project reading
+[`storybook-site/vercel.json`](../storybook-site/README.md); the root `vercel.json`
+still owns the blog's own deploy. Both projects and all their domains are declared in
+`rtkelly13/shared-utilities` at
+[`infra/vercel/`](https://github.com/rtkelly13/shared-utilities/tree/main/infra/vercel) —
+one Pulumi stack covering every ryankelly.dev site (site keys `blog-storybook` and
+`design-system-storybook`).
+
+> The package repo keeps an audit of the system in
+> [`docs/evaluation.md`](https://github.com/rtkelly13/design-system/blob/main/docs/evaluation.md).
+> One of its findings was this repo's `"@rtkelly13/design-system": "^0.0.5"` range,
+> which under semver matched *only* `0.0.5` and so could never resolve a release.
+> Fixed in #98 — the dependency now tracks `^0.1.3`.
+
