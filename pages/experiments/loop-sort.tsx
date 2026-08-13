@@ -103,20 +103,27 @@ export default function LoopSortExperimentPage() {
             <LoopSortBoard
               map={displayedMap}
               activeStep={activeStep}
-              onMapUpdate={handleMapChange}
-            />
-          </section>
-
-          {/* Solution & Playback Controls */}
-          <section>
-            <SolutionControls
-              result={solverResult}
+              solverResult={solverResult}
               currentStepIndex={currentStepIndex}
               onStepChange={setCurrentStepIndex}
               onSolveRequest={handleRunSolver}
               isSolving={isSolving}
+              onMapUpdate={handleMapChange}
             />
           </section>
+
+          {/* Detailed Solution Step Timeline (Collapsible/Secondary) */}
+          {solverResult && (
+            <section>
+              <SolutionControls
+                result={solverResult}
+                currentStepIndex={currentStepIndex}
+                onStepChange={setCurrentStepIndex}
+                onSolveRequest={handleRunSolver}
+                isSolving={isSolving}
+              />
+            </section>
+          )}
 
           {/* Structured Text File Editor & File Upload */}
           <section>
