@@ -1,10 +1,14 @@
 import {
   AlertCircle,
+  AlertTriangle,
+  ArrowRight,
   Box,
   Check,
   CheckCircle2,
+  ChevronRight,
   Construction,
   Copy,
+  Cpu,
   Download,
   Eye,
   EyeOff,
@@ -12,25 +16,31 @@ import {
   HelpCircle,
   Info,
   Lock,
+  Pause,
   Play,
+  RotateCcw,
   RotateCw,
   Share2,
   ShieldAlert,
+  SkipBack,
+  SkipForward,
   Snowflake,
   Sparkles,
   Wand2,
 } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   analyzeColorDeficit,
   autoFillBestGuess,
 } from '../../lib/loop-sort/deduction';
 import { stringifyMap } from '../../lib/loop-sort/parser';
+import { solveLoopSort } from '../../lib/loop-sort/solver';
 import type {
   LoopSortMap,
   MoveStep,
   Rack,
+  SolverResult,
   TargetBox,
 } from '../../lib/loop-sort/types';
 import { AVAILABLE_PALETTE, COLOR_STYLES, getColorStyle } from './colorMap';
@@ -38,16 +48,28 @@ import { AVAILABLE_PALETTE, COLOR_STYLES, getColorStyle } from './colorMap';
 interface LoopSortBoardProps {
   map: LoopSortMap;
   activeStep?: MoveStep;
+  solverResult: SolverResult | null;
+  currentStepIndex: number;
+  onStepChange: (stepIndex: number) => void;
+  onSolveRequest: () => void;
+  isSolving: boolean;
   onMapUpdate?: (updatedMap: LoopSortMap) => void;
 }
 
 export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
   map,
   activeStep,
+  solverResult,
+  currentStepIndex,
+  onStepChange,
+  onSolveRequest,
+  isSolving,
   onMapUpdate,
 }) => {
   const [showFogOfWar, setShowFogOfWar] = useState<boolean>(false);
   const [showDeductionPanel, setShowDeductionPanel] = useState<boolean>(false);
+  const [isPlayingSolution, setIsPlayingSolution] = useState<boolean>(false);
+  const [stepSpeedMs, setStepSpeedMs] = useState<number>(1800); // Deliberate 1.8s gap between steps
   const [copiedNotification, setCopiedNotification] = useState<string | null>(
     null,
   );
@@ -69,6 +91,37 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
   const hasTopRope = topRacks.some((r) => r.ropeTiedTo) || topRacks.length >= 5;
 
   const analysis = analyzeColorDeficit(map);
+  const totalSteps = solverResult?.steps.length || 0;
+
+  // Auto-play timer with generous gap between steps
+  useEffect(() => {
+    if (!isPlayingSolution || !solverResult || totalSteps === 0) return;
+
+    if (currentStepIndex >= totalSteps) {
+      setIsPlayingSolution(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      onStepChange(currentStepIndex + 1);
+    }, stepSpeedMs);
+
+    return () => clearTimeout(timer);
+  }, [
+    isPlayingSolution,
+    currentStepIndex,
+    totalSteps,
+    solverResult,
+    stepSpeedMs,
+    onStepChange,
+  ]);
+
+  // Find any top-of-stack mystery block currently exposed and needing human revelation
+  const exposedMysteryRacks = map.racks.filter((rack) => {
+    if (rack.blocks.length === 0) return false;
+    const topBlock = rack.blocks[rack.blocks.length - 1];
+    return topBlock === '?' || topBlock === 'hidden' || topBlock === 'mystery';
+  });
 
   const handleBlockClick = (rackId: string, slotIdx: number) => {
     if (!onMapUpdate) return;
@@ -89,11 +142,37 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
       };
     });
 
-    onMapUpdate({
+    const updated = {
       ...map,
       racks: newRacks,
-    });
+    };
+
+    onMapUpdate(updated);
     setEditingSlot(null);
+  };
+
+  const handleQuickRevealMystery = (rackId: string, color: string) => {
+    if (!onMapUpdate) return;
+    const targetRack = map.racks.find((r) => r.id === rackId);
+    if (!targetRack || targetRack.blocks.length === 0) return;
+
+    const topIdx = targetRack.blocks.length - 1;
+    const newRacks = map.racks.map((r) => {
+      if (r.id !== rackId) return r;
+      const newBlocks = [...r.blocks];
+      newBlocks[topIdx] = color;
+      return {
+        ...r,
+        blocks: newBlocks,
+      };
+    });
+
+    const updated = {
+      ...map,
+      racks: newRacks,
+    };
+
+    onMapUpdate(updated);
   };
 
   const handleBestGuessFill = () => {
@@ -150,7 +229,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
           zIndex: isFrom || isTo ? 30 : 1,
         }}
       >
-        {/* Cart Chassis Container (Explicit rounded styling to override brutalist 0px resets) */}
+        {/* Cart Chassis Container */}
         <div
           className="w-[58px] sm:w-[68px] p-1.5 pb-2 flex flex-col items-center shadow-2xl relative"
           style={{
@@ -170,9 +249,9 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
                   ? '3px solid #38bdf8'
                   : '2px solid #7c68ba',
             boxShadow: isFrom
-              ? '0 0 16px rgba(34, 211, 238, 0.8)'
+              ? '0 0 18px rgba(34, 211, 238, 0.9)'
               : isTo
-                ? '0 0 16px rgba(236, 72, 153, 0.8)'
+                ? '0 0 18px rgba(236, 72, 153, 0.9)'
                 : '0 8px 16px rgba(0, 0, 0, 0.6)',
           }}
         >
@@ -280,7 +359,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
 
                   {isMystery ? (
                     <span
-                      className="font-black drop-shadow"
+                      className="font-black drop-shadow animate-pulse"
                       style={{ color: '#fde047' }}
                     >
                       ?
@@ -422,7 +501,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
                 ? '3px solid #facc15'
                 : `2px solid ${colorStyle.borderHex}`,
             boxShadow: isTo
-              ? '0 0 16px rgba(236, 72, 153, 0.8)'
+              ? '0 0 18px rgba(236, 72, 153, 0.9)'
               : '0 8px 16px rgba(0, 0, 0, 0.6), inset 0 2px 6px rgba(255,255,255,0.4)',
           }}
         >
@@ -545,173 +624,213 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Top Toolbar: View Controls, Deduction & Export Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-900 border-2 border-zinc-700 p-3 rounded-lg">
-        <div className="flex items-center gap-2">
-          <RotateCw className="w-4 h-4 text-brutalist-cyan" />
-          <span className="font-display font-bold text-sm text-white uppercase tracking-wider">
-            [ INTERACTIVE_BOARD_STUDIO ]
-          </span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Fog-of-War Toggle */}
-          <button
-            onClick={() => setShowFogOfWar(!showFogOfWar)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded font-mono text-xs font-bold uppercase transition-all border-2 ${
-              showFogOfWar
-                ? 'bg-amber-500 text-black border-amber-300 shadow-sm'
-                : 'bg-zinc-800 text-zinc-300 border-zinc-600 hover:text-white'
-            }`}
-            title="Toggle between In-Game presentation (mystery ? blocks) and Oracle View"
-          >
-            {showFogOfWar ? (
-              <>
-                <EyeOff className="w-3.5 h-3.5" />
-                <span>Fog-of-War: ON</span>
-              </>
-            ) : (
-              <>
-                <Eye className="w-3.5 h-3.5" />
-                <span>Exposed View</span>
-              </>
-            )}
-          </button>
-
-          {/* Color Deficit Inspector Toggle */}
-          <button
-            onClick={() => setShowDeductionPanel(!showDeductionPanel)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded font-mono text-xs font-bold uppercase transition-all border-2 ${
-              showDeductionPanel
-                ? 'bg-brutalist-cyan text-black border-cyan-300'
-                : 'bg-zinc-800 text-zinc-300 border-zinc-600 hover:text-white'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Deduction Engine ({analysis.totalMysterySlots} ?)</span>
-          </button>
-
-          {/* Best Guess Auto-Fill Button */}
-          {analysis.totalMysterySlots > 0 && onMapUpdate && (
+      {/* 1. TOP INTERACTIVE SOLVER HUD (Integrated on the game) */}
+      <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-2 border-brutalist-cyan p-4 rounded-2xl shadow-xl space-y-3 font-mono">
+        {/* HUD Top Bar: Solve Trigger & Playback Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
+          <div className="flex items-center gap-3">
             <button
-              onClick={handleBestGuessFill}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded font-mono text-xs font-bold uppercase transition-all bg-emerald-600 hover:bg-emerald-500 text-white border-2 border-emerald-400 shadow-sm"
-              title="Automatically populate mystery ? slots based on target box deficit"
+              type="button"
+              onClick={onSolveRequest}
+              disabled={isSolving}
+              className="px-5 py-2.5 bg-brutalist-pink text-white font-bold text-xs uppercase border-2 border-white hover:bg-pink-600 active:scale-95 disabled:opacity-50 flex items-center gap-2 rounded shadow-md cursor-pointer"
             >
-              <Wand2 className="w-3.5 h-3.5" />
-              <span>Best Guess Auto-Fill</span>
+              <Cpu className="w-4 h-4" />
+              <span>{isSolving ? 'Solving Level...' : 'Run Auto-Solver'}</span>
             </button>
+
+            {solverResult?.solved && (
+              <span className="text-xs text-emerald-400 font-bold bg-emerald-950/80 border border-emerald-500/60 px-2.5 py-1 rounded">
+                Solved ({totalSteps} steps)
+              </span>
+            )}
+          </div>
+
+          {/* Interactive Stepping Controls */}
+          {solverResult?.solved && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPlayingSolution(false);
+                  onStepChange(0);
+                }}
+                disabled={currentStepIndex === 0}
+                className="p-2 bg-black border border-zinc-600 text-white hover:border-brutalist-cyan disabled:opacity-30 rounded cursor-pointer"
+                title="Reset to initial state"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPlayingSolution(false);
+                  onStepChange(Math.max(0, currentStepIndex - 1));
+                }}
+                disabled={currentStepIndex === 0}
+                className="p-2 bg-black border border-zinc-600 text-white hover:border-brutalist-cyan disabled:opacity-30 rounded cursor-pointer"
+                title="Step Back"
+              >
+                <SkipBack className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsPlayingSolution(!isPlayingSolution)}
+                className="px-4 py-2 bg-brutalist-cyan text-black font-bold text-xs uppercase flex items-center gap-1.5 border border-white hover:bg-cyan-300 rounded cursor-pointer shadow-sm"
+              >
+                {isPlayingSolution ? (
+                  <>
+                    <Pause className="w-4 h-4" />
+                    <span>Pause</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    <span>Auto-Step</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPlayingSolution(false);
+                  onStepChange(Math.min(totalSteps, currentStepIndex + 1));
+                }}
+                disabled={currentStepIndex >= totalSteps}
+                className="px-3.5 py-2 bg-emerald-600 text-white font-bold text-xs uppercase flex items-center gap-1 border border-emerald-400 hover:bg-emerald-500 disabled:opacity-30 rounded cursor-pointer shadow-sm"
+                title="Execute Next Step"
+              >
+                <span>Next Move</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+
+              {/* Step Gap Selector */}
+              <div className="flex items-center gap-1 pl-2 border-l border-zinc-700 text-[11px] text-zinc-400">
+                <span className="text-[10px]">GAP:</span>
+                {[
+                  { label: '1.2s', ms: 1200 },
+                  { label: '1.8s', ms: 1800 },
+                  { label: '3s', ms: 3000 },
+                ].map((s) => (
+                  <button
+                    key={s.label}
+                    type="button"
+                    onClick={() => setStepSpeedMs(s.ms)}
+                    className={`px-1.5 py-0.5 rounded text-[10px] ${
+                      stepSpeedMs === s.ms
+                        ? 'bg-brutalist-yellow text-black font-bold'
+                        : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
-          {/* Export State Actions */}
-          <div className="flex items-center gap-1 border-l border-zinc-700 pl-2">
+          {/* Quick Exporters */}
+          <div className="flex items-center gap-1.5">
             <button
               onClick={handleCopyText}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded font-mono text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600"
-              title="Copy current state as structured text"
+              className="px-2.5 py-1.5 rounded text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 cursor-pointer"
+              title="Copy map to clipboard"
             >
-              <Copy className="w-3.5 h-3.5" />
+              <Copy className="w-3.5 h-3.5 inline mr-1" />
               <span>Copy</span>
             </button>
-
             <button
               onClick={() => handleDownloadFile('txt')}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded font-mono text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600"
-              title="Download .loop map file"
+              className="px-2.5 py-1.5 rounded text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 cursor-pointer"
+              title="Download .loop file"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 inline mr-1" />
               <span>.loop</span>
-            </button>
-
-            <button
-              onClick={() => handleDownloadFile('json')}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded font-mono text-xs text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600"
-              title="Download JSON map file"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>JSON</span>
             </button>
           </div>
         </div>
+
+        {/* HUD Middle: Active Step Guidance Banner */}
+        {solverResult?.solved ? (
+          <div className="p-3 bg-black border border-brutalist-cyan/60 rounded-xl flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-white">
+              <span className="text-brutalist-cyan font-black bg-cyan-950 border border-cyan-500/50 px-2 py-0.5 rounded">
+                STEP {currentStepIndex}/{totalSteps}
+              </span>
+              <p className="font-bold">
+                {currentStepIndex === 0
+                  ? 'Initial board state. Click "Next Move" or "Auto-Step" to progress.'
+                  : activeStep?.description}
+              </p>
+            </div>
+            {activeStep && (
+              <span className="text-[10px] text-zinc-400 uppercase bg-zinc-800 px-2 py-0.5 rounded">
+                {activeStep.type}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="text-xs text-zinc-400 flex items-center gap-2">
+            <Info className="w-4 h-4 text-brutalist-yellow" />
+            <span>
+              Click <strong>"Run Auto-Solver"</strong> to compute the optimal
+              move path, or fill in mystery slots to assist the solver.
+            </span>
+          </div>
+        )}
+
+        {/* HUD In-Flight Mystery Reveal Prompt (When sub-surface ? block is exposed on top) */}
+        {exposedMysteryRacks.length > 0 && onMapUpdate && (
+          <div className="p-3 bg-amber-950/90 border-2 border-amber-400 rounded-xl space-y-2 animate-fade-in shadow-lg">
+            <div className="flex items-center justify-between text-xs text-amber-200">
+              <span className="font-bold flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>
+                  FOG-OF-WAR UNCOVERED: What color appeared in{' '}
+                  {exposedMysteryRacks[0].id}?
+                </span>
+              </span>
+              <span className="text-[10px] text-amber-400/80">
+                Click a color to update & assist solver
+              </span>
+            </div>
+
+            {/* Quick 1-click color swatch row for the exposed rack */}
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {AVAILABLE_PALETTE.filter((c) => c !== '?').map((c) => {
+                const style = getColorStyle(c);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() =>
+                      handleQuickRevealMystery(exposedMysteryRacks[0].id, c)
+                    }
+                    className="px-2.5 py-1 font-bold text-xs uppercase shadow-sm transition-transform hover:scale-105 cursor-pointer"
+                    style={{
+                      borderRadius: '6px',
+                      background: style.gradient,
+                      border: `1px solid ${style.borderHex}`,
+                      color: style.textHex,
+                    }}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Copy Notification Banner */}
+      {/* Copy Notification Toast */}
       {copiedNotification && (
         <div className="p-2 bg-emerald-900/90 border-2 border-emerald-400 text-emerald-200 font-mono text-xs text-center rounded flex items-center justify-center gap-2 animate-fade-in">
           <Check className="w-4 h-4" />
           <span>{copiedNotification}</span>
-        </div>
-      )}
-
-      {/* Deduction & Mystery Breakdown Panel */}
-      {showDeductionPanel && (
-        <div className="p-4 rounded-xl bg-zinc-900 border-2 border-brutalist-cyan space-y-3 font-mono">
-          <div className="flex items-center justify-between border-b border-zinc-700 pb-2">
-            <span className="font-bold text-sm text-brutalist-cyan uppercase flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" />
-              <span>[ FOG_OF_WAR_COLOR_DEDUCTION_INSPECTOR ]</span>
-            </span>
-            <span className="text-xs text-zinc-400">
-              {analysis.totalMysterySlots} Mystery Slots Remaining
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-            {/* 1. Demand */}
-            <div className="p-3 bg-black border border-zinc-700 rounded">
-              <span className="font-bold text-zinc-300 block mb-1">
-                Target Box Demand:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {Object.entries(analysis.demanded).map(([color, count]) => (
-                  <span
-                    key={color}
-                    className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-600 text-[11px]"
-                  >
-                    {color}: <strong>{count}</strong>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. Exposed */}
-            <div className="p-3 bg-black border border-zinc-700 rounded">
-              <span className="font-bold text-zinc-300 block mb-1">
-                Visible/Exposed on Board:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {Object.entries(analysis.exposed).map(([color, count]) => (
-                  <span
-                    key={color}
-                    className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-600 text-[11px]"
-                  >
-                    {color}: <strong>{count}</strong>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. Inferred Deficit */}
-            <div className="p-3 bg-black border-2 border-emerald-500 rounded">
-              <span className="font-bold text-emerald-400 block mb-1">
-                Inferred Missing Deficit:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {Object.keys(analysis.deficit).length === 0 ? (
-                  <span className="text-zinc-500">No color deficits!</span>
-                ) : (
-                  Object.entries(analysis.deficit).map(([color, count]) => (
-                    <span
-                      key={color}
-                      className="px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-400 text-emerald-200 text-[11px]"
-                    >
-                      {color}: <strong>+{count}</strong>
-                    </span>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -720,12 +839,12 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
         <div className="p-4 rounded-xl bg-zinc-900 border-2 border-brutalist-pink space-y-3 font-mono animate-fade-in shadow-2xl">
           <div className="flex items-center justify-between">
             <span className="font-bold text-xs text-brutalist-pink uppercase">
-              SELECT COLOR FOR {editingSlot.rackId} (SLOT{' '}
+              ASSIGN COLOR TO {editingSlot.rackId} (SLOT{' '}
               {editingSlot.slotIdx + 1})
             </span>
             <button
               onClick={() => setEditingSlot(null)}
-              className="text-xs text-zinc-400 hover:text-white px-2 py-0.5 border border-zinc-600 rounded"
+              className="text-xs text-zinc-400 hover:text-white px-2 py-0.5 border border-zinc-600 rounded cursor-pointer"
             >
               Cancel
             </button>
@@ -738,7 +857,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
                 <button
                   key={c}
                   onClick={() => handleSelectColorForSlot(c)}
-                  className="px-3 py-1.5 font-mono font-black text-xs uppercase border shadow-md transition-transform hover:scale-105"
+                  className="px-3 py-1.5 font-mono font-black text-xs uppercase border shadow-md transition-transform hover:scale-105 cursor-pointer"
                   style={{
                     borderRadius: '8px',
                     background: style.gradient,
@@ -756,7 +875,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
 
       {/* Main Game Board Canvas Container (Authentic Navy/Purple Studio Look) */}
       <div
-        className="p-4 sm:p-8 space-y-8 select-none mx-auto max-w-4xl shadow-2xl"
+        className="p-4 sm:p-8 space-y-8 select-none mx-auto max-w-4xl shadow-2xl relative"
         style={{
           borderRadius: '36px',
           background: 'linear-gradient(180deg, #181538 0%, #110e28 100%)',
