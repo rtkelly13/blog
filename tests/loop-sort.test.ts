@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  analyzeColorDeficit,
+  autoFillBestGuess,
+} from '../lib/loop-sort/deduction';
+import {
   normalizeColor,
   parseMapText,
   stringifyMap,
@@ -194,5 +198,41 @@ describe('Loop Sort Solver Engine', () => {
     expect(recolored.boxes.length).toBe(LEVEL_1_WARMUP.boxes.length);
     const result = solveLoopSort(recolored);
     expect(result.solved).toBe(true);
+  });
+});
+
+describe('Loop Sort Deduction & Fog-of-War Engine', () => {
+  it('should accurately calculate color deficit from target boxes and exposed blocks', () => {
+    const map = parseMapText(`
+NAME: Mystery Test
+BOX_TOP: pink (4)
+BOX_L1: red (4)
+
+T1: pink, red
+T2: ?, ?
+L1: ?, ?, ?
+`);
+
+    const analysis = analyzeColorDeficit(map);
+    expect(analysis.demanded).toEqual({ pink: 4, red: 4 });
+    expect(analysis.exposed).toEqual({ pink: 1, red: 1 });
+    expect(analysis.deficit).toEqual({ pink: 3, red: 3 });
+    expect(analysis.totalMysterySlots).toBe(5);
+    expect(analysis.totalDeficitCount).toBe(6);
+  });
+
+  it('should auto-fill best guess colors into mystery slots', () => {
+    const map = parseMapText(`
+NAME: Mystery Test
+BOX_TOP: pink (4)
+
+T1: pink, pink
+T2: ?, ?
+`);
+
+    const filled = autoFillBestGuess(map);
+    expect(filled.racks[1].blocks).toEqual(['pink', 'pink']);
+    const solved = solveLoopSort(filled);
+    expect(solved.solved).toBe(true);
   });
 });

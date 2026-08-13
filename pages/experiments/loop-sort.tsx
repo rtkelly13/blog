@@ -100,7 +100,11 @@ export default function LoopSortExperimentPage() {
               </span>
             </div>
 
-            <LoopSortBoard map={displayedMap} activeStep={activeStep} />
+            <LoopSortBoard
+              map={displayedMap}
+              activeStep={activeStep}
+              onMapUpdate={handleMapChange}
+            />
           </section>
 
           {/* Solution & Playback Controls */}
