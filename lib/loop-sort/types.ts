@@ -9,6 +9,7 @@ export interface Rack {
   iceLockedBy?: string; // ID of the adjacent bucket that must be emptied (0 blocks) to unfreeze
   ropeTiedTo?: string; // ID of the bucket/box that must be solved/cleared to untie rope
   allowedColors?: string[]; // Coloured bucket restriction: only these colors can be placed here
+  coveredUntilColorStacked?: string; // Covered under colored shroud until that color is fully stacked/solved
   isConstruction?: boolean; // Under construction / mystery bucket
   targetColor?: string; // Revealed/target color for construction or single-color bucket
   adjacentIds?: string[]; // Spatial neighbors
@@ -21,6 +22,7 @@ export interface TargetBox {
   color: string;
   capacity: number;
   filled: number;
+  coveredUntilColorStacked?: string; // Covered under colored shroud until that color is stacked
   isConstruction?: boolean; // Scaffolding concealing color initially
   hiddenColor?: string;
   queueOrder?: number;

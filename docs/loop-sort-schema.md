@@ -13,6 +13,7 @@ In addition to basic color-sorting rules, Loop Sort introduces spatial positioni
 | Mechanic | Description | Unlock / Behavior Rule |
 | :--- | :--- | :--- |
 | **Grid & Spatial Positioning** | Buckets and racks exist in specific sequence/grid coordinates. | Spatial adjacency determines neighbor interactions and conveyor traversal order. |
+| **Color-Covered Sections (`SHROUD`)** | Trucks or buckets covered under a colored fabric/capsule shroud. | Locked and sealed **until that specific color is completely stacked or assembled**. |
 | **Ice Buckets (`ICE`)** | Buckets encased in ice that cannot receive or dispense blocks. | Unfreezes and opens only when a specified **adjacent bucket is completely empty** (`blocks: []`). |
 | **Rope / Tied Buckets (`ROPE`)** | Buckets bound with ropes / chains. | Unties and activates only when an associated **reference bucket is fully solved / cleared** (`SOLVED`). |
 | **Coloured Buckets (`FILTER`)** | Buckets with a designated color tint/filter restriction. | **Only blocks matching the bucket's allowed color(s)** may be placed inside (unlike neutral transfer racks). |
@@ -70,6 +71,7 @@ BOX_L3: yellow (4) { construction: true, hidden_color: yellow }
 
 | Modifier Key | Format | Example | Description |
 | :--- | :--- | :--- | :--- |
+| `covered_until_color_stacked` / `covered_color` | String color | `{ covered_color: pink }` | Shrouded/covered until that specific color is completely stacked. |
 | `ice_locked_by` / `ice_adjacent` | String ID | `{ ice_locked_by: T1 }` | Bucket remains frozen until rack `T1` has `0` blocks. |
 | `rope_tied_to` / `rope_target` | String ID | `{ rope_tied_to: T4 }` | Bucket remains bound until rack/box `T4` is solved/cleared. |
 | `allowed_colors` / `color_filter`| Array of strings | `{ allowed_colors: [red] }` | Only blocks of matching color can enter this bucket. |

@@ -30,6 +30,13 @@ This document serves as the comprehensive rulebook for **Loop Sort**, structured
 
 ---
 
+### Q: What are Color-Covered (Shrouded) Sections and how do they unlock?
+**A:** Color-Covered sections are trucks or bucket slots draped under a colored fabric/capsule shroud (e.g., Pink Shroud, Red Shroud).
+- A covered section remains inactive and sealed **until a complete stack of that specific color is assembled or deposited** (e.g., 4 blocks of that color are fully stacked or completed in the preceding target truck).
+- Once the required color stack is completed, the shroud pulls away, uncovering the underlying target truck or rack for active play.
+
+---
+
 ### Q: What are Ice Buckets and how do you unlock them?
 **A:** Ice Buckets are encased in frozen ice blocks. 
 - While frozen, an ice bucket is completely inert: you **cannot remove blocks** from it and you **cannot deposit blocks** into it.
@@ -68,7 +75,7 @@ This document serves as the comprehensive rulebook for **Loop Sort**, structured
 ### Q: What constitutes an invalid move?
 **A:** The game engine rejects any move that violates the following fundamental constraints:
 1. Attempting to pull from an empty rack.
-2. Attempting to interact with an **ice-locked** or **rope-bound** bucket.
+2. Attempting to interact with an **ice-locked**, **rope-bound**, or **color-covered** bucket.
 3. Placing a block into a full rack (`blocks.length >= capacity`).
 4. Placing a block onto a non-matching top block (e.g., placing a Green block onto a Red block).
 5. Violating a bucket's `allowed_colors` constraint.
@@ -77,4 +84,4 @@ This document serves as the comprehensive rulebook for **Loop Sort**, structured
 ---
 
 ### Q: How does the optimal solver navigate these restrictions?
-**A:** The automated solver builds a state-space search graph where each node tracks rack stacks, bucket lock states (ice, ropes), target box fill counts, and color constraints. It computes the shortest deterministic path of moves to transition from the initial configuration to a fully solved victory state.
+**A:** The automated solver builds a state-space search graph where each node tracks rack stacks, bucket lock states (ice, ropes, color shrouds), target box fill counts, and color constraints. It computes the shortest deterministic path of moves to transition from the initial configuration to a fully solved victory state.

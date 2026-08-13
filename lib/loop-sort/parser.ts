@@ -110,6 +110,8 @@ export function stringifyMap(map: LoopSortMap): string {
     if (rack.ropeTiedTo) mods['rope_tied_to'] = rack.ropeTiedTo;
     if (rack.allowedColors && rack.allowedColors.length > 0)
       mods['allowed_colors'] = rack.allowedColors;
+    if (rack.coveredUntilColorStacked)
+      mods['covered_until_color_stacked'] = rack.coveredUntilColorStacked;
     if (rack.isConstruction) mods['construction'] = true;
     if (rack.targetColor) mods['target_color'] = rack.targetColor;
     if (rack.adjacentIds && rack.adjacentIds.length > 0)
@@ -130,6 +132,8 @@ export function stringifyMap(map: LoopSortMap): string {
   const topBoxes = map.boxes.filter((b) => b.section === 'top_shelf');
   for (const box of topBoxes) {
     const mods: Record<string, any> = {};
+    if (box.coveredUntilColorStacked)
+      mods['covered_until_color_stacked'] = box.coveredUntilColorStacked;
     if (box.isConstruction) mods['construction'] = true;
     if (box.hiddenColor) mods['hidden_color'] = box.hiddenColor;
     if (box.queueOrder !== undefined) mods['queue_order'] = box.queueOrder;
@@ -147,6 +151,8 @@ export function stringifyMap(map: LoopSortMap): string {
     if (rack.ropeTiedTo) mods['rope_tied_to'] = rack.ropeTiedTo;
     if (rack.allowedColors && rack.allowedColors.length > 0)
       mods['allowed_colors'] = rack.allowedColors;
+    if (rack.coveredUntilColorStacked)
+      mods['covered_until_color_stacked'] = rack.coveredUntilColorStacked;
     if (rack.isConstruction) mods['construction'] = true;
     if (rack.targetColor) mods['target_color'] = rack.targetColor;
     if (rack.adjacentIds && rack.adjacentIds.length > 0)
@@ -167,6 +173,8 @@ export function stringifyMap(map: LoopSortMap): string {
   const loopBoxes = map.boxes.filter((b) => b.section === 'loop_track');
   for (const box of loopBoxes) {
     const mods: Record<string, any> = {};
+    if (box.coveredUntilColorStacked)
+      mods['covered_until_color_stacked'] = box.coveredUntilColorStacked;
     if (box.isConstruction) mods['construction'] = true;
     if (box.hiddenColor) mods['hidden_color'] = box.hiddenColor;
     if (box.queueOrder !== undefined) mods['queue_order'] = box.queueOrder;
@@ -208,6 +216,16 @@ export function parseMapText(text: string): LoopSortMap {
                   normalizeColor(c),
                 )
               : undefined,
+            coveredUntilColorStacked:
+              r.coveredUntilColorStacked ||
+              r.covered_until_color_stacked ||
+              r.covered_color
+                ? normalizeColor(
+                    r.coveredUntilColorStacked ||
+                      r.covered_until_color_stacked ||
+                      r.covered_color,
+                  )
+                : undefined,
             isConstruction: Boolean(r.isConstruction || r.construction),
             targetColor:
               r.targetColor || r.target_color
@@ -226,6 +244,16 @@ export function parseMapText(text: string): LoopSortMap {
                 color: normalizeColor(b.color),
                 capacity: Number(b.capacity) || 4,
                 filled: Number(b.filled) || 0,
+                coveredUntilColorStacked:
+                  b.coveredUntilColorStacked ||
+                  b.covered_until_color_stacked ||
+                  b.covered_color
+                    ? normalizeColor(
+                        b.coveredUntilColorStacked ||
+                          b.covered_until_color_stacked ||
+                          b.covered_color,
+                      )
+                    : undefined,
                 isConstruction: Boolean(b.isConstruction || b.construction),
                 hiddenColor:
                   b.hiddenColor || b.hidden_color
@@ -317,6 +345,17 @@ export function parseMapText(text: string): LoopSortMap {
       val = val.replace(/\{[^}]+\}/, '').trim();
     }
 
+    const coveredUntil =
+      modifiers.covereduntilcolorstacked ||
+      modifiers.coveredcolor ||
+      modifiers.shroudcolor
+        ? normalizeColor(
+            modifiers.covereduntilcolorstacked ||
+              modifiers.coveredcolor ||
+              modifiers.shroudcolor,
+          )
+        : undefined;
+
     // Check if key starts with BOX or B_
     if (upperKey.startsWith('BOX') || upperKey.startsWith('B_')) {
       // Box line, e.g. BOX_TOP: pink (4) or BOX_L1: yellow
@@ -335,6 +374,7 @@ export function parseMapText(text: string): LoopSortMap {
           color,
           capacity,
           filled: 0,
+          coveredUntilColorStacked: coveredUntil,
           isConstruction: Boolean(
             modifiers.construction || modifiers.isconstruction,
           ),
@@ -388,6 +428,7 @@ export function parseMapText(text: string): LoopSortMap {
       ropeTiedTo:
         modifiers.ropetiedto || modifiers.ropetarget || modifiers.rope,
       allowedColors,
+      coveredUntilColorStacked: coveredUntil,
       isConstruction: Boolean(
         modifiers.construction || modifiers.isconstruction,
       ),
