@@ -125,6 +125,20 @@ html {
 }
 
 .dark {
+  /* Nested theme panels: a `.dark` panel inside a `.sketch` root (e.g. the
+     design-sandbox component library) must not inherit sketch's inverted zinc
+     scale, so reset it to Tailwind's defaults here. Redundant when `.dark` is
+     on <html> (these ARE the defaults), load-bearing when nested. */
+  --color-zinc-950: #09090b;
+  --color-zinc-900: #18181b;
+  --color-zinc-800: #27272a;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-600: #52525b;
+  --color-zinc-500: #71717a;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-200: #e4e4e7;
+
   --diagram-bg: #000000;
   --diagram-bg-secondary: #18181b;
   --diagram-stroke: #ffffff;
@@ -330,8 +344,12 @@ html {
 
 /* Light-grey text utilities (used as primary text on the dark themes) are
    inlined literals, so re-point the light end of the grey scale to ink under
-   sketch so it stays legible on paper. */
-.sketch :is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400) {
+   sketch so it stays legible on paper. Excludes nested `.dark`/`.dim` theme
+   panels (design-sandbox component library), where light grey is correct. */
+.sketch
+:is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400):not(
+  .sketch :is(.dark, .dim) *
+) {
   color: #33373f;
 }
 

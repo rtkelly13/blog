@@ -3,6 +3,7 @@ import {
   Beaker,
   Boxes,
   FlaskConical,
+  Gamepad2,
   Gavel,
   Palette,
   Projector,
@@ -15,6 +16,15 @@ import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 
 const experiments = [
+  {
+    name: 'Loop Sort Solver',
+    path: '/experiments/loop-sort',
+    description:
+      'Interactive solver & visualizer engine for Loop Sort puzzle maps — upload or edit structured map files in fully exposed form and step through optimal solutions',
+    icon: <Gamepad2 className="w-12 h-12" />,
+    status: 'active',
+    components: 4,
+  },
   {
     name: 'Component Library',
     path: '/design-sandbox/component-library',
