@@ -5,7 +5,13 @@ export interface Rack {
   name: string;
   section: SectionType;
   capacity: number;
-  blocks: string[]; // Stack representation: top block is the last element (blocks[blocks.length - 1])
+  blocks: string[]; // Stack representation: bottom is index 0, top block is the last element (blocks[blocks.length - 1])
+  iceLockedBy?: string; // ID of the adjacent bucket that must be emptied (0 blocks) to unfreeze
+  ropeTiedTo?: string; // ID of the bucket/box that must be solved/cleared to untie rope
+  allowedColors?: string[]; // Coloured bucket restriction: only these colors can be placed here
+  isConstruction?: boolean; // Under construction / mystery bucket
+  targetColor?: string; // Revealed/target color for construction or single-color bucket
+  adjacentIds?: string[]; // Spatial neighbors
 }
 
 export interface TargetBox {
@@ -15,11 +21,15 @@ export interface TargetBox {
   color: string;
   capacity: number;
   filled: number;
+  isConstruction?: boolean; // Scaffolding concealing color initially
+  hiddenColor?: string;
+  queueOrder?: number;
 }
 
 export interface LoopSortMap {
   name: string;
   level?: number;
+  description?: string;
   racks: Rack[];
   boxes: TargetBox[];
 }

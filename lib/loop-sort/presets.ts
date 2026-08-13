@@ -3,6 +3,8 @@ import type { LoopSortMap } from './types';
 export const LEVEL_259_EXPOSED: LoopSortMap = {
   name: 'Level 259 (Super Hard - Fully Exposed)',
   level: 259,
+  description:
+    'Fully exposed multi-tier level with 5 top shelf racks and 5 conveyor loop racks.',
   racks: [
     // Top Shelf Racks (Capacity 4)
     {
@@ -117,6 +119,8 @@ export const LEVEL_259_EXPOSED: LoopSortMap = {
 export const LEVEL_1_WARMUP: LoopSortMap = {
   name: 'Level 1 (Warmup)',
   level: 1,
+  description:
+    'Introductory level showing basic 2-rack block transfer and box filling.',
   racks: [
     {
       id: 'T1',
@@ -160,9 +164,219 @@ export const LEVEL_1_WARMUP: LoopSortMap = {
   ],
 };
 
+export const LEVEL_ICE_SAMPLE: LoopSortMap = {
+  name: 'Sample: Ice Bucket Lock',
+  level: 10,
+  description:
+    'Demonstrates Ice Bucket mechanic: Rack T2 is frozen until adjacent Rack T1 is completely emptied.',
+  racks: [
+    {
+      id: 'T1',
+      name: 'Buffer Rack (Empty Me)',
+      section: 'top_shelf',
+      capacity: 4,
+      blocks: ['blue', 'blue'],
+      adjacentIds: ['T2'],
+    },
+    {
+      id: 'T2',
+      name: 'Frozen Ice Rack',
+      section: 'top_shelf',
+      capacity: 4,
+      blocks: ['red', 'yellow', 'yellow'],
+      iceLockedBy: 'T1',
+    },
+    {
+      id: 'L1',
+      name: 'Loop Staging Rack',
+      section: 'loop_track',
+      capacity: 4,
+      blocks: ['yellow', 'red', 'red'],
+    },
+  ],
+  boxes: [
+    {
+      id: 'B_L1',
+      name: 'Blue Box',
+      section: 'loop_track',
+      color: 'blue',
+      capacity: 2,
+      filled: 0,
+    },
+    {
+      id: 'B_L2',
+      name: 'Yellow Box',
+      section: 'loop_track',
+      color: 'yellow',
+      capacity: 3,
+      filled: 0,
+    },
+    {
+      id: 'B_L3',
+      name: 'Red Box',
+      section: 'loop_track',
+      color: 'red',
+      capacity: 3,
+      filled: 0,
+    },
+  ],
+};
+
+export const LEVEL_ROPE_SAMPLE: LoopSortMap = {
+  name: 'Sample: Rope Bound Bucket',
+  level: 15,
+  description:
+    'Demonstrates Rope mechanic: Rack L2 is bound by rope until Box B_TOP (Green) is fully completed.',
+  racks: [
+    {
+      id: 'T1',
+      name: 'Top Green Rack',
+      section: 'top_shelf',
+      capacity: 4,
+      blocks: ['green', 'green', 'green', 'green'],
+    },
+    {
+      id: 'L1',
+      name: 'Track Rack A',
+      section: 'loop_track',
+      capacity: 4,
+      blocks: ['orange', 'orange'],
+    },
+    {
+      id: 'L2',
+      name: 'Rope Bound Rack',
+      section: 'loop_track',
+      capacity: 4,
+      blocks: ['orange', 'orange'],
+      ropeTiedTo: 'B_TOP',
+    },
+  ],
+  boxes: [
+    {
+      id: 'B_TOP',
+      name: 'Green Goal Box',
+      section: 'top_shelf',
+      color: 'green',
+      capacity: 4,
+      filled: 0,
+    },
+    {
+      id: 'B_L1',
+      name: 'Orange Goal Box',
+      section: 'loop_track',
+      color: 'orange',
+      capacity: 4,
+      filled: 0,
+    },
+  ],
+};
+
+export const LEVEL_COLOR_FILTER_SAMPLE: LoopSortMap = {
+  name: 'Sample: Coloured Bucket Filter',
+  level: 20,
+  description:
+    'Demonstrates Coloured Bucket mechanic: Rack T2 only accepts Purple or Pink blocks.',
+  racks: [
+    {
+      id: 'T1',
+      name: 'Top Staging',
+      section: 'top_shelf',
+      capacity: 4,
+      blocks: ['purple', 'pink', 'pink'],
+    },
+    {
+      id: 'T2',
+      name: 'Purple/Pink Filter Rack',
+      section: 'top_shelf',
+      capacity: 4,
+      blocks: [],
+      allowedColors: ['purple', 'pink'],
+    },
+    {
+      id: 'L1',
+      name: 'Track Mixed',
+      section: 'loop_track',
+      capacity: 4,
+      blocks: ['pink', 'purple', 'purple'],
+    },
+  ],
+  boxes: [
+    {
+      id: 'B_L1',
+      name: 'Pink Target Box',
+      section: 'loop_track',
+      color: 'pink',
+      capacity: 3,
+      filled: 0,
+    },
+    {
+      id: 'B_L2',
+      name: 'Purple Target Box',
+      section: 'loop_track',
+      color: 'purple',
+      capacity: 3,
+      filled: 0,
+    },
+  ],
+};
+
+export const LEVEL_CONSTRUCTION_MYSTERY_SAMPLE: LoopSortMap = {
+  name: 'Sample: Construction & Mystery Blocks',
+  level: 25,
+  description:
+    'Demonstrates Mystery ? blocks and Construction target boxes with concealed colors.',
+  racks: [
+    {
+      id: 'T1',
+      name: 'Exposed Staging',
+      section: 'top_shelf',
+      capacity: 4,
+      blocks: ['red', 'blue', 'blue'],
+    },
+    {
+      id: 'L1',
+      name: 'Mystery Stack Track',
+      section: 'loop_track',
+      capacity: 4,
+      blocks: ['?', '?', 'red', 'red'],
+      isConstruction: true,
+      targetColor: 'red',
+    },
+    {
+      id: 'L2',
+      name: 'Empty Staging Rack',
+      section: 'loop_track',
+      capacity: 4,
+      blocks: [],
+    },
+  ],
+  boxes: [
+    {
+      id: 'B_L1',
+      name: 'Blue Target Box',
+      section: 'loop_track',
+      color: 'blue',
+      capacity: 2,
+      filled: 0,
+    },
+    {
+      id: 'B_L2',
+      name: 'Concealed Box (Red)',
+      section: 'loop_track',
+      color: 'red',
+      capacity: 3,
+      filled: 0,
+      isConstruction: true,
+      hiddenColor: 'red',
+    },
+  ],
+};
+
 export const LEVEL_100_BALANCED: LoopSortMap = {
   name: 'Level 100 (Loop Circuit)',
   level: 100,
+  description:
+    'Balanced circuit level with 3 upper shelf racks, 2 loop racks, and 4 colored target boxes.',
   racks: [
     {
       id: 'T1',
@@ -242,11 +456,11 @@ export const LEVEL_100_BALANCED: LoopSortMap = {
 export function shuffleMapColors(map: LoopSortMap): LoopSortMap {
   const colorSet = new Set<string>();
   for (const box of map.boxes) {
-    colorSet.add(box.color);
+    if (box.color !== '?') colorSet.add(box.color);
   }
   for (const rack of map.racks) {
     for (const b of rack.blocks) {
-      colorSet.add(b);
+      if (b !== '?') colorSet.add(b);
     }
   }
 
@@ -281,13 +495,22 @@ export function shuffleMapColors(map: LoopSortMap): LoopSortMap {
     })),
     racks: map.racks.map((r) => ({
       ...r,
-      blocks: r.blocks.map((blk) => colorMap.get(blk) || blk),
+      blocks: r.blocks.map((blk) =>
+        blk === '?' ? '?' : colorMap.get(blk) || blk,
+      ),
+      allowedColors: r.allowedColors
+        ? r.allowedColors.map((c) => colorMap.get(c) || c)
+        : undefined,
     })),
   };
 }
 
-export const PRESET_MAPS = [
+export const PRESET_MAPS: LoopSortMap[] = [
   LEVEL_259_EXPOSED,
   LEVEL_1_WARMUP,
+  LEVEL_ICE_SAMPLE,
+  LEVEL_ROPE_SAMPLE,
+  LEVEL_COLOR_FILTER_SAMPLE,
+  LEVEL_CONSTRUCTION_MYSTERY_SAMPLE,
   LEVEL_100_BALANCED,
 ];
