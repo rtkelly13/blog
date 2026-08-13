@@ -7,6 +7,13 @@ export interface ColorStyle {
 }
 
 export const COLOR_STYLES: Record<string, ColorStyle> = {
+  '?': {
+    name: 'Mystery',
+    bg: 'bg-zinc-800 border-dashed border-brutalist-yellow text-brutalist-yellow',
+    border: 'border-brutalist-yellow',
+    text: 'text-brutalist-yellow',
+    hex: '#facc15',
+  },
   pink: {
     name: 'Pink',
     bg: 'bg-pink-500',

@@ -1,4 +1,12 @@
-import { Box, CheckCircle2 } from 'lucide-react';
+import {
+  Box,
+  CheckCircle2,
+  Construction,
+  Flame,
+  Lock,
+  ShieldAlert,
+  Snowflake,
+} from 'lucide-react';
 import type React from 'react';
 import type {
   LoopSortMap,
@@ -23,13 +31,19 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
   const topBoxes = map.boxes.filter((b) => b.section === 'top_shelf');
   const loopBoxes = map.boxes.filter((b) => b.section === 'loop_track');
 
-  // Racks inside loop track layout: top row (first 4 or top ones), bottom row (L5)
+  // Racks inside loop track layout: top row (first 4 or top ones), bottom row (remaining)
   const loopTopRacks = loopRacks.slice(0, 4);
   const loopBottomRacks = loopRacks.slice(4);
 
   const renderRack = (rack: Rack) => {
     const isFrom = activeStep?.fromRackId === rack.id;
     const isTo = activeStep?.toTargetId === rack.id;
+
+    // Check lock conditions
+    const isIceLocked = Boolean(
+      rack.iceLockedBy && rack.iceLockedBy.length > 0,
+    );
+    const isRopeTied = Boolean(rack.ropeTiedTo && rack.ropeTiedTo.length > 0);
 
     // Fill array up to capacity
     const slots: (string | null)[] = [];
@@ -41,20 +55,52 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
     return (
       <div
         key={rack.id}
-        className={`flex flex-col items-center p-2 border-2 bg-black transition-all ${
+        className={`relative flex flex-col items-center p-2 border-2 bg-black transition-all ${
           isFrom
             ? 'border-brutalist-cyan shadow-[0_0_12px_rgba(34,211,238,0.8)] scale-105 z-10'
             : isTo
               ? 'border-brutalist-pink shadow-[0_0_12px_rgba(236,72,153,0.8)] scale-105 z-10'
-              : 'border-white'
+              : isIceLocked
+                ? 'border-sky-400 bg-sky-950/20'
+                : isRopeTied
+                  ? 'border-amber-500 bg-amber-950/20'
+                  : rack.isConstruction
+                    ? 'border-yellow-400 bg-yellow-950/20'
+                    : 'border-white'
         }`}
       >
-        <span className="font-mono text-xs font-bold text-zinc-400 mb-1">
-          {rack.id}
-        </span>
+        {/* Header Badges */}
+        <div className="flex items-center gap-1 mb-1 font-mono text-xs font-bold text-zinc-400">
+          <span>{rack.id}</span>
+          {isIceLocked && (
+            <Snowflake
+              className="w-3 h-3 text-sky-400 animate-pulse"
+              title={`Frozen until ${rack.iceLockedBy} is empty`}
+            />
+          )}
+          {isRopeTied && (
+            <Lock
+              className="w-3 h-3 text-amber-400"
+              title={`Rope-tied until ${rack.ropeTiedTo} is solved`}
+            />
+          )}
+          {rack.isConstruction && (
+            <Construction
+              className="w-3 h-3 text-yellow-400"
+              title="Under Construction"
+            />
+          )}
+        </div>
+
+        {/* Color Filter Indicator if restricted */}
+        {rack.allowedColors && rack.allowedColors.length > 0 && (
+          <div className="w-full text-center text-[9px] font-mono text-brutalist-yellow uppercase bg-zinc-800 border border-zinc-700 px-1 py-0.5 mb-1 truncate max-w-[70px]">
+            {rack.allowedColors.join('/')}
+          </div>
+        )}
 
         {/* Stack Container (top element on top, bottom element on bottom) */}
-        <div className="w-12 flex flex-col-reverse gap-1 border-2 border-zinc-700 bg-zinc-900 p-1 min-h-[140px] justify-start">
+        <div className="w-14 flex flex-col-reverse gap-1 border-2 border-zinc-700 bg-zinc-900 p-1 min-h-[140px] justify-start relative">
           {slots.map((color, idx) => {
             if (!color) {
               return (
@@ -67,17 +113,37 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
               );
             }
 
+            const isMystery = color === '?';
             const style = getColorStyle(color);
             return (
               <div
                 key={idx}
                 className={`h-7 w-full border-2 ${style.border} ${style.bg} ${style.text} flex items-center justify-center font-mono font-bold text-[10px] uppercase shadow-sm transition-transform`}
-                title={color}
+                title={isMystery ? 'Mystery Hidden Block' : color}
               >
-                {color.slice(0, 3)}
+                {isMystery ? '?' : color.slice(0, 3)}
               </div>
             );
           })}
+
+          {/* Ice / Rope / Construction Overlay */}
+          {isIceLocked && (
+            <div className="absolute inset-0 bg-sky-500/20 border border-sky-400/50 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
+              <Snowflake className="w-6 h-6 text-sky-300 drop-shadow" />
+              <span className="text-[9px] font-mono font-bold text-sky-200 uppercase bg-black/80 px-1 mt-1 border border-sky-400">
+                EMPTY {rack.iceLockedBy}
+              </span>
+            </div>
+          )}
+
+          {isRopeTied && (
+            <div className="absolute inset-0 bg-amber-500/20 border border-amber-400/50 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
+              <Lock className="w-5 h-5 text-amber-300 drop-shadow" />
+              <span className="text-[9px] font-mono font-bold text-amber-200 uppercase bg-black/80 px-1 mt-1 border border-amber-400">
+                SOLVE {rack.ropeTiedTo}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -96,11 +162,17 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
             ? 'border-brutalist-pink shadow-[0_0_12px_rgba(236,72,153,0.8)] scale-105 z-10'
             : isCompleted
               ? 'border-brutalist-yellow'
-              : 'border-white'
+              : box.isConstruction
+                ? 'border-amber-400 bg-amber-950/20'
+                : 'border-white'
         }`}
       >
         <span className="font-mono text-xs font-bold text-zinc-400 mb-1 flex items-center gap-1">
-          <Box className="w-3 h-3 text-brutalist-pink" />
+          {box.isConstruction ? (
+            <Construction className="w-3 h-3 text-amber-400" />
+          ) : (
+            <Box className="w-3 h-3 text-brutalist-pink" />
+          )}
           {box.id}
         </span>
 
@@ -111,9 +183,13 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
         >
           {/* Header Color Tag */}
           <div
-            className={`w-full py-1 border border-white ${colorStyle.bg} ${colorStyle.text} text-center font-mono font-bold text-[10px] uppercase`}
+            className={`w-full py-1 border border-white ${
+              box.isConstruction
+                ? 'bg-amber-900/60 border-amber-400 text-amber-300 font-mono'
+                : `${colorStyle.bg} ${colorStyle.text}`
+            } text-center font-mono font-bold text-[10px] uppercase truncate`}
           >
-            {box.color}
+            {box.isConstruction ? 'HIDDEN' : box.color}
           </div>
 
           {/* Fill Visualizer */}
@@ -131,7 +207,9 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
           {/* Progress Bar */}
           <div className="w-full bg-black border border-white h-3">
             <div
-              className={`h-full ${colorStyle.bg} transition-all duration-300`}
+              className={`h-full ${
+                box.isConstruction ? 'bg-amber-400' : colorStyle.bg
+              } transition-all duration-300`}
               style={{
                 width: `${Math.min(100, (box.filled / box.capacity) * 100)}%`,
               }}
@@ -155,8 +233,11 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
           </h3>
           {topBoxes.length > 0 && (
             <span className="font-mono text-xs text-brutalist-yellow">
-              TOP TARGET: {topBoxes[0].color.toUpperCase()} (
-              {topBoxes[0].filled}/{topBoxes[0].capacity})
+              TOP TARGET:{' '}
+              {topBoxes[0].isConstruction
+                ? 'HIDDEN'
+                : topBoxes[0].color.toUpperCase()}{' '}
+              ({topBoxes[0].filled}/{topBoxes[0].capacity})
             </span>
           )}
         </div>
