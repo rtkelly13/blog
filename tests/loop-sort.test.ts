@@ -47,22 +47,35 @@ T2: red, pink, pink { ice_locked_by: T1 }
 T3: yellow, yellow { rope_tied_to: T4 }
 T4: pink, orange, pink
 T5: orange, purple, orange { allowed_colors: [orange, purple] }
-BOX_TOP: pink (4)
+    // BOX_TOP pink with covered_color pink
+    BOX_TOP: pink (4) { covered_color: pink }
 
-[LOOP_TRACK]
-L1: orange, green, green
-L2: blue, grey, brown { ice_locked_by: L1 }
-L3: yellow, yellow, purple
-L4: ?, ?, magenta, magenta { construction: true, target_color: magenta }
-L5: green, red, red, magenta
-BOX_L1: red (4)
-BOX_L2: magenta (4)
-BOX_L3: yellow (4) { construction: true, hidden_color: yellow, queue_order: 2 }
-`;
+    [LOOP_TRACK]
+    L1: orange, green, green
+    L2: blue, grey, brown { ice_locked_by: L1 }
+    L3: yellow, yellow, purple
+    L4: ?, ?, magenta, magenta { construction: true, target_color: magenta }
+    L5: green, red, red, magenta { covered_color: red }
+    BOX_L1: red (4)
+    BOX_L2: magenta (4) { covered_color: red }
+    BOX_L3: yellow (4) { construction: true, hidden_color: yellow, queue_order: 2 }
+    `;
 
     const map = parseMapText(text);
     expect(map.name).toBe('Advanced Mechanics Level');
     expect(map.level).toBe(300);
+
+    // BOX_TOP covered color
+    const boxTop = map.boxes.find((b) => b.id === 'BOX_TOP');
+    expect(boxTop?.coveredUntilColorStacked).toBe('pink');
+
+    // L5 covered color
+    const l5 = map.racks.find((r) => r.id === 'L5');
+    expect(l5?.coveredUntilColorStacked).toBe('red');
+
+    // BOX_L2 covered color
+    const boxL2 = map.boxes.find((b) => b.id === 'BOX_L2');
+    expect(boxL2?.coveredUntilColorStacked).toBe('red');
 
     // T1 empty
     const t1 = map.racks.find((r) => r.id === 'T1');

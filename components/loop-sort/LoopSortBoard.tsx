@@ -8,6 +8,7 @@ import {
   Info,
   Lock,
   RotateCw,
+  ShieldAlert,
   Snowflake,
 } from 'lucide-react';
 import type React from 'react';
@@ -49,6 +50,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
     const isTo = activeStep?.toTargetId === rack.id;
     const isIceLocked = Boolean(rack.iceLockedBy);
     const isRopeTied = Boolean(rack.ropeTiedTo);
+    const isCovered = Boolean(rack.coveredUntilColorStacked);
 
     const cap = rack.capacity || 4;
     const blocks = rack.blocks;
@@ -161,6 +163,16 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
                 </span>
               </div>
             )}
+
+            {/* Covered Shroud Overlay */}
+            {isCovered && (
+              <div className="absolute inset-0 bg-purple-900/90 backdrop-blur-[1px] rounded-xl flex flex-col items-center justify-center border-2 border-pink-400/60 z-10 p-1 text-center">
+                <Lock className="w-4 h-4 text-pink-300 mb-1" />
+                <span className="text-[7px] font-mono font-bold text-pink-200 uppercase leading-tight">
+                  UNTIL {rack.coveredUntilColorStacked?.toUpperCase()} STACKED
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Cart Wheels / Lights at Bottom */}
@@ -184,7 +196,11 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
   const renderTargetTruck = (box: TargetBox) => {
     const isTo = activeStep?.toTargetId === box.id;
     const isCompleted = box.filled >= box.capacity;
+    const isCovered = Boolean(box.coveredUntilColorStacked);
     const colorStyle = getColorStyle(box.color);
+    const coveredStyle = box.coveredUntilColorStacked
+      ? getColorStyle(box.coveredUntilColorStacked)
+      : colorStyle;
 
     return (
       <div
@@ -243,6 +259,20 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
               }}
             />
           </div>
+
+          {/* Shroud Cover Overlay (Locked until that color is stacked) */}
+          {isCovered && (
+            <div
+              className={`absolute inset-0 ${coveredStyle.bg} bg-opacity-95 rounded-3xl flex flex-col items-center justify-center p-2 text-center z-20 border-2 border-white/40 shadow-inner`}
+            >
+              <div className="w-9 h-9 rounded-2xl bg-white/20 border border-white/40 flex items-center justify-center mb-2 shadow-md">
+                <Box className="w-5 h-5 text-white stroke-[2.5]" />
+              </div>
+              <span className="text-[8px] font-mono font-extrabold text-white uppercase leading-tight bg-black/50 px-1 py-0.5 rounded border border-white/30">
+                UNTIL {box.coveredUntilColorStacked?.toUpperCase()} STACKED
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );

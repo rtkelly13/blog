@@ -8,6 +8,9 @@ See full documentation at [blog/docs/loop-sort-rules.md](file:///Users/ryankelly
 ### Q: How do vertical racks (buckets) work?
 **A:** Each rack acts as a **Last-In, First-Out (LIFO) stack** with a fixed maximum capacity (typically 4 blocks). You can only move the **top-most block**, and you can only place it onto a matching color or an empty rack.
 
+### Q: What are Color-Covered (Shrouded) Sections and how do they unlock?
+**A:** Color-Covered sections are trucks or bucket slots draped under a colored fabric/capsule shroud. They remain sealed **until a complete stack of that specific color is assembled or deposited**.
+
 ### Q: What are Ice Buckets and how do you unlock them?
 **A:** Ice Buckets are frozen solid—no blocks can enter or leave. The ice shatters only when a designated **adjacent bucket is completely emptied** (`0` blocks).
 
