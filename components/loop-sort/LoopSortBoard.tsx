@@ -1,7 +1,9 @@
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowDown,
   ArrowRight,
+  ArrowUp,
   Box,
   Check,
   CheckCircle2,
@@ -69,7 +71,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
   const [showFogOfWar, setShowFogOfWar] = useState<boolean>(false);
   const [showDeductionPanel, setShowDeductionPanel] = useState<boolean>(false);
   const [isPlayingSolution, setIsPlayingSolution] = useState<boolean>(false);
-  const [stepSpeedMs, setStepSpeedMs] = useState<number>(1800); // Deliberate 1.8s gap between steps
+  const [stepSpeedMs, setStepSpeedMs] = useState<number>(1800); // Generous 1.8s gap
   const [copiedNotification, setCopiedNotification] = useState<string | null>(
     null,
   );
@@ -84,7 +86,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
   const topBoxes = map.boxes.filter((b) => b.section === 'top_shelf');
   const loopBoxes = map.boxes.filter((b) => b.section === 'loop_track');
 
-  // Split loop track into top row (up to 4) and bottom row
+  // Split loop track into top row (4 carts) and bottom row (1 cart + trucks)
   const loopTopRacks = loopRacks.slice(0, 4);
   const loopBottomRacks = loopRacks.slice(4);
 
@@ -210,7 +212,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const renderRackCart = (rack: Rack) => {
+  const renderRackCart = (rack: Rack, isOrientationInverted = false) => {
     const isFrom = activeStep?.fromRackId === rack.id;
     const isTo = activeStep?.toTargetId === rack.id;
     const isIceLocked = Boolean(rack.iceLockedBy);
@@ -264,25 +266,25 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
               {rack.id}
             </span>
             {isIceLocked && (
-              <Snowflake
-                className="w-3 h-3 animate-pulse"
-                style={{ color: '#7dd3fc' }}
-                title={`Frozen until ${rack.iceLockedBy} is empty`}
-              />
+              <span title={`Frozen until ${rack.iceLockedBy} is empty`}>
+                <Snowflake
+                  className="w-3 h-3 animate-pulse"
+                  style={{ color: '#7dd3fc' }}
+                />
+              </span>
             )}
             {isRopeTied && (
-              <Lock
-                className="w-3 h-3"
-                style={{ color: '#fde047' }}
-                title={`Rope-tied until ${rack.ropeTiedTo} is solved`}
-              />
+              <span title={`Rope-tied until ${rack.ropeTiedTo} is solved`}>
+                <Lock className="w-3 h-3" style={{ color: '#fde047' }} />
+              </span>
             )}
             {rack.isConstruction && (
-              <Construction
-                className="w-3 h-3"
-                style={{ color: '#facc15' }}
-                title="Under Construction"
-              />
+              <span title="Under Construction">
+                <Construction
+                  className="w-3 h-3"
+                  style={{ color: '#facc15' }}
+                />
+              </span>
             )}
           </div>
 
@@ -423,7 +425,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
             )}
           </div>
 
-          {/* Cart Wheels / Headlights at Bottom */}
+          {/* Cart Wheels / Headlights at Bottom (Facing direction) */}
           <div className="flex items-center justify-between w-full px-2 pt-1.5">
             <div
               className="w-2 h-1.5 shadow-sm"
@@ -624,9 +626,9 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* 1. TOP INTERACTIVE SOLVER HUD (Integrated on the game) */}
+      {/* 1. TOP INTERACTIVE SOLVER HUD */}
       <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-2 border-brutalist-cyan p-4 rounded-2xl shadow-xl space-y-3 font-mono">
-        {/* HUD Top Bar: Solve Trigger & Playback Controls */}
+        {/* HUD Top Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
           <div className="flex items-center gap-3">
             <button
@@ -646,7 +648,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
             )}
           </div>
 
-          {/* Interactive Stepping Controls */}
+          {/* Stepping Controls */}
           {solverResult?.solved && (
             <div className="flex items-center gap-2">
               <button
@@ -719,7 +721,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
                     key={s.label}
                     type="button"
                     onClick={() => setStepSpeedMs(s.ms)}
-                    className={`px-1.5 py-0.5 rounded text-[10px] ${
+                    className={`px-1.5 py-0.5 rounded text-[10px] cursor-pointer ${
                       stepSpeedMs === s.ms
                         ? 'bg-brutalist-yellow text-black font-bold'
                         : 'bg-zinc-800 text-zinc-400 hover:text-white'
@@ -782,7 +784,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
           </div>
         )}
 
-        {/* HUD In-Flight Mystery Reveal Prompt (When sub-surface ? block is exposed on top) */}
+        {/* HUD In-Flight Mystery Reveal Prompt */}
         {exposedMysteryRacks.length > 0 && onMapUpdate && (
           <div className="p-3 bg-amber-950/90 border-2 border-amber-400 rounded-xl space-y-2 animate-fade-in shadow-lg">
             <div className="flex items-center justify-between text-xs text-amber-200">
@@ -798,7 +800,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
               </span>
             </div>
 
-            {/* Quick 1-click color swatch row for the exposed rack */}
+            {/* Quick 1-click color swatch row */}
             <div className="flex flex-wrap gap-1.5 pt-1">
               {AVAILABLE_PALETTE.filter((c) => c !== '?').map((c) => {
                 const style = getColorStyle(c);
@@ -873,9 +875,9 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
         </div>
       )}
 
-      {/* Main Game Board Canvas Container (Authentic Navy/Purple Studio Look) */}
+      {/* Main Game Board Canvas Container (Integrated Loop Track Presentation) */}
       <div
-        className="p-4 sm:p-8 space-y-8 select-none mx-auto max-w-4xl shadow-2xl relative"
+        className="p-4 sm:p-8 space-y-6 select-none mx-auto max-w-4xl shadow-2xl relative"
         style={{
           borderRadius: '36px',
           background: 'linear-gradient(180deg, #181538 0%, #110e28 100%)',
@@ -884,14 +886,14 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
             '0 20px 40px rgba(0,0,0,0.8), inset 0 2px 8px rgba(255,255,255,0.1)',
         }}
       >
-        {/* 1. Upper Shelf Section with Golden Rope Border */}
+        {/* 1. UPPER QUEUE LOOP TRACK (Wrapped with Rope if locked) */}
         <div className="relative">
-          <div className="flex items-center justify-between mb-3 px-2">
+          <div className="flex items-center justify-between mb-2 px-2">
             <span
               className="font-mono font-bold text-xs uppercase tracking-widest flex items-center gap-1.5"
               style={{ color: '#d8b4fe' }}
             >
-              <span>UPPER STAGING SHELF</span>
+              <span>QUEUE LOOP STAGING</span>
               {hasTopRope && (
                 <span
                   className="text-[10px] font-black px-1.5 py-0.5"
@@ -914,7 +916,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
             </span>
           </div>
 
-          {/* Rope Wrapped Border Container */}
+          {/* Queue Track Rail Container */}
           <div
             className="relative p-3 sm:p-4 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5"
             style={{
@@ -951,14 +953,26 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
             )}
 
             {/* Top Shelf Racks */}
-            {topRacks.map(renderRackCart)}
+            {topRacks.map((r) => renderRackCart(r))}
 
             {/* Top Shelf Target Boxes / Goal Truck */}
             {topBoxes.map(renderTargetTruck)}
           </div>
         </div>
 
-        {/* 2. Continuous Conveyor Loop Circuit Track */}
+        {/* Track Junction Flow Arrows */}
+        <div className="flex items-center justify-between px-8 text-[#8670d8] font-mono text-[11px]">
+          <div className="flex items-center gap-1">
+            <ArrowUp className="w-4 h-4 animate-pulse" />
+            <span>CIRCUIT INLET</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span>CIRCUIT OUTLET</span>
+            <ArrowDown className="w-4 h-4 animate-pulse" />
+          </div>
+        </div>
+
+        {/* 2. CONTINUOUS CONVEYOR LOOP CIRCUIT TRACK */}
         <div
           className="relative p-4 sm:p-6 shadow-inner"
           style={{
@@ -989,7 +1003,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
                 className="text-[10px] uppercase font-bold"
                 style={{ color: '#7c68ba' }}
               >
-                CONVEYOR CIRCUIT
+                CONTINUOUS CONVEYOR TRACK
               </span>
               <span className="flex items-center gap-1">
                 TRACK OUTBOUND ► ► ►
@@ -998,7 +1012,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
 
             {/* Upper Row inside Loop Track (4 Carts side-by-side) */}
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5">
-              {loopTopRacks.map(renderRackCart)}
+              {loopTopRacks.map((r) => renderRackCart(r))}
             </div>
 
             {/* Track Middle Divider */}
@@ -1012,7 +1026,7 @@ export const LoopSortBoard: React.FC<LoopSortBoardProps> = ({
 
             {/* Bottom Row inside Loop Track (1 Cart + 3 Target Trucks) */}
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5">
-              {loopBottomRacks.map(renderRackCart)}
+              {loopBottomRacks.map((r) => renderRackCart(r))}
               {loopBoxes.map(renderTargetTruck)}
             </div>
           </div>
