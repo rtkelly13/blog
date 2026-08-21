@@ -183,6 +183,17 @@ The shared harness is `components/hero/` — `ShaderStage` plus `ideas.ts`. Both
 sandbox pages run on it, so there is one implementation of the lifecycle
 concerns rather than one per prototype.
 
+**A fourth finding came out of running six of them.** A generative field is not
+a flat backdrop, and hero type will lose to it: the subtitle is
+`--brutalist-cyan`, which measures 10:1 against the hero background on black
+and 5.5:1 on paper — comfortably legible on paper stock, and completely
+unreadable where a bright contour line crosses the same pixels. Contrast
+against the *background colour* says nothing about contrast against the
+*content*. So the knock-back is in the harness rather than in each idea: every
+shader fades its own field to 13% inside a feathered box across the middle. It
+is a property of putting words on generated imagery, so it belongs to whatever
+draws it — a three.js hero would need exactly the same thing.
+
 ## If we adopt it
 
 1. Lift the shader hero out of the sandbox page into `components/`, loaded from

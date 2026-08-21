@@ -162,8 +162,17 @@ helpers, `SHADER_POSTLUDE` the `main()`.
   (as `CyberHero` does), so the fallbacks are the neon palette, not a safety
   net — and `getComputedStyle` returns 8-digit hex (`#23262e24`), not the
   `rgba()` the stylesheet was written in.
+- **The type safe area is part of the harness, not each idea.** The postlude
+  fades every shader's own field to 13% inside a feathered box across the
+  middle of the frame, because a hero has to earn its text legibility:
+  accent-coloured type at 12px loses to a bright line crossing the same pixels,
+  in either theme. Because the output is premultiplied, scaling the whole
+  `vec4` fades toward the backdrop — darker on black, lighter on paper — with
+  no hue shift. `safe={false}` shows the raw field.
 - `mode="split"` renders both themes in one pass either side of `uSplit`;
   `mode="follow"` renders whichever theme the page is in.
+- Ideas may carry **variants** (`ideas.ts`) — alternative treatments of the same
+  direction, selectable per card. Changing variant recompiles the program.
 - Ideas and their two readings live in `hero/ideas.ts`; they render at
   `/design-sandbox/hero-lab`, with the cost research at
   `/design-sandbox/webgl-heroes` and

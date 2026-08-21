@@ -41,6 +41,7 @@ uniform vec2  uRes;
 uniform float uTime;
 uniform float uMotion;   // 1 = animated, 0 = reduced motion (still frame)
 uniform float uSplit;    // x split in 0..1; left = terminal, right = paper
+uniform float uSafe;     // how hard the field is knocked back behind the type
 uniform vec3  uTermGrid;
 uniform vec3  uTermRing;
 uniform vec3  uTermBg;
@@ -103,6 +104,16 @@ float stroke(float v, float weight) {
   return 1.0 - smoothstep(0.0, fwidth(v) * weight + 1e-6, abs(v));
 }
 
+// The type safe area: a feathered rounded box across the middle of the frame.
+// Every idea knocks its own field back inside it, because a hero has to earn
+// its text legibility — accent-coloured type at 12px loses to a bright line
+// crossing the same pixels, in either theme.
+float safeArea(vec2 uv) {
+  vec2 d = abs(uv) - vec2(0.44, 0.105);
+  float box = length(max(d, vec2(0.0))) + min(max(d.x, d.y), 0.0);
+  return 1.0 - smoothstep(-0.03, 0.17, box);
+}
+
 // Ruled lines every whole unit of v. The width comes from fwidth(v) rather
 // than fwidth(fract(v)) — the derivative of a sawtooth explodes at the wrap,
 // which is what puts a row of dark dots through a naive hatch.
@@ -130,7 +141,9 @@ void main() {
   th.bg = mix(uTermBg, uPaperBg, side);
   th.ink = side;
 
-  outColor = hero(uv, t, th);
+  // Premultiplied, so scaling the whole vec4 fades the field toward the
+  // backdrop — darker on black, lighter on paper — without touching its hue.
+  outColor = hero(uv, t, th) * mix(1.0, 0.13, safeArea(uv) * uSafe);
 }`;
 
 /**
@@ -228,6 +241,8 @@ type Props = {
   mode?: 'split' | 'follow';
   /** Split position in 0..1. Ignored in `follow` mode. */
   split?: number;
+  /** Knock the field back behind the lockup. Off shows the raw field. */
+  safe?: boolean;
   className?: string;
   onStatus?: (status: ShaderStatus) => void;
 };
@@ -236,6 +251,7 @@ export default function ShaderStage({
   hero,
   mode = 'split',
   split = 0.5,
+  safe = true,
   className,
   onStatus,
 }: Props) {
@@ -243,7 +259,9 @@ export default function ShaderStage({
   const termProbe = useRef<HTMLDivElement>(null);
   const paperProbe = useRef<HTMLDivElement>(null);
   const splitRef = useRef(split);
+  const safeRef = useRef(safe);
   const setSplitUniform = useRef<((value: number) => void) | null>(null);
+  const setSafeUniform = useRef<((value: boolean) => void) | null>(null);
   const [status, setStatus] = useState<ShaderStatus>('pending');
 
   useEffect(() => {
@@ -256,6 +274,11 @@ export default function ShaderStage({
     splitRef.current = split;
     setSplitUniform.current?.(split);
   }, [split]);
+
+  useEffect(() => {
+    safeRef.current = safe;
+    setSafeUniform.current?.(safe);
+  }, [safe]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -298,6 +321,7 @@ export default function ShaderStage({
     const uTime = loc('uTime');
     const uMotion = loc('uMotion');
     const uSplit = loc('uSplit');
+    const uSafe = loc('uSafe');
     const uTermGrid = loc('uTermGrid');
     const uTermRing = loc('uTermRing');
     const uTermBg = loc('uTermBg');
@@ -310,11 +334,21 @@ export default function ShaderStage({
       // on one side, and let the page's own theme decide which side that is.
       if (mode === 'split') {
         gl.uniform1f(uSplit, value);
+        redrawIfIdle();
         return;
       }
       const bg = readPalette(document.documentElement).bg;
       const luminance = 0.2126 * bg[0] + 0.7152 * bg[1] + 0.0722 * bg[2];
       gl.uniform1f(uSplit, luminance > 0.5 ? -1 : 2);
+    };
+
+    // Reassigned once the clock exists. Uniform changes that arrive while the
+    // loop is parked — a drag under reduced motion, say — still need a frame.
+    let redrawIfIdle: () => void = () => {};
+
+    const applySafe = (value: boolean) => {
+      gl.uniform1f(uSafe, value ? 1 : 0);
+      redrawIfIdle();
     };
 
     const applyPalettes = () => {
@@ -335,7 +369,9 @@ export default function ShaderStage({
       applySplit(splitRef.current);
     };
     applyPalettes();
+    applySafe(safeRef.current);
     setSplitUniform.current = applySplit;
+    setSafeUniform.current = applySafe;
 
     const themeObserver = new MutationObserver(applyPalettes);
     themeObserver.observe(document.documentElement, {
@@ -358,15 +394,21 @@ export default function ShaderStage({
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(canvas);
 
+    let lastSeconds = 0;
     const draw = (seconds: number) => {
+      lastSeconds = seconds;
       gl.uniform1f(uTime, seconds);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let raf = 0;
+    redrawIfIdle = () => {
+      if (!raf) draw(lastSeconds);
+    };
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let visible = true;
     let start = performance.now();
 
@@ -423,6 +465,7 @@ export default function ShaderStage({
     return () => {
       stop();
       setSplitUniform.current = null;
+      setSafeUniform.current = null;
       themeObserver.disconnect();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();

@@ -19,7 +19,7 @@ import siteMetadata from '@/data/siteMetadata';
  * go to /design-sandbox/hero-lab.
  */
 
-const SYNTHWAVE = HERO_IDEAS[0];
+const SYNTHWAVE = HERO_IDEAS.find((idea) => idea.id === 'synthwave');
 
 /**
  * The CSS backdrop that shows through when WebGL is unavailable — and that the
@@ -57,7 +57,7 @@ function ShaderHero() {
     <div className="relative h-[60vh] min-h-[320px] w-full overflow-hidden border-2 border-white">
       <HeroBackdrop flat={status === 'unsupported'} />
       <ShaderStage
-        hero={SYNTHWAVE.hero}
+        hero={SYNTHWAVE?.variants[0].hero ?? ''}
         mode="follow"
         onStatus={setStatus}
         className="absolute inset-0 h-full w-full"

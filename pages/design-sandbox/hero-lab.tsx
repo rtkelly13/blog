@@ -88,13 +88,24 @@ function useDragSplit(initial: number) {
   return { split, setSplit, frameRef, onPointerDown, onKeyDown };
 }
 
-function IdeaCard({ idea, index }: { idea: HeroIdea; index: number }) {
+function IdeaCard({
+  idea,
+  index,
+  safe,
+}: {
+  idea: HeroIdea;
+  index: number;
+  safe: boolean;
+}) {
   // Stagger the openings so a page of cards does not read as one grid of
   // identical wipes.
   const { split, frameRef, onPointerDown, onKeyDown } = useDragSplit(
     0.42 + ((index * 0.07) % 0.18),
   );
   const [status, setStatus] = useState<ShaderStatus>('pending');
+  const [variantId, setVariantId] = useState(idea.variants[0].id);
+  const variant =
+    idea.variants.find((v) => v.id === variantId) ?? idea.variants[0];
   const pct = `${(split * 100).toFixed(2)}%`;
 
   return (
@@ -105,6 +116,30 @@ function IdeaCard({ idea, index }: { idea: HeroIdea; index: number }) {
         </h2>
         <p className="font-mono text-xs text-zinc-400">{idea.tagline}</p>
       </header>
+
+      {idea.variants.length > 1 && (
+        <div className="flex flex-wrap items-center gap-2 border-b-2 border-white px-4 py-3">
+          {idea.variants.map((v) => {
+            const active = v.id === variant.id;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setVariantId(v.id)}
+                aria-pressed={active}
+                className={`border-2 px-3 py-1 font-mono text-xs uppercase tracking-widest transition-colors ${
+                  active
+                    ? 'border-brutalist-cyan bg-brutalist-cyan text-black'
+                    : 'border-zinc-700 text-zinc-400 hover:border-brutalist-cyan hover:text-white'
+                }`}
+              >
+                {v.name}
+              </button>
+            );
+          })}
+          <p className="font-mono text-xs text-zinc-400">{variant.note}</p>
+        </div>
+      )}
 
       <div
         ref={frameRef}
@@ -129,9 +164,10 @@ function IdeaCard({ idea, index }: { idea: HeroIdea; index: number }) {
         />
 
         <ShaderStage
-          hero={idea.hero}
+          hero={variant.hero}
           mode="split"
           split={split}
+          safe={safe}
           onStatus={setStatus}
           className="absolute inset-0 h-full w-full"
         />
@@ -230,6 +266,8 @@ function HeroLockup() {
 }
 
 export default function HeroLab() {
+  const [safe, setSafe] = useState(true);
+
   return (
     <>
       <PageSEO
@@ -280,8 +318,28 @@ export default function HeroLab() {
             </p>
           </div>
 
+          <div className="flex flex-wrap items-center gap-3 border-2 border-white bg-zinc-900 p-4">
+            <button
+              type="button"
+              onClick={() => setSafe((s) => !s)}
+              aria-pressed={safe}
+              className={`border-2 px-3 py-1 font-mono text-xs uppercase tracking-widest transition-colors ${
+                safe
+                  ? 'border-brutalist-yellow bg-brutalist-yellow text-black'
+                  : 'border-zinc-700 text-zinc-400 hover:border-brutalist-yellow hover:text-white'
+              }`}
+            >
+              type safe area: {safe ? 'on' : 'off'}
+            </button>
+            <p className="font-mono text-xs text-zinc-400">
+              {'>'} Each shader fades its own field to 13% behind the lockup.
+              Turn it off to see the raw field — and to see why accent-coloured
+              type at this size loses to a bright line crossing the same pixels.
+            </p>
+          </div>
+
           {HERO_IDEAS.map((idea, index) => (
-            <IdeaCard key={idea.id} idea={idea} index={index} />
+            <IdeaCard key={idea.id} idea={idea} index={index} safe={safe} />
           ))}
 
           <div className="border-2 border-brutalist-yellow bg-zinc-900 p-6">

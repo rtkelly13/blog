@@ -1,4 +1,4 @@
-export { HERO_IDEAS, type HeroIdea } from './ideas';
+export { HERO_IDEAS, type HeroIdea, type HeroVariant } from './ideas';
 export {
   default as ShaderStage,
   readColor,
