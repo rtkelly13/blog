@@ -162,6 +162,27 @@ console errors, and the still-frame path confirmed by the status line.
 snapshot-tested. Constraint 3 above is the work that stands between this page
 and `pages/index.tsx`.
 
+## The lab
+
+[`pages/design-sandbox/hero-lab.tsx`](../pages/design-sandbox/hero-lab.tsx)
+takes the harness the prototype proved out and runs six generative ideas on it
+— HORIZON, CONTOUR, CROSSHATCH, DOT_MATRIX, TRACE, GLYPH_RAIN — each rendered
+so both themes are visible **at once**, split by a seam you can drag across the
+frame. One canvas draws both: the shader picks its palette *and its shading
+model* per pixel from which side of the seam it lands on.
+
+Judging a hero one theme at a time is how the grey-smudge version got as far as
+it did. Simultaneous is the only honest comparison when the two aesthetics are
+meant to be equals, and it turns the rule above into something you can see: on
+black the depth is carried by brightness, on paper by line weight; bloom
+becomes ink, a continuous fade becomes a hard stamp, a coarse LED screen
+becomes a fine 45° halftone. An idea that only survives on black is a failed
+idea for this site, however good it looks there.
+
+The shared harness is `components/hero/` — `ShaderStage` plus `ideas.ts`. Both
+sandbox pages run on it, so there is one implementation of the lifecycle
+concerns rather than one per prototype.
+
 ## If we adopt it
 
 1. Lift the shader hero out of the sandbox page into `components/`, loaded from

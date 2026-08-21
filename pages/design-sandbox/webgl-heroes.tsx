@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { HERO_IDEAS, ShaderStage, type ShaderStatus } from '@/components/hero';
 import Link from '@/components/Link';
 import PageHeader from '@/components/PageHeader';
 import { PageSEO } from '@/components/SEO';
@@ -13,331 +14,12 @@ import siteMetadata from '@/data/siteMetadata';
  * a fraction of the bytes? Measurements and the verdict live in
  * docs/hero-webgl-research.md; this page is the working end of it.
  *
- * The prototype deliberately carries the production-shaped concerns rather
- * than just the pretty part, because those are what the comparison turns on:
- * design-system tokens read at runtime (so dark / dim / sketch all work), a
- * reduced-motion path that renders one still frame, pausing when off-screen or
- * backgrounded, DPR-aware resize, and a CSS fallback when WebGL is missing or
- * the context is lost.
+ * Here the hero follows the page's own theme, the way a shipped one would.
+ * To see an idea's two readings side by side, and five more ideas besides,
+ * go to /design-sandbox/hero-lab.
  */
 
-const VERT = `#version 300 es
-in vec2 aPos;
-void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
-
-/**
- * Grid + horizon glow + ring, all procedural. Colours arrive as uniforms so the
- * shader never hardcodes the palette — the theme owns it.
- */
-const FRAG = `#version 300 es
-precision highp float;
-
-uniform vec2  uRes;
-uniform float uTime;
-uniform vec3  uGrid;
-uniform vec3  uRing;
-uniform float uMotion;   // 1 = animated, 0 = reduced motion (still frame)
-uniform float uInk;      // 0 = glow on a dark surface, 1 = ink on paper
-
-out vec4 outColor;
-
-// Perspective floor grid: project screen space onto a plane below the horizon,
-// then draw anti-aliased lines with derivative-based width so the lines stay
-// one pixel wide as they recede instead of aliasing into noise.
-float floorGrid(vec2 uv, float t) {
-  float horizon = uv.y + 0.16;
-  if (horizon >= -0.001) return 0.0;
-
-  vec2 plane = vec2(uv.x / -horizon, (0.5 / -horizon) + t * 0.25);
-  vec2 cell = abs(fract(plane) - 0.5);
-  vec2 w = fwidth(plane);
-  vec2 line = smoothstep(w * 1.5, vec2(0.0), cell);
-  float g = max(line.x, line.y);
-
-  // Fade the far field so the grid dissolves into the background.
-  return g * smoothstep(0.0, 0.22, -horizon);
-}
-
-// On a dark surface the ring is a light source, so it blooms. On paper a bloom
-// reads as a smudge — there the ring becomes a weightier ink stroke instead.
-float ring(vec2 uv, float pulse, float ink) {
-  float d = abs(length(uv * vec2(1.0, 1.25)) - 0.30);
-  float core = smoothstep(mix(0.010, 0.016, ink), 0.002, d);
-  float glow = smoothstep(0.180, 0.0, d) * 0.35 * (1.0 - ink);
-  return core + glow * pulse;
-}
-
-void main() {
-  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
-  float t = uTime * uMotion;
-
-  float g = floorGrid(uv, t) * mix(0.55, 0.75, uInk);
-  float pulse = 0.75 + 0.25 * sin(t * 1.2);
-  float r = ring(uv, pulse, uInk);
-
-  // A soft band of light sitting on the horizon line, tying grid to ring —
-  // light only, so paper gets none of it.
-  float horizonGlow =
-    smoothstep(0.12, 0.0, abs(uv.y + 0.16)) * 0.25 * (1.0 - uInk);
-
-  vec3 col = uGrid * (g + horizonGlow) + uRing * r;
-  float alpha = clamp(g + horizonGlow + r, 0.0, 1.0);
-  outColor = vec4(col * alpha, alpha);
-}`;
-
-/**
- * Turn a computed CSS colour into 0..1 RGB, dropping alpha — the shader owns
- * opacity. Browsers do not hand these back in the form the stylesheet wrote
- * them: `rgba(35, 38, 46, 0.14)` comes out of `getComputedStyle` as the
- * 8-digit hex `#23262e24`, so every notation has to be handled or the token
- * silently falls through to the fallback.
- */
-function readColor(value: string, fallback: [number, number, number]) {
-  const hex = value.trim().match(/^#([0-9a-f]{3,8})$/i);
-  if (hex) {
-    const h = hex[1];
-    const full =
-      h.length <= 4
-        ? h
-            .slice(0, 3)
-            .split('')
-            .map((c) => c + c)
-            .join('')
-        : h.slice(0, 6);
-    return [0, 2, 4].map(
-      (i) => Number.parseInt(full.slice(i, i + 2), 16) / 255,
-    ) as [number, number, number];
-  }
-  const rgb = value.match(/rgba?\(([^)]+)\)/i);
-  if (rgb) {
-    const parts = rgb[1]
-      .split(/[,\s/]+/)
-      .filter(Boolean)
-      .map(Number);
-    if (
-      parts.length >= 3 &&
-      parts.slice(0, 3).every((n) => Number.isFinite(n))
-    ) {
-      return [parts[0] / 255, parts[1] / 255, parts[2] / 255] as [
-        number,
-        number,
-        number,
-      ];
-    }
-  }
-  return fallback;
-}
-
-function compile(gl: WebGL2RenderingContext, type: number, src: string) {
-  const shader = gl.createShader(type);
-  if (!shader) return null;
-  gl.shaderSource(shader, src);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    gl.deleteShader(shader);
-    return null;
-  }
-  return shader;
-}
-
-/**
- * Compile, link and activate the shader pair. Returns null on any failure so
- * the caller can drop straight to the CSS fallback.
- */
-function createProgram(gl: WebGL2RenderingContext) {
-  const program = gl.createProgram();
-  const vs = compile(gl, gl.VERTEX_SHADER, VERT);
-  const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
-  if (!program || !vs || !fs) return null;
-
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    gl.deleteProgram(program);
-    return null;
-  }
-  // biome-ignore lint/correctness/useHookAtTopLevel: gl.useProgram is a WebGL call, not a React hook
-  gl.useProgram(program);
-  return { program, vs, fs };
-}
-
-type Status = 'pending' | 'running' | 'still' | 'unsupported';
-
-function useShaderHero(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
-  const [status, setStatus] = useState<Status>('pending');
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const gl = canvas.getContext('webgl2', {
-      alpha: true,
-      antialias: false,
-      powerPreference: 'low-power',
-    });
-    if (!gl) {
-      setStatus('unsupported');
-      return;
-    }
-
-    const built = createProgram(gl);
-    if (!built) {
-      setStatus('unsupported');
-      return;
-    }
-    const { program, vs, fs } = built;
-
-    // One full-screen triangle — cheaper than a quad and needs no index buffer.
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 3, -1, -1, 3]),
-      gl.STATIC_DRAW,
-    );
-    const aPos = gl.getAttribLocation(program, 'aPos');
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-    const uRes = gl.getUniformLocation(program, 'uRes');
-    const uTime = gl.getUniformLocation(program, 'uTime');
-    const uGrid = gl.getUniformLocation(program, 'uGrid');
-    const uRing = gl.getUniformLocation(program, 'uRing');
-    const uMotion = gl.getUniformLocation(program, 'uMotion');
-    const uInk = gl.getUniformLocation(program, 'uInk');
-
-    // The design system owns the palette: read the same custom properties
-    // CyberHero uses, and re-read them when the theme class flips.
-    // The dark themes deliberately leave --hero-* unset and lean on the inline
-    // fallbacks (CyberHero does the same); sketch is the mode that overrides
-    // them. So the fallbacks below are the neon palette, not a safety net.
-    const applyTheme = () => {
-      const styles = getComputedStyle(document.documentElement);
-      const grid = readColor(
-        styles.getPropertyValue('--hero-grid-strong'),
-        [0.22, 1.0, 0.08],
-      );
-      const ring = readColor(
-        styles.getPropertyValue('--hero-ring'),
-        [0.53, 0.94, 0.68],
-      );
-      const bg = readColor(
-        styles.getPropertyValue('--brutalist-darkBg'),
-        [0.04, 0.04, 0.04],
-      );
-      gl.uniform3f(uGrid, grid[0], grid[1], grid[2]);
-      gl.uniform3f(uRing, ring[0], ring[1], ring[2]);
-      // Sketch mode remaps the hero background to paper. Glow is a dark-surface
-      // idiom, so the luminance of that token decides which one we draw.
-      const luminance = 0.2126 * bg[0] + 0.7152 * bg[1] + 0.0722 * bg[2];
-      gl.uniform1f(uInk, luminance > 0.5 ? 1 : 0);
-    };
-    applyTheme();
-
-    const themeObserver = new MutationObserver(applyTheme);
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class', 'style', 'data-theme'],
-    });
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
-      const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-        gl.viewport(0, 0, w, h);
-      }
-      gl.uniform2f(uRes, canvas.width, canvas.height);
-    };
-    resize();
-    const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(canvas);
-
-    const draw = (seconds: number) => {
-      gl.uniform1f(uTime, seconds);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    };
-
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let raf = 0;
-    let visible = true;
-    let start = performance.now();
-
-    const stop = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = 0;
-    };
-
-    const loop = (now: number) => {
-      draw((now - start) / 1000);
-      raf = requestAnimationFrame(loop);
-    };
-
-    const sync = () => {
-      stop();
-      if (motionQuery.matches) {
-        // Reduced motion: one still frame, no clock, no rAF at all.
-        gl.uniform1f(uMotion, 0);
-        draw(0);
-        setStatus('still');
-        return;
-      }
-      gl.uniform1f(uMotion, 1);
-      setStatus('running');
-      if (!visible || document.hidden) {
-        draw((performance.now() - start) / 1000);
-        return;
-      }
-      start = performance.now();
-      raf = requestAnimationFrame(loop);
-    };
-
-    // Idle when scrolled away or the tab is backgrounded — a hero that keeps a
-    // GPU busy below the fold is the main reason WebGL heroes get a bad name.
-    const intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        visible = entry.isIntersecting;
-        sync();
-      },
-      { threshold: 0 },
-    );
-    intersectionObserver.observe(canvas);
-
-    const onContextLost = (event: Event) => {
-      event.preventDefault();
-      stop();
-      setStatus('unsupported');
-    };
-    canvas.addEventListener('webglcontextlost', onContextLost);
-    document.addEventListener('visibilitychange', sync);
-    motionQuery.addEventListener('change', sync);
-    sync();
-
-    return () => {
-      stop();
-      themeObserver.disconnect();
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
-      canvas.removeEventListener('webglcontextlost', onContextLost);
-      document.removeEventListener('visibilitychange', sync);
-      motionQuery.removeEventListener('change', sync);
-      gl.deleteProgram(program);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
-      gl.deleteBuffer(buffer);
-    };
-  }, [canvasRef]);
-
-  return status;
-}
+const SYNTHWAVE = HERO_IDEAS[0];
 
 /**
  * The CSS backdrop that shows through when WebGL is unavailable — and that the
@@ -361,18 +43,24 @@ function HeroBackdrop({ flat }: { flat: boolean }) {
   );
 }
 
+const STATUS_LABEL: Record<ShaderStatus, string> = {
+  pending: 'starting…',
+  running: 'webgl2 · animating',
+  still: 'webgl2 · reduced-motion still frame',
+  unsupported: 'css fallback (no webgl2)',
+};
+
 function ShaderHero() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const status = useShaderHero(canvasRef);
+  const [status, setStatus] = useState<ShaderStatus>('pending');
 
   return (
     <div className="relative h-[60vh] min-h-[320px] w-full overflow-hidden border-2 border-white">
       <HeroBackdrop flat={status === 'unsupported'} />
-      <canvas
-        ref={canvasRef}
-        aria-hidden
+      <ShaderStage
+        hero={SYNTHWAVE.hero}
+        mode="follow"
+        onStatus={setStatus}
         className="absolute inset-0 h-full w-full"
-        style={{ display: status === 'unsupported' ? 'none' : 'block' }}
       />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <h2 className="font-display text-4xl font-bold uppercase text-white md:text-6xl">
@@ -388,13 +76,6 @@ function ShaderHero() {
     </div>
   );
 }
-
-const STATUS_LABEL: Record<Status, string> = {
-  pending: 'starting…',
-  running: 'webgl2 · animating',
-  still: 'webgl2 · reduced-motion still frame',
-  unsupported: 'css fallback (no webgl2)',
-};
 
 /**
  * Measured on this repo at three@0.185.1 / @react-three/fiber@9.7.0 /
@@ -499,6 +180,16 @@ export default function WebglHeroes() {
               <br />
               {'>'} Scroll it out of view or background the tab — the render
               loop parks itself.
+              <br />
+              {'>'} Five more ideas, each showing both themes at once, are in
+              the{' '}
+              <Link
+                href="/design-sandbox/hero-lab"
+                className="text-brutalist-cyan"
+              >
+                hero lab
+              </Link>
+              .
             </p>
           </div>
         </div>
