@@ -116,6 +116,11 @@ per-section accent rule, diagrams, search, talk widgets) lives in
 render in the **design sandbox** (`/design-sandbox`) and in Storybook
 (`pnpm storybook`, :6006).
 
+Whether the homepage hero should be drawn on the GPU — and what three.js /
+react-three-fiber would cost against a plain fragment shader — is measured in
+**[docs/hero-webgl-research.md](./hero-webgl-research.md)**, with a working
+prototype at `/design-sandbox/webgl-heroes`.
+
 ## Hosted Storybooks
 
 | URL | Shows |

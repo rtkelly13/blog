@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
   type LucideIcon,
   MousePointerClick,
+  Orbit,
   Tags as TagsIcon,
   Type,
 } from 'lucide-react';
@@ -33,6 +34,13 @@ const components: {
     path: '/design-sandbox/homepage-heroes',
     description: 'Synth wave heroes for landing pages',
     icon: ImageIcon,
+  },
+  {
+    name: 'WebGL Heroes',
+    path: '/design-sandbox/webgl-heroes',
+    description:
+      'Shader-driven hero prototype, and what a 3D engine would cost',
+    icon: Orbit,
   },
   {
     name: 'Article Heroes',
