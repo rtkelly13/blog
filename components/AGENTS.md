@@ -9,6 +9,7 @@ React components: UI primitives, feature modules (diagrams, search, comments), a
 ```
 components/
 ├── diagrams/         # Diagram renderers (Mermaid, SVG, ReactFlow)
+├── hero/             # Shader hero harness + the lab's generative ideas
 ├── search/           # KBar command palette (Cmd+K)
 ├── comments/         # Comment providers (Giscus, Utterances, Disqus)
 ├── social-icons/     # SVG social icons
@@ -25,6 +26,7 @@ components/
 Use these for imports:
 
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
+- `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
 - `social-icons/index.tsx` → SocialIcon
 - `comments/index.tsx` → Comments (auto-selects provider)
 - `analytics/index.tsx` → Analytics (auto-selects provider)
@@ -140,6 +142,41 @@ Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
 motion/@xyflow/react ship as lazy chunks only on pages that mount them.
 `IdeaSlide` is the exception — a dependency-free static marker component.
 Both respect `prefers-reduced-motion` via `useReducedMotion`.
+
+## HERO SHADERS (hero/)
+
+`ShaderStage` is the harness every generative hero runs on: it owns the WebGL2
+context, the full-screen triangle, DPR-aware sizing, the clock, reduced motion
+(one still frame, no rAF), pausing when off-screen or backgrounded, and the
+CSS fallback. An idea supplies only a `vec4 hero(vec2 uv, float t, Theme th)`
+— `SHADER_PRELUDE` provides the uniforms, the `Theme` struct and noise/line
+helpers, `SHADER_POSTLUDE` the `main()`.
+
+- **`th.ink` is the whole dual-mode contract**: 0 on the lit surface, 1 on
+  paper. Shaders branch their *shading model* on it, not just their palette —
+  bloom becomes ink weight, a smooth fade becomes a hard stamp. A glow is added
+  light, and added light on paper reads as a thumbprint.
+- **Palettes are measured, never hardcoded**: `ShaderStage` reads the
+  `--hero-*` tokens off real DOM probes carrying `.dark` and `.sketch`. Note
+  the dark themes leave those tokens unset and lean on inline `var()` fallbacks
+  (as `CyberHero` does), so the fallbacks are the neon palette, not a safety
+  net — and `getComputedStyle` returns 8-digit hex (`#23262e24`), not the
+  `rgba()` the stylesheet was written in.
+- **The type safe area is part of the harness, not each idea.** The postlude
+  fades every shader's own field to 13% inside a feathered box across the
+  middle of the frame, because a hero has to earn its text legibility:
+  accent-coloured type at 12px loses to a bright line crossing the same pixels,
+  in either theme. Because the output is premultiplied, scaling the whole
+  `vec4` fades toward the backdrop — darker on black, lighter on paper — with
+  no hue shift. `safe={false}` shows the raw field.
+- `mode="split"` renders both themes in one pass either side of `uSplit`;
+  `mode="follow"` renders whichever theme the page is in.
+- Ideas may carry **variants** (`ideas.ts`) — alternative treatments of the same
+  direction, selectable per card. Changing variant recompiles the program.
+- Ideas and their two readings live in `hero/ideas.ts`; they render at
+  `/design-sandbox/hero-lab`, with the cost research at
+  `/design-sandbox/webgl-heroes` and
+  [docs/hero-webgl-research.md](../docs/hero-webgl-research.md).
 
 ## DIAGRAMS
 
