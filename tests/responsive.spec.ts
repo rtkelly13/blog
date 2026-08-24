@@ -30,6 +30,86 @@ test.describe('Mobile - iPhone 12 (390x844)', () => {
     ).toBeVisible();
   });
 
+  // Regression: the drawer lives inside the sticky header, which carries
+  // `backdrop-blur`. A non-`none` backdrop-filter makes that header the
+  // containing block for `position: fixed` descendants, so the panel's
+  // `h-full` resolved against the header (~80px) rather than the viewport —
+  // the links spilled out below the painted panel and read as a menu with a
+  // transparent background. Assert the geometry, not a screenshot, so the
+  // check runs everywhere (visual baselines are CI-only).
+  test('mobile nav panel covers the viewport behind its links', async ({
+    page,
+  }) => {
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error('expected a fixed viewport');
+
+    await page.goto('/');
+    await page.locator('button[aria-label="Toggle Menu"]').click();
+
+    // The panel is the drawer div wrapping the link list.
+    const panel = page.locator('nav.fixed').locator('xpath=..');
+    const panelBox = await panel.boundingBox();
+    if (!panelBox) throw new Error('expected the nav panel to be laid out');
+
+    // It must reach the bottom of the viewport, not stop at the header.
+    expect(panelBox.y + panelBox.height).toBeGreaterThanOrEqual(
+      viewport.height,
+    );
+
+    // And every link must sit inside that painted area.
+    const links = page.locator('nav.fixed a');
+    const count = await links.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const linkBox = await links.nth(i).boundingBox();
+      if (!linkBox) throw new Error(`nav link ${i} was not laid out`);
+      expect(linkBox.y).toBeGreaterThanOrEqual(panelBox.y);
+      expect(linkBox.y + linkBox.height).toBeLessThanOrEqual(
+        panelBox.y + panelBox.height,
+      );
+    }
+  });
+
+  // Regression: the drawer used to live inside the header, a `z-50` stacking
+  // context, so covering the viewport from there painted the panel over the
+  // header's own controls and swallowed their clicks. It is portalled to
+  // <body> at `z-40` now, so the header stays on top.
+  test('site header stays interactive while the mobile nav is open', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const toggle = page.locator('button[aria-label="Toggle Menu"]');
+    await toggle.click();
+    await expect(
+      page.locator('nav.fixed').getByRole('link', { name: 'Blog' }),
+    ).toBeVisible();
+
+    // Nothing may sit on top of the header's controls.
+    const covered = await page.evaluate(() => {
+      const header = document.querySelector('header');
+      if (!header) throw new Error('expected a site header');
+      return [...header.querySelectorAll('button')]
+        .filter((button) => {
+          const box = button.getBoundingClientRect();
+          const top = document.elementFromPoint(
+            box.x + box.width / 2,
+            box.y + box.height / 2,
+          );
+          return !(top && button.contains(top));
+        })
+        .map((button) => button.getAttribute('aria-label'));
+    });
+    expect(covered).toEqual([]);
+
+    // And the toggle still closes the drawer.
+    await toggle.click();
+    const panel = page.locator('nav.fixed').locator('xpath=..');
+    await expect
+      .poll(async () => (await panel.boundingBox())?.x ?? -1)
+      .toBeGreaterThanOrEqual(page.viewportSize()?.width ?? 0);
+  });
+
   test('blog post TOC toggle button appears', async ({ page }) => {
     await page.goto('/blog/aws-batch/cookbook');
 
