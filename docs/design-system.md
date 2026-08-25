@@ -121,6 +121,11 @@ react-three-fiber would cost against a plain fragment shader — is measured in
 **[docs/hero-webgl-research.md](./hero-webgl-research.md)**, with a working
 prototype at `/design-sandbox/webgl-heroes`.
 
+Whether the interactive components should be built on d3 — and which of its
+submodules the brutalist constraints and the snapshot suite actually leave room
+for — is measured in **[docs/d3-research.md](./d3-research.md)**. Short version:
+d3 computes, React renders; never the `d3` meta-package.
+
 ## Hosted Storybooks
 
 | URL | Shows |
