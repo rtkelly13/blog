@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import headerNavLinks from '@/data/headerNavLinks';
+import { useDrawer } from '@/lib/useDrawer';
 import Link from './Link';
+
+// Tailwind's `lg`, where the inline nav takes over and this drawer is hidden.
+const LG = '(min-width: 64rem)';
 
 const MobileNav = () => {
   const [navShow, setNavShow] = useState(false);
@@ -11,16 +15,57 @@ const MobileNav = () => {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const onToggleNav = () => {
-    setNavShow((status) => {
-      if (status) {
-        document.body.style.overflow = 'auto';
-      } else {
-        document.body.style.overflow = 'hidden';
-      }
-      return !status;
-    });
-  };
+  const panelRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  const closeNav = useCallback(() => setNavShow(false), []);
+  const onToggleNav = useCallback(() => setNavShow((shown) => !shown), []);
+
+  useDrawer({
+    open: navShow,
+    onClose: closeNav,
+    panelRef,
+    triggerRef: toggleRef,
+  });
+
+  // Scroll lock. Two fixes over what this used to be:
+  //
+  // 1. It locks <html>, not <body>. `document.scrollingElement` here is <html>
+  //    (nothing constrains the body's height), so `overflow: hidden` on the
+  //    body clipped a box that was not the scroller and the page scrolled
+  //    behind the open drawer regardless. Locking the scrolling element
+  //    actually holds, and leaves the sticky header pinned.
+  // 2. It is an effect keyed on `navShow` rather than something the toggle
+  //    handler does on the side, so the cleanup runs on close, on unmount and
+  //    on the `lg` close below — the old version could leave `hidden` behind
+  //    for good if the drawer was hidden by a resize instead of a click. The
+  //    previous inline value is restored rather than hardcoded back to `auto`,
+  //    so this does not clobber a lock someone else owns.
+  useEffect(() => {
+    if (!navShow) return;
+
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    root.style.overflow = 'hidden';
+
+    return () => {
+      root.style.overflow = previousOverflow;
+    };
+  }, [navShow]);
+
+  // Growing past `lg` swaps this drawer for the inline nav, so close it —
+  // otherwise it reopens mid-slide on the way back down, and used to take the
+  // scroll lock with it for good.
+  useEffect(() => {
+    const lg = window.matchMedia(LG);
+    const onChange = () => {
+      if (lg.matches) closeNav();
+    };
+
+    onChange();
+    lg.addEventListener('change', onChange);
+    return () => lg.removeEventListener('change', onChange);
+  }, [closeNav]);
 
   /*
    * Portalled to <body> rather than left inside the header, for two reasons
@@ -44,22 +89,29 @@ const MobileNav = () => {
    * list clear of the header. `lg:hidden` has to live on the panel itself now
    * that it no longer inherits it from the toggle's wrapper.
    *
-   * Covered by tests/responsive.spec.ts → "mobile nav panel covers the
-   * viewport behind its links" and "site header stays interactive".
+   * `inert` while closed is what keeps the off-screen links out of the tab
+   * order and the accessibility tree; `translate-x-full` only moves them out
+   * of sight. `tabIndex={-1}` lets useDrawer hand focus to the panel on open.
    */
   const panel = (
     <div
-      className={`lg:hidden fixed w-full h-screen top-0 right-0 pt-24 bg-black/95 backdrop-blur border-l border-gray-800 z-40 transform ease-in-out duration-300 ${
+      id="mobile-nav-panel"
+      ref={panelRef}
+      tabIndex={-1}
+      inert={!navShow}
+      className={`lg:hidden fixed w-full h-screen top-0 right-0 pt-24 bg-black/95 backdrop-blur border-l border-gray-800 z-40 transform ease-in-out duration-300 focus:outline-hidden ${
         navShow ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
-      <button
-        type="button"
-        aria-label="toggle modal"
-        className="fixed w-full h-full cursor-auto focus:outline-hidden"
+      {/* Click-away. A plain div, not a button: Escape closes the drawer now,
+          so a full-panel focusable control with no visible label would just be
+          a confusing extra tab stop. Mirrors the TOC drawer's backdrop. */}
+      <div
+        className="fixed w-full h-full cursor-auto"
         onClick={onToggleNav}
-      ></button>
-      <nav className="fixed h-full mt-8 w-full">
+        aria-hidden="true"
+      />
+      <nav aria-label="Site" className="fixed h-full mt-8 w-full">
         {headerNavLinks.map((link) => (
           <div key={link.title} className="px-12 py-4 border-b border-gray-800">
             <Link
@@ -79,8 +131,11 @@ const MobileNav = () => {
     <div className="lg:hidden">
       <button
         type="button"
+        ref={toggleRef}
         className="w-8 h-8 ml-1 mr-1 text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]"
         aria-label="Toggle Menu"
+        aria-expanded={navShow}
+        aria-controls="mobile-nav-panel"
         onClick={onToggleNav}
       >
         <svg
