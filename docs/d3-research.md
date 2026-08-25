@@ -24,6 +24,13 @@ encodings — currently has almost no purchase on this site.
 
 So the recommendation is narrow and conditional, not "adopt d3".
 
+**Adopted, narrowly.** `components/charts/` now implements exactly the shape
+this document argued for — `d3-array`, `d3-force`, `d3-format`, `d3-scale`,
+`d3-shape` and nothing else, with `biome.json` failing the build on `d3`,
+`d3-selection`, `d3-transition` and `d3-axis`. It runs at
+[/experiments/d3-charts](../pages/experiments/d3-charts.tsx). See
+[What shipped](#what-shipped) at the end.
+
 ## What d3 already is here
 
 Worth establishing before discussing adoption: **d3 is already in this repo's
@@ -153,15 +160,33 @@ Three things fall out of that:
   and do remap under `.sketch`; the type does not. `scale.ticks(n)` returns the
   tick values as plain numbers, and React renders them in `font-mono` for free.
 
-**Not measured — read this before quoting the table.** These are
-isolated-library figures only. There is no in-app number here: producing one
-needs `next build`, which needs `@rtkelly/mermaid-toolkit` built from its
-`codeload.github.com` tarball, and that host is unreachable from a restricted
-network (403), so `pnpm install` never completes there. The precedent doc's
-homepage first-load numbers came from a real build; these did not. Its lesson
-holds regardless — `next/dynamic` **moves** the cost rather than removing it, so
-"+15.2 KB, lazily" still means 15.2 KB requested by every reader of a post that
-carries a chart. Redo the build measurement before adopting anything here.
+### In the real build
+
+The isolated figures above predicted the in-app cost well. Measured with
+`next build` (Turbopack), summing the gzip of each route's entries in
+`.next/build-manifest.json` — the same method as the precedent doc:
+
+| Route | First-load JS | Route's own JS |
+| --- | ---: | ---: |
+| `/experiments` (the index this links from) | 220.4 KB gzip | 18.7 KB gzip |
+| `/experiments/d3-charts` | **239.6 KB gzip** | **38.0 KB gzip** |
+| `/` (homepage, for scale) | 254.8 KB gzip | 53.2 KB gzip |
+
+Shared `/_app` baseline: 201.6 KB gzip.
+
+**+19.2 KB gzip** for the whole page against its sibling — the 15.2 KB of d3
+plus about 4 KB of components and page JSX. Two honest notes on that number:
+
+- **These charts are not lazily loaded, on purpose.** `next/dynamic` moves cost
+  rather than removing it, and this page *is* the charts — deferring them would
+  delay the only content on the route. A chart dropped into a post should go
+  through `MDXComponents.tsx` like the other interactives, and then the 19 KB
+  lands only on posts that carry one.
+- **The layout runs twice: once server-side, once on hydration.** The marks are
+  prerendered into the HTML, but React still needs the component code on the
+  client, and `layoutForce` recomputes its ticks there. At five nodes that is
+  free; at a few hundred it would want `useMemo` on a stable input or a
+  serialised layout.
 
 ## Where d3 would and would not go, component by component
 
@@ -251,16 +276,15 @@ would overlap both. If a diagram needs a Sankey, mermaid has one; `d3-sankey` at
 2.8 KB only wins if the diagram needs to be *interactive*, and that is a real
 component, not a renderer swap.
 
-### A chart primitive for MDX — yes, when there is data
+### A chart primitive — yes, and it now exists
 
-This is the only case where d3 is clearly the right tool, and it is currently
-hypothetical. A `<Chart>` component that takes data in frontmatter or props,
-uses `d3-scale` for the mapping, `d3-shape` for path strings, `d3-array` for
-extents and `d3-format` for tick labels, and lets **React render every mark** —
-15.2 KB gzip, lazily loaded like the other interactives, no `d3-selection`, no
+This is the only case where d3 is clearly the right tool, and it is the one
+thing here that got built: `components/charts/`. `d3-scale` does the mapping,
+`d3-shape` the path strings, `d3-array` the extents, `d3-format` the tick
+labels, and **React renders every mark** — no `d3-selection`, no
 `d3-transition`, no `d3-axis`.
 
-Two notes on shape, if it gets built:
+Two notes on shape, which the implementation follows:
 
 - **The design system rules out most of `d3-shape`.** Of its 20 exported curves,
   the brutalist constraint (hard edges, no soft anything) permits exactly five:
@@ -276,13 +300,20 @@ Two notes on shape, if it gets built:
   brutalist system, and a scheme baked into the series colours would not remap
   under `.sketch`.
 
-And the honest trigger: **this repo does generate data worth charting — in
-`docs/`, not in `data/`.** The bundle tables in
-[hero-webgl-research.md](./hero-webgl-research.md) and in this document are
-exactly the kind of thing a post would want as a chart. If that research ever
-becomes a post, the chart primitive earns its 15.2 KB the day it ships.
+And this is where the "nothing to chart" finding turned out to be half wrong:
+**the repo does generate data worth charting — in `docs/`, not in `data/`.** The
+bundle tables in [hero-webgl-research.md](./hero-webgl-research.md) and in this
+document are exactly the kind of thing a post would want as a chart, and
+[/experiments/d3-charts](../pages/experiments/d3-charts.tsx) now draws both
+tables with the primitive. The editorial question — whether a *post* wants one —
+is still open; the tooling question is closed.
 
-## Rules, if any of this is adopted
+## Rules
+
+Four of these are enforced by `biome.json` rather than by review — `d3`,
+`d3-selection`, `d3-transition` and `d3-axis` each fail
+`style/noRestrictedImports` with the reason attached. The rest are conventions
+`components/charts/` follows.
 
 1. **Never `import … from 'd3'`.** Always the named submodule
    (`d3-scale`, `d3-shape`, …). The meta-package's 18.1 KB floor is five times
@@ -323,6 +354,67 @@ becomes a post, the chart primitive earns its 15.2 KB the day it ships.
    `MDXComponents.tsx` like every other interactive; with a story, since a story
    is a test here.
 
+## What shipped
+
+`components/charts/` — four files, and the only place in this repo that imports
+d3:
+
+| File | Role |
+| --- | --- |
+| `chartModel.ts` | The whole of d3. `layoutBars`, `layoutSeries`, `layoutForce` — data in, numbers and path strings out. No DOM, no clock, no state. |
+| `BarChart.tsx` | Horizontal bars. Ticks are `scale.ticks()` rendered as mono JSX. |
+| `SeriesChart.tsx` | One series, on a `CurveName` rather than a curve factory. |
+| `ForceGraph.tsx` | A graph drawn from settled coordinates — no running simulation. |
+
+Dependencies added: `d3-array`, `d3-force`, `d3-format`, `d3-scale`,
+`d3-shape` (and their `@types`). Nothing else.
+
+**And "added" overstates it.** All ten were *already resolved in
+`pnpm-lock.yaml`* at the same versions — the runtime five via mermaid, the
+`@types` via mermaid's runtime `@types/d3` dependency. So the lockfile diff for
+this whole adoption is **30 lines of pure insertion and not one new package**:
+five direct-dependency entries, five dev, and no new `packages:` or
+`snapshots:` blocks at all. The install graph is byte-for-byte what it was.
+That is the "d3 is already in the tree" finding above, in its strongest form —
+this change promoted transitive resolutions to declared ones and added nothing
+to what gets downloaded.
+
+Enforcement, so the rules above are not just prose: `biome.json` fails
+`style/noRestrictedImports` on `d3`, `d3-selection`, `d3-transition` and
+`d3-axis`, each with its reason attached.
+
+Verified rather than asserted:
+
+- `tests/chart-model.test.ts` — 19 unit tests on the pure model, including the
+  determinism claim (two runs, identical digests), that a differing tick count
+  *does* change the layout (otherwise the determinism test proves nothing), that
+  the caller's nodes are not mutated, and the degenerate cases (empty series,
+  zero domain, flat series, dangling link, gutter wider than the viewBox).
+- `BarChart.stories.tsx` / `ForceGraph.stories.tsx` — 8 stories, which in this
+  repo are browser tests with an axe pass (`pnpm test` went from 62 to 70
+  Storybook assertions).
+- `next build` passes and `/experiments/d3-charts` prerenders statically; the
+  determinism panel's verdict is in the server-rendered HTML, not computed on
+  the client.
+- Rendered at 1280px in `dark` and `sketch`, no console errors, with the
+  accents landing as blue pen / red pen / green marker on paper.
+
+Two things the model got wrong first, both caught by tests rather than by
+reading:
+
+- `forceLink` **throws** `node not found` on a link naming an absent node — it
+  validates at `initialize`, long before any render-time filter would run. One
+  bad edge took the whole layout down; dangling links are now dropped before
+  the simulation sees them.
+- Bar options merged by spread let a forwarded `undefined` clobber a default —
+  the same trap `components/graphics/registry.ts` already documents. The merge
+  is per-field now.
+
+Not done, deliberately: the charts are **not** registered in
+`MDXComponents.tsx`. Nothing in `data/` needs one yet, and an unused dynamic
+import is dead weight; wire it up in the same commit as the first post that
+charts something.
+
 ## Reproducing the numbers
 
 No script is checked in — the measurement is a scratch project, deliberately
@@ -348,11 +440,12 @@ dynamically.
 
 ## Open
 
-- Whether the site *wants* charts is an editorial question, not a technical one.
-  This documents what they would cost and how they would have to be built; it
-  does not argue that a post needs one.
+- Whether a *post* wants a chart is still an editorial question. The primitive
+  exists and is exercised on the experiment page; nothing in `data/` uses it,
+  and nothing should until there is a dataset the prose needs.
 - If a genuinely large graph diagram ever appears — a dependency graph of the
-  virtual monorepo, say — `d3-force` at 4.9 KB against hand-placed coordinates
-  is the calculation to redo, and the determinism result above is what makes it
-  viable.
+  virtual monorepo, say — `ForceGraph` is already the answer, and the honest
+  next step is the hydration note under *In the real build*: recomputing a
+  few-hundred-node layout on the client is the one place this design pays for
+  its simplicity.
 - `d3-geo` (7.9 KB) is filed for completeness only. Nothing on this site is a map.
