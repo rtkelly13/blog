@@ -8,6 +8,7 @@ React components: UI primitives, feature modules (diagrams, search, comments), a
 
 ```
 components/
+├── charts/           # d3-backed chart primitives (pure model + JSX marks)
 ├── diagrams/         # Diagram renderers (Mermaid, SVG, ReactFlow)
 ├── hero/             # Shader hero harness + the lab's generative ideas
 ├── search/           # KBar command palette (Cmd+K)
@@ -25,6 +26,8 @@ components/
 
 Use these for imports:
 
+- `charts/index.ts` → BarChart, SeriesChart, ForceGraph, layoutBars,
+  layoutSeries, layoutForce, CURVES, ACCENT_VAR
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
 - `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
 - `social-icons/index.tsx` → SocialIcon
@@ -150,6 +153,38 @@ Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
 motion/@xyflow/react ship as lazy chunks only on pages that mount them.
 `IdeaSlide` is the exception — a dependency-free static marker component.
 Both respect `prefers-reduced-motion` via `useReducedMotion`.
+
+## CHARTS (charts/)
+
+Data charts on named `d3-*` submodules. The rule the research landed on
+([docs/d3-research.md](../docs/d3-research.md)) is **d3 computes, React
+renders**, and the folder is laid out to make that structural:
+
+- `chartModel.ts` — the only file in the repo that imports d3. Pure functions
+  (`layoutBars`, `layoutSeries`, `layoutForce`) taking data and returning
+  numbers and path strings; no DOM, no clock, no state, so it is unit-tested
+  (`tests/chart-model.test.ts`) and safe to call during render.
+- `BarChart` — horizontal bars. `data` is `BarDatum[]` (`label`, `value`,
+  optional `accent`/`note`/`baseline`); `label` is the accessible name. Ticks
+  are `scale.ticks()` rendered as mono JSX, because `d3-axis` hardcodes
+  `font-family: sans-serif`.
+- `SeriesChart` — one series, drawn with one of the **five** curves the
+  brutalist constraint leaves of `d3-shape`'s twenty. Takes a `CurveName`, not
+  a curve factory, so a soft curve cannot reach it from a call site.
+- `ForceGraph` — a force-directed graph rendered from settled coordinates.
+  There is no simulation running: `layoutForce` calls `.stop()` before the first
+  tick and ticks to completion in render. That is sound because `d3-force@3`
+  seeds its own LCG, so identical input gives identical pixels — which is what
+  makes it snapshot- and reduced-motion-safe.
+
+All three are static by construction, so unlike `interactive/` they have no
+`useReducedMotion` branch — there is no loop to stop. Colour comes from
+`ACCENT_VAR` / `CHART_COLOR` (`var(--brutalist-*)` and `var(--color-*)` with
+neon fallbacks), so the charts follow HIGH → DIM → SKETCH like everything else.
+
+**Do not** add `d3`, `d3-selection`, `d3-transition` or `d3-axis` — `biome.json`
+fails the build on all four via `style/noRestrictedImports`, with the reason on
+each. Live at [/experiments/d3-charts](../pages/experiments/d3-charts.tsx).
 
 ## HERO SHADERS (hero/)
 
