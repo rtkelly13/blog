@@ -138,6 +138,14 @@ Step-driven interactives usable in any MDX (posts, talks, ideas):
   motion swaps the clock for a PREPARE/MAP/REDUCE/DONE phase stepper. Props:
   `mappers`, `slots`, `spotReclaim`, `caption`, `title`, `autoplay`.
 
+Whether any of these should be rebuilt on d3 — and what its submodules cost
+against this design system's constraints — is measured in
+[docs/d3-research.md](../docs/d3-research.md). The rule that came out of it:
+**d3 computes, React renders** — named `d3-*` submodules for layout/scales only,
+never the `d3` meta-package, and never `d3-selection` / `d3-transition` /
+`d3-axis` in app code (`motion` is the animation library and `useReducedMotion`
+is the contract).
+
 Both are registered in `MDXComponents.tsx` via `next/dynamic` (`ssr: false`) so
 motion/@xyflow/react ship as lazy chunks only on pages that mount them.
 `IdeaSlide` is the exception — a dependency-free static marker component.
