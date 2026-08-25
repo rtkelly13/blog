@@ -54,8 +54,10 @@ when you work there:
 
 - **Tailwind v4** — `css/tailwind.css` uses `@import "tailwindcss"`, not
   `@tailwind` directives; PostCSS uses `@tailwindcss/postcss`.
-- **Visual snapshots regenerate on CI only** — `pnpm test:snapshots:remote` (or
-  a `/update-snapshots` PR comment). Never commit macOS-rendered PNGs.
+- **Visual snapshots regenerate on CI only, and only when asked** — the PR gate
+  compares, never writes. Comment `/update-snapshots` (or run
+  `pnpm test:snapshots:remote`) once you've confirmed the diff is intentional.
+  Never commit macOS-rendered PNGs.
 - **Linear history** — rebase onto `main`, squash-merge PRs; no merge commits.
 - **Build needs `@rtkelly/mermaid-toolkit`** built first (handled in CI).
 

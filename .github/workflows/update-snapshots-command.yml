@@ -9,9 +9,25 @@ name: Update snapshots (command)
 # `pnpm test:snapshots:remote` locally, downloading the artifact, and
 # hand-committing the files.
 #
-# Human-gated by design: a maintainer decides when a visual diff is an
-# INTENTIONAL change worth baking in. CI never blindly accepts a diff, so a
-# genuine regression still fails the gate instead of being silently absorbed.
+# Human-gated by design, and now the ONLY way a baseline changes: pr-checks.yml
+# runs the suite with `--update-snapshots=none`, so a visual diff fails the gate
+# and stays failed until a maintainer looks at it and says here that the change
+# is intentional. Nothing absorbs a diff on its own.
+#
+# Two modes, because "regenerate the baselines" is two different requests:
+#
+#   /update-snapshots       → `missing` — writes only baselines that do not
+#                             exist yet (a new page, a new viewport). Cannot
+#                             overwrite an existing baseline, so adding a
+#                             screenshot can never quietly re-record a
+#                             regression somewhere else in the suite.
+#   /update-snapshots all   → re-records every baseline. The deliberate one,
+#                             for a change that is *meant* to alter rendering.
+#   /update-snapshots changed → re-records only the ones that differ.
+#
+# `all`/`changed` overwrite evidence, so they have to be typed. The mode is
+# echoed back in the result comment, so a reviewer can tell "two added" from
+# "the whole library re-recorded".
 #
 # Note on re-runs: pushes made with the default GITHUB_TOKEN do not themselves
 # re-trigger the `pull_request` gate. Set a `SNAPSHOT_PAT` repo secret (a PAT or
@@ -85,6 +101,27 @@ jobs:
           # default token, which commits fine but won't re-trigger workflows.
           token: ${{ secrets.SNAPSHOT_PAT || secrets.GITHUB_TOKEN }}
 
+      # The SHA every baseline below is rendered against. Checked against the
+      # branch tip again before pushing: a run that generates from one tree and
+      # commits onto another records an expectation nothing has verified.
+      - name: Record the commit under test
+        id: base
+        working-directory: blog
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve mode from the comment
+        id: mode
+        env:
+          BODY: ${{ github.event.comment.body }}
+        run: |
+          set -euo pipefail
+          mode=missing
+          case "$BODY" in
+            *"/update-snapshots all"*) mode=all ;;
+            *"/update-snapshots changed"*) mode=changed ;;
+          esac
+          echo "mode=${mode}" >> "$GITHUB_OUTPUT"
+
       - uses: ./blog/.github/actions/setup-blog
         with:
           install-playwright: "true"
@@ -93,27 +130,72 @@ jobs:
         working-directory: blog
         run: pnpm build
 
+      # Tolerated, not ignored. In `missing` mode Playwright reports a test that
+      # *creates* a baseline as failed on purpose, so bootstrapping a screenshot
+      # exits non-zero — failing the job on that is how this command would never
+      # manage to create one. The verify step below is the actual gate: it re-runs
+      # the suite with no write flag, so a baseline that does not reproduce fails
+      # there and nothing is committed.
       - name: Regenerate snapshots
+        continue-on-error: true
         working-directory: blog
-        # Same command playwright.yml uses; webServer serves the build just built.
-        run: pnpm exec playwright test --update-snapshots
+        env:
+          MODE: ${{ steps.mode.outputs.mode }}
+        run: pnpm exec playwright test --update-snapshots="${MODE}"
+
+      # Proves the new baselines are self-consistent before they are committed.
+      # Worth the extra couple of minutes: a GITHUB_TOKEN push does not start
+      # workflow runs, so without this the PR's own visual check keeps its old
+      # result and the only signal a reviewer gets is "some PNGs changed".
+      - name: Verify the suite passes against the new baselines
+        working-directory: blog
+        run: pnpm exec playwright test --update-snapshots=none
 
       - name: Commit & push snapshots
         id: commit
         working-directory: blog
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet -- tests/__snapshots__; then
+          if [ -z "$(git status --porcelain tests/__snapshots__)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Committed snapshots already match the freshly generated ones — nothing to commit."
             exit 0
           fi
+
+          git fetch --depth=1 origin "${{ steps.pr.outputs.ref }}"
+          tip=$(git rev-parse FETCH_HEAD)
+          if [ "${tip}" != "${BASE_SHA}" ]; then
+            {
+              echo "changed=false"
+              echo "raced=true"
+              echo "moved_to=${tip}"
+            } >> "$GITHUB_OUTPUT"
+            echo "::error::${{ steps.pr.outputs.ref }} moved from ${BASE_SHA} to ${tip} while this run was rendering baselines. Nothing committed — re-run /update-snapshots on the new tip."
+            exit 1
+          fi
+
           git add tests/__snapshots__
           git commit -m "test(visual): regenerate snapshots via /update-snapshots"
           git push origin "HEAD:${{ steps.pr.outputs.ref }}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Show what changed
+        if: steps.commit.outputs.changed == 'true'
+        working-directory: blog
+        run: git show --stat HEAD -- tests/__snapshots__
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report-update-snapshots
+          path: blog/playwright-report/
+          retention-days: 30
+          if-no-files-found: ignore
 
       - name: Report result
         if: always()
@@ -122,16 +204,81 @@ jobs:
           script: |
             const status = '${{ job.status }}';
             const changed = '${{ steps.commit.outputs.changed }}';
+            const raced = '${{ steps.commit.outputs.raced }}';
+            const mode = '${{ steps.mode.outputs.mode }}';
+            const base = '${{ steps.base.outputs.sha }}'.slice(0, 7);
+            const movedTo = '${{ steps.commit.outputs.moved_to }}'.slice(0, 7);
+            const runUrl =
+              `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             let body;
-            if (status !== 'success') {
-              body = '❌ `/update-snapshots` failed before it could commit — see the [workflow run](' +
-                `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})` +
-                ' for details.';
+            if (raced === 'true') {
+              body = [
+                '### ❌ Snapshot update raced a push',
+                '',
+                `Baselines were rendered against \`${base}\`, but the branch is now at`,
+                `\`${movedTo}\`. They were **not** committed — they describe a tree that is`,
+                'no longer the tip, so committing them would record an expectation nothing',
+                'has checked. Re-run `/update-snapshots` and let it finish.',
+                '',
+                `[Run log](${runUrl})`,
+              ].join('\n');
+            } else if (status !== 'success') {
+              body = [
+                '### ❌ `/update-snapshots` failed',
+                '',
+                'No baselines were committed. The **verify** step re-runs the suite with',
+                'no write flag, and it went red. Two things look like this:',
+                '',
+                mode === 'missing'
+                  ? '- **The diffs are in baselines that already exist.** `missing` mode'
+                    + ' refuses to overwrite them, so it wrote nothing and the suite is'
+                    + ' still red for the same reason it was before. If those renders are'
+                    + ' *meant* to change, comment `/update-snapshots all`.'
+                  : '- **A baseline did not reproduce on a second run**, so something on the'
+                    + ' page renders non-deterministically. That is a real bug, not a'
+                    + ' snapshot problem.',
+                mode === 'missing'
+                  ? '- **A new baseline did not reproduce on a second run** — something on'
+                    + ' the page renders non-deterministically.'
+                  : '- **A functional E2E assertion failed** — the suite covers more than'
+                    + ' screenshots.',
+                '',
+                `The [run log](${runUrl}) says which, and the`,
+                '`playwright-report-update-snapshots` artifact has the diffs.',
+              ].join('\n');
             } else if (changed === 'true') {
-              body = '✅ Regenerated the visual snapshots and pushed them to this branch. ' +
-                'If the PR gate does not re-run on its own, re-run **PR checks** (a `SNAPSHOT_PAT` secret makes this automatic).';
+              body = [
+                `### 📸 Baselines updated (mode: \`${mode}\`)`,
+                '',
+                'Regenerated on Linux, re-run against the new baselines to prove they',
+                'reproduce, and pushed to this branch.',
+                '',
+                '> [!IMPORTANT]',
+                '> Look at the images in that commit before merging — a regenerated',
+                '> baseline records whatever rendered, including a regression.',
+                '',
+                "This PR's visual check still shows its previous result: GitHub does not",
+                'start workflow runs from `GITHUB_TOKEN` pushes. Re-run **PR checks**, or',
+                'push any commit, to see it go green. (A `SNAPSHOT_PAT` secret makes that',
+                'automatic.)',
+                '',
+                `[Run log](${runUrl})`,
+              ].join('\n');
             } else {
-              body = 'ℹ️ Ran `--update-snapshots`, but the committed snapshots already matched — nothing to commit.';
+              body = [
+                `### 📸 Baselines already current (mode: \`${mode}\`)`,
+                '',
+                'Nothing to commit — the committed baselines already match what this',
+                'branch renders.',
+                '',
+                mode === 'missing'
+                  ? 'Note that `missing` mode only writes baselines that do not exist. If you'
+                    + ' meant to re-record ones that *have* changed, comment'
+                    + ' `/update-snapshots all`.'
+                  : '',
+                '',
+                `[Run log](${runUrl})`,
+              ].filter((line, i, all) => !(line === '' && all[i - 1] === '')).join('\n');
             }
             await github.rest.issues.createComment({
               owner: context.repo.owner,

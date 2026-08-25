@@ -20,6 +20,26 @@ function run(command, ignoreError = false) {
   }
 }
 
+const MODES = ['missing', 'changed', 'all'];
+
+/**
+ * Which baselines the CI run may write. `missing` only creates ones that do not
+ * exist yet, so fetching a baseline for a new page cannot also re-record an
+ * existing one that has drifted — that is how a regression becomes the
+ * expectation. Pass `--mode all` when the change is *meant* to alter rendering.
+ */
+function resolveMode() {
+  const flag = process.argv.indexOf('--mode');
+  const mode = flag === -1 ? 'missing' : process.argv[flag + 1];
+  if (!MODES.includes(mode)) {
+    console.error(
+      `❌ Unknown --mode "${mode}". Expected one of: ${MODES.join(', ')}.`,
+    );
+    process.exit(1);
+  }
+  return mode;
+}
+
 async function updateSnapshots() {
   console.log('\x1b[36m--- Automated Visual Snapshot Updater ---\x1b[0m');
 
@@ -28,10 +48,14 @@ async function updateSnapshots() {
   console.log(`Branch: ${branch}`);
 
   // 2. Trigger Workflow
-  console.log('Triggering "playwright.yml" with update_snapshots=true...');
-  run(
-    `gh workflow run playwright.yml --ref "${branch}" -f update_snapshots=true`,
-  );
+  const mode = resolveMode();
+  console.log(`Triggering "playwright.yml" with mode=${mode}...`);
+  if (mode === 'missing') {
+    console.log(
+      '  (only baselines that do not exist yet — pass "--mode all" to re-record)',
+    );
+  }
+  run(`gh workflow run playwright.yml --ref "${branch}" -f mode="${mode}"`);
 
   // 3. Find the run ID
   console.log('Waiting for run to start...');

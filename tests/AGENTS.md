@@ -82,28 +82,53 @@ throwaway config rather than editing `vitest.config.ts`.
 
 **Platform-specific**: Snapshots generated on Linux (CI). Tests skip on macOS/Windows.
 
+**The PR gate never writes a baseline.** `pr-checks.yml` → `e2e-visual` runs
+`playwright test --update-snapshots=none`, so a visual diff fails the check and
+stays failed. Regenerating is a separate, explicitly requested act.
+
+Why it is spelled out this way: the gate used to run a bare `--update-snapshots`
+and push the rewritten PNGs back to the branch. A bare flag presets to
+`changed`, so every diff was re-recorded as the new expectation and the check
+went green — it re-baselined 13 responsive screenshots on PR #109 (commit
+`0a436e2`) and reported "E2E + visual regression ✅ Passed". A check that
+rewrites what it compares against cannot fail.
+
+**Reading a failure:** download the `playwright-report` artifact from the E2E
+job — it carries expected / actual / diff for each screenshot. Decide whether
+the change is intended *before* asking for a new baseline.
+
 **Update flow:**
 
 ```bash
-# Option 1 (PRs): comment on the PR — CI regenerates AND commits the
-# snapshots back to the branch for you (update-snapshots-command.yml).
-/update-snapshots
+# Option 1 (PRs): comment on the PR. CI regenerates on Linux, re-runs the suite
+# against the new baselines to prove they reproduce, and commits them back to
+# the branch (update-snapshots-command.yml).
+/update-snapshots          # `missing` — only baselines that don't exist yet
+/update-snapshots all      # re-record every baseline (a deliberate act)
+/update-snapshots changed  # re-record only the ones that differ
 
 # Option 2: trigger CI, then pull the artifact down locally
-pnpm test:update-snapshots
+pnpm test:snapshots:remote            # missing
+pnpm test:snapshots:remote --mode all # re-record
 
 # Option 3: manual via GitHub Actions
-gh workflow run playwright.yml --ref <branch> -f update_snapshots=true
-
-# For options 2 & 3, download and commit the regenerated files
-gh run download <run-id> -n playwright-snapshots
-cp -r playwright-snapshots/* tests/__snapshots__/
-git add tests/__snapshots__ && git commit
+gh workflow run playwright.yml --ref <branch> -f mode=all
 ```
 
-Option 1 is human-gated on purpose: you only comment `/update-snapshots` once
-you've confirmed the visual diff is intentional, so a genuine regression still
-fails the gate rather than being auto-absorbed.
+`missing` is the default everywhere on purpose. A run meant to add one new
+screenshot would, in `changed` mode, also re-record every other baseline that
+had drifted — which is exactly how a regression becomes the expectation. The
+mode is echoed back in the PR comment, so a reviewer can tell "two added" from
+"everything re-recorded".
+
+Whichever route: **look at the images in the resulting commit before merging.**
+A regenerated baseline records whatever rendered, including a regression.
+
+Note that a `GITHUB_TOKEN` push does not start new workflow runs, so the PR's
+own visual check keeps its previous result until you re-run **PR checks** or
+push again. The update run verifies the new baselines itself, so you are not
+flying blind in the meantime. A `SNAPSHOT_PAT` repo secret (`contents: write`)
+makes the re-run automatic.
 
 **Snapshot path template:**
 
