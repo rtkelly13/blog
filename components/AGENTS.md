@@ -10,6 +10,7 @@ React components: UI primitives, feature modules (diagrams, search, comments), a
 components/
 ├── diagrams/         # Diagram renderers (Mermaid, SVG, ReactFlow)
 ├── hero/             # Shader hero harness + the lab's generative ideas
+├── iconlab/          # Icon-pack evaluation specimens (/experiments/icon-packs)
 ├── search/           # KBar command palette (Cmd+K)
 ├── comments/         # Comment providers (Giscus, Utterances, Disqus)
 ├── social-icons/     # SVG social icons
@@ -27,6 +28,8 @@ Use these for imports:
 
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
 - `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
+- `iconlab/index.ts` → GeometryStrip, CapFixDemo, BakedCorners, StrokeWeight,
+  ThemeSurvival, LicenceLedger, BrandProvenance, PixelPairing, PACKS
 - `social-icons/index.tsx` → SocialIcon
 - `comments/index.tsx` → Comments (auto-selects provider)
 - `analytics/index.tsx` → Analytics (auto-selects provider)
@@ -97,6 +100,21 @@ values. So the rule for any new component is:
   so they follow dark ↔ sketch.
 - Verify both: cycle the theme switch (HIGH → DIM → SKETCH) and confirm the
   component reads on paper as well as on black.
+
+## ICON PACKS (iconlab/)
+
+The pack choice itself is argued at **`/experiments/icon-packs`** — every panel
+renders published path data from the pack it names, so the geometry, theming
+and licence claims can be checked rather than taken on trust. Three rules come
+out of it and apply to any new icon work:
+
+- **Lucide stays the primary set.** ISC, `currentColor`, 2px on a 24 grid, and
+  the only real mismatch (round caps) is reachable from a stylesheet.
+- **Nothing the design system re-exports may carry an attribution licence.**
+  `@rtkelly13/design-system` publishes to public npm, so a CC BY 4.0 pack hands
+  every consumer an obligation. CC0, MIT and ISC only.
+- **Depend, never vendor.** Hand-copied paths (see `social-icons/icons.tsx`)
+  lose their provenance and stop tracking upstream.
 
 ## INTERACTIVE MDX (interactive/)
 
