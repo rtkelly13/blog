@@ -1,8 +1,9 @@
 import { FileText, Menu, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Toc } from 'types/Toc';
 import siteMetadata from '@/data/siteMetadata';
+import { useDrawer } from '@/lib/useDrawer';
 
 interface BlogActionsProps {
   toc?: Toc;
@@ -17,6 +18,18 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
   // context of <main> and can render above the sticky header (z-50). Gated on
   // mount so server render and first client render match.
   const [mounted, setMounted] = useState(false);
+
+  const panelRef = useRef<HTMLElement>(null);
+  const tocToggleRef = useRef<HTMLButtonElement>(null);
+
+  const closeToc = useCallback(() => setTocOpen(false), []);
+
+  useDrawer({
+    open: tocOpen,
+    onClose: closeToc,
+    panelRef,
+    triggerRef: tocToggleRef,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -64,6 +77,9 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
           {toc && toc.length > 0 && (
             <button
               aria-label="Toggle table of contents"
+              aria-expanded={tocOpen}
+              aria-controls="post-toc-panel"
+              ref={tocToggleRef}
               type="button"
               onClick={handleTocToggle}
               className="border-2 border-white bg-brutalist-cyan text-black p-3 transition-all hover:shadow-hard-md active:translate-x-1 active:translate-y-1"
@@ -132,12 +148,20 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
         mounted &&
         createPortal(
           <>
+            {/* `inert` while closed keeps the off-screen heading links out of
+                the tab order and the accessibility tree — `translate-x-full`
+                only moves them out of sight. `tabIndex={-1}` lets useDrawer
+                hand focus to the panel on open. */}
             <aside
+              id="post-toc-panel"
+              ref={panelRef}
+              tabIndex={-1}
+              inert={!tocOpen}
               className={`
               fixed top-0 right-0 h-full w-80 max-w-[90vw]
               border-l-2 border-white bg-zinc-900 p-6
               transition-transform duration-300 ease-in-out
-              z-[60]
+              z-[60] focus:outline-hidden
               ${tocOpen ? 'translate-x-0' : 'translate-x-full'}
             `}
             >

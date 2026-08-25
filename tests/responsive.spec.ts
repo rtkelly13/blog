@@ -110,6 +110,106 @@ test.describe('Mobile - iPhone 12 (390x844)', () => {
       .toBeGreaterThanOrEqual(page.viewportSize()?.width ?? 0);
   });
 
+  // The drawer only slides off screen when closed (`translate-x-full`), which
+  // hides it from sight but not from the keyboard. `inert` is what takes it out
+  // of the tab order and the accessibility tree.
+  test('closed mobile nav is out of the tab order', async ({ page }) => {
+    await page.goto('/');
+    // The drawer is portalled on mount, so wait for it to exist rather than
+    // racing hydration and measuring an empty panel.
+    await expect(page.locator('#mobile-nav-panel a').first()).toBeAttached();
+
+    const reachable = await page.evaluate(() => {
+      const links = [
+        ...document.querySelectorAll<HTMLElement>('#mobile-nav-panel a'),
+      ];
+      return {
+        total: links.length,
+        focusable: links.filter((link) => {
+          link.focus();
+          return document.activeElement === link;
+        }).length,
+      };
+    });
+
+    expect(reachable.total).toBeGreaterThan(0);
+    expect(reachable.focusable).toBe(0);
+  });
+
+  test('mobile nav closes on Escape and hands focus back', async ({ page }) => {
+    await page.goto('/');
+
+    const toggle = page.locator('button[aria-label="Toggle Menu"]');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await page.keyboard.press('Escape');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    // Focus must not be left on a control that has slid off screen.
+    await expect(toggle).toBeFocused();
+  });
+
+  // Regression, two of them. The lock used to be set on <body>, which is not
+  // the scrolling element here, so the page scrolled behind the open drawer.
+  // And it was released only by the toggle handler, so hiding the drawer with
+  // a resize instead of a click left the lock behind for good.
+  //
+  // Drive this with a real wheel gesture: `html` carries
+  // `scroll-behavior: smooth`, so reading `scrollY` straight after a
+  // `scrollTo` measures the animation rather than whether scrolling is
+  // possible at all.
+  test('the mobile nav locks page scroll, and lets go past lg', async ({
+    page,
+  }) => {
+    await page.goto('/blog/aws-batch/cookbook');
+
+    const wheelTo = async (y: number) => {
+      await page.mouse.move(195, 600);
+      await page.mouse.wheel(0, y);
+      await page.waitForTimeout(400);
+      return page.evaluate(() => window.scrollY);
+    };
+
+    // Scrolls freely to begin with.
+    expect(await wheelTo(600)).toBeGreaterThan(0);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+
+    await page.locator('button[aria-label="Toggle Menu"]').click();
+    // Held while the drawer is open.
+    expect(await wheelTo(600)).toBe(0);
+
+    // Released when the drawer gives way to the inline nav.
+    await page.setViewportSize({ width: 1280, height: 844 });
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.style.overflow))
+      .not.toBe('hidden');
+    expect(await wheelTo(600)).toBeGreaterThan(0);
+  });
+
+  // Same `translate-x-full` pattern, same fix, on the post TOC drawer.
+  test('closed post TOC is out of the tab order', async ({ page }) => {
+    await page.goto('/blog/aws-batch/cookbook');
+    await expect(page.locator('#post-toc-panel a').first()).toBeAttached();
+
+    const reachable = await page.evaluate(() => {
+      const links = [
+        ...document.querySelectorAll<HTMLElement>('#post-toc-panel a'),
+      ];
+      return {
+        total: links.length,
+        focusable: links.filter((link) => {
+          link.focus();
+          return document.activeElement === link;
+        }).length,
+      };
+    });
+
+    expect(reachable.total).toBeGreaterThan(0);
+    expect(reachable.focusable).toBe(0);
+  });
+
   test('blog post TOC toggle button appears', async ({ page }) => {
     await page.goto('/blog/aws-batch/cookbook');
 
