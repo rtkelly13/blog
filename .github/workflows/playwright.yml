@@ -1,17 +1,30 @@
 name: Update visual snapshots
 
-# Manual-only. Visual regression now runs inside the consolidated PR gate
-# (pr-checks.yml → e2e-visual) against a locally built site, so this workflow's
+# Manual-only. Visual regression runs inside the consolidated PR gate
+# (pr-checks.yml → e2e-visual), which never writes a baseline, so this workflow's
 # sole job is to (re)generate the committed Linux snapshots on demand. Snapshots
 # must be produced on the CI runner so they match what pr-checks compares against.
+#
+# For a PR, prefer commenting `/update-snapshots` — it does this on the PR's head
+# branch and reports back. This dispatch is the path for baselining `main`, and
+# the one `pnpm test:snapshots:remote` drives.
 on:
   workflow_dispatch:
     inputs:
-      update_snapshots:
-        description: "Update visual regression snapshots"
+      mode:
+        description: >-
+          Which baselines to write. "missing" (the default) only creates ones
+          that do not exist, so a run meant to add a page's screenshot cannot
+          also re-record an existing baseline that has drifted — which is how a
+          regression becomes the expectation. Choose "changed" or "all"
+          deliberately, when a change is *meant* to alter rendering.
         required: false
-        default: true
-        type: boolean
+        default: missing
+        type: choice
+        options:
+          - missing
+          - changed
+          - all
 
 permissions:
   contents: write
@@ -32,9 +45,20 @@ jobs:
         working-directory: blog
         run: pnpm build
 
+      # `missing` mode reports a test that *creates* a baseline as failed, on
+      # purpose, so bootstrapping a screenshot exits non-zero. Tolerated here and
+      # gated by the verify step below, which re-runs with no write flag: a
+      # baseline that does not reproduce fails there and nothing is committed.
       - name: Update snapshots
+        continue-on-error: true
         working-directory: blog
-        run: pnpm exec playwright test --update-snapshots
+        env:
+          MODE: ${{ inputs.mode }}
+        run: pnpm exec playwright test --update-snapshots="${MODE:-missing}"
+
+      - name: Verify the suite passes against the new baselines
+        working-directory: blog
+        run: pnpm exec playwright test --update-snapshots=none
 
       # Commit the regenerated snapshots straight back to the branch this run
       # was dispatched on, so intentional visual changes don't need a manual
