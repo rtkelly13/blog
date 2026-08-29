@@ -79,6 +79,19 @@ const cycles = (v: number, max = 3): number =>
 const wobble = (t: number, k: number, phase: number): number =>
   Math.sin(t * TAU * k + phase) - Math.sin(phase);
 
+/**
+ * How far a mark travels, as a fraction of the space it has.
+ *
+ * These are tuned against a measurement, not by eye: `tests/graphics-generators
+ * .test.ts` asserts a floor on peak displacement, because the first pass picked
+ * amplitudes like 0.18 and 0.12 that were arithmetically correct and visually
+ * nothing — `dot-grid` peaked at 2.35px and moved 1.2% of its marks, which
+ * reads as a still image. A generator that satisfies every coherence property
+ * and does not visibly move has not been animated.
+ */
+const ORBIT_OF_CELL = 0.13;
+const DRIFT_OF_FRAME = 0.035;
+
 /** Wrap generator marks in a themed <svg> with optional backdrop + opacity. */
 function frame(params: GraphicParams, inner: string): string {
   const { width, height, opacity, background } = params;
@@ -114,17 +127,22 @@ const dotGrid: SampledGenerator<Dot[]> = {
     }
     return dots;
   },
-  // The dots breathe. A grid cannot translate coherently — its marks are
-  // individually sampled, so shifting the lattice by one cell would pair every
-  // position with a different dot — so the motion is per-mark instead.
+  // Each dot orbits inside its own cell. The lattice cannot translate as a
+  // whole — its marks are individually sampled, so sliding it by one cell would
+  // pair every position with a different dot — but a per-dot orbit bounded by
+  // the cell moves plainly without ever colliding or leaving a bare edge.
   project: (dots, p, t) => {
     const faint = withAlpha(p.accent, 0.4);
     const bright = withAlpha(p.accent, 0.95);
+    const orbit = lerp(96, 34, p.density) * ORBIT_OF_CELL;
     let out = '';
     for (const d of dots) {
-      const rad =
-        d.rad * (1 + 0.18 * wobble(t, cycles(d.rad), (d.x + d.y) * 0.01));
-      out += `<circle cx="${r2(d.x)}" cy="${r2(d.y)}" r="${r2(rad)}" fill="${d.hot ? bright : faint}"/>`;
+      const k = cycles(d.rad, 2);
+      const phase = (d.x + d.y) * 0.01;
+      const cx = d.x + orbit * wobble(t, k, phase);
+      const cy = d.y + orbit * wobble(t, k, phase + Math.PI / 2);
+      const rad = d.rad * (1 + 0.4 * wobble(t, k, phase));
+      out += `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(rad)}" fill="${d.hot ? bright : faint}"/>`;
     }
     return frame(p, out);
   },
@@ -156,13 +174,21 @@ const diagonalHatch: SampledGenerator<Rule[]> = {
     }
     return rules;
   },
+  // The one field that can translate wholesale: every rule is the same infinite
+  // 45 degree line, generated from -height to width so the set overruns both
+  // edges. Sliding it reveals no bare margin, and unlike a grid there is no
+  // per-mark identity to mismatch — so this is the most legible motion in the
+  // set, and the cheapest.
   project: (rules, p, t) => {
     const faint = withAlpha(p.accent, 0.32);
     const bright = withAlpha(p.accent, 0.9);
+    const slide = lerp(70, 20, p.density) * 0.9 * wobble(t, 1, 0);
     let out = '';
     for (const rule of rules) {
-      const w = rule.w * (1 + 0.22 * wobble(t, cycles(rule.w), rule.o * 0.02));
-      out += `<line x1="${r2(rule.o)}" y1="0" x2="${r2(rule.o + p.height)}" y2="${p.height}" stroke="${rule.hot ? bright : faint}" stroke-width="${r2(w)}"/>`;
+      const o = rule.o + slide;
+      const w =
+        rule.w * (1 + 0.3 * wobble(t, cycles(rule.w, 2), rule.o * 0.02));
+      out += `<line x1="${r2(o)}" y1="0" x2="${r2(o + p.height)}" y2="${p.height}" stroke="${rule.hot ? bright : faint}" stroke-width="${r2(w)}"/>`;
     }
     return frame(p, out);
   },
@@ -223,13 +249,13 @@ const nodeNetwork: SampledGenerator<Network> = {
   project: ({ nodes, edges }, p, t) => {
     const edgeColor = withAlpha(p.accent, 0.35);
     const dotColor = withAlpha(p.accent, 0.95);
-    const drift = Math.min(p.width, p.height) * 0.012;
+    const drift = Math.min(p.width, p.height) * DRIFT_OF_FRAME;
 
     // Each node orbits its sampled position. Edges are then drawn between the
     // *displaced* positions, so the wires follow the nodes instead of detaching.
     const at = nodes.map((n) => {
       const phase = (n.x + n.y) * 0.01;
-      const k = cycles(n.rad);
+      const k = cycles(n.rad, 2);
       return {
         x: n.x + drift * wobble(t, k, phase),
         y: n.y + drift * wobble(t, k, phase + Math.PI / 2),
@@ -350,7 +376,8 @@ const isoGrid: SampledGenerator<Cell[]> = {
     for (const c of cells) {
       // The lattice cannot move without tearing, so the diamonds themselves
       // breathe about their centres.
-      const s = 1 + 0.12 * wobble(t, cycles(c.cx + c.cy), (c.cx - c.cy) * 0.01);
+      const s =
+        1 + 0.3 * wobble(t, cycles(c.cx + c.cy, 2), (c.cx - c.cy) * 0.01);
       const hw = (cw / 2) * s;
       const hh = (ch / 2) * s;
       const path = `M${r2(c.cx)} ${r2(c.cy - hh)} L${r2(c.cx + hw)} ${r2(c.cy)} L${r2(c.cx)} ${r2(c.cy + hh)} L${r2(c.cx - hw)} ${r2(c.cy)} Z`;
@@ -405,14 +432,20 @@ const scatterBlocks: SampledGenerator<Block[]> = {
       // for the whole file and no exceptions in the tests. It also reads better:
       // two full revolutions per loop is fast enough to pull the eye off
       // whatever the background is sitting behind.
-      const swing = 24 * (b.roll < 0.5 ? 1 : -1);
+      const k = cycles(b.size, 2);
+      const phase = b.roll * TAU;
+      const swing = 40 * (b.roll < 0.5 ? 1 : -1);
+      // Rotation alone moves one number per block, so the frame stayed almost
+      // still even at 48px of peak swing — the corners travelled, nothing a
+      // viewer tracks did. Drifting the block puts the motion into the
+      // coordinates as well.
+      const x = b.x + DRIFT_OF_FRAME * 320 * wobble(t, k, phase);
+      const y = b.y + DRIFT_OF_FRAME * 320 * wobble(t, k, phase + Math.PI / 2);
       // Rounded like every other emitted number. Without it the loop closes
       // geometrically but not textually: `sin(2πk + φ)` differs from `sin(φ)` in
       // the last few bits, and this is the one value the original printed raw.
-      const rot = r2(
-        b.rot + swing * wobble(t, cycles(b.size, 2), b.roll * TAU),
-      );
-      out += `<rect x="${r2(b.x)}" y="${r2(b.y)}" width="${r2(b.size)}" height="${r2(b.size)}" transform="rotate(${rot} ${r2(b.x + b.size / 2)} ${r2(b.y + b.size / 2)})" ${style}/>`;
+      const rot = r2(b.rot + swing * wobble(t, k, phase));
+      out += `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(b.size)}" height="${r2(b.size)}" transform="rotate(${rot} ${r2(x + b.size / 2)} ${r2(y + b.size / 2)})" ${style}/>`;
     }
     return frame(p, out);
   },
