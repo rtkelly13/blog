@@ -1,6 +1,7 @@
 import { RotateCcw } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
+import { type DepPhase, depFrameAt, depTotal } from './depResolveModel';
 
 /**
  * The diamond dependency conflict and its global resolution, animated.
@@ -9,39 +10,6 @@ import { useEffect, useRef, useState } from 'react';
  * it to a single version both agree on, then writes the lock. Prototype for
  * the Paket talk.
  */
-
-export type DepPhase = 'graph' | 'conflict' | 'resolve' | 'locked';
-
-export interface DepFrame {
-  phase: DepPhase;
-  /** 0..1 within the resolve transition (A's edge re-points, v1 fades). */
-  resolveProgress: number;
-  lockWritten: boolean;
-}
-
-const T_GRAPH = 1.6;
-const T_CONFLICT = 3.4;
-const T_RESOLVE = 5.4;
-const TOTAL = 7.0;
-
-export function depTotal(): number {
-  return TOTAL;
-}
-
-export function depFrameAt(t: number): DepFrame {
-  let phase: DepPhase;
-  if (t < T_GRAPH) phase = 'graph';
-  else if (t < T_CONFLICT) phase = 'conflict';
-  else if (t < T_RESOLVE) phase = 'resolve';
-  else phase = 'locked';
-  const resolveProgress =
-    t <= T_CONFLICT
-      ? 0
-      : t >= T_RESOLVE
-        ? 1
-        : (t - T_CONFLICT) / (T_RESOLVE - T_CONFLICT);
-  return { phase, resolveProgress, lockWritten: phase === 'locked' };
-}
 
 const C = {
   cyan: 'var(--brutalist-cyan, #22d3ee)',
@@ -140,7 +108,7 @@ export default function DepResolve({
   const [playing, setPlaying] = useState(false);
   const [started, setStarted] = useState(false);
 
-  const frame = depFrameAt(reduceMotion ? TOTAL : t);
+  const frame = depFrameAt(reduceMotion ? depTotal() : t);
 
   const restart = () => {
     setT(0);
@@ -179,9 +147,9 @@ export default function DepResolve({
         const dt = (now - last) / 1000;
         setT((p) => {
           const next = p + dt;
-          if (next >= TOTAL) {
+          if (next >= depTotal()) {
             setPlaying(false);
-            return TOTAL;
+            return depTotal();
           }
           return next;
         });
@@ -330,7 +298,7 @@ export default function DepResolve({
                 ['graph', 0.8],
                 ['conflict', 2.4],
                 ['resolve', 4.4],
-                ['locked', TOTAL],
+                ['locked', depTotal()],
               ] as const
             ).map(([lbl, at]) => (
               <button
