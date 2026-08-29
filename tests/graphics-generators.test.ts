@@ -171,10 +171,12 @@ describe('generator coherence (the property animation needs)', () => {
   it.each(cases)(
     '%s: every value moves continuously, frame to frame',
     (_name, gen) => {
-      // Bound derived from the fastest motion in the set: scatter-blocks turns at
-      // most 2 whole revolutions over the loop, so 360 * 2 / 300 = 2.4 degrees per
-      // step is the observed ceiling. Positions and radii move by <1. A generator
-      // that re-rolled would blow straight past this.
+      // Bound set from measurement, not guessed: the fastest mark in the set is
+      // a scatter-block at 1.68 units per step. Raising every amplitude to make
+      // the motion visible did not move that — capping the cycle counts at 2
+      // lowered the rate even as the distance grew. A generator that re-rolled
+      // between frames would blow past this by orders of magnitude, which is
+      // what the bound is for.
       const MAX_STEP_DELTA = 3;
       const p = params({ seed: 7, density: 0.6 });
       const s = gen.sample(p);
@@ -190,6 +192,28 @@ describe('generator coherence (the property animation needs)', () => {
       expect(worst).toBeLessThan(MAX_STEP_DELTA);
     },
   );
+
+  it.each(cases)('%s: moves far enough to be seen', (_name, gen) => {
+    // The assertion that was missing, and the reason it was missing is the
+    // point: every other test in this block is satisfied by a generator that
+    // moves by a third of a pixel. The first pass shipped `dot-grid` peaking at
+    // 2.35px with 1.2% of its marks moving, and `diagonal-hatch` at 2.20px with
+    // 0.8% — both provably coherent, seamlessly looping, and visually still.
+    //
+    // Coherence says motion is well-formed. Only this says there is any.
+    const MIN_PEAK_PX = 10;
+    const p = params({ seed: 7, density: 0.6 });
+    const s = gen.sample(p);
+    const base = numbers(gen.project(s, p, 0));
+    let peak = 0;
+    for (let i = 1; i <= STEPS; i++) {
+      const cur = numbers(gen.project(s, p, i / STEPS));
+      for (let k = 0; k < base.length; k++) {
+        peak = Math.max(peak, Math.abs(cur[k] - base[k]));
+      }
+    }
+    expect(peak).toBeGreaterThan(MIN_PEAK_PX);
+  });
 
   it.each(cases)('%s: emits no NaN at any point in the loop', (_name, gen) => {
     const p = params({ seed: 3, density: 0.7 });
