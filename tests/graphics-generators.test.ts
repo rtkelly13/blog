@@ -234,6 +234,62 @@ describe('generator coherence (the property animation needs)', () => {
   });
 });
 
+describe('ridgeline parallax', () => {
+  interface Ridge {
+    speed: number;
+    harmonics: { freq: number }[];
+  }
+
+  const ridges = () => {
+    const gen = GENERATOR_LIST.find((g) => g.name === 'ridgeline');
+    if (!gen) throw new Error('ridgeline is not registered');
+    return gen.sample(params({ seed: 7, density: 0.6 })) as Ridge[];
+  };
+
+  it('drifts faster the nearer the range', () => {
+    // The parallax, asserted rather than eyeballed. Layers are sampled far to
+    // near, so speed must rise monotonically — a range that overtook the one in
+    // front of it would read as the depth order inverting.
+    const speeds = ridges().map((r) => r.speed);
+    expect(speeds.length).toBeGreaterThan(2);
+    for (let i = 1; i < speeds.length; i++) {
+      expect(speeds[i]).toBeGreaterThanOrEqual(speeds[i - 1]);
+    }
+    expect(speeds[speeds.length - 1]).toBeGreaterThan(speeds[0]);
+  });
+
+  it('never crosses the frame in a loop', () => {
+    // What "too fast" meant concretely: this used to reach 3 frame-widths per
+    // loop, which blurs rather than drifts.
+    for (const r of ridges()) {
+      expect(r.speed).toBeGreaterThan(0);
+      expect(r.speed).toBeLessThan(0.5);
+    }
+  });
+
+  it('gives every harmonic a whole number of cycles per loop', () => {
+    // This is *why* the speeds can be fractional at all. Each frequency is a
+    // multiple of the layer's base, so `freq * speed` is an integer and the
+    // range lands exactly where it started — the loop-closure test proves the
+    // result, this one names the mechanism.
+    for (const r of ridges()) {
+      for (const h of r.harmonics) {
+        expect(h.freq * r.speed).toBeCloseTo(Math.round(h.freq * r.speed), 10);
+      }
+    }
+  });
+
+  it('samples finely enough not to alias its own peaks', () => {
+    // `1 - |sin|` peaks twice per period, and the projection samples 192 times
+    // across the frame. Below about four samples per peak the corners alias
+    // into noise, which is the opposite of the crisp silhouette intended.
+    const top = Math.max(
+      ...ridges().flatMap((r) => r.harmonics.map((h) => h.freq)),
+    );
+    expect(192 / (2 * top)).toBeGreaterThan(3);
+  });
+});
+
 describe('the integer-cycle rule', () => {
   it('is why the loop closes, and a fraction would break it', () => {
     // Executable form of the trap: motion is `sin(t·2π·k + φ)`, which returns to
