@@ -169,27 +169,37 @@ describe('generator coherence (the property animation needs)', () => {
   );
 
   it.each(cases)(
-    '%s: every value moves continuously, frame to frame',
+    '%s: moves smoothly relative to how far it travels',
     (_name, gen) => {
-      // Bound set from measurement, not guessed: the fastest mark in the set is
-      // a scatter-block at 1.68 units per step. Raising every amplitude to make
-      // the motion visible did not move that — capping the cycle counts at 2
-      // lowered the rate even as the distance grew. A generator that re-rolled
-      // between frames would blow past this by orders of magnitude, which is
-      // what the bound is for.
-      const MAX_STEP_DELTA = 3;
+      // Measured as a ratio, not an absolute distance.
+      //
+      // This was `worst < 3` — a number read off the wobbling generators, which
+      // all move a mark a little about a fixed point. `ridgeline` translates a
+      // whole silhouette instead, so it legitimately moves 20 units a step and
+      // failed a bound that was never a law, just the previous set's ceiling.
+      //
+      // The property actually worth testing is scale-free: smooth motion covers
+      // its distance in many small steps, so peak displacement is far larger
+      // than any single step. A generator re-rolling between frames reaches its
+      // full range in *one* step, so the ratio collapses to about 1. Every
+      // generator here scores 4.6 or better and most score 35+; the threshold
+      // catches the failure without pinning anything to a canvas size.
+      const MIN_SMOOTHNESS = 4;
       const p = params({ seed: 7, density: 0.6 });
       const s = gen.sample(p);
-      let prev = numbers(gen.project(s, p, 0));
+      const base = numbers(gen.project(s, p, 0));
+      let prev = base;
+      let peak = 0;
       let worst = 0;
       for (let i = 1; i <= STEPS; i++) {
         const next = numbers(gen.project(s, p, i / STEPS));
-        for (let k = 0; k < prev.length; k++) {
+        for (let k = 0; k < base.length; k++) {
+          peak = Math.max(peak, Math.abs(next[k] - base[k]));
           worst = Math.max(worst, Math.abs(next[k] - prev[k]));
         }
         prev = next;
       }
-      expect(worst).toBeLessThan(MAX_STEP_DELTA);
+      expect(peak / worst).toBeGreaterThan(MIN_SMOOTHNESS);
     },
   );
 
