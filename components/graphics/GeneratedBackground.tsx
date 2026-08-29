@@ -15,12 +15,18 @@ interface GeneratedBackgroundProps extends Partial<GraphicParams> {
  * Renders a graphic generator inline as a full-bleed SVG layer. Decorative, so
  * it's marked aria-hidden. For CSS/Spectacle backgrounds prefer `graphicDataUri`
  * (registry) — this component is for the gallery and in-flow decoration.
+ *
+ * `t` is accepted but this component does not animate it: each change re-samples
+ * the generator, which is the wasteful half. Driving `t` per frame is a
+ * renderer's job — hoist `sample` out of the loop via `getGenerator(name)` and
+ * call `project` per frame instead.
  */
 export default function GeneratedBackground({
   generator,
   className,
   style,
   seed,
+  t,
   accent,
   background,
   density,
@@ -41,6 +47,7 @@ export default function GeneratedBackground({
     () =>
       renderGraphic(generator, {
         seed,
+        t,
         accent: themedAccent,
         background,
         density,
@@ -52,6 +59,7 @@ export default function GeneratedBackground({
     [
       generator,
       seed,
+      t,
       themedAccent,
       background,
       density,
