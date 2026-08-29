@@ -1,4 +1,6 @@
 export { default as GeneratedBackground } from './GeneratedBackground';
+export type { GeneratorName } from './generators';
+export { SAMPLED_GENERATORS } from './generators';
 export { ACCENT_SWATCHES, BRUTALIST_ACCENTS, withAlpha } from './palette';
 export {
   GENERATOR_LIST,
@@ -7,5 +9,10 @@ export {
   renderGraphic,
   resolveParams,
 } from './registry';
-export type { Generator, GraphicParams, RenderFn } from './types';
+export type {
+  Generator,
+  GraphicParams,
+  RenderFn,
+  SampledGenerator,
+} from './types';
 export { BASE_PARAMS } from './types';
