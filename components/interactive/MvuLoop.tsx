@@ -1,47 +1,13 @@
 import { RotateCcw } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
-
-/**
- * The Elmish / MVU loop, animated. A message travels Model → View → Update
- * → Model, and each full lap changes the model (a counter), so the "single
- * source of truth mutating through a pure update function" is visible.
- * Prototype for the SAFE-stack talk.
- */
-
-export type MvuNode = 'model' | 'view' | 'update';
-
-export interface MvuFrame {
-  /** Edge the token is traversing. */
-  edge: 'model->view' | 'view->update' | 'update->model';
-  /** 0..1 along the current edge. */
-  progress: number;
-  active: MvuNode;
-  /** Model state value; increments once per lap. */
-  modelValue: number;
-  /** The message currently in flight, shown on view->update. */
-  message: string | null;
-}
-
-const EDGE_DUR = 1.1;
-const LAP = EDGE_DUR * 3;
-
-export function mvuFrameAt(t: number): MvuFrame {
-  const lap = Math.floor(t / LAP);
-  const within = t - lap * LAP;
-  const edgeIdx = Math.min(Math.floor(within / EDGE_DUR), 2);
-  const progress = (within - edgeIdx * EDGE_DUR) / EDGE_DUR;
-  const edges = ['model->view', 'view->update', 'update->model'] as const;
-  const active: MvuNode[] = ['view', 'update', 'model'];
-  return {
-    edge: edges[edgeIdx],
-    progress,
-    active: active[edgeIdx],
-    // The model updates as the token arrives back at Model (edge 2 done).
-    modelValue: lap + (edgeIdx === 2 ? 1 : 0),
-    message: edgeIdx === 1 ? 'Increment' : null,
-  };
-}
+import {
+  EDGE_DUR,
+  LAP,
+  type MvuFrame,
+  type MvuNode,
+  mvuFrameAt,
+} from './mvuLoopModel';
 
 const C = {
   cyan: 'var(--brutalist-cyan, #22d3ee)',
