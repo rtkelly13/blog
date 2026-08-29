@@ -563,23 +563,53 @@ interface Ridge {
   /** Horizon height for this layer, as a fraction of the frame. */
   base: number;
   harmonics: Harmonic[];
-  /** Whole cycles per loop. Back layers drift slower — that is the parallax. */
+  /**
+   * Frame-widths per loop — `1/f0`, a fraction rather than a whole width.
+   * Back ranges drift slower; that is the parallax.
+   */
   speed: number;
 }
 
 /**
  * Layered mountains, angular rather than rolling.
  *
- * Each ridge is a sum of harmonics at **integer** frequencies, which does two
- * things at once: it makes the ridge periodic across the frame, so advancing
- * the phase slides the range and lands it exactly where it started; and it
- * gives each layer its own integer speed, so the layers parallax. Both fall out
- * of the same constraint that closes the loop.
+ * ## How the loop closes, and why that used to make it too fast
  *
- * `1 - |sin θ|` rather than `sin θ` is what makes peaks instead of hills — the
- * absolute value puts a corner at every zero crossing, and summing harmonics
- * with decaying amplitude gives the self-similar profile of real terrain with
- * no noise function anywhere.
+ * A ridge slides by adding to the coordinate before the frequency multiplies
+ * it: `u = x/W + t·speed`. At `t = 1` every harmonic has advanced by
+ * `freq · speed` cycles, so the range lands exactly where it started **provided
+ * that product is a whole number**.
+ *
+ * With arbitrary integer frequencies that forces `speed` itself to be an
+ * integer — and one whole frame-width per loop is already a brisk drift, so the
+ * slowest range this could draw was too fast and the fastest crossed three
+ * widths and blurred.
+ *
+ * Deriving every harmonic in a layer from one base `f0` removes the constraint.
+ * The frequencies are `f0, 2·f0, 3·f0`, so `speed = 1/f0` still gives a whole
+ * number of cycles on each, and a range can now creep at an eighth of a width.
+ *
+ * ## One parameter, two cues, and they agree
+ *
+ * `f0` is also what sets a range's detail — more peaks for higher `f0`. Distant
+ * mountains read as many small peaks *and* barely move; near ones as few large
+ * peaks that travel. Both fall out of the same number in the same direction, so
+ * the parallax and the aerial perspective cannot drift apart: they are the same
+ * parameter.
+ *
+ * Far ranges take `f0 ≈ 8` and drift 0.125 frame-widths per loop; near ones
+ * `f0 ≈ 3` and 0.333. A 2.7x spread, and nothing crosses the frame.
+ *
+ * ## Peaks, not hills
+ *
+ * `1 - |sin θ|` rather than `sin θ`: the absolute value puts a corner at every
+ * zero crossing, and harmonics with decaying amplitude give a self-similar
+ * profile with no noise function anywhere.
+ *
+ * Three harmonics sampled 192 times, not four sampled 96. `1 - |sin|` peaks
+ * twice per period, so a far range's top harmonic of 24 puts 48 peaks across
+ * the frame; below about four samples per peak the corners alias into noise,
+ * which is the opposite of a crisp silhouette.
  */
 const ridgeline: SampledGenerator<Ridge[]> = {
   sample: (p) => {
@@ -588,34 +618,33 @@ const ridgeline: SampledGenerator<Ridge[]> = {
     const ridges: Ridge[] = [];
     for (let i = 0; i < layers; i++) {
       const depth = i / Math.max(1, layers - 1); // 0 = furthest, 1 = nearest
+      // The one number deciding both how fine this range is and how slowly it
+      // drifts. Jittered upward by at most one, so seeds differ without the
+      // far-to-near ordering inverting.
+      const f0 = Math.round(lerp(8, 3, depth)) + intRange(rng, 0, 1);
       const harmonics: Harmonic[] = [];
-      for (let h = 0; h < 4; h++) {
+      for (let h = 0; h < 3; h++) {
         harmonics.push({
-          // Integer, and rising per octave. Nearer ranges get coarser detail
-          // because they are closer, which is the whole of aerial perspective.
-          // Integer and rising per octave, but capped: the fourth octave of a
-          // 2x ladder outruns the 96-sample step and aliases into noise.
-          freq: intRange(rng, 1, 2) * (h + 1) + h,
-          amp: range(rng, 0.7, 1.3) / 2 ** h,
+          // Every harmonic a multiple of f0 — that is what lets `speed` be a
+          // fraction and still land the loop.
+          freq: f0 * (h + 1),
+          amp: range(rng, 0.8, 1.2) / (h + 1),
           phase: range(rng, 0, TAU),
         });
       }
       ridges.push({
         base: lerp(0.42, 0.96, depth),
         harmonics,
-        // Frame-widths travelled per loop. Integer, so the ridge lands exactly
-        // where it started; nearer ranges travel further, which is the parallax.
-        //
-        // Paired rather than one-per-layer (1,1,2,2,3 for five layers): a
-        // straight `i + 1` sent the front range across five frame widths in a
-        // loop, which is a blur rather than a drift.
-        speed: Math.ceil((i + 1) / 2),
+        // Frame-widths per loop. `1/f0` is a whole number of cycles on every
+        // harmonic, so the range closes; and because f0 falls as the range
+        // nears, this rises — the parallax comes free.
+        speed: 1 / f0,
       });
     }
     return ridges;
   },
   project: (ridges, p, t) => {
-    const step = p.width / 96;
+    const step = p.width / 192;
     let out = '';
     for (let i = 0; i < ridges.length; i++) {
       const r = ridges[i];
