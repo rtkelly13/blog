@@ -9,6 +9,17 @@
     "colours": 4,
     "bounds": [232, -48, 1048, 768]
   },
+  "cell-mask": {
+    "elements": {
+      "g": 1,
+      "rect": 120,
+      "path": 120
+    },
+    "marks": 241,
+    "viewBox": "0 0 1280 720",
+    "colours": 5,
+    "bounds": [0, 0, 1352, 1352]
+  },
   "contour": {
     "elements": {
       "g": 1,
@@ -18,6 +29,17 @@
     "viewBox": "0 0 1280 720",
     "colours": 3,
     "bounds": [0, 1, 1253, 724]
+  },
+  "cube-helix": {
+    "elements": {
+      "g": 1,
+      "path": 32,
+      "polygon": 124
+    },
+    "marks": 157,
+    "viewBox": "0 0 1280 720",
+    "colours": 6,
+    "bounds": [144, 113, 1245, 606]
   },
   "diagonal-hatch": {
     "elements": {
@@ -100,6 +122,26 @@
     "colours": 4,
     "bounds": [-129, -50, 1376, 773]
   },
+  "kaleidoscope": {
+    "elements": {
+      "g": 1,
+      "line": 147
+    },
+    "marks": 148,
+    "viewBox": "0 0 1280 720",
+    "colours": 19,
+    "bounds": [0, 0, 0, 0]
+  },
+  "lissajous": {
+    "elements": {
+      "g": 1,
+      "path": 12
+    },
+    "marks": 13,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [45, -13, 1299, 707]
+  },
   "node-network": {
     "elements": {
       "g": 1,
@@ -121,6 +163,26 @@
     "colours": 4,
     "bounds": [322, 44, 958, 676]
   },
+  "phyllotaxis": {
+    "elements": {
+      "g": 1,
+      "path": 5
+    },
+    "marks": 6,
+    "viewBox": "0 0 1280 720",
+    "colours": 6,
+    "bounds": [-93, -375, 1375, 1091]
+  },
+  "polar-mesh": {
+    "elements": {
+      "g": 1,
+      "path": 55
+    },
+    "marks": 56,
+    "viewBox": "0 0 1280 720",
+    "colours": 15,
+    "bounds": [-16, -275, 1271, 1013]
+  },
   "radial-spokes": {
     "elements": {
       "g": 1,
@@ -132,6 +194,16 @@
     "colours": 4,
     "bounds": [640, 360, 640, 360]
   },
+  "ribbon-grid": {
+    "elements": {
+      "g": 1,
+      "polygon": 330
+    },
+    "marks": 331,
+    "viewBox": "0 0 1280 720",
+    "colours": 33,
+    "bounds": [-128, -89, 1441, 876]
+  },
   "ridgeline": {
     "elements": {
       "g": 1,
@@ -142,6 +214,16 @@
     "colours": 10,
     "bounds": [0, 217, 1280, 720]
   },
+  "rose-curve": {
+    "elements": {
+      "g": 1,
+      "path": 6
+    },
+    "marks": 7,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [122, -91, 1046, 823]
+  },
   "scatter-blocks": {
     "elements": {
       "g": 1,
@@ -151,6 +233,57 @@
     "viewBox": "0 0 1280 720",
     "colours": 4,
     "bounds": [0, 0, 0, 0]
+  },
+  "signal-decay": {
+    "elements": {
+      "g": 1,
+      "path": 30
+    },
+    "marks": 31,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [0, 4, 1280, 715]
+  },
+  "spiral-mesh": {
+    "elements": {
+      "g": 1,
+      "path": 41
+    },
+    "marks": 42,
+    "viewBox": "0 0 1280 720",
+    "colours": 23,
+    "bounds": [-22, -306, 1315, 1039]
+  },
+  "spiral-warp": {
+    "elements": {
+      "g": 1,
+      "line": 299
+    },
+    "marks": 300,
+    "viewBox": "0 0 1280 720",
+    "colours": 43,
+    "bounds": [0, 0, 0, 0]
+  },
+  "swept-polygons": {
+    "elements": {
+      "g": 1,
+      "polygon": 6,
+      "line": 600
+    },
+    "marks": 607,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [209, -67, 1041, 773]
+  },
+  "terrain-mesh": {
+    "elements": {
+      "g": 1,
+      "path": 47
+    },
+    "marks": 48,
+    "viewBox": "0 0 1280 720",
+    "colours": 41,
+    "bounds": [-282, 174, 1562, 720]
   },
   "triangle-grid": {
     "elements": {
@@ -171,5 +304,26 @@
     "viewBox": "0 0 1280 720",
     "colours": 3,
     "bounds": [0, 0, 1411, 1370]
+  },
+  "void-field": {
+    "elements": {
+      "g": 1,
+      "rect": 689
+    },
+    "marks": 690,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [0, 0, 0, 0]
+  },
+  "weave": {
+    "elements": {
+      "g": 1,
+      "polygon": 250,
+      "path": 104
+    },
+    "marks": 355,
+    "viewBox": "0 0 1280 720",
+    "colours": 19,
+    "bounds": [-168, -168, 1428, 851]
   }
 }

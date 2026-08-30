@@ -49,7 +49,7 @@ against all of the following automatically, the moment it appears in the index:
 | coordinates stay near the frame | bleed is fine, four frames out is a runaway |
 | under 400 KB as a data URI at full density | these get inlined into HTML |
 
-The two rules that catch people:
+The three rules that catch people:
 
 - **Never draw from the rng inside `project`.** It is not merely wasteful — the
   stream is positional, so a draw shifts every later mark and re-rolls the
@@ -57,6 +57,13 @@ The two rules that catch people:
 - **Every cycle count must be a whole number.** Use `cycles()`, which cannot
   return a float. A fractional multiplier leaves a term mid-cycle at `t = 1` and
   produces a jump that reads as an encoding glitch rather than as a bug here.
+- **Anything that decides *where in the document* a mark is emitted must be
+  sampled.** The coherence suite compares emitted numbers **by index**, so if a
+  mark moves between output groups mid-loop — batched into a different `<path>`,
+  re-sorted into a different painter order — its coordinates land at a different
+  document position and register as a teleport. The smoothness ratio collapses
+  even though nothing visibly moved. Batching, grouping and sort order are all
+  `sample`'s business, and must be frozen before `project` ever runs.
 
 Anything sampled — `density`, `disorder` — must not be animated. It moves a loop
 bound in `sample`, which re-rolls the composition. Only `t` is animatable.

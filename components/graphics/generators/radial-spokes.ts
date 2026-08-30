@@ -3,7 +3,6 @@ import type { Rng } from './shared';
 import {
   chance,
   frame,
-  lattice,
   lerp,
   mulberry32,
   r2,

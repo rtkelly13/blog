@@ -5,7 +5,6 @@ import {
   cycles,
   disorderAt,
   frame,
-  lattice,
   lerp,
   mulberry32,
   ORBIT_OF_CELL,

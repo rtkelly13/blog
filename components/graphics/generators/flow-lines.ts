@@ -2,9 +2,7 @@ import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
   chance,
-  cycles,
   frame,
-  lattice,
   lerp,
   mulberry32,
   r2,

@@ -6,7 +6,6 @@ import {
   disorderAt,
   frame,
   intRange,
-  lattice,
   lerp,
   mulberry32,
   r2,

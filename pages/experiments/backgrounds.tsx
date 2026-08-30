@@ -1,9 +1,11 @@
 import { Pause, Play, Radio, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { GeneratorGroup } from '@/components/graphics';
 import {
   ACCENT_SWATCHES,
   AnimatedBackground,
-  GENERATOR_LIST,
+  GENERATOR_GROUPS,
+  generatorsInGroup,
   SURFACES,
 } from '@/components/graphics';
 import { PageSEO } from '@/components/SEO';
@@ -18,6 +20,24 @@ import siteMetadata from '@/data/siteMetadata';
  * per frame — was only ever visible through the Remotion renderer or the test
  * suite. This page drives it in the browser.
  */
+/**
+ * What each family is for, in one line. Shown under its heading — a gallery of
+ * thirty-odd tiles is a wall without them, and the grouping is only useful if
+ * the reader can tell why two things are neighbours.
+ */
+const GROUP_BLURB: Record<GeneratorGroup, string> = {
+  lattice:
+    'Regular tilings and grids. Edge-to-edge texture that sits behind anything.',
+  field:
+    'Marks driven by a field rather than a grid — flow, interference, networks.',
+  radial:
+    'Built about a centre, so they can sit behind a title rather than merely under it.',
+  terrain:
+    'Layered silhouettes and height fields. Depth by occlusion and contrast.',
+  isometric:
+    'Stacked geometry with opaque faces, so nearer solids hide farther ones.',
+};
+
 export default function BackgroundsLab() {
   const [accent, setAccent] = useState('#22d3ee');
   const [seed, setSeed] = useState(7);
@@ -30,6 +50,7 @@ export default function BackgroundsLab() {
   // over `playing`; the global buttons clear the map so they always mean what
   // they say rather than being silently countermanded by a stale override.
   const [solo, setSolo] = useState<Record<string, boolean>>({});
+  const [only, setOnly] = useState<GeneratorGroup | 'all'>('all');
 
   // Only the two tiles nearest the middle of the viewport run.
   //
@@ -125,10 +146,10 @@ export default function BackgroundsLab() {
             not an independent roll of the dice.
           </p>
           <p className="mt-2 max-w-3xl font-mono text-xs text-zinc-500">
-            <span className="text-brutalist-cyan">&gt;</span> Only the two tiles
-            nearest the middle of the window run — they are the outlined ones.
-            Scroll to drive the rest, or hit Play on any tile to pin it. Every
-            loop closes:
+            <span className="text-brutalist-cyan">&gt;</span> Grouped by family.
+            Only the two tiles nearest the middle of the window run — the
+            outlined ones — so scroll to drive the rest, or hit Play on any tile
+            to pin it. Every loop closes:
             <code> t = 1</code> renders identically to <code>t = 0</code>, so
             nothing seams. Pause to scrub a single loop by hand.
           </p>
@@ -185,6 +206,28 @@ export default function BackgroundsLab() {
               >
                 <RotateCcw className="h-4 w-4" /> Seed {seed}
               </button>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Family
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(['all', ...GENERATOR_GROUPS] as const).map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setOnly(g)}
+                  className={`border-2 px-2.5 py-1 font-mono text-xs uppercase ${
+                    only === g
+                      ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
+                      : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -258,62 +301,83 @@ export default function BackgroundsLab() {
           <code>t</code> is.
         </p>
 
-        <div className="grid grid-cols-1 gap-2 bg-zinc-800 p-2 lg:grid-cols-2">
-          {GENERATOR_LIST.map((g) => (
-            <figure
-              key={g.name}
-              ref={(el) => {
-                if (el) tiles.current.set(g.name, el);
-                else tiles.current.delete(g.name);
-              }}
-              className={`bg-black transition-shadow ${
-                central.includes(g.name)
-                  ? 'shadow-[inset_0_0_0_2px_var(--brutalist-cyan,#22d3ee)]'
-                  : ''
-              }`}
-            >
-              <div className="aspect-video overflow-hidden">
-                <AnimatedBackground
-                  generator={g.name}
-                  {...shared}
-                  playing={isPlaying(g.name)}
-                  className="h-full w-full"
-                />
-              </div>
-              <figcaption className="border-t-2 border-zinc-800 p-4">
-                <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="font-display text-lg font-bold uppercase text-white">
-                    {g.label}
-                  </h2>
-                  <div className="flex items-center gap-3">
-                    <code className="font-mono text-xs text-brutalist-cyan">
-                      {g.name}
-                    </code>
-                    <button
-                      type="button"
-                      onClick={() => toggleOne(g.name)}
-                      aria-label={`${isPlaying(g.name) ? 'Pause' : 'Play'} ${g.label}`}
-                      className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
-                    >
-                      {isPlaying(g.name) ? (
-                        <>
-                          <Pause className="h-3 w-3" /> Pause
-                        </>
-                      ) : (
-                        <>
-                          <Play className="h-3 w-3" /> Play
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <p className="mt-1 font-mono text-xs text-zinc-400">
-                  {g.description}
+        {GENERATOR_GROUPS.filter(
+          (group) => only === 'all' || only === group,
+        ).map((group) => {
+          const inGroup = generatorsInGroup(group);
+          if (inGroup.length === 0) return null;
+          return (
+            <section key={group}>
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-y-2 border-white bg-zinc-900 px-6 py-4">
+                <h2 className="font-display text-xl font-bold uppercase tracking-tight text-white">
+                  [ {group} ]
+                </h2>
+                <span className="font-mono text-xs text-brutalist-cyan">
+                  {inGroup.length}
+                </span>
+                <p className="font-mono text-xs text-zinc-400">
+                  {GROUP_BLURB[group]}
                 </p>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2 bg-zinc-800 p-2 lg:grid-cols-2">
+                {inGroup.map((g) => (
+                  <figure
+                    key={g.name}
+                    ref={(el) => {
+                      if (el) tiles.current.set(g.name, el);
+                      else tiles.current.delete(g.name);
+                    }}
+                    className={`bg-black transition-shadow ${
+                      central.includes(g.name)
+                        ? 'shadow-[inset_0_0_0_2px_var(--brutalist-cyan,#22d3ee)]'
+                        : ''
+                    }`}
+                  >
+                    <div className="aspect-video overflow-hidden">
+                      <AnimatedBackground
+                        generator={g.name}
+                        {...shared}
+                        playing={isPlaying(g.name)}
+                        className="h-full w-full"
+                      />
+                    </div>
+                    <figcaption className="border-t-2 border-zinc-800 p-4">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <h3 className="font-display text-lg font-bold uppercase text-white">
+                          {g.label}
+                        </h3>
+                        <div className="flex items-center gap-3">
+                          <code className="font-mono text-xs text-brutalist-cyan">
+                            {g.name}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => toggleOne(g.name)}
+                            aria-label={`${isPlaying(g.name) ? 'Pause' : 'Play'} ${g.label}`}
+                            className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                          >
+                            {isPlaying(g.name) ? (
+                              <>
+                                <Pause className="h-3 w-3" /> Pause
+                              </>
+                            ) : (
+                              <>
+                                <Play className="h-3 w-3" /> Play
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <p className="mt-1 font-mono text-xs text-zinc-400">
+                        {g.description}
+                      </p>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </>
   );

@@ -8,7 +8,6 @@ import {
   mulberry32,
   r2,
   range,
-  smooth,
   TAU,
   withAlpha,
   wobble,
