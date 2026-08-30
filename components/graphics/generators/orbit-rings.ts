@@ -5,7 +5,6 @@ import {
   cycles,
   frame,
   intRange,
-  lattice,
   lerp,
   mulberry32,
   r2,

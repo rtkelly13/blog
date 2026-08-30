@@ -1,6 +1,8 @@
 import type { GeneratorModule } from '../types';
 import brokenRing from './broken-ring';
+import cellMask from './cell-mask';
 import contour from './contour';
+import cubeHelix from './cube-helix';
 import diagonalHatch from './diagonal-hatch';
 import dotGrid from './dot-grid';
 import flowField from './flow-field';
@@ -9,13 +11,26 @@ import hexGrid from './hex-grid';
 import interference from './interference';
 import isoCubes from './iso-cubes';
 import isoGrid from './iso-grid';
+import kaleidoscope from './kaleidoscope';
+import lissajous from './lissajous';
 import nodeNetwork from './node-network';
 import orbitRings from './orbit-rings';
+import phyllotaxis from './phyllotaxis';
+import polarMesh from './polar-mesh';
 import radialSpokes from './radial-spokes';
+import ribbonGrid from './ribbon-grid';
 import ridgeline from './ridgeline';
+import roseCurve from './rose-curve';
 import scatterBlocks from './scatter-blocks';
+import signalDecay from './signal-decay';
+import spiralMesh from './spiral-mesh';
+import spiralWarp from './spiral-warp';
+import sweptPolygons from './swept-polygons';
+import terrainMesh from './terrain-mesh';
 import triangleGrid from './triangle-grid';
 import truchetArcs from './truchet-arcs';
+import voidField from './void-field';
+import weave from './weave';
 
 /**
  * Every generator, in gallery order.
@@ -55,6 +70,21 @@ export const GENERATOR_MODULES: GeneratorModule<unknown>[] = [
   flowLines,
   brokenRing,
   orbitRings,
+  kaleidoscope,
+  phyllotaxis,
+  lissajous,
+  polarMesh,
+  terrainMesh,
+  spiralMesh,
+  roseCurve,
+  weave,
+  signalDecay,
+  voidField,
+  spiralWarp,
+  ribbonGrid,
+  cellMask,
+  cubeHelix,
+  sweptPolygons,
 ] as GeneratorModule<unknown>[];
 
 /** Back-compat shape: id → the sample/project pair. */

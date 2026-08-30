@@ -1,7 +1,6 @@
 import { defineGenerator } from '../types';
 import type { Rng, Tiled } from './shared';
 import {
-  cycles,
   frame,
   lattice,
   lerp,
@@ -10,7 +9,6 @@ import {
   scaledPath,
   wave,
   withAlpha,
-  wobble,
 } from './shared';
 
 /* ── hex-grid ─────────────────────────────────────────────────────────────── */

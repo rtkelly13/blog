@@ -1,7 +1,6 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
-  cycles,
   frame,
   intRange,
   lerp,
@@ -9,7 +8,6 @@ import {
   mulberry32,
   r2,
   range,
-  smooth,
   TAU,
   valueNoise,
   withAlpha,

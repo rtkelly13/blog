@@ -10,7 +10,6 @@ import {
   range,
   TAU,
   withAlpha,
-  wobble,
 } from './shared';
 
 /* ── contour ──────────────────────────────────────────────────────────────── */
