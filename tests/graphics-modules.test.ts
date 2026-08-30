@@ -87,6 +87,28 @@ describe('generator modules', () => {
     },
   );
 
+  it.each(GENERATOR_MODULES.map((m) => [m.name, m] as const))(
+    '%s: declares a sane speed, if it declares one',
+    (_name, m) => {
+      // A multiplier, not a duration. Zero would stop the loop and a large
+      // value would outrun the frame rate, so both ends are pinned.
+      if (m.speed === undefined) return;
+      expect(m.speed).toBeGreaterThan(0.05);
+      expect(m.speed).toBeLessThanOrEqual(4);
+    },
+  );
+
+  it('gives every radial generator a pace of its own', () => {
+    // Tangential speed is omega times r, so a centred form at full reach covers
+    // far more ground per turn than a lattice mark does per wobble — and a
+    // partial turn is not available, because it does not close. Every radial
+    // generator therefore has to slow itself down through `speed`, and this is
+    // the assertion that stops a new one shipping at lattice pace.
+    for (const m of GENERATOR_MODULES.filter((x) => x.group === 'radial')) {
+      expect(m.speed ?? 1).toBeLessThan(1);
+    }
+  });
+
   it('reaches the registry with its group intact', () => {
     for (const m of GENERATOR_MODULES) {
       const g = GENERATOR_LIST.find((x) => x.name === m.name);

@@ -82,6 +82,11 @@ export default defineGenerator<Helix>({
   description:
     'Isometric cubes threaded along a sine helix, nearer ones hiding those behind.',
   group: 'isometric',
+  // Slower than the lattice generators, and the reason is geometric: a turn
+  // at full reach covers the whole circumference, so what reads as a stately
+  // rotation on a small form is a blur on a frame-filling one. See
+  // `GeneratorModule.speed`.
+  speed: 0.6,
   defaults: { density: 0.5, strokeWidth: 1.5 },
 
   sample: (p) => {
@@ -89,7 +94,10 @@ export default defineGenerator<Helix>({
     // Deliberately narrow. Every cube is five polygons plus a path, so density
     // buys a few more links in the chain and not an order of magnitude; the
     // data-URI budget is spent on geometry, not on count.
-    const count = Math.round(lerp(22, 40, p.density));
+    // Fewer than it looks like it wants. Cubes are five polygons each and the
+    // helix crosses the frame once, so past about thirty they stop reading as
+    // beads on a thread and start reading as a solid tube.
+    const count = Math.round(lerp(14, 26, p.density));
     const cubes: Cube[] = [];
     for (let i = 0; i < count; i++) {
       cubes.push({
@@ -109,7 +117,13 @@ export default defineGenerator<Helix>({
   },
 
   project: ({ cubes, coils, spin }, p, t) => {
-    const marginX = p.width * 0.1;
+    // Negative margin: the helix starts and ends *outside* the frame.
+    //
+    // Ending it inside made the thread a self-contained object with two visible
+    // stops — an illustration of a helix rather than a length of one passing
+    // through. Overrunning both edges is what makes it read as continuous, and
+    // it costs nothing: the cubes beyond the edge are clipped by the viewBox.
+    const marginX = -p.width * 0.14;
     const orbit = p.height * 0.2;
     const edge = withAlpha(p.accent, 0.6);
     const thread = withAlpha(p.accent, 0.22);

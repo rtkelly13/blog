@@ -2,15 +2,15 @@ import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
   chance,
-  cycles,
   frame,
+  intRange,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
+  valueNoise,
   withAlpha,
-  wobble,
 } from './shared';
 
 /* ── flow-field ───────────────────────────────────────────────────────────── */
@@ -25,15 +25,21 @@ interface Quill {
 }
 
 interface Flow {
+  seed: number;
   quills: Quill[];
-  /** Field constants — the field's shape, sampled once. */
+  /** Field scale, sampled once — the field's shape, not its phase. */
   a: number;
   b: number;
-  c: number;
 }
 
 /** Radians the field sways through per loop. */
-const FLOW_SWAY = 0.9;
+/**
+ * How far the sample point travels around its circle in noise space per loop.
+ *
+ * Small: the field should evolve, not churn. At 0.35 a quill's angle drifts
+ * through most of a turn over the loop while its neighbours drift with it.
+ */
+const FIELD_WALK = 0.35;
 
 /**
  * A vector field, drawn as the direction field itself.
@@ -89,33 +95,51 @@ export default defineGenerator<Flow>({
       }
     }
     return {
+      seed: intRange(rng, 1, 9999),
       quills,
-      a: range(rng, 1.2, 2.6),
-      b: range(rng, 1.2, 2.6),
-      // Whole cycles, via the same helper as everything else — the second field
-      // term advances by `phase * c`, so a fractional `c` would leave it
-      // mid-cycle at `t = 1` while the first term had closed.
-      c: cycles(rng(), 2),
+      // Field scale in noise units across the frame. Around three gives sweeps
+      // a few quills wide; much higher and it degenerates into per-mark noise.
+      a: range(rng, 2.4, 3.6),
+      b: range(rng, 1.4, 2.2),
     };
   },
   project: (f, p, t) => {
-    const faint = withAlpha(p.accent, 0.34);
+    const _faint = withAlpha(p.accent, 0.3);
     const bright = withAlpha(p.accent, 0.95);
-    const phase = FLOW_SWAY * wobble(t, 1, 0);
+    // The field walks a circle through noise space.
+    //
+    // It used to be two crossed sines, and that is *separable* — a function of
+    // x plus a function of y — which is precisely why it banded. Whole rows
+    // shared an angle and the frame read as horizontal stripes of near-parallel
+    // dashes. No amount of tuning the amplitudes fixes a field whose two axes
+    // never interact.
+    //
+    // Noise is not separable, so neighbouring quills agree without whole rows
+    // agreeing. Offsetting the sample point around a circle animates it and
+    // closes the loop exactly, for the same reason `ridgeline` does it: a
+    // circle returns to where it started.
+    const ox = FIELD_WALK * Math.cos(t * TAU);
+    const oy = FIELD_WALK * Math.sin(t * TAU);
     let out = '';
     for (const q of f.quills) {
-      const u = q.x / p.width;
-      const v = q.y / p.height;
-      // Two crossed sines — `flow_lines`' "vector field written as two
-      // formulas", and the whole of the field. The quill is centred on its
-      // sample point and turned, so it pivots rather than swinging from one end.
+      const nx = (q.x / p.width) * f.a + ox;
+      const ny = (q.y / p.height) * f.b + oy;
+      // Two octaves: the coarse one sets the sweep, the fine one keeps
+      // neighbours from marching in lockstep.
       const angle =
-        Math.sin(u * f.a * TAU + phase) * 1.15 +
-        Math.cos(v * f.b * TAU - phase * f.c) * 1.15 +
+        (valueNoise(nx, ny, f.seed) * 2 - 1) * TAU * 0.75 +
+        (valueNoise(nx * 2.7, ny * 2.7, f.seed + 31) * 2 - 1) * 0.55 +
         q.skew;
-      const dx = (Math.cos(angle) * q.len) / 2;
-      const dy = (Math.sin(angle) * q.len) / 2;
-      out += `<line x1="${r2(q.x - dx)}" y1="${r2(q.y - dy)}" x2="${r2(q.x + dx)}" y2="${r2(q.y + dy)}" stroke="${q.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (q.hot ? 1.8 : 0.85))}" stroke-linecap="round"/>`;
+      // Length from a second, slower field, so the frame has quiet stretches
+      // and busy ones instead of one uniform weight everywhere. A flow field
+      // drawn at constant weight is a texture; varying it is what gives the
+      // eye somewhere to go.
+      const weight = valueNoise(nx * 0.6 + 11, ny * 0.6 - 7, f.seed + 97);
+      const len = q.len * (0.45 + 1.15 * weight);
+      const dx = (Math.cos(angle) * len) / 2;
+      const dy = (Math.sin(angle) * len) / 2;
+      const alpha = q.hot ? 0.95 : 0.16 + 0.42 * weight;
+      out += `<line x1="${r2(q.x - dx)}" y1="${r2(q.y - dy)}" x2="${r2(q.x + dx)}" y2="${r2(q.y + dy)}" stroke="${q.hot ? bright : withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(p.strokeWidth * (q.hot ? 1.8 : 0.85))}" stroke-linecap="round"/>`;
     }
     return frame(p, out);
   },
