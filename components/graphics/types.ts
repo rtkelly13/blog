@@ -31,6 +31,38 @@ export interface GraphicParams {
   opacity: number;
   /** Base stroke width in viewBox units. */
   strokeWidth: number;
+  /**
+   * Opaque fill for faces that hide what is behind them.
+   *
+   * Not a shade of `accent` and not `background`. Overlapping solids need a
+   * colour that says *"this face occludes the one behind it"*, and neither of
+   * the other two can supply it: `withAlpha(accent, …)` is see-through by
+   * construction, so stacked cubes show through each other, and `background`
+   * defaults to `'transparent'` — correct for layering over a surface, and
+   * therefore no colour at all.
+   *
+   * So it is its own parameter, defaulting to the theme's surface rather than
+   * to `background`. Only generators that actually stack geometry read it; the
+   * rest ignore it, which is why it can be added without moving a golden.
+   */
+  occlusion: string;
+  /**
+   * How much the composition comes apart across the frame, 0..1.
+   *
+   * `0` is a strict lattice everywhere and is the default, so every generator
+   * that honours this renders exactly as it did before it existed.
+   *
+   * Distinct from `density`, which sets how *many* marks there are, and from
+   * the per-mark wobble in `project`, which displaces every mark by the same
+   * amount and therefore reads as uniform texture. This is a *gradient*: order
+   * at one edge decaying to chaos at the other. A texture has no composition;
+   * a ramp does.
+   *
+   * Sampled, not projected — it perturbs where marks *are*, so like `density`
+   * it must not be animated. Interpolating two sampled structures is the way to
+   * do that, and is deliberately not attempted here.
+   */
+  disorder: number;
 }
 
 export type RenderFn = (params: GraphicParams) => string;
@@ -48,7 +80,12 @@ export interface SampledGenerator<S> {
   project: (structure: S, params: GraphicParams, t: number) => string;
 }
 
-export type ControlType = 'seed' | 'density' | 'strokeWidth' | 'opacity';
+export type ControlType =
+  | 'seed'
+  | 'density'
+  | 'strokeWidth'
+  | 'opacity'
+  | 'disorder';
 
 /** Metadata that lets the gallery build live controls generically. */
 export interface Generator {
@@ -87,4 +124,6 @@ export const BASE_PARAMS: GraphicParams = {
   density: 0.5,
   opacity: 1,
   strokeWidth: 2,
+  occlusion: '#0a0a1a',
+  disorder: 0,
 };

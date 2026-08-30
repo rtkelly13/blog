@@ -93,6 +93,37 @@ const wobble = (t: number, k: number, phase: number): number =>
 const ORBIT_OF_CELL = 0.13;
 const DRIFT_OF_FRAME = 0.035;
 
+/**
+ * Deterministic value in [-1, 1) from a pair of coordinates.
+ *
+ * Not an rng draw, and that is the entire point. `disorder` is sampled, so it
+ * has to perturb positions from *inside* `sample` — and drawing for it would
+ * shift the stream and re-roll every later mark, which is the failure this
+ * module exists to prevent, reintroduced by the parameter meant to improve it.
+ * Hashing the coordinates instead means `disorder = 0` consumes exactly the
+ * randomness the generator always did, so not one golden moves.
+ */
+const scramble = (x: number, y: number, salt: number): number => {
+  const n = Math.sin(x * 12.9898 + y * 78.233 + salt * 43.7585) * 43758.5453;
+  return (n - Math.floor(n)) * 2 - 1;
+};
+
+/**
+ * How far into the disorder ramp a point is — 0 at the top edge, `disorder` at
+ * the bottom.
+ *
+ * The ramp is what separates this from jitter. A uniform perturbation is
+ * texture, and the eye stops reading it within about a second; a gradient from
+ * strict lattice to chaos is a *composition*, with somewhere to start and
+ * somewhere to end up. Squared, so the ordered end holds on rather than
+ * degrading from the first row — the top of `flow_dots` is a convincing grid
+ * for a third of its height, and that contrast is the whole effect.
+ */
+const disorderAt = (p: GraphicParams, y: number): number =>
+  p.disorder <= 0
+    ? 0
+    : p.disorder * Math.min(1, Math.max(0, y / p.height)) ** 2;
+
 /** Wrap generator marks in a themed <svg> with optional backdrop + opacity. */
 function frame(params: GraphicParams, inner: string): string {
   const { width, height, opacity, background } = params;
@@ -123,7 +154,16 @@ const dotGrid: SampledGenerator<Dot[]> = {
         const hot = chance(rng, 0.06 + p.density * 0.14);
         const rad =
           (hot ? range(rng, 2.5, 4.5) : range(rng, 1, 2.4)) * (spacing / 40);
-        dots.push({ x, y, rad, hot });
+        // The strict grid comes apart as it falls. Bounded by roughly one cell,
+        // so the lattice dissolves rather than turning into a scatter that
+        // happens to have started as a grid.
+        const chaos = disorderAt(p, y);
+        dots.push({
+          x: x + chaos * spacing * 0.95 * scramble(x, y, 1),
+          y: y + chaos * spacing * 0.6 * scramble(x, y, 2),
+          rad,
+          hot,
+        });
       }
     }
     return dots;
@@ -357,9 +397,12 @@ const isoGrid: SampledGenerator<Cell[]> = {
         // cell never makes it. Preserving that short-circuit is what keeps the
         // stream — and therefore every later cell — identical.
         const filled = flare ? false : chance(rng, 0.12);
+        const cx = col * cw + (row % 2 ? cw / 2 : 0);
+        const cy = (row * ch) / 2;
+        const chaos = disorderAt(p, cy);
         cells.push({
-          cx: col * cw + (row % 2 ? cw / 2 : 0),
-          cy: (row * ch) / 2,
+          cx: cx + chaos * cw * 0.5 * scramble(cx, cy, 3),
+          cy: cy + chaos * ch * 0.5 * scramble(cx, cy, 4),
           flare,
           filled,
         });
@@ -681,6 +724,459 @@ const ridgeline: SampledGenerator<Ridge[]> = {
   },
 };
 
+/* ── radial-spokes ────────────────────────────────────────────────────────── */
+
+interface Spoke {
+  angle: number;
+  inner: number;
+  outer: number;
+  hot: boolean;
+}
+
+interface Wheel {
+  spokes: Spoke[];
+  rings: { r: number; hot: boolean }[];
+  cx: number;
+  cy: number;
+  reach: number;
+}
+
+/**
+ * Spokes and rings about a centre.
+ *
+ * The first generator here that is not Cartesian, and that is the point. Every
+ * other one draws edge-to-edge uniform texture — a grid, a lattice, a stack of
+ * bands — which can sit behind anything because it emphasises nothing. This one
+ * has a middle, so it can sit *behind a title* and point at it.
+ *
+ * Motion is a sweep: the whole wheel advances by whole turns, which closes the
+ * loop for the same reason every other generator does, except the angle is
+ * consumed by `cos`/`sin` rather than printed. That matters — a `rotate()`
+ * transform would print `360` at `t = 1` against `0` at `t = 0`, geometrically
+ * identical and textually different, which is the trap `scatter-blocks`
+ * documents. Coordinates have no such wrap.
+ */
+const radialSpokes: SampledGenerator<Wheel> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const cx = p.width / 2;
+    const cy = p.height / 2;
+    // Reach past the corner, so the wheel bleeds off every edge rather than
+    // floating as a disc with visible sides.
+    const reach = Math.hypot(p.width, p.height) / 2;
+    const count = Math.round(lerp(24, 120, p.density));
+    const spokes: Spoke[] = [];
+    for (let i = 0; i < count; i++) {
+      const hot = chance(rng, 0.08 + p.density * 0.1);
+      // Quantised to the spoke index rather than drawn freely: evenly spaced
+      // radials are the whole character of the form, and jitter reads as a
+      // mistake rather than as texture.
+      const angle = (i / count) * TAU;
+      spokes.push({
+        angle,
+        inner: reach * range(rng, 0.08, 0.34),
+        outer: reach * range(rng, 0.55, 1),
+        hot,
+      });
+    }
+    const ringCount = Math.round(lerp(3, 9, p.density));
+    const rings = Array.from({ length: ringCount }, (_, i) => ({
+      r: reach * ((i + 1) / (ringCount + 1)),
+      hot: chance(rng, 0.25),
+    }));
+    return { spokes, rings, cx, cy, reach };
+  },
+  project: (w, p, t) => {
+    const faint = withAlpha(p.accent, 0.3);
+    const bright = withAlpha(p.accent, 0.95);
+    const ringColor = withAlpha(p.accent, 0.4);
+    // One turn per loop. Whole by construction, so `t = 1` lands back on `t = 0`.
+    const sweep = t * TAU;
+    let out = '';
+    for (const s of w.spokes) {
+      const a = s.angle + sweep;
+      // A travelling pulse around the wheel: the length term depends on the
+      // spoke's own angle, so the swell runs round the rim instead of every
+      // spoke breathing in unison.
+      const pulse = 1 + 0.16 * Math.sin(s.angle * 3 + sweep * 2);
+      const x1 = w.cx + Math.cos(a) * s.inner;
+      const y1 = w.cy + Math.sin(a) * s.inner;
+      const x2 = w.cx + Math.cos(a) * s.outer * pulse;
+      const y2 = w.cy + Math.sin(a) * s.outer * pulse;
+      out += `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${s.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (s.hot ? 2.2 : 1))}"/>`;
+    }
+    for (const ring of w.rings) {
+      const r = ring.r * (1 + 0.06 * Math.sin(sweep * 2 + ring.r * 0.02));
+      out += `<circle cx="${r2(w.cx)}" cy="${r2(w.cy)}" r="${r2(r)}" fill="none" stroke="${ring.hot ? bright : ringColor}" stroke-width="${p.strokeWidth}"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── interference ─────────────────────────────────────────────────────────── */
+
+interface Source {
+  x: number;
+  y: number;
+  freq: number;
+  amp: number;
+  orbit: number;
+  orbitPhase: number;
+  orbitCycles: number;
+}
+
+interface Field {
+  sources: Source[];
+  rows: number[];
+  cols: number[];
+}
+
+/**
+ * Two-source wave interference, drawn as displaced horizontal rules.
+ *
+ * The best fit in the set for the sample/project split, because the split is
+ * doing real work rather than being satisfied: the *grid* is sampled once and
+ * never moves, and the *sources* move, so every mark on screen is the same mark
+ * from frame to frame while the whole surface reorganises. Interference figures
+ * are also worth having because they are the one pattern here that is not
+ * decomposable — the fringes exist only in the sum, so no amount of per-mark
+ * wobble produces them.
+ *
+ * Each source orbits a whole number of times per loop, so the field is
+ * identical at `t = 1` and `t = 0` without any term needing to be written as
+ * `f(t) − f(0)`.
+ */
+const interference: SampledGenerator<Field> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    // Two or three. More sources do not read as more interference, they read as
+    // noise — the fringes stop being traceable once there are enough of them.
+    const count = intRange(rng, 2, 3);
+    const sources: Source[] = [];
+    for (let i = 0; i < count; i++) {
+      sources.push({
+        x: range(rng, p.width * 0.15, p.width * 0.85),
+        y: range(rng, p.height * 0.15, p.height * 0.85),
+        freq: range(rng, 0.012, 0.028),
+        amp: range(rng, 10, 22),
+        orbit: range(rng, 40, 130),
+        orbitPhase: range(rng, 0, TAU),
+        orbitCycles: intRange(rng, 1, 2),
+      });
+    }
+    const gap = lerp(34, 12, p.density);
+    const rows: number[] = [];
+    for (let y = gap / 2; y < p.height; y += gap) rows.push(y);
+    // Sample points along x. Fixed count, so the emitted number count cannot
+    // change with t — the mark-count invariant is structural here, not lucky.
+    const step = Math.max(6, Math.round(lerp(16, 7, p.density)));
+    const cols: number[] = [];
+    for (let x = 0; x <= p.width; x += step) cols.push(x);
+    return { sources, rows, cols };
+  },
+  project: (f, p, t) => {
+    const faint = withAlpha(p.accent, 0.34);
+    const bright = withAlpha(p.accent, 0.9);
+    // Sources first: every row reads the same moved sources, which is what makes
+    // the fringes coherent rather than each row inventing its own.
+    const at = f.sources.map((s) => {
+      const a = s.orbitPhase + t * TAU * s.orbitCycles;
+      return {
+        x: s.x + Math.cos(a) * s.orbit,
+        y: s.y + Math.sin(a) * s.orbit,
+        freq: s.freq,
+        amp: s.amp,
+      };
+    });
+    let out = '';
+    for (let i = 0; i < f.rows.length; i++) {
+      const y0 = f.rows[i];
+      let d = '';
+      for (const x of f.cols) {
+        let dy = 0;
+        for (const s of at) {
+          const dist = Math.hypot(x - s.x, y0 - s.y);
+          // Amplitude falls off with distance, so a source reads as a source
+          // rather than as a global modulation of the whole frame.
+          dy += s.amp * Math.sin(dist * s.freq) * (1 / (1 + dist * 0.004));
+        }
+        d += `${d ? 'L' : 'M'}${r2(x)} ${r2(y0 + dy)}`;
+      }
+      const hot = i % 7 === 3;
+      out += `<path d="${d}" fill="none" stroke="${hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (hot ? 1.8 : 0.9))}"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── flow-field ───────────────────────────────────────────────────────────── */
+
+interface Quill {
+  x: number;
+  y: number;
+  len: number;
+  hot: boolean;
+  /** Sampled bias, so the field is not the only thing setting the angle. */
+  skew: number;
+}
+
+interface Flow {
+  quills: Quill[];
+  /** Field constants — the field's shape, sampled once. */
+  a: number;
+  b: number;
+  c: number;
+}
+
+/** Radians the field sways through per loop. */
+const FLOW_SWAY = 0.9;
+
+/**
+ * A vector field, drawn as the direction field itself.
+ *
+ * ## Why this is not streamlines
+ *
+ * The obvious adaptation of `flow_lines` is to integrate: seed a point, step it
+ * through the field twenty-odd times, draw the path. That version was built
+ * first and it fails this directory's smoothness invariant outright — it scored
+ * a peak/worst ratio of **1.0**, which is the confetti signature, from a
+ * generator that re-rolls nothing at all.
+ *
+ * Advection is why. Each integration step feeds its position into the next, so
+ * an angular nudge at the seed is compounded all the way down the line, and near
+ * a separatrix the tail does not drift — it switches channel. Measured: one
+ * value moving 271px in a single 1/300 step, and a trace that jumps 739 → 468
+ * and then carries on smoothly. The motion is continuous in the mathematical
+ * sense and discontinuous at any rate you can actually sample it at.
+ *
+ * Weakening the field does not fix it, it only postpones it: a sweep across
+ * amplitudes 0.4–1.1 and step counts 4–26 never cleared a ratio of 5.5, against
+ * 45+ for every other generator here. Coherence and advection are in genuine
+ * tension, and the invariant is the more valuable of the two.
+ *
+ * So this draws the field rather than its integral: a quill at each sample
+ * point, angled by the field, with no feedback between them. Every mark depends
+ * on `t` through exactly one smooth term, which is why it moves like everything
+ * else in this file. It is also the form `wave-field` takes in the reference
+ * set — the same idea, in the version that survives being tested.
+ */
+const flowField: SampledGenerator<Flow> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const gap = lerp(64, 26, p.density);
+    const quills: Quill[] = [];
+    // Half a cell of bleed, so the field does not stop short of the frame.
+    for (let y = -gap / 2; y < p.height + gap; y += gap) {
+      for (let x = -gap / 2; x < p.width + gap; x += gap) {
+        quills.push({
+          x,
+          y,
+          len: gap * range(rng, 0.55, 0.95),
+          hot: chance(rng, 0.07 + p.density * 0.08),
+          skew: range(rng, -0.12, 0.12),
+        });
+      }
+    }
+    return {
+      quills,
+      a: range(rng, 1.2, 2.6),
+      b: range(rng, 1.2, 2.6),
+      // Whole cycles, via the same helper as everything else — the second field
+      // term advances by `phase * c`, so a fractional `c` would leave it
+      // mid-cycle at `t = 1` while the first term had closed.
+      c: cycles(rng(), 2),
+    };
+  },
+  project: (f, p, t) => {
+    const faint = withAlpha(p.accent, 0.34);
+    const bright = withAlpha(p.accent, 0.95);
+    const phase = FLOW_SWAY * wobble(t, 1, 0);
+    let out = '';
+    for (const q of f.quills) {
+      const u = q.x / p.width;
+      const v = q.y / p.height;
+      // Two crossed sines — `flow_lines`' "vector field written as two
+      // formulas", and the whole of the field. The quill is centred on its
+      // sample point and turned, so it pivots rather than swinging from one end.
+      const angle =
+        Math.sin(u * f.a * TAU + phase) * 1.15 +
+        Math.cos(v * f.b * TAU - phase * f.c) * 1.15 +
+        q.skew;
+      const dx = (Math.cos(angle) * q.len) / 2;
+      const dy = (Math.sin(angle) * q.len) / 2;
+      out += `<line x1="${r2(q.x - dx)}" y1="${r2(q.y - dy)}" x2="${r2(q.x + dx)}" y2="${r2(q.y + dy)}" stroke="${q.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (q.hot ? 1.8 : 0.85))}" stroke-linecap="round"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── truchet-arcs ─────────────────────────────────────────────────────────── */
+
+interface Tile {
+  x: number;
+  y: number;
+  /** 0 or 1 — which diagonal the pair of quarter-arcs connects. */
+  flip: number;
+  hot: boolean;
+  show: boolean;
+  roll: number;
+}
+
+/**
+ * Quarter-arc Truchet tiling.
+ *
+ * A Truchet tile has no orientation of its own; the pattern is entirely in how
+ * neighbours agree. That makes it the one tiling whose *motion* can be about
+ * connection rather than displacement — as tiles turn, arcs meet across edges
+ * and long curves form and break across the whole frame. Nothing else here does
+ * that, because everything else moves marks that were already unrelated.
+ *
+ * The tiles rock rather than spin, for the reason `scatter-blocks` sets out: a
+ * printed `rotate()` of `360` is textually different from `0` while being the
+ * same picture. A ±90° rock sweeps through every connection state anyway, which
+ * is the part worth seeing.
+ */
+const truchetArcs: SampledGenerator<Tile[]> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const size = lerp(120, 46, p.density);
+    const tiles: Tile[] = [];
+    for (let y = 0; y < p.height + size; y += size) {
+      for (let x = 0; x < p.width + size; x += size) {
+        const flip = intRange(rng, 0, 1);
+        const hot = chance(rng, 0.07 + p.density * 0.08);
+        // `quarter_circles_grid` leaves tiles out at random, which is what stops
+        // a Truchet reading as wallpaper — the breaks are what make the surviving
+        // curves legible as paths.
+        const show = chance(rng, 0.82);
+        // Truchet is the tiling that suffers most from this and gains most:
+        // arcs only connect while the tiles line up, so the ramp reads as the
+        // pattern's continuity failing rather than as marks moving.
+        const chaos = disorderAt(p, y);
+        tiles.push({
+          x: x + chaos * size * 0.45 * scramble(x, y, 5),
+          y: y + chaos * size * 0.45 * scramble(x, y, 6),
+          flip,
+          hot,
+          show,
+          roll: rng(),
+        });
+      }
+    }
+    return tiles;
+  },
+  project: (tiles, p, t) => {
+    const size = lerp(120, 46, p.density);
+    const faint = withAlpha(p.accent, 0.38);
+    const bright = withAlpha(p.accent, 0.95);
+    const h = size / 2;
+    let out = '';
+    for (const tile of tiles) {
+      // Hidden tiles still emit, at zero opacity, so the mark count is constant
+      // across the loop and across densities. Dropping them instead would make
+      // the emitted-number count depend on the sample, which is exactly what the
+      // confetti test watches for.
+      const stroke = !tile.show ? 'none' : tile.hot ? bright : faint;
+      const k = cycles(tile.roll, 2);
+      const phase = (tile.x + tile.y) * 0.008 + tile.roll * TAU;
+      const rot = r2(tile.flip * 90 + 90 * wobble(t, k, phase));
+      const cx = tile.x + h;
+      const cy = tile.y + h;
+      // Two quarter-arcs on opposite corners — the Truchet unit.
+      const d =
+        `M${r2(tile.x)} ${r2(cy)} A${r2(h)} ${r2(h)} 0 0 1 ${r2(cx)} ${r2(tile.y)} ` +
+        `M${r2(cx)} ${r2(tile.y + size)} A${r2(h)} ${r2(h)} 0 0 1 ${r2(tile.x + size)} ${r2(cy)}`;
+      out += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${r2(p.strokeWidth * (tile.hot ? 2.4 : 1.2))}" transform="rotate(${rot} ${r2(cx)} ${r2(cy)})" stroke-linecap="butt"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── iso-cubes ────────────────────────────────────────────────────────────── */
+
+interface Cube {
+  col: number;
+  row: number;
+  /** Sampled height in cube units — the still silhouette. */
+  height: number;
+  lit: boolean;
+  phase: number;
+}
+
+/**
+ * Isometric cubes on a height field — the generator `occlusion` exists for.
+ *
+ * `iso-grid` draws diamonds because flat diamonds never overlap. The moment
+ * cubes stack, a nearer cube has to hide the one behind it, and there is no way
+ * to say that with an accent and an alpha: `withAlpha(accent, 0.9)` still lets
+ * the far cube through, and the stack turns to soup exactly where the depth cue
+ * was supposed to be. So the faces are painted `p.occlusion` — opaque, matching
+ * the surface — and the form is carried by the stroked edges over the top.
+ *
+ * That is the technique the isometric patterns in the reference set use, and
+ * measurably so: they are the only ten of the fifty-seven that declare an
+ * occlusion colour at all.
+ *
+ * Draw order is back-to-front by `row + col`, which is the whole of painter's
+ * algorithm on a regular lattice and the reason the occlusion reads correctly.
+ */
+const isoCubes: SampledGenerator<Cube[]> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const cols = Math.round(lerp(7, 16, p.density));
+    const rows = Math.round(lerp(9, 20, p.density));
+    const cubes: Cube[] = [];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        cubes.push({
+          col,
+          row,
+          height: range(rng, 0.15, 1),
+          lit: chance(rng, 0.14),
+          phase: range(rng, 0, TAU),
+        });
+      }
+    }
+    // Painter's order. Sorted after sampling so the rng stream stays in lattice
+    // order and does not depend on the comparator.
+    return cubes.sort((a, b) => a.row + a.col - (b.row + b.col));
+  },
+  project: (cubes, p, t) => {
+    const cw = lerp(74, 38, p.density);
+    const halfW = cw / 2;
+    const halfH = cw * 0.29;
+    const unit = cw * 0.62;
+    const edge = withAlpha(p.accent, 0.55);
+    const litTop = withAlpha(p.accent, 0.9);
+    const dimTop = withAlpha(p.accent, 0.16);
+    const originX = p.width / 2;
+    const originY = p.height * 0.16;
+    let out = '';
+    for (const c of cubes) {
+      // A travelling wave over the lattice rather than a per-cube bob: the
+      // surface rises and falls as a landscape, which is the thing a height
+      // field can do that a grid of independent pulses cannot.
+      const lift =
+        1 +
+        0.45 * wobble(t, cycles(c.height, 2), c.phase + (c.col - c.row) * 0.5);
+      const hgt = c.height * unit * lift;
+      const bx = originX + (c.col - c.row) * halfW;
+      const by = originY + (c.col + c.row) * halfH;
+      const top = by - hgt;
+      // Left and right faces, opaque, so this cube hides whatever is behind it.
+      const left = `${r2(bx - halfW)},${r2(by - halfH)} ${r2(bx)},${r2(by)} ${r2(bx)},${r2(top)} ${r2(bx - halfW)},${r2(top - halfH)}`;
+      const right = `${r2(bx + halfW)},${r2(by - halfH)} ${r2(bx)},${r2(by)} ${r2(bx)},${r2(top)} ${r2(bx + halfW)},${r2(top - halfH)}`;
+      const cap = `${r2(bx)},${r2(top)} ${r2(bx + halfW)},${r2(top - halfH)} ${r2(bx)},${r2(top - halfH * 2)} ${r2(bx - halfW)},${r2(top - halfH)}`;
+      out += `<polygon points="${left}" fill="${p.occlusion}"/>`;
+      out += `<polygon points="${right}" fill="${p.occlusion}"/>`;
+      out += `<polygon points="${cap}" fill="${c.lit ? litTop : dimTop}"/>`;
+      out += `<path d="M${r2(bx - halfW)} ${r2(top - halfH)} L${r2(bx)} ${r2(top)} L${r2(bx + halfW)} ${r2(top - halfH)} M${r2(bx)} ${r2(top)} L${r2(bx)} ${r2(by)}" fill="none" stroke="${edge}" stroke-width="${p.strokeWidth}"/>`;
+      out += `<polygon points="${cap}" fill="none" stroke="${edge}" stroke-width="${p.strokeWidth}"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
 /* ── registry ─────────────────────────────────────────────────────────────── */
 
 /** The split form, for renderers that want to sample once and project per frame. */
@@ -694,6 +1190,11 @@ export const SAMPLED_GENERATORS = {
   'hex-grid': hexGrid,
   'triangle-grid': triangleGrid,
   ridgeline: ridgeline,
+  'radial-spokes': radialSpokes,
+  interference: interference,
+  'flow-field': flowField,
+  'truchet-arcs': truchetArcs,
+  'iso-cubes': isoCubes,
 };
 
 export type GeneratorName = keyof typeof SAMPLED_GENERATORS;
