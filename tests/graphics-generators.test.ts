@@ -264,13 +264,30 @@ describe('ridgeline parallax', () => {
     expect(speeds[speeds.length - 1]).toBeGreaterThan(speeds[0]);
   });
 
-  it('never crosses the frame in a loop', () => {
-    // What "too fast" meant concretely: this used to reach 3 frame-widths per
-    // loop, which blurs rather than drifts.
+  it('never travels more than one frame-width in a loop', () => {
+    // Was `< 0.5`, and that bound is what produced a comb.
+    //
+    // A range's silhouette has period `1/gcd(freqs)` and its speed is the same
+    // `1/gcd`. The two are the same number, so demanding a slow drift is
+    // demanding a short period — sub-half-width speeds *require* the silhouette
+    // to repeat at least twice on screen. One whole frame-width is the floor
+    // for a range that does not repeat at all.
+    //
+    // The original complaint was three widths per loop, which blurs. One does
+    // not, and it is what the nearest range now takes.
     for (const r of ridges()) {
       expect(r.speed).toBeGreaterThan(0);
-      expect(r.speed).toBeLessThan(0.5);
+      expect(r.speed).toBeLessThanOrEqual(1);
     }
+  });
+
+  it('gives the nearest range a period of a whole frame, so it cannot repeat', () => {
+    // The property the rewrite exists for. `gcd` of the nearest range's
+    // frequencies must be 1, which puts its period at one frame width — there
+    // is no second copy of it on screen to notice.
+    const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
+    const near = ridges()[ridges().length - 1];
+    expect(near.harmonics.map((h) => h.freq).reduce(gcd)).toBe(1);
   });
 
   it('gives every harmonic a whole number of cycles per loop', () => {
