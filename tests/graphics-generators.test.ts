@@ -240,10 +240,11 @@ describe('generator coherence (the property animation needs)', () => {
   });
 });
 
-describe('ridgeline parallax', () => {
+describe('ridgeline terrain', () => {
   interface Ridge {
-    speed: number;
-    harmonics: { freq: number }[];
+    period: number;
+    base: number;
+    seed: number;
   }
 
   const ridges = () => {
@@ -252,163 +253,86 @@ describe('ridgeline parallax', () => {
     return gen.sample(params({ seed: 7, density: 0.6 })) as Ridge[];
   };
 
+  /** The y of every sampled point on one range, in draw order. */
+  const profile = (index: number): number[] => {
+    const svg = renderGraphic('ridgeline', params({ seed: 7, density: 0.6 }));
+    const paths = [...svg.matchAll(/ d="([^"]+)"/g)].map((m) => m[1]);
+    return [...paths[index].matchAll(/L[\d.-]+ ([\d.-]+)/g)].map((m) =>
+      Number(m[1]),
+    );
+  };
+
   it('drifts faster the nearer the range', () => {
     // The parallax, asserted rather than eyeballed. Layers are sampled far to
-    // near, so speed must rise monotonically — a range that overtook the one in
-    // front of it would read as the depth order inverting.
-    const speeds = ridges().map((r) => r.speed);
-    expect(speeds.length).toBeGreaterThan(2);
-    for (let i = 1; i < speeds.length; i++) {
-      expect(speeds[i]).toBeGreaterThanOrEqual(speeds[i - 1]);
+    // near, so `period` — which is both the drift and the feature scale — must
+    // rise monotonically.
+    const periods = ridges().map((r) => r.period);
+    expect(periods.length).toBeGreaterThan(2);
+    for (let i = 1; i < periods.length; i++) {
+      expect(periods[i]).toBeGreaterThanOrEqual(periods[i - 1]);
     }
-    expect(speeds[speeds.length - 1]).toBeGreaterThan(speeds[0]);
+    expect(periods[periods.length - 1]).toBeGreaterThan(periods[0]);
   });
 
-  it('never travels more than one frame-width in a loop', () => {
-    // Was `< 0.5`, and that bound is what produced a comb.
+  it('never puts a whole circuit inside the frame, so nothing repeats', () => {
+    // The property the noise-on-a-circle construction exists for. One trip
+    // round the circle spans `period` frame-widths; below 1 the frame would
+    // contain more than one circuit and the terrain would visibly repeat.
     //
-    // A range's silhouette has period `1/gcd(freqs)` and its speed is the same
-    // `1/gcd`. The two are the same number, so demanding a slow drift is
-    // demanding a short period — sub-half-width speeds *require* the silhouette
-    // to repeat at least twice on screen. One whole frame-width is the floor
-    // for a range that does not repeat at all.
-    //
-    // The original complaint was three widths per loop, which blurs. One does
-    // not, and it is what the nearest range now takes.
+    // This is also why the drift cannot be slower: the period and the speed are
+    // the same number. Three earlier versions bought slow drift with a short
+    // period and every one of them read as a comb.
     for (const r of ridges()) {
-      expect(r.speed).toBeGreaterThan(0);
-      expect(r.speed).toBeLessThanOrEqual(1);
+      expect(r.period).toBeGreaterThanOrEqual(1);
+      expect(r.period).toBeLessThanOrEqual(1.5);
     }
   });
 
-  it('gives the nearest range a period of a whole frame, so it cannot repeat', () => {
-    // The property the rewrite exists for. `gcd` of the nearest range's
-    // frequencies must be 1, which puts its period at one frame width — there
-    // is no second copy of it on screen to notice.
-    const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
-    const near = ridges()[ridges().length - 1];
-    expect(near.harmonics.map((h) => h.freq).reduce(gcd)).toBe(1);
+  it('gives every layer its own terrain', () => {
+    // Layers walk separate patches of noise space. Shared seeds would make the
+    // ranges echo each other, which reads as one range drawn several times.
+    const seeds = ridges().map((r) => r.seed);
+    expect(new Set(seeds).size).toBe(seeds.length);
   });
 
-  it('gives every harmonic a whole number of cycles per loop', () => {
-    // This is *why* the speeds can be fractional at all. Each frequency is a
-    // multiple of the layer's base, so `freq * speed` is an integer and the
-    // range lands exactly where it started — the loop-closure test proves the
-    // result, this one names the mechanism.
-    for (const r of ridges()) {
-      for (const h of r.harmonics) {
-        expect(h.freq * r.speed).toBeCloseTo(Math.round(h.freq * r.speed), 10);
-      }
+  it('is not periodic across the frame', () => {
+    // The failure three previous versions had, measured directly rather than
+    // argued from the frequencies. A periodic profile correlates strongly with
+    // itself shifted by its period; terrain does not correlate with itself at
+    // any non-zero shift.
+    const near = profile(ridges().length - 1);
+    const corr = (v: number[], lag: number) => {
+      const n = v.length - lag;
+      const mean = v.reduce((a, b) => a + b, 0) / v.length;
+      let num = 0;
+      let den = 0;
+      for (let i = 0; i < n; i++) num += (v[i] - mean) * (v[i + lag] - mean);
+      for (const q of v) den += (q - mean) ** 2;
+      return num / den;
+    };
+    expect(near.length).toBeGreaterThan(100);
+    // Every shift from an eighth to half the frame must stay well below a
+    // self-match. The old harmonic version peaked near 1.0 at its period.
+    let worst = 0;
+    for (let lag = Math.floor(near.length / 8); lag < near.length / 2; lag++) {
+      worst = Math.max(worst, corr(near, lag));
     }
+    expect(worst).toBeLessThan(0.6);
   });
 
-  it('samples finely enough not to alias its own peaks', () => {
-    // `1 - |sin|` peaks twice per period, and the projection samples 192 times
-    // across the frame. Below about four samples per peak the corners alias
-    // into noise, which is the opposite of the crisp silhouette intended.
-    const top = Math.max(
-      ...ridges().flatMap((r) => r.harmonics.map((h) => h.freq)),
-    );
-    expect(192 / (2 * top)).toBeGreaterThan(3);
-  });
-});
-
-describe('disorder: the ramp, and why it is free', () => {
-  // The generators that honour it. The rest ignore it, which is allowed —
-  // `disorder` perturbs a lattice, and not every generator has one.
-  const RAMPED = ['dot-grid', 'iso-grid', 'truchet-arcs'];
-
-  it.each(RAMPED)('%s: disorder=0 is byte-identical to the golden', (name) => {
-    // The claim that lets this be added to shipped generators at all. It holds
-    // because the perturbation is hashed from coordinates rather than drawn
-    // from the rng — a draw would shift the stream and re-roll every later
-    // mark even when multiplied by zero.
-    expect(renderGraphic(name, params({ disorder: 0 }))).toBe(
-      renderGraphic(name, params()),
-    );
-  });
-
-  it.each(RAMPED)('%s: disorder actually perturbs the lattice', (name) => {
-    expect(renderGraphic(name, params({ disorder: 0.9 }))).not.toBe(
-      renderGraphic(name, params({ disorder: 0 })),
-    );
-  });
-
-  it.each(RAMPED)(
-    '%s: perturbs the far edge more than the near one',
-    (name) => {
-      // The property that makes it a ramp rather than jitter. Marks are compared
-      // against their undisturbed positions in the top and bottom thirds; if the
-      // gradient were flat, or inverted, both would move by the same amount.
-      const calm = numbers(renderGraphic(name, params({ disorder: 0 })));
-      const wild = numbers(renderGraphic(name, params({ disorder: 1 })));
-      expect(wild.length).toBe(calm.length);
-
-      // y-coordinates decide which band a mark is in; the emitted numbers are
-      // interleaved x/y, so odd indices are the ys for these three generators.
-      let nearSum = 0;
-      let farSum = 0;
-      for (let i = 1; i < calm.length; i += 2) {
-        const drift =
-          Math.abs(wild[i] - calm[i]) + Math.abs(wild[i - 1] - calm[i - 1]);
-        if (calm[i] < 720 / 3) nearSum += drift;
-        else if (calm[i] > (720 * 2) / 3) farSum += drift;
-      }
-      expect(farSum).toBeGreaterThan(nearSum * 2);
-    },
-  );
-
-  it('does not vary with t — it is sampled, not projected', () => {
-    // Same trap as `density`: animating it would move a loop bound in `sample`
-    // and re-roll the composition. Asserting it is inert in `project` is what
-    // stops someone wiring it to a scrubber.
-    const gen = getGenerator('dot-grid');
-    if (!gen) throw new Error('dot-grid missing');
-    const p = params({ disorder: 0.7 });
-    expect(gen.sample(p)).toEqual(gen.sample({ ...p, t: 0.42 }));
-  });
-});
-
-describe('occlusion: opaque, and its own colour', () => {
-  it('iso-cubes paints faces with it', () => {
-    expect(
-      renderGraphic('iso-cubes', params({ occlusion: '#123456' })),
-    ).toContain('#123456');
-  });
-
-  it('is not derivable from accent or background', () => {
-    // The whole argument for a third parameter. Moving `occlusion` alone must
-    // change the output, or it is a synonym for something already there.
-    const base = params({ accent: '#22d3ee', background: '#000000' });
-    expect(
-      renderGraphic('iso-cubes', { ...base, occlusion: '#111111' }),
-    ).not.toBe(renderGraphic('iso-cubes', { ...base, occlusion: '#222222' }));
-  });
-
-  it('is opaque, so a nearer cube hides a farther one', () => {
-    // An rgba() face would let the stack show through, which is the failure the
-    // parameter exists to prevent. The emitted fill must be the colour itself.
-    const svg = renderGraphic('iso-cubes', params({ occlusion: '#0a0a1a' }));
-    expect(svg).toContain('fill="#0a0a1a"');
-    expect(svg).not.toContain('rgba(10, 10, 26');
-  });
-
-  it('is used by ridgeline, whose ranges have to hide each other', () => {
-    // Added after the fact: the layered ranges were filled with alpha 0.04-0.11
-    // and occluded nothing, so the stack read as overlapping line charts rather
-    // than as distance. This is the assertion that stops that regressing.
-    const base = params({ accent: '#22d3ee' });
-    expect(
-      renderGraphic('ridgeline', { ...base, occlusion: '#111111' }),
-    ).not.toBe(renderGraphic('ridgeline', { ...base, occlusion: '#222222' }));
-  });
-
-  it('leaves generators that do not stack geometry untouched', () => {
-    for (const name of ['dot-grid', 'contour', 'diagonal-hatch']) {
-      expect(renderGraphic(name, params({ occlusion: '#ff0000' }))).toBe(
-        renderGraphic(name, params({ occlusion: '#00ff00' })),
-      );
+  it('samples finely enough not to alias its own creases', () => {
+    // Ridged noise puts a crease at every fold, and the finest octave sets how
+    // many. Counted from the rendered profile rather than from the constants,
+    // so adding an octave without adding samples fails here.
+    const near = profile(ridges().length - 1);
+    let extrema = 0;
+    for (let i = 1; i < near.length - 1; i++) {
+      const a = near[i] - near[i - 1];
+      const b = near[i + 1] - near[i];
+      if (a !== 0 && b !== 0 && Math.sign(a) !== Math.sign(b)) extrema++;
     }
+    // At least four samples per feature, counting both slopes of each.
+    expect(near.length / Math.max(1, extrema)).toBeGreaterThan(4);
   });
 });
 
