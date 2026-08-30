@@ -59,6 +59,38 @@ const META: Record<
       'Layered angular mountains, parallaxing — depth by contrast, not perspective.',
     defaults: { density: 0.55, strokeWidth: 2 },
   },
+  'radial-spokes': {
+    label: 'Radial Spokes',
+    description:
+      'Spokes and rings about a centre — the one background with a middle to sit behind.',
+    defaults: { density: 0.5, strokeWidth: 1.5 },
+  },
+  interference: {
+    label: 'Interference',
+    description:
+      'Two-source wave interference as displaced rules; the fringes exist only in the sum.',
+    defaults: { density: 0.55, strokeWidth: 2 },
+  },
+  'flow-field': {
+    label: 'Flow Field',
+    description:
+      'Streamlines swimming along a vector field written as two crossed sines.',
+    defaults: { density: 0.5, strokeWidth: 2 },
+  },
+  'truchet-arcs': {
+    label: 'Truchet Arcs',
+    description:
+      'Quarter-arc tiles that turn — long curves form and break across the frame.',
+    defaults: { density: 0.5, strokeWidth: 2 },
+  },
+  'iso-cubes': {
+    // Density is capped lower than the rest by default: cubes are five polygons
+    // each, and this is the generator most able to blow the data-URI budget.
+    label: 'Iso Cubes',
+    description:
+      'Stacked cubes on a rolling height field — opaque faces, so depth survives.',
+    defaults: { density: 0.4, strokeWidth: 1.5 },
+  },
 };
 
 export const GENERATOR_LIST: Generator[] = Object.entries(
