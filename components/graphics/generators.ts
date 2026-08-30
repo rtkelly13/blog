@@ -91,15 +91,25 @@ const wobble = (t: number, k: number, phase: number): number =>
  * and does not visibly move has not been animated.
  */
 /**
- * Which multiples of `f0` a ridge's harmonics take.
+ * Harmonic multipliers for a ridge, each set coprime *as a set*.
  *
- * Non-consecutive, to break the plain 1,2,3 series that made every period an
- * identical spike — but capped at 5 rather than the 7 tried first. The
- * projection samples 192 times across the frame and `1 - |sin|` peaks twice per
- * period, so the top harmonic has to stay under about 32 or its corners alias
- * into noise; `f0 = 5` with a 7 step reaches 35 and does exactly that.
+ * That is the load-bearing property: the silhouette's period is
+ * `1/gcd(freqs)`, so `gcd(m) === 1` is what makes `gcd(g · m) === g` and lets
+ * `g` alone decide how many times a range repeats across the frame.
+ *
+ * Leading multipliers stay small to keep the wavelength broad, and the largest
+ * stays under 10 — the projection samples 192 times across the frame and
+ * `1 - |sin|` peaks twice per period, so a top frequency much past 32 aliases
+ * its own corners into noise.
  */
-const HARMONIC_STEPS = [1, 2, 5];
+const MULTIPLIER_SETS = [
+  [1, 3, 7],
+  [1, 4, 9],
+  [1, 5, 8],
+  [2, 5, 9],
+  [2, 3, 7],
+  [2, 7, 9],
+];
 
 /**
  * Arc a spoke tip sweeps per loop, as a fraction of the wheel's reach.
@@ -681,37 +691,49 @@ const ridgeline: SampledGenerator<Ridge[]> = {
     const ridges: Ridge[] = [];
     for (let i = 0; i < layers; i++) {
       const depth = i / Math.max(1, layers - 1); // 0 = furthest, 1 = nearest
-      // The one number deciding both how fine this range is and how slowly it
-      // drifts. Jittered upward by at most one, so seeds differ without the
-      // far-to-near ordering inverting.
-      // Repeats across the frame, and the reason this is low.
+      // ## Why the silhouette is aperiodic across the frame
       //
-      // Every harmonic must be a whole multiple of `f0` for the loop to close,
-      // which makes a range's silhouette periodic with period `1/f0` — that is
-      // unavoidable, so the fix is to have *few* periods rather than to pretend
-      // there are none. At `f0 = 8` a far range put sixteen near-identical
-      // peaks across the frame and read as a comb; at 2–4 the repeat is hard to
-      // pick out, and `speed = 1/f0` still stays under half a frame-width.
-      // No random term any more. It was `+ intRange(rng, 0, 1)`, which was
-      // survivable at the old 8..3 spread and is not at 5..3: adjacent layers
-      // often share a base, so a single random step inverts their parallax and
-      // a far range overtakes a near one. Seed variety comes from the
-      // amplitudes and phases below; the depth ladder stays strictly ordered.
-      // The floor of 3 also matters — `f0 = 2` gives `speed = 0.5` exactly,
-      // and the drift bound is strict.
-      const f0 = Math.round(lerp(5, 3, depth));
+      // Loop closure needs `freq · speed` whole for every harmonic, and the
+      // two previous attempts both read that as "make every frequency a
+      // multiple of one base `f0`". That closes the loop and it makes the
+      // silhouette *exactly periodic with period `1/f0`* — a comb of identical
+      // peaks. Lowering `f0` only made the repeats fewer, never absent.
+      //
+      // The period is not `1/f0`, though. It is `1/gcd(freqs)`. Multiples of a
+      // common base are one way to satisfy the constraint and not the only one:
+      // any set sharing a divisor `g` works, with `speed = 1/g`. So `g` is what
+      // to choose, and it buys two things at once —
+      //
+      //   g = 1  ->  period is one whole frame width: no repeat on screen
+      //   g = 2  ->  two repeats, and half the drift speed
+      //
+      // The near range, the one actually being read, takes `g = 1` and is
+      // aperiodic across the frame. Far ranges take `g = 2`, where two repeats
+      // in a low-contrast compressed band are near-invisible, and pay for it in
+      // exactly the currency parallax wants: they drift half as fast.
+      const g = Math.round(lerp(2, 1, depth));
+      // Coprime as a set, so `gcd(g · m) === g` and the period is what `g` says
+      // it is. Small leading multipliers keep the wavelength broad: `m0 = 2`
+      // with `g = 1` puts four peaks across the frame, where the previous
+      // version put twelve.
+      // Far ranges draw from the low half of the table, which starts at 1.
+      //
+      // They carry `g = 2`, so a set starting at 2 would put their fundamental
+      // at 4 and eight peaks across the frame — the narrow, spiky band that
+      // still read as a comb after the first fix. Starting at 1 puts it back at
+      // 2, the same wavelength the near ranges get.
+      const m =
+        MULTIPLIER_SETS[
+          g > 1
+            ? intRange(rng, 0, 2)
+            : intRange(rng, 0, MULTIPLIER_SETS.length - 1)
+        ];
       const harmonics: Harmonic[] = [];
       for (let h = 0; h < 3; h++) {
         harmonics.push({
-          // Every harmonic a multiple of f0 — that is what lets `speed` be a
-          // fraction and still land the loop. Sparse, non-consecutive
-          // multiples rather than 1,2,3: the sum is periodic either way, but a
-          // plain harmonic series makes every period an identical symmetrical
-          // spike, and skipping steps gives the profile within one period some
-          // structure to look at.
-          freq: f0 * HARMONIC_STEPS[h],
-          // Halving per harmonic, not `1/(h + 1)`. The gentler decay left the
-          // overtones nearly as loud as the fundamental, which is what turned
+          freq: g * m[h],
+          // Halving per harmonic. A gentler decay leaves the overtones nearly
+          // as loud as the fundamental, which is the other half of what turned
           // terrain into a comb — real relief is self-similar, so each octave
           // must contribute meaningfully less than the one below it.
           amp: range(rng, 0.8, 1.2) / 2 ** h,
@@ -721,10 +743,14 @@ const ridgeline: SampledGenerator<Ridge[]> = {
       ridges.push({
         base: lerp(0.42, 0.96, depth),
         harmonics,
-        // Frame-widths per loop. `1/f0` is a whole number of cycles on every
-        // harmonic, so the range closes; and because f0 falls as the range
-        // nears, this rises — the parallax comes free.
-        speed: 1 / f0,
+        // Frame-widths per loop. `freq · speed = m` is whole for every
+        // harmonic, so the range lands exactly where it started, and because
+        // `g` falls as the range nears, this rises — parallax comes free.
+        //
+        // One whole frame-width is the *floor* for an aperiodic range, not a
+        // number picked for feel: `g = 1` is what makes the period the frame,
+        // and `speed = 1/g` follows. Slower means periodic.
+        speed: 1 / g,
       });
     }
     return ridges;
@@ -747,7 +773,11 @@ const ridgeline: SampledGenerator<Ridge[]> = {
       // overlapping line charts. Mountains hide what is behind them, and that
       // is most of what makes a range look like distance rather than noise.
       const fillA = mix(p.occlusion, p.accent, 0.05 + depth * 0.12);
-      const relief = lerp(0.3, 0.12, depth) * p.height;
+      // Was `lerp(0.3, 0.12, …)`, which gave the *furthest* range the deepest
+      // relief — tall spikes along the top of the frame, exactly where the
+      // repetition was most obvious. Distance flattens, so the ladder runs the
+      // other way now, and the nearest range is the one with the big silhouette.
+      const relief = lerp(0.16, 0.26, depth) * p.height;
 
       let d = `M0 ${p.height} `;
       for (let x = 0; x <= p.width; x += step) {
