@@ -1337,94 +1337,170 @@ interface Streamline {
   drift: number;
 }
 
-/** Integration steps per streamline. */
-const LINE_STEPS = 30;
+/** Sections a streamline is cut into. Fixed, so the mark count cannot vary. */
+const LINE_SECTIONS = 7;
 
-/** Segments a streamline is cut into, for the travelling highlight. */
-const LINE_SEGMENTS = 10;
+/** Integration step, as a fraction of the smaller frame dimension. */
+const LINE_STEP = 0.014;
+
+/** Hard cap on steps in one direction, so a closed orbit cannot spin forever. */
+const LINE_MAX_STEPS = 90;
 
 /**
- * Long streamlines through a vector field — the striking half of `flow_lines`,
- * with the instability designed out rather than tuned down.
+ * Evenly spaced streamlines, cut into sections that grow and shrink into
+ * each other.
  *
- * `flow-field` draws the direction field because *advecting* it per frame is
- * chaotic: each integration step feeds the next, so near a separatrix a tail
- * switches channel instead of drifting, and the smoothness ratio collapses to
- * 1.0. That finding stands, and it is why this generator does not move the
- * field either.
+ * ## Even spacing is most of the look
  *
- * What it does instead is put the integration in `sample`, which is the half of
- * the split with no `t` in it at all. The curves are traced once and then never
- * re-integrated. `project` moves each point by a bounded term computed from its
- * *own sampled position* — no point's displacement is a function of the
- * previous point's displacement, so there is no feedback to compound and the
- * motion is exactly as smooth as `dot-grid`'s.
+ * The reference draws 148 paths of between 2 and 62 points each — uniform
+ * stroke, no colour variation, nothing clever in the rendering. All of its
+ * quality is in *placement*: lines are seeded, integrated, and stopped as soon
+ * as they come within a separation distance of a line already drawn. That is
+ * Jobard and Lefebvre's algorithm, and it is what produces the combed
+ * appearance, with long sweeps through open field and short stubs where the
+ * flow crowds.
  *
- * The flow itself is carried by brightness rather than by geometry: each curve
- * is cut into segments lit by a wave travelling along its length, so the line
- * reads as something moving *through* it while the curve barely stirs. That is
- * the part advection was wanted for, and it turns out not to need advection.
+ * The first version here seeded at random and clumped, which no amount of
+ * per-line styling fixes — random points in a plane are not evenly spaced, they
+ * are Poisson, and Poisson looks lumpy. So this keeps an occupancy grid and
+ * refuses to draw where it is already dense. Line *lengths* then vary on their
+ * own, which is the thing that made the reference look considered.
+ *
+ * ## Sections, and why the geometry still never advects
+ *
+ * Integration lives in `sample`, for the reason `flow-field` documents at
+ * length: advecting per frame compounds error and the tail switches channel
+ * rather than drifting.
+ *
+ * `project` cuts each finished curve into sections and contracts each one
+ * toward its own start by a travelling factor. A section at full extent meets
+ * the next and the line reads as continuous; at low extent it is a short dash
+ * with a gap either side. Since the factor travels along the line, sections
+ * grow into their neighbours and shrink away from them in sequence, which is
+ * the flow — carried entirely by *extent*, while every underlying point stays
+ * where `sample` put it.
+ *
+ * Contraction interpolates along the curve rather than dropping points, so a
+ * section emits the same number of coordinates at every `t`. Dropping them
+ * would change the mark count with the frame, which is the confetti failure.
  */
 const flowLines: SampledGenerator<Streamline[]> = {
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const count = Math.round(lerp(18, 70, p.density));
     const a = range(rng, 1.1, 2.2);
     const b = range(rng, 1.1, 2.2);
-    const step = Math.min(p.width, p.height) * 0.032;
-    const lines: Streamline[] = [];
-    for (let i = 0; i < count; i++) {
-      let x = range(rng, -0.1, 1.1) * p.width;
-      let y = range(rng, -0.1, 1.1) * p.height;
-      const points: [number, number][] = [[x, y]];
-      for (let k = 0; k < LINE_STEPS; k++) {
-        // Integration lives here and only here. Chaotic sensitivity is
-        // harmless in `sample`, because `sample` is called once.
-        const ang =
-          Math.sin((x / p.width) * a * TAU) * 1.35 +
-          Math.cos((y / p.height) * b * TAU) * 1.35;
-        x += Math.cos(ang) * step;
-        y += Math.sin(ang) * step;
-        points.push([x, y]);
+    const step = Math.min(p.width, p.height) * LINE_STEP;
+    // Separation, and therefore how many lines fit. Denser packing means more,
+    // shorter lines — the two move together, as they do in the reference.
+    const sep = lerp(46, 15, p.density);
+    const cell = sep;
+    const cols = Math.ceil(p.width / cell) + 4;
+    const rows = Math.ceil(p.height / cell) + 4;
+    // Occupancy grid, offset by two cells so out-of-frame bleed still indexes.
+    const grid: [number, number][][] = Array.from(
+      { length: cols * rows },
+      () => [],
+    );
+    const idx = (x: number, y: number) =>
+      Math.floor(y / cell + 2) * cols + Math.floor(x / cell + 2);
+    const tooClose = (x: number, y: number, d: number): boolean => {
+      const cx = Math.floor(x / cell + 2);
+      const cy = Math.floor(y / cell + 2);
+      for (let j = cy - 1; j <= cy + 1; j++) {
+        for (let i = cx - 1; i <= cx + 1; i++) {
+          if (i < 0 || j < 0 || i >= cols || j >= rows) continue;
+          for (const [px, py] of grid[j * cols + i]) {
+            if ((px - x) ** 2 + (py - y) ** 2 < d * d) return true;
+          }
+        }
       }
-      lines.push({
-        points,
-        hot: chance(rng, 0.14),
-        phase: range(rng, 0, TAU),
-        drift: range(rng, 0.5, 1),
-      });
+      return false;
+    };
+    const angleAt = (x: number, y: number) =>
+      Math.sin((x / p.width) * a * TAU) * 1.35 +
+      Math.cos((y / p.height) * b * TAU) * 1.35;
+
+    /** Walk the field from a point, stopping at the frame or at a neighbour. */
+    const trace = (sx: number, sy: number, dir: number): [number, number][] => {
+      const pts: [number, number][] = [];
+      let x = sx;
+      let y = sy;
+      for (let k = 0; k < LINE_MAX_STEPS; k++) {
+        const ang = angleAt(x, y);
+        x += Math.cos(ang) * step * dir;
+        y += Math.sin(ang) * step * dir;
+        if (x < -sep || y < -sep || x > p.width + sep || y > p.height + sep) {
+          break;
+        }
+        // Half the separation while growing, so a line may approach another
+        // more closely than seeds are allowed to — otherwise every line stops
+        // almost immediately and the field is all stubs.
+        if (tooClose(x, y, sep * 0.5)) break;
+        pts.push([x, y]);
+      }
+      return pts;
+    };
+
+    // Seeds on a jittered lattice rather than at random: the grid gives even
+    // coverage, the jitter stops the lines starting in visible rows.
+    const lines: Streamline[] = [];
+    const gap = sep * 1.6;
+    for (let sy = gap / 2; sy < p.height; sy += gap) {
+      for (let sx = gap / 2; sx < p.width; sx += gap) {
+        const jx = sx + range(rng, -gap / 3, gap / 3);
+        const jy = sy + range(rng, -gap / 3, gap / 3);
+        const hot = chance(rng, 0.12);
+        const drift = range(rng, 0.5, 1);
+        const phase = range(rng, 0, TAU);
+        if (tooClose(jx, jy, sep)) continue;
+        const back = trace(jx, jy, -1).reverse();
+        const fwd = trace(jx, jy, 1);
+        const pts: [number, number][] = [...back, [jx, jy], ...fwd];
+        // Two points cannot be cut into sections, and a three-point stub is not
+        // worth the marks.
+        if (pts.length < LINE_SECTIONS + 1) continue;
+        for (const q of pts) grid[idx(q[0], q[1])]?.push(q);
+        lines.push({ points: pts, hot, phase, drift });
+      }
     }
     return lines;
   },
   project: (lines, p, t) => {
-    const sway = Math.min(p.width, p.height) * 0.035;
     let out = '';
     for (const line of lines) {
-      const k = cycles(line.drift, 2);
-      // One displacement per point, each from that point's own sampled
-      // coordinates. Neighbours move nearly together because the term varies
-      // smoothly in space, so the curve bends rather than shattering.
-      const moved = line.points.map(([px, py]) => {
-        const ph = line.phase + (px + py) * 0.004;
+      const pts = line.points;
+      const per = (pts.length - 1) / LINE_SECTIONS;
+      /** Position at a fractional index along the curve. */
+      const at = (f: number): [number, number] => {
+        const i = Math.min(pts.length - 1, Math.max(0, f));
+        const lo = Math.floor(i);
+        const hi = Math.min(pts.length - 1, lo + 1);
+        const m = i - lo;
         return [
-          px + sway * line.drift * wobble(t, k, ph),
-          py + sway * line.drift * wobble(t, k, ph + Math.PI / 2),
-        ] as [number, number];
-      });
-      const per = Math.max(1, Math.floor((moved.length - 1) / LINE_SEGMENTS));
-      for (let sIdx = 0; sIdx * per < moved.length - 1; sIdx++) {
+          pts[lo][0] + (pts[hi][0] - pts[lo][0]) * m,
+          pts[lo][1] + (pts[hi][1] - pts[lo][1]) * m,
+        ];
+      };
+      for (let sIdx = 0; sIdx < LINE_SECTIONS; sIdx++) {
         const from = sIdx * per;
-        const to = Math.min(moved.length - 1, from + per);
+        // Extent, travelling along the line. Whole cycles per loop, so it
+        // closes; the section index sets where it is, so growth runs from head
+        // to tail rather than every section pulsing together.
+        const wave = (Math.sin(sIdx * 1.1 - t * TAU * 2 + line.phase) + 1) / 2;
+        const extent = 0.25 + 0.75 * wave;
         let d = '';
-        for (let i = from; i <= to; i++) {
-          d += `${i === from ? 'M' : 'L'}${r2(moved[i][0])} ${r2(moved[i][1])}`;
+        const steps = Math.max(2, Math.round(per));
+        for (let i = 0; i <= steps; i++) {
+          const [x, y] = at(from + (i / steps) * per * extent);
+          d += `${i === 0 ? 'M' : 'L'}${r2(x)} ${r2(y)}`;
         }
-        // The travelling highlight. Whole cycles per loop, so it closes; the
-        // segment index sets where it is along the curve, so the pulse runs
-        // from head to tail rather than the whole line blinking.
-        const lit = (Math.sin(sIdx * 0.9 - t * TAU * 2 + line.phase) + 1) / 2;
-        const alpha = (line.hot ? 0.35 : 0.14) + lit * (line.hot ? 0.6 : 0.3);
-        out += `<path d="${d}" fill="none" stroke="${withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(p.strokeWidth * (line.hot ? 1.7 : 0.9))}" stroke-linecap="round"/>`;
+        // Thin as it shrinks, so a contracting section fades out of the line
+        // instead of ending as a stub of full weight.
+        const w =
+          p.strokeWidth * (line.hot ? 1.7 : 0.9) * (0.45 + 0.55 * extent);
+        const alpha =
+          (line.hot ? 0.4 : 0.18) + extent * (line.hot ? 0.55 : 0.4);
+        out += `<path d="${d}" fill="none" stroke="${withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(w)}" stroke-linecap="round"/>`;
       }
     }
     return frame(p, out);
