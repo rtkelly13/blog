@@ -49,6 +49,11 @@ export default defineGenerator<SpiralMesh>({
   label: 'Spiral Mesh',
   description: 'A mesh following spiral trajectories, for circular flow.',
   group: 'radial',
+  // Slower than the lattice generators, and the reason is geometric: a turn
+  // at full reach covers the whole circumference, so what reads as a stately
+  // rotation on a small form is a blur on a frame-filling one. See
+  // `GeneratorModule.speed`.
+  speed: 0.5,
   defaults: { density: 0.5, strokeWidth: 2 },
 
   sample: (p) => {

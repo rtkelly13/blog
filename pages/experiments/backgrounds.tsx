@@ -44,6 +44,7 @@ export default function BackgroundsLab() {
   const [density, setDensity] = useState(0.55);
   const [disorder, setDisorder] = useState(0);
   const [duration, setDuration] = useState(12);
+  const [speed, setSpeed] = useState(1);
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
   // Per-tile overrides on top of the global transport. A name present here wins
@@ -115,6 +116,7 @@ export default function BackgroundsLab() {
     disorder,
     occlusion: SURFACES.darkBg,
     duration,
+    speed,
     t: scrub,
     // 16:9, because that is what these are *for* — talk slides via
     // SpectacleDeck and full-bleed page headers. Previewing them square was
@@ -147,9 +149,11 @@ export default function BackgroundsLab() {
           </p>
           <p className="mt-2 max-w-3xl font-mono text-xs text-zinc-500">
             <span className="text-brutalist-cyan">&gt;</span> Grouped by family.
-            Only the two tiles nearest the middle of the window run — the
-            outlined ones — so scroll to drive the rest, or hit Play on any tile
-            to pin it. Every loop closes:
+            Speed multiplies each generator&rsquo;s own declared pace — the
+            radial ones run slower by default, because a turn at full reach
+            covers the whole circumference. Only the two tiles nearest the
+            middle of the window run — the outlined ones — so scroll to drive
+            the rest, or hit Play on any tile to pin it. Every loop closes:
             <code> t = 1</code> renders identically to <code>t = 0</code>, so
             nothing seams. Pause to scrub a single loop by hand.
           </p>
@@ -259,6 +263,21 @@ export default function BackgroundsLab() {
               step={1}
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
+              className="w-full accent-brutalist-cyan"
+            />
+          </label>
+
+          <label className="min-w-[150px]">
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Speed · {speed.toFixed(2)}&times;
+            </div>
+            <input
+              type="range"
+              min={0.2}
+              max={2}
+              step={0.1}
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
               className="w-full accent-brutalist-cyan"
             />
           </label>

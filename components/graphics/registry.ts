@@ -20,6 +20,7 @@ export const GENERATOR_LIST: Generator[] = GENERATOR_MODULES.map((m) => ({
   label: m.label,
   description: m.description,
   group: m.group,
+  speed: m.speed ?? 1,
   defaults: { ...BASE_PARAMS, ...m.defaults },
   render: (p: GraphicParams) => m.project(m.sample(p), p, p.t ?? 0),
   sample: m.sample,
