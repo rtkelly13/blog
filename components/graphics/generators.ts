@@ -91,6 +91,95 @@ const wobble = (t: number, k: number, phase: number): number =>
  * and does not visibly move has not been animated.
  */
 /**
+ * Deterministic 2D value noise, and the fractal sum built on it.
+ *
+ * Written out rather than pulled in because it has to be *exactly* reproducible
+ * across runs and machines — the goldens depend on it — and because the ridge
+ * needs it sampled in a very specific way (see `ridgeline`).
+ */
+const hash2 = (x: number, y: number, seed: number): number => {
+  const n = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453;
+  return n - Math.floor(n);
+};
+
+/** Smoothstep, so the lattice of the noise grid never shows as facets. */
+const smooth = (v: number): number => v * v * (3 - 2 * v);
+
+const valueNoise = (x: number, y: number, seed: number): number => {
+  const xi = Math.floor(x);
+  const yi = Math.floor(y);
+  const xf = smooth(x - xi);
+  const yf = smooth(y - yi);
+  const a = hash2(xi, yi, seed);
+  const b = hash2(xi + 1, yi, seed);
+  const c = hash2(xi, yi + 1, seed);
+  const d = hash2(xi + 1, yi + 1, seed);
+  return lerp(lerp(a, b, xf), lerp(c, d, xf), yf);
+};
+
+/**
+ * Ridged fractal noise — octaves of `1 - |2n - 1|`, each half the amplitude and
+ * twice the frequency of the last.
+ *
+ * The ridging is what makes it terrain rather than hills: taking the absolute
+ * value folds the noise at its midline and puts a crease at every crossing, and
+ * summing octaves with halving amplitude makes those creases self-similar. It
+ * is the same trick the old harmonic sum used `1 - |sin|` for, applied to
+ * something that is not periodic.
+ */
+const ridgedFbm = (x: number, y: number, seed: number): number => {
+  let sum = 0;
+  let norm = 0;
+  let amp = 1;
+  let f = 1;
+  // Carried between octaves, and the reason this makes crests rather than
+  // hills. A plain sum of ridged octaves is smooth everywhere, because the fine
+  // detail is spread evenly over the whole profile; weighting each octave by
+  // the last concentrates it *on the ridges already there*, so a crest keeps
+  // sharpening while a valley stays smooth. That asymmetry is what mountains
+  // look like, and an unweighted sum reads as rolling hills.
+  let weight = 1;
+  for (let o = 0; o < RIDGE_OCTAVES; o++) {
+    const n = valueNoise(x * f, y * f, seed + o * 17);
+    // Fold at the midline: the absolute value puts a crease at every crossing.
+    const ridge = (1 - Math.abs(2 * n - 1)) ** 2;
+    sum += amp * ridge * weight;
+    norm += amp;
+    weight = Math.min(1, ridge * RIDGE_GAIN);
+    amp *= 0.5;
+    f *= 2;
+  }
+  return sum / norm;
+};
+
+/**
+ * Octaves in a ridge, and samples across the frame — set together, because the
+ * first aliases without enough of the second.
+ *
+ * The finest octave is `2^(octaves-1)` times the base feature rate. At
+ * `RIDGE_NOISE_R = 0.62` the frame spans about 3.9 base features, so five
+ * octaves put ~62 creases across it and 320 samples give five per crease.
+ * Pinned by a test that counts extrema in the rendered profile, so adding an
+ * octave without adding samples fails rather than quietly aliasing.
+ */
+const RIDGE_OCTAVES = 5;
+const RIDGE_SAMPLES = 320;
+
+/**
+ * How strongly a ridge invites the next octave's detail. Above about 3 the
+ * weighting saturates and the effect goes back to being a plain sum.
+ */
+const RIDGE_GAIN = 2.4;
+
+/**
+ * Radius of the circle traced through noise space, per loop.
+ *
+ * Bigger means more distinct terrain around the loop and finer features on
+ * screen; this is the knob that trades variety against aliasing.
+ */
+const RIDGE_NOISE_R = 0.62;
+
+/**
  * Harmonic multipliers for a ridge, each set coprime *as a set*.
  *
  * That is the load-bearing property: the silhouette's period is
@@ -625,22 +714,19 @@ const triangleGrid: SampledGenerator<Tiled> = {
 
 /* ── ridgeline ────────────────────────────────────────────────────────────── */
 
-interface Harmonic {
-  /** Whole cycles across the frame — integer, so the ridge is periodic. */
-  freq: number;
-  amp: number;
-  phase: number;
-}
-
 interface Ridge {
   /** Horizon height for this layer, as a fraction of the frame. */
   base: number;
-  harmonics: Harmonic[];
+  /** Where in noise space this layer's circle sits — its own terrain. */
+  ox: number;
+  oy: number;
+  seed: number;
   /**
-   * Frame-widths per loop — `1/f0`, a fraction rather than a whole width.
-   * Back ranges drift slower; that is the parallax.
+   * Frame-widths spanned by one full trip around the noise circle, and
+   * therefore also the drift speed. Near ranges cover more ground per loop;
+   * that is the parallax.
    */
-  speed: number;
+  period: number;
 }
 
 /**
@@ -691,72 +777,55 @@ const ridgeline: SampledGenerator<Ridge[]> = {
     const ridges: Ridge[] = [];
     for (let i = 0; i < layers; i++) {
       const depth = i / Math.max(1, layers - 1); // 0 = furthest, 1 = nearest
-      // ## Why the silhouette is aperiodic across the frame
-      //
-      // Loop closure needs `freq · speed` whole for every harmonic, and the
-      // two previous attempts both read that as "make every frequency a
-      // multiple of one base `f0`". That closes the loop and it makes the
-      // silhouette *exactly periodic with period `1/f0`* — a comb of identical
-      // peaks. Lowering `f0` only made the repeats fewer, never absent.
-      //
-      // The period is not `1/f0`, though. It is `1/gcd(freqs)`. Multiples of a
-      // common base are one way to satisfy the constraint and not the only one:
-      // any set sharing a divisor `g` works, with `speed = 1/g`. So `g` is what
-      // to choose, and it buys two things at once —
-      //
-      //   g = 1  ->  period is one whole frame width: no repeat on screen
-      //   g = 2  ->  two repeats, and half the drift speed
-      //
-      // The near range, the one actually being read, takes `g = 1` and is
-      // aperiodic across the frame. Far ranges take `g = 2`, where two repeats
-      // in a low-contrast compressed band are near-invisible, and pay for it in
-      // exactly the currency parallax wants: they drift half as fast.
-      const g = Math.round(lerp(2, 1, depth));
-      // Coprime as a set, so `gcd(g · m) === g` and the period is what `g` says
-      // it is. Small leading multipliers keep the wavelength broad: `m0 = 2`
-      // with `g = 1` puts four peaks across the frame, where the previous
-      // version put twelve.
-      // Far ranges draw from the low half of the table, which starts at 1.
-      //
-      // They carry `g = 2`, so a set starting at 2 would put their fundamental
-      // at 4 and eight peaks across the frame — the narrow, spiky band that
-      // still read as a comb after the first fix. Starting at 1 puts it back at
-      // 2, the same wavelength the near ranges get.
-      const m =
-        MULTIPLIER_SETS[
-          g > 1
-            ? intRange(rng, 0, 2)
-            : intRange(rng, 0, MULTIPLIER_SETS.length - 1)
-        ];
-      const harmonics: Harmonic[] = [];
-      for (let h = 0; h < 3; h++) {
-        harmonics.push({
-          freq: g * m[h],
-          // Halving per harmonic. A gentler decay leaves the overtones nearly
-          // as loud as the fundamental, which is the other half of what turned
-          // terrain into a comb — real relief is self-similar, so each octave
-          // must contribute meaningfully less than the one below it.
-          amp: range(rng, 0.8, 1.2) / 2 ** h,
-          phase: range(rng, 0, TAU),
-        });
-      }
       ridges.push({
         base: lerp(0.42, 0.96, depth),
-        harmonics,
-        // Frame-widths per loop. `freq · speed = m` is whole for every
-        // harmonic, so the range lands exactly where it started, and because
-        // `g` falls as the range nears, this rises — parallax comes free.
-        //
-        // One whole frame-width is the *floor* for an aperiodic range, not a
-        // number picked for feel: `g = 1` is what makes the period the frame,
-        // and `speed = 1/g` follows. Slower means periodic.
-        speed: 1 / g,
+        // Each layer gets its own patch of noise space, far enough from the
+        // others that no two ranges are correlated.
+        ox: range(rng, -40, 40),
+        oy: range(rng, -40, 40),
+        seed: intRange(rng, 1, 9999),
+        // Frame-widths per loop, and the reason a range can drift at all
+        // without repeating. See the note above `project`.
+        period: lerp(1, 1.5, depth),
       });
     }
     return ridges;
   },
+  /**
+   * ## Why the terrain is noise on a circle
+   *
+   * Three attempts at this were sums of sine harmonics, and all three repeated,
+   * for a reason no amount of frequency-picking fixes: a sum of sinusoids whose
+   * frequencies share a divisor `g` is periodic with period `1/g`, and loop
+   * closure forces them to share one. The best available was `g = 1` — one
+   * period per frame — which is not a repeat on screen but is still only three
+   * sines, and three sines read as *wavy*, never as random.
+   *
+   * Terrain needs octaves, and octaves of noise are not periodic at all. Which
+   * is normally a problem here, because the loop has to close exactly.
+   *
+   * Sampling the noise **around a circle** solves both at once. Walk a circle in
+   * 2D noise space as `x` crosses the frame, and the profile is fractal noise —
+   * genuinely aperiodic to look at, no two features alike — while being exactly
+   * periodic in the *loop* parameter, because a circle returns to where it
+   * started. `t = 1` lands on `t = 0` by construction rather than by arithmetic
+   * luck, and there is nothing to repeat within the frame because one trip round
+   * the circle spans more than a frame.
+   *
+   * ## Parallax, without giving the periodicity back
+   *
+   * `period` is how many frame-widths one trip around the circle covers, and it
+   * doubles as the drift speed: advancing `u` by `period` is one full circuit,
+   * so the range lands exactly where it started. Near ranges take a larger
+   * `period`, which means both a faster drift *and* broader features — the two
+   * cues distance gives you, from one number, pointing the same way.
+   *
+   * A period below 1 would put more than one circuit inside the frame, which is
+   * exactly the repeat this exists to avoid. So 1 is the floor, and it is a
+   * property of the construction rather than a tuning choice.
+   */
   project: (ridges, p, t) => {
-    const step = p.width / 192;
+    const step = p.width / RIDGE_SAMPLES;
     let out = '';
     for (let i = 0; i < ridges.length; i++) {
       const r = ridges[i];
@@ -764,39 +833,28 @@ const ridgeline: SampledGenerator<Ridge[]> = {
       // Depth is carried by contrast, not perspective: far ranges are faint and
       // thin, near ranges bright and heavy.
       const stroke = withAlpha(p.accent, 0.22 + depth * 0.68);
-      // Opaque, so a near range hides the ones behind it.
-      //
-      // This was `withAlpha(p.accent, 0.04 + depth * 0.07)` — alpha 0.04 to
-      // 0.11, through which every far range stayed fully visible. The layers
-      // were stacked in draw order and occluded nothing, so depth was carried
-      // entirely by stroke contrast and the result read as a pile of
-      // overlapping line charts. Mountains hide what is behind them, and that
-      // is most of what makes a range look like distance rather than noise.
+      // Opaque, so a near range hides the ones behind it. This was
+      // `withAlpha(p.accent, 0.04 + depth * 0.07)` — alpha 0.04 to 0.11,
+      // through which every far range stayed fully visible, so the layers were
+      // stacked in draw order and occluded nothing. Mountains hide what is
+      // behind them, and that is most of what makes a range read as distance.
       const fillA = mix(p.occlusion, p.accent, 0.05 + depth * 0.12);
-      // Was `lerp(0.3, 0.12, …)`, which gave the *furthest* range the deepest
-      // relief — tall spikes along the top of the frame, exactly where the
-      // repetition was most obvious. Distance flattens, so the ladder runs the
-      // other way now, and the nearest range is the one with the big silhouette.
+      // Distance flattens, so relief grows toward the viewer. It used to run
+      // the other way and gave the furthest range the deepest spikes.
       const relief = lerp(0.16, 0.26, depth) * p.height;
 
       let d = `M0 ${p.height} `;
       for (let x = 0; x <= p.width; x += step) {
-        let sum = 0;
-        let norm = 0;
-        // The drift is added to `x` before the frequency multiplies it, not to
-        // the phase afterwards. That distinction is the whole difference between
-        // a range that *translates* and one that *morphs*: a flat phase offset
-        // advances every harmonic by the same angle, so the fast ones slide
-        // further than the slow ones and the silhouette boils. Shifting the
-        // coordinate moves them together.
-        const u = x / p.width + t * r.speed;
-        for (const h of r.harmonics) {
-          const th = u * TAU * h.freq + h.phase;
-          sum += h.amp * (1 - Math.abs(Math.sin(th)));
-          norm += h.amp;
-        }
-        const y = r.base * p.height - (sum / norm) * relief;
-        d += `L${r2(x)} ${r2(y)} `;
+        // One circuit of the circle per `period` frame-widths. Drift is added
+        // to the coordinate before the angle is taken, so every octave moves
+        // together and the range translates rather than boiling.
+        const ang = ((x / p.width + t * r.period) / r.period) * TAU;
+        const h = ridgedFbm(
+          r.ox + RIDGE_NOISE_R * Math.cos(ang),
+          r.oy + RIDGE_NOISE_R * Math.sin(ang),
+          r.seed,
+        );
+        d += `L${r2(x)} ${r2(r.base * p.height - h * relief)} `;
       }
       d += `L${p.width} ${p.height} Z`;
       out += `<path d="${d.trim()}" fill="${fillA}" stroke="${stroke}" stroke-width="${r2(p.strokeWidth * (0.6 + depth * 1.2))}" stroke-linejoin="miter"/>`;
