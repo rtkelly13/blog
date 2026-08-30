@@ -44,6 +44,11 @@ export default defineGenerator<RingBand[]>({
   description:
     'Counter-rotating polygon bands, mostly missing — the negative space is the structure.',
   group: 'radial',
+  // Slower than the lattice generators, and the reason is geometric: a turn
+  // at full reach covers the whole circumference, so what reads as a stately
+  // rotation on a small form is a blur on a frame-filling one. See
+  // `GeneratorModule.speed`.
+  speed: 0.5,
   defaults: { density: 0.5, strokeWidth: 1.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

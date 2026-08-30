@@ -52,6 +52,13 @@ interface Field {
 
 /** A packed field of vertical bars with a soft-edged void torn out of it. */
 
+/**
+ * Base alphas for the three weight tiers. Kept as numbers rather than as
+ * pre-built colours because the rim term lifts each toward full accent, and
+ * that has to happen per bar rather than per tier.
+ */
+const BASE_TONES = [0.25, 0.55, 0.9];
+
 export default defineGenerator<Field>({
   name: 'void-field',
   label: 'Void Field',
@@ -116,11 +123,6 @@ export default defineGenerator<Field>({
   // bars instead would be a texture that shimmers; moving the void makes the
   // shape breathe and wander, which is the only thing here worth watching.
   project: ({ hole, bars }, p, t) => {
-    const tones = [
-      withAlpha(p.accent, 0.25),
-      withAlpha(p.accent, 0.55),
-      withAlpha(p.accent, 0.9),
-    ];
     // One cycle count for both axes of the orbit and a quarter-turn between
     // them: same `k` is what makes the path close on itself rather than trace a
     // Lissajous figure, and `cycles` is what makes it close at `t = 1` at all.
@@ -144,12 +146,25 @@ export default defineGenerator<Field>({
       // pitch, and a linear ramp leaves a visible cone of half-height bars.
       const ramp = Math.min(1, Math.max(0, (d - 0.82) / 0.3));
       const h = b.h * smooth(ramp);
+      // Bars just outside the void brighten.
+      //
+      // Without it the hole is defined only by absence, and absence has no
+      // edge — the field simply stops. A rim makes the void an object the
+      // composition is arranged around rather than a place where the pattern
+      // ran out. `1 - ramp` peaks exactly where the falloff is halfway, which
+      // is the bars that are shortened but still present.
+      const rim = ramp > 0 ? 1 - Math.abs(ramp * 2 - 1) : 0;
       // Every bar is emitted at every `t`, including the ones the void has
       // eaten entirely: dropping a bar changes how many numbers the frame
       // contains, which is the confetti signature the suite tests for even
       // though here it would only ever be the hole opening. A zero-height rect
       // draws nothing and costs one element.
-      out += `<rect x="${r2(b.x)}" y="${r2(by - h / 2)}" width="${r2(b.w)}" height="${r2(h)}" fill="${tones[b.tone]}"/>`;
+      // Base tone lifted toward full accent by the rim term, so the void is
+      // ringed by the brightest bars in the frame.
+      const alpha = r2(
+        BASE_TONES[b.tone] + rim * 0.5 * (1 - BASE_TONES[b.tone]),
+      );
+      out += `<rect x="${r2(b.x)}" y="${r2(by - h / 2)}" width="${r2(b.w)}" height="${r2(h)}" fill="${withAlpha(p.accent, alpha)}"/>`;
     }
     return frame(p, out);
   },

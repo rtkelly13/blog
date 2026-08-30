@@ -91,6 +91,8 @@ export type ControlType =
 export interface Generator {
   /** Family, for grouped galleries. */
   group: GeneratorGroup;
+  /** Loop-duration multiplier; see {@link GeneratorModule.speed}. */
+  speed: number;
   /** Stable id used in frontmatter and the registry (kebab-case). */
   name: string;
   /** Human label for the gallery. */
@@ -142,6 +144,25 @@ export interface GeneratorModule<S = unknown> {
   group: GeneratorGroup;
   /** Per-generator defaults, merged over {@link BASE_PARAMS}. */
   defaults?: Partial<GraphicParams>;
+  /**
+   * How fast this generator wants to be driven, as a multiplier on the loop
+   * duration. Default 1; `0.5` takes twice as long to complete one loop.
+   *
+   * Deliberately *not* a `GraphicParams` field. Everything in that interface
+   * changes what is drawn, and this changes nothing — it is the renderer's
+   * business. It also cannot be a multiplier on `t`, which is the obvious
+   * implementation and the wrong one: `t` scaled by anything non-integral
+   * leaves the motion mid-cycle at the end of the loop, and every generator's
+   * closure depends on `t` running exactly 0 to 1. Stretching the *duration*
+   * leaves that untouched — the loop is identical, it simply takes longer.
+   *
+   * Radial generators are the ones that need it. Tangential speed is `ω · r`,
+   * so a centred form at full reach covers far more ground per turn than a
+   * lattice mark does per wobble, and one turn per loop is already brisk. The
+   * alternative — turning less than once — is not available, because a partial
+   * turn does not close.
+   */
+  speed?: number;
   /**
    * The time-invariant half. Consumes the entire rng stream and depends on
    * every param except `t`.

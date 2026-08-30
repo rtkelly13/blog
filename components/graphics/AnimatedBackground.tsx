@@ -9,6 +9,13 @@ interface AnimatedBackgroundProps extends Partial<GraphicParams> {
   generator: string;
   /** Seconds for one full loop. `t` runs 0..1 across it and then repeats. */
   duration?: number;
+  /**
+   * Pace multiplier over the generator's own declared `speed`. Below 1 is
+   * slower. Like `opacity`, this is what a caller reaches for when the graphic
+   * is a quiet backdrop rather than the subject — a background that moves at
+   * gallery pace behind a paragraph is a distraction.
+   */
+  speed?: number;
   /** Drive the loop. When false the frame at `t` is held. */
   playing?: boolean;
   /** Explicit loop position, 0..1. Used when `playing` is false. */
@@ -37,6 +44,7 @@ interface AnimatedBackgroundProps extends Partial<GraphicParams> {
 export default function AnimatedBackground({
   generator,
   duration = 12,
+  speed = 1,
   playing = true,
   t = 0,
   className,
@@ -139,7 +147,11 @@ export default function AnimatedBackground({
 
     let raf = 0;
     let start: number | null = null;
-    const ms = Math.max(1, duration) * 1000;
+    // The generator's declared pace and the caller's, multiplied. Applied to
+    // the *duration* rather than to `t`, so the loop still runs 0 to 1 and
+    // closure is untouched — it just takes longer to get there.
+    const pace = Math.max(0.05, (gen.speed ?? 1) * speed);
+    const ms = (Math.max(1, duration) / pace) * 1000;
 
     const tick = (now: number) => {
       if (start === null) start = now;
@@ -151,7 +163,7 @@ export default function AnimatedBackground({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [gen, structure, params, playing, t, duration, onScreen]);
+  }, [gen, structure, params, playing, t, duration, speed, onScreen]);
 
   if (!gen) return null;
 

@@ -98,24 +98,35 @@ export default defineGenerator<Figure[]>({
   defaults: { density: 0.55, strokeWidth: 1.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const cols = Math.round(lerp(2, 5, p.density));
-    const rows = Math.round(lerp(2, 4, p.density));
+    const cols = Math.round(lerp(2, 4, p.density));
+    const rows = Math.round(lerp(2, 3, p.density));
     const cellW = p.width / cols;
     const cellH = p.height / rows;
+    // Reach is measured against the frame, not the cell.
+    //
+    // Sizing each figure to its own cell and nudging it by a tenth produced a
+    // contact sheet: every curve sat inside an invisible box the eye found
+    // anyway, and the whole thing read as a chart of specimens rather than a
+    // composition. The grid survives only as a coverage device now — figures
+    // are placed from it, then jittered by almost half a cell and scaled
+    // against the short side of the frame, so a large one spans several cells,
+    // overlaps its neighbours and runs off the edge.
+    const reach = Math.min(p.width, p.height);
     const figures: Figure[] = [];
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
         const [a, b] = pick(rng, RATIOS);
-        // Scales overlap 1 deliberately: at 1 the figure fills its cell and
-        // touches its neighbours, so the larger ones interleave rather than
-        // sitting in a visible grid of boxes. A field of identically sized
-        // curves reads as a table of specimens.
-        const scale = range(rng, 0.62, 1.08);
+        // A wide range, weighted small: mostly modest figures with the
+        // occasional one big enough to be the subject. Squared, so large ones
+        // stay rare enough to read as an accent rather than as clutter.
+        const roll = rng();
+        const scale = 0.1 + 0.42 * roll * roll;
         figures.push({
-          cx: (col + 0.5) * cellW + range(rng, -0.1, 0.1) * cellW,
-          cy: (row + 0.5) * cellH + range(rng, -0.1, 0.1) * cellH,
-          ax: cellW * 0.5 * scale,
-          ay: cellH * 0.5 * scale,
+          cx: (col + 0.5) * cellW + range(rng, -0.45, 0.45) * cellW,
+          cy: (row + 0.5) * cellH + range(rng, -0.45, 0.45) * cellH,
+          // Axes differ per figure, so they are not all the same aspect.
+          ax: reach * scale * range(rng, 0.85, 1.35),
+          ay: reach * scale * range(rng, 0.85, 1.35),
           a,
           b,
           delta: range(rng, 0, TAU),
@@ -124,7 +135,7 @@ export default defineGenerator<Figure[]>({
           // field turn in lockstep, and the parallax between figures is what
           // stops the whole thing pulsing as one object.
           spin: cycles(rng(), 2) * (chance(rng, 0.5) ? 1 : -1),
-          hot: chance(rng, 0.16),
+          hot: chance(rng, 0.22),
         });
       }
     }
