@@ -26,6 +26,18 @@ export default function BackgroundsLab() {
   const [duration, setDuration] = useState(12);
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
+  // Per-tile overrides on top of the global transport. A name present here wins
+  // over `playing`; the global buttons clear the map so they always mean what
+  // they say rather than being silently countermanded by a stale override.
+  const [solo, setSolo] = useState<Record<string, boolean>>({});
+
+  const isPlaying = (name: string) => solo[name] ?? playing;
+  const toggleOne = (name: string) =>
+    setSolo((prev) => ({ ...prev, [name]: !(prev[name] ?? playing) }));
+  const setAll = (next: boolean) => {
+    setPlaying(next);
+    setSolo({});
+  };
 
   const shared = {
     seed,
@@ -34,7 +46,6 @@ export default function BackgroundsLab() {
     disorder,
     occlusion: SURFACES.darkBg,
     duration,
-    playing,
     t: scrub,
     // 16:9, because that is what these are *for* — talk slides via
     // SpectacleDeck and full-bleed page headers. Previewing them square was
@@ -66,7 +77,9 @@ export default function BackgroundsLab() {
             not an independent roll of the dice.
           </p>
           <p className="mt-2 max-w-3xl font-mono text-xs text-zinc-500">
-            <span className="text-brutalist-cyan">&gt;</span> Every loop closes:
+            <span className="text-brutalist-cyan">&gt;</span> Tiles animate only
+            while on screen, and each has its own transport — the header buttons
+            drive all of them at once. Every loop closes:
             <code> t = 1</code> renders identically to <code>t = 0</code>, so
             nothing seams. Pause to scrub a single loop by hand.
           </p>
@@ -103,7 +116,7 @@ export default function BackgroundsLab() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setPlaying((v) => !v)}
+                onClick={() => setAll(!playing)}
                 className="flex items-center gap-2 border-2 border-white bg-zinc-900 px-3 py-1.5 font-mono text-xs uppercase text-white hover:border-brutalist-cyan hover:text-brutalist-cyan"
               >
                 {playing ? (
@@ -203,6 +216,7 @@ export default function BackgroundsLab() {
                 <AnimatedBackground
                   generator={g.name}
                   {...shared}
+                  playing={isPlaying(g.name)}
                   className="h-full w-full"
                 />
               </div>
@@ -211,9 +225,27 @@ export default function BackgroundsLab() {
                   <h2 className="font-display text-lg font-bold uppercase text-white">
                     {g.label}
                   </h2>
-                  <code className="font-mono text-xs text-brutalist-cyan">
-                    {g.name}
-                  </code>
+                  <div className="flex items-center gap-3">
+                    <code className="font-mono text-xs text-brutalist-cyan">
+                      {g.name}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => toggleOne(g.name)}
+                      aria-label={`${isPlaying(g.name) ? 'Pause' : 'Play'} ${g.label}`}
+                      className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                    >
+                      {isPlaying(g.name) ? (
+                        <>
+                          <Pause className="h-3 w-3" /> Pause
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-3 w-3" /> Play
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <p className="mt-1 font-mono text-xs text-zinc-400">
                   {g.description}

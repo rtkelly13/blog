@@ -1,5 +1,5 @@
 import { useTheme } from 'next-themes';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { graphicThemeDefaults } from './palette';
 import { getGenerator, resolveParams } from './registry';
 import type { GraphicParams } from './types';
@@ -53,6 +53,7 @@ export default function AnimatedBackground({
   height,
 }: AnimatedBackgroundProps) {
   const host = useRef<HTMLDivElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
   const { resolvedTheme } = useTheme();
   const theme = graphicThemeDefaults(resolvedTheme);
 
@@ -97,6 +98,27 @@ export default function AnimatedBackground({
     [gen, params],
   );
 
+  // Offscreen tiles do not animate.
+  //
+  // A gallery of these is a page of independent rAF loops, each re-serialising
+  // a few thousand SVG elements every frame, and the browser has no idea they
+  // are equivalent — so seventeen of them compete for one main thread whether
+  // or not any are in view. Almost none usually are. Gating on intersection is
+  // the difference between paying for what is visible and paying for the whole
+  // page, and it costs one observer per tile.
+  useEffect(() => {
+    const el = host.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      // A little margin, so a tile is already running by the time it is looked
+      // at rather than visibly starting from its still frame.
+      { rootMargin: '200px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   useEffect(() => {
     const el = host.current;
     if (!el || !gen || structure === null) return;
@@ -105,8 +127,13 @@ export default function AnimatedBackground({
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-    if (!playing || reduced) {
-      el.innerHTML = gen.project(structure, params, reduced ? 0 : t);
+    if (!playing || reduced || !onScreen) {
+      // Held frame. Scrolling away leaves whatever was last drawn rather than
+      // snapping back to `t = 0`, so returning to a tile does not visibly reset
+      // it — and a paused tile still honours the scrubber.
+      if (!playing || reduced) {
+        el.innerHTML = gen.project(structure, params, reduced ? 0 : t);
+      }
       return;
     }
 
@@ -124,7 +151,7 @@ export default function AnimatedBackground({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [gen, structure, params, playing, t, duration]);
+  }, [gen, structure, params, playing, t, duration, onScreen]);
 
   if (!gen) return null;
 
