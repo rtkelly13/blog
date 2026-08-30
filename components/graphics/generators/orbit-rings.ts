@@ -1,0 +1,135 @@
+import { defineGenerator } from '../types';
+import type { Rng } from './shared';
+import {
+  chance,
+  cycles,
+  frame,
+  intRange,
+  lattice,
+  lerp,
+  mulberry32,
+  r2,
+  range,
+  TAU,
+  withAlpha,
+  wobble,
+} from './shared';
+
+/* ── orbit-rings ──────────────────────────────────────────────────────────── */
+
+interface Orbit {
+  /** Base radius as a fraction of reach. */
+  r: number;
+  points: { angle: number; rad: number; hot: boolean }[];
+  /** Angle the ring's points gather toward. */
+  focus: number;
+  /** Whole cycles per loop for the gather/scatter. */
+  beat: number;
+  /** Offset so the rings do not all gather on the same beat. */
+  phase: number;
+  spin: number;
+}
+
+/** How far into the ring's own width a point may wander, as a fraction. */
+const ORBIT_BAND = 0.2;
+
+/**
+ * Concentric rings of points that gather and scatter.
+ *
+ * Named for what it is, not for what inspired it. This began as an adaptation
+ * of the reference's `modular_circle` and ended up nothing like it — that one
+ * is a triangular lattice inside a hexagon with tangent line families radiating
+ * off its vertices, a kaleidoscope. This is beads on rings. The kaleidoscope is
+ * still worth building; it is not this.
+ *
+ * The motion is angular, not radial: each ring's points ease toward a focus
+ * angle and spread back out again, so the ring visibly bunches on one side and
+ * thins on the other while staying a ring. Radial movement is deliberately
+ * confined to the outer fifth of each ring's width (`ORBIT_BAND`) — enough to
+ * stop the points looking pinned to a wire, little enough that the concentric
+ * structure never blurs into a disc.
+ *
+ * Gathering is a lerp toward the focus rather than an added offset, because an
+ * offset moves every point by the same amount and reads as rotation. Pulling
+ * each point a *fraction of its own distance* to the focus is what makes them
+ * converge — near points barely move, far ones travel a long way, and the ring
+ * closes up like a drawstring.
+ */
+
+export default defineGenerator<Orbit[]>({
+  name: 'orbit-rings',
+  label: 'Orbit Rings',
+  description:
+    'Rings of beads that gather toward a focus and scatter back, wandering an outer band.',
+  group: 'radial',
+  defaults: { density: 0.5, strokeWidth: 1.5 },
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const rings = Math.round(lerp(4, 10, p.density));
+    const out: Orbit[] = [];
+    for (let i = 0; i < rings; i++) {
+      const count = Math.round(lerp(10, 30, p.density)) + intRange(rng, 0, 6);
+      out.push({
+        r: 0.2 + (i / Math.max(1, rings - 1)) * 0.76,
+        points: Array.from({ length: count }, (_, j) => ({
+          angle: (j / count) * TAU,
+          rad: range(rng, 2.6, 5.6),
+          hot: chance(rng, 0.12),
+        })),
+        focus: range(rng, 0, TAU),
+        beat: cycles(rng(), 3),
+        phase: range(rng, 0, TAU),
+        // One turn per loop, for the same reason as `broken-ring`. The
+        // gather/scatter `beat` may run faster because it travels a short
+        // angular distance, not the whole circumference.
+        spin: cycles(rng(), 1) * (i % 2 ? -1 : 1),
+      });
+    }
+    return out;
+  },
+  project: (rings, p, t) => {
+    const cx = p.width / 2;
+    const cy = p.height / 2;
+    const reach = Math.min(p.width, p.height) * 0.46;
+    const bandWidth = reach / Math.max(1, rings.length);
+    let out = '';
+    for (const ring of rings) {
+      const base = ring.r * reach;
+      // A faint guide per ring. Without it the concentric structure never
+      // reads: the points alone are just a scatter that happens to be round,
+      // and the whole idea is that they are gathering *on* something.
+      out += `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(base)}" fill="none" stroke="${withAlpha(p.accent, 0.12)}" stroke-width="${r2(p.strokeWidth * 0.6)}"/>`;
+      // 0 at rest, 1 fully gathered. `wobble` keeps it zero at both ends of the
+      // loop, so the ring starts and finishes evenly spaced.
+      const gather = 0.42 * wobble(t, ring.beat, ring.phase);
+      // No fractional multiplier here. A `* 0.5` looked like a reasonable way
+      // to halve the speed and left an odd `spin` mid-turn at `t = 1`, which
+      // the loop-closure test caught immediately. Slower means a smaller
+      // `cycles()` ceiling, never a fraction of one.
+      const spin = t * TAU * ring.spin;
+      for (const pt of ring.points) {
+        // Shortest way round to the focus, so a point never takes the long
+        // route and swings through the far side of the ring to get there.
+        let delta = ring.focus - pt.angle;
+        delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+        const a = pt.angle + delta * gather + spin;
+        // Radial wander, confined to the outer band — and zero at rest.
+        //
+        // This was a plain `sin(angle * 3 + …)`, which is non-zero at `t = 0`
+        // and so pushed every point off its ring before anything had moved.
+        // The rings stopped looking like rings and the whole form read as a
+        // scatter. `wobble` starts it at zero, so the still frame is clean
+        // concentric rings and the wander is something that *happens* to them.
+        const r =
+          base +
+          bandWidth *
+            ORBIT_BAND *
+            wobble(t, ring.beat, pt.angle * 3 + ring.phase);
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r;
+        out += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(pt.rad)}" fill="${withAlpha(p.accent, pt.hot ? 0.98 : 0.68)}"/>`;
+      }
+    }
+    return frame(p, out);
+  },
+});

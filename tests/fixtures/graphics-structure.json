@@ -1,0 +1,175 @@
+{
+  "broken-ring": {
+    "elements": {
+      "g": 1,
+      "polygon": 154
+    },
+    "marks": 155,
+    "viewBox": "0 0 1280 720",
+    "colours": 4,
+    "bounds": [232, -48, 1048, 768]
+  },
+  "contour": {
+    "elements": {
+      "g": 1,
+      "path": 16
+    },
+    "marks": 17,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [0, 1, 1253, 724]
+  },
+  "diagonal-hatch": {
+    "elements": {
+      "g": 1,
+      "line": 45
+    },
+    "marks": 46,
+    "viewBox": "0 0 1280 720",
+    "colours": 2,
+    "bounds": [0, 0, 0, 0]
+  },
+  "dot-grid": {
+    "elements": {
+      "g": 1,
+      "circle": 220
+    },
+    "marks": 221,
+    "viewBox": "0 0 1280 720",
+    "colours": 2,
+    "bounds": [33, 33, 1268, 683]
+  },
+  "flow-field": {
+    "elements": {
+      "g": 1,
+      "line": 540
+    },
+    "marks": 541,
+    "viewBox": "0 0 1280 720",
+    "colours": 2,
+    "bounds": [0, 0, 0, 0]
+  },
+  "flow-lines": {
+    "elements": {
+      "g": 1,
+      "path": 560
+    },
+    "marks": 561,
+    "viewBox": "0 0 1280 720",
+    "colours": 61,
+    "bounds": [-29, -30, 1309, 747]
+  },
+  "hex-grid": {
+    "elements": {
+      "g": 1,
+      "path": 176
+    },
+    "marks": 177,
+    "viewBox": "0 0 1280 720",
+    "colours": 44,
+    "bounds": [-133, -133, 1401, 782]
+  },
+  "interference": {
+    "elements": {
+      "g": 1,
+      "path": 31
+    },
+    "marks": 32,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [0, 1, 1272, 716]
+  },
+  "iso-cubes": {
+    "elements": {
+      "g": 1,
+      "polygon": 720,
+      "path": 180
+    },
+    "marks": 901,
+    "viewBox": "0 0 1280 720",
+    "colours": 5,
+    "bounds": [220, 59, 976, 521]
+  },
+  "iso-grid": {
+    "elements": {
+      "g": 1,
+      "path": 544
+    },
+    "marks": 545,
+    "viewBox": "0 0 1280 720",
+    "colours": 4,
+    "bounds": [-129, -50, 1376, 773]
+  },
+  "node-network": {
+    "elements": {
+      "g": 1,
+      "line": 37,
+      "circle": 38
+    },
+    "marks": 76,
+    "viewBox": "0 0 1280 720",
+    "colours": 2,
+    "bounds": [55, 2, 1252, 716]
+  },
+  "orbit-rings": {
+    "elements": {
+      "g": 1,
+      "circle": 167
+    },
+    "marks": 168,
+    "viewBox": "0 0 1280 720",
+    "colours": 4,
+    "bounds": [322, 44, 958, 676]
+  },
+  "radial-spokes": {
+    "elements": {
+      "g": 1,
+      "line": 72,
+      "circle": 6
+    },
+    "marks": 79,
+    "viewBox": "0 0 1280 720",
+    "colours": 4,
+    "bounds": [640, 360, 640, 360]
+  },
+  "ridgeline": {
+    "elements": {
+      "g": 1,
+      "path": 5
+    },
+    "marks": 6,
+    "viewBox": "0 0 1280 720",
+    "colours": 10,
+    "bounds": [0, 217, 1280, 720]
+  },
+  "scatter-blocks": {
+    "elements": {
+      "g": 1,
+      "rect": 45
+    },
+    "marks": 46,
+    "viewBox": "0 0 1280 720",
+    "colours": 4,
+    "bounds": [0, 0, 0, 0]
+  },
+  "triangle-grid": {
+    "elements": {
+      "g": 1,
+      "path": 300
+    },
+    "marks": 301,
+    "viewBox": "0 0 1280 720",
+    "colours": 57,
+    "bounds": [-104, -90, 1482, 825]
+  },
+  "truchet-arcs": {
+    "elements": {
+      "g": 1,
+      "path": 170
+    },
+    "marks": 171,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [0, 0, 1411, 1370]
+  }
+}
