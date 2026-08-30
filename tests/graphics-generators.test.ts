@@ -336,6 +336,100 @@ describe('ridgeline terrain', () => {
   });
 });
 
+describe('disorder: the ramp, and why it is free', () => {
+  // The generators that honour it. The rest ignore it, which is allowed —
+  // `disorder` perturbs a lattice, and not every generator has one.
+  const RAMPED = ['dot-grid', 'iso-grid', 'truchet-arcs'];
+
+  it.each(RAMPED)('%s: disorder=0 is byte-identical to the golden', (name) => {
+    // The claim that lets this be added to shipped generators at all. It holds
+    // because the perturbation is hashed from coordinates rather than drawn
+    // from the rng — a draw would shift the stream and re-roll every later
+    // mark even when multiplied by zero.
+    expect(renderGraphic(name, params({ disorder: 0 }))).toBe(
+      renderGraphic(name, params()),
+    );
+  });
+
+  it.each(RAMPED)('%s: disorder actually perturbs the lattice', (name) => {
+    expect(renderGraphic(name, params({ disorder: 0.9 }))).not.toBe(
+      renderGraphic(name, params({ disorder: 0 })),
+    );
+  });
+
+  it.each(RAMPED)(
+    '%s: perturbs the far edge more than the near one',
+    (name) => {
+      // The property that makes it a ramp rather than jitter. If the gradient
+      // were flat, or inverted, both bands would move by the same amount.
+      const calm = numbers(renderGraphic(name, params({ disorder: 0 })));
+      const wild = numbers(renderGraphic(name, params({ disorder: 1 })));
+      expect(wild.length).toBe(calm.length);
+      let nearSum = 0;
+      let farSum = 0;
+      for (let i = 1; i < calm.length; i += 2) {
+        const drift =
+          Math.abs(wild[i] - calm[i]) + Math.abs(wild[i - 1] - calm[i - 1]);
+        if (calm[i] < 720 / 3) nearSum += drift;
+        else if (calm[i] > (720 * 2) / 3) farSum += drift;
+      }
+      expect(farSum).toBeGreaterThan(nearSum * 2);
+    },
+  );
+
+  it('does not vary with t — it is sampled, not projected', () => {
+    // Same trap as `density`: animating it would move a loop bound in `sample`
+    // and re-roll the composition. Asserting it is inert in `project` is what
+    // stops someone wiring it to a scrubber.
+    const gen = getGenerator('dot-grid');
+    if (!gen) throw new Error('dot-grid missing');
+    const p = params({ disorder: 0.7 });
+    expect(gen.sample(p)).toEqual(gen.sample({ ...p, t: 0.42 }));
+  });
+});
+
+describe('occlusion: opaque, and its own colour', () => {
+  it('iso-cubes paints faces with it', () => {
+    expect(
+      renderGraphic('iso-cubes', params({ occlusion: '#123456' })),
+    ).toContain('#123456');
+  });
+
+  it('is not derivable from accent or background', () => {
+    // The whole argument for a third parameter. Moving `occlusion` alone must
+    // change the output, or it is a synonym for something already there.
+    const base = params({ accent: '#22d3ee', background: '#000000' });
+    expect(
+      renderGraphic('iso-cubes', { ...base, occlusion: '#111111' }),
+    ).not.toBe(renderGraphic('iso-cubes', { ...base, occlusion: '#222222' }));
+  });
+
+  it('is opaque, so a nearer cube hides a farther one', () => {
+    // An rgba() face would let the stack show through, which is the failure the
+    // parameter exists to prevent.
+    const svg = renderGraphic('iso-cubes', params({ occlusion: '#0a0a1a' }));
+    expect(svg).toContain('fill="#0a0a1a"');
+    expect(svg).not.toContain('rgba(10, 10, 26');
+  });
+
+  it('is used by ridgeline, whose ranges have to hide each other', () => {
+    // The layered ranges were filled with alpha 0.04-0.11 and occluded nothing,
+    // so the stack read as overlapping line charts rather than as distance.
+    const base = params({ accent: '#22d3ee' });
+    expect(
+      renderGraphic('ridgeline', { ...base, occlusion: '#111111' }),
+    ).not.toBe(renderGraphic('ridgeline', { ...base, occlusion: '#222222' }));
+  });
+
+  it('leaves generators that do not stack geometry untouched', () => {
+    for (const name of ['dot-grid', 'contour', 'diagonal-hatch']) {
+      expect(renderGraphic(name, params({ occlusion: '#ff0000' }))).toBe(
+        renderGraphic(name, params({ occlusion: '#00ff00' })),
+      );
+    }
+  });
+});
+
 describe('the integer-cycle rule', () => {
   it('is why the loop closes, and a fraction would break it', () => {
     // Executable form of the trap: motion is `sin(t·2π·k + φ)`, which returns to
