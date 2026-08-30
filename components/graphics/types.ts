@@ -89,6 +89,8 @@ export type ControlType =
 
 /** Metadata that lets the gallery build live controls generically. */
 export interface Generator {
+  /** Family, for grouped galleries. */
+  group: GeneratorGroup;
   /** Stable id used in frontmatter and the registry (kebab-case). */
   name: string;
   /** Human label for the gallery. */
@@ -111,6 +113,67 @@ export interface Generator {
   sample: (params: GraphicParams) => unknown;
   /** The time-driven half. Pure arithmetic; consumes no randomness. */
   project: (structure: unknown, params: GraphicParams, t: number) => string;
+}
+
+/**
+ * What a generator module exports, and the whole contract for adding one.
+ *
+ * Metadata lives *with* the implementation deliberately. It used to sit in a
+ * `META` table in `registry.ts` while the code sat in `generators.ts`, so adding
+ * a generator meant editing three files and forgetting the third was silent —
+ * a generator with no label rendered as its own id. Co-locating them makes the
+ * module the single unit: one file is one generator, complete.
+ *
+ * `S` is the sampled structure and stays private to the module. Nothing outside
+ * needs to know what a generator sampled, only that `project` accepts what its
+ * own `sample` returned.
+ */
+export interface GeneratorModule<S = unknown> {
+  /** Stable kebab-case id. Must equal the module's filename — a test asserts it. */
+  name: string;
+  /** Human label for galleries. */
+  label: string;
+  /** One line on what the generator looks like. */
+  description: string;
+  /**
+   * Rough family, for grouping in galleries. Presentation only — nothing
+   * behavioural hangs off it.
+   */
+  group: GeneratorGroup;
+  /** Per-generator defaults, merged over {@link BASE_PARAMS}. */
+  defaults?: Partial<GraphicParams>;
+  /**
+   * The time-invariant half. Consumes the entire rng stream and depends on
+   * every param except `t`.
+   */
+  sample: (params: GraphicParams) => S;
+  /** The time-driven half. Pure arithmetic; consumes no randomness. */
+  project: (structure: S, params: GraphicParams, t: number) => string;
+}
+
+/** Families a generator can belong to. Ordered as galleries should present them. */
+export const GENERATOR_GROUPS = [
+  'lattice',
+  'field',
+  'radial',
+  'terrain',
+  'isometric',
+] as const;
+
+export type GeneratorGroup = (typeof GENERATOR_GROUPS)[number];
+
+/**
+ * Identity helper that keeps `S` inferred.
+ *
+ * Without it a module would have to name its own structure type twice, or widen
+ * to `unknown` and lose the check that `project` accepts what `sample` returned.
+ * With it, `sample` and `project` are type-checked against each other and the
+ * structure type never has to be written down at all.
+ */
+export function defineGenerator<S>(
+  module: GeneratorModule<S>,
+): GeneratorModule<S> {
+  return module;
 }
 
 /** Global fallbacks; individual generators override via `defaults`. */

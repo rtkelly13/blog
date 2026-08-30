@@ -1,135 +1,40 @@
-import { SAMPLED_GENERATORS } from './generators';
+import { GENERATOR_MODULES } from './generators';
 import {
   BASE_PARAMS,
   type Generator,
+  type GeneratorGroup,
   type GraphicParams,
-  type SampledGenerator,
 } from './types';
 
-/** Per-generator metadata + default params (merged over BASE_PARAMS). */
-const META: Record<
-  string,
-  { label: string; description: string; defaults?: Partial<GraphicParams> }
-> = {
-  'dot-grid': {
-    label: 'Dot Grid',
-    description: 'Regular grid of dots with a scatter flaring to full accent.',
-    defaults: { density: 0.5 },
-  },
-  'diagonal-hatch': {
-    label: 'Diagonal Hatch',
-    description: 'Parallel 45° rules — a few pop, the rest stay ghostly.',
-    defaults: { density: 0.55, strokeWidth: 2 },
-  },
-  'node-network': {
-    label: 'Node Network',
-    description: 'Constellation of nodes wired to their nearest neighbours.',
-    defaults: { density: 0.5 },
-  },
-  contour: {
-    label: 'Contour',
-    description: 'Stacked topographic waves with occasional bright bands.',
-    defaults: { density: 0.6, strokeWidth: 2 },
-  },
-  'iso-grid': {
-    label: 'Iso Grid',
-    description: 'Isometric lattice of diamonds; some cells fill with accent.',
-    defaults: { density: 0.5 },
-  },
-  'scatter-blocks': {
-    label: 'Scatter Blocks',
-    description: 'Brutalist confetti of rotated squares — outlined to solid.',
-    defaults: { density: 0.5 },
-  },
-  'hex-grid': {
-    label: 'Hex Grid',
-    description:
-      'Honeycomb lit by a wave crossing it; cells breathe with the field.',
-    defaults: { density: 0.5 },
-  },
-  'triangle-grid': {
-    label: 'Triangle Grid',
-    description:
-      'Interlocking triangles, the two orientations driven in antiphase.',
-    defaults: { density: 0.5 },
-  },
-  ridgeline: {
-    label: 'Ridgeline',
-    description:
-      'Layered angular mountains, parallaxing — depth by contrast, not perspective.',
-    defaults: { density: 0.55, strokeWidth: 2 },
-  },
-  'radial-spokes': {
-    label: 'Radial Spokes',
-    description:
-      'Spokes and rings about a centre — the one background with a middle to sit behind.',
-    defaults: { density: 0.5, strokeWidth: 1.5 },
-  },
-  interference: {
-    label: 'Interference',
-    description:
-      'Two-source wave interference as displaced rules; the fringes exist only in the sum.',
-    defaults: { density: 0.55, strokeWidth: 2 },
-  },
-  'flow-field': {
-    label: 'Flow Field',
-    description:
-      'Streamlines swimming along a vector field written as two crossed sines.',
-    defaults: { density: 0.5, strokeWidth: 2 },
-  },
-  'truchet-arcs': {
-    label: 'Truchet Arcs',
-    description:
-      'Quarter-arc tiles that turn — long curves form and break across the frame.',
-    defaults: { density: 0.5, strokeWidth: 2 },
-  },
-  'flow-lines': {
-    label: 'Flow Lines',
-    description:
-      'Long streamlines with a pulse running along them — traced once, lit per frame.',
-    defaults: { density: 0.5, strokeWidth: 2 },
-  },
-  'broken-ring': {
-    label: 'Broken Ring',
-    description:
-      'Counter-rotating polygon bands, mostly missing — the negative space is the structure.',
-    defaults: { density: 0.5, strokeWidth: 1.5 },
-  },
-  'orbit-rings': {
-    label: 'Orbit Rings',
-    description:
-      'Rings of beads that gather toward a focus and scatter back, wandering an outer band.',
-    defaults: { density: 0.5, strokeWidth: 1.5 },
-  },
-  'iso-cubes': {
-    // Density is capped lower than the rest by default: cubes are five polygons
-    // each, and this is the generator most able to blow the data-URI budget.
-    label: 'Iso Cubes',
-    description:
-      'Stacked cubes on a rolling height field — opaque faces, so depth survives.',
-    defaults: { density: 0.4, strokeWidth: 1.5 },
-  },
-};
-
-export const GENERATOR_LIST: Generator[] = Object.entries(
-  SAMPLED_GENERATORS,
-).map(([name, generator]) => {
-  const g = generator as SampledGenerator<unknown>;
-  return {
-    name,
-    label: META[name]?.label ?? name,
-    description: META[name]?.description ?? '',
-    defaults: { ...BASE_PARAMS, ...META[name]?.defaults },
-    render: (p: GraphicParams) => g.project(g.sample(p), p, p.t ?? 0),
-    sample: g.sample,
-    project: g.project,
-  };
-});
+/**
+ * The public face of the generator modules.
+ *
+ * Everything here is *derived*. There used to be a `META` table in this file
+ * holding labels, descriptions and defaults for generators implemented
+ * somewhere else, which meant adding one required edits in three places and
+ * missing the third was silent. Metadata now lives in the module, so this file
+ * only adapts and indexes.
+ */
+export const GENERATOR_LIST: Generator[] = GENERATOR_MODULES.map((m) => ({
+  name: m.name,
+  label: m.label,
+  description: m.description,
+  group: m.group,
+  defaults: { ...BASE_PARAMS, ...m.defaults },
+  render: (p: GraphicParams) => m.project(m.sample(p), p, p.t ?? 0),
+  sample: m.sample,
+  project: m.project,
+}));
 
 const BY_NAME = new Map(GENERATOR_LIST.map((g) => [g.name, g]));
 
 export function getGenerator(name: string): Generator | undefined {
   return BY_NAME.get(name);
+}
+
+/** Generators in one family, in registry order. For grouped galleries. */
+export function generatorsInGroup(group: GeneratorGroup): Generator[] {
+  return GENERATOR_LIST.filter((g) => g.group === group);
 }
 
 /** Merge caller params over a generator's defaults into a full param set.
