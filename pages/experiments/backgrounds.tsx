@@ -1,5 +1,5 @@
 import { Pause, Play, Radio, RotateCcw } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ACCENT_SWATCHES,
   AnimatedBackground,
@@ -31,7 +31,55 @@ export default function BackgroundsLab() {
   // they say rather than being silently countermanded by a stale override.
   const [solo, setSolo] = useState<Record<string, boolean>>({});
 
-  const isPlaying = (name: string) => solo[name] ?? playing;
+  // Only the two tiles nearest the middle of the viewport run.
+  //
+  // Gating on intersection alone still left everything on screen animating, and
+  // on a tall window that is four or five independent rAF loops each
+  // re-serialising a few thousand SVG elements. Two is what a reader is
+  // actually looking at. The rest hold their last frame, which is why scrolling
+  // back to one does not visibly restart it.
+  const [central, setCentral] = useState<string[]>([]);
+  const tiles = useRef(new Map<string, HTMLElement>());
+  const frame = useRef(0);
+
+  const measure = useCallback(() => {
+    const mid = window.innerHeight / 2;
+    const ranked = [...tiles.current.entries()]
+      .map(([name, el]) => {
+        const r = el.getBoundingClientRect();
+        return { name, d: Math.abs(r.top + r.height / 2 - mid) };
+      })
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 2)
+      .map((x) => x.name);
+    // Only commit when the pair actually changes — this runs on every scroll
+    // frame, and setting identical state would re-render the whole gallery.
+    setCentral((prev) =>
+      prev.length === ranked.length && prev.every((n, i) => n === ranked[i])
+        ? prev
+        : ranked,
+    );
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      cancelAnimationFrame(frame.current);
+      frame.current = requestAnimationFrame(measure);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame.current);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [measure]);
+
+  // A per-tile override always wins, so Play on a tile means Play even when it
+  // is nowhere near the middle.
+  const isPlaying = (name: string) =>
+    solo[name] ?? (playing && central.includes(name));
   const toggleOne = (name: string) =>
     setSolo((prev) => ({ ...prev, [name]: !(prev[name] ?? playing) }));
   const setAll = (next: boolean) => {
@@ -77,9 +125,10 @@ export default function BackgroundsLab() {
             not an independent roll of the dice.
           </p>
           <p className="mt-2 max-w-3xl font-mono text-xs text-zinc-500">
-            <span className="text-brutalist-cyan">&gt;</span> Tiles animate only
-            while on screen, and each has its own transport — the header buttons
-            drive all of them at once. Every loop closes:
+            <span className="text-brutalist-cyan">&gt;</span> Only the two tiles
+            nearest the middle of the window run — they are the outlined ones.
+            Scroll to drive the rest, or hit Play on any tile to pin it. Every
+            loop closes:
             <code> t = 1</code> renders identically to <code>t = 0</code>, so
             nothing seams. Pause to scrub a single loop by hand.
           </p>
@@ -211,7 +260,18 @@ export default function BackgroundsLab() {
 
         <div className="grid grid-cols-1 gap-2 bg-zinc-800 p-2 lg:grid-cols-2">
           {GENERATOR_LIST.map((g) => (
-            <figure key={g.name} className="bg-black">
+            <figure
+              key={g.name}
+              ref={(el) => {
+                if (el) tiles.current.set(g.name, el);
+                else tiles.current.delete(g.name);
+              }}
+              className={`bg-black transition-shadow ${
+                central.includes(g.name)
+                  ? 'shadow-[inset_0_0_0_2px_var(--brutalist-cyan,#22d3ee)]'
+                  : ''
+              }`}
+            >
               <div className="aspect-video overflow-hidden">
                 <AnimatedBackground
                   generator={g.name}

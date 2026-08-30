@@ -180,27 +180,6 @@ const RIDGE_GAIN = 2.4;
 const RIDGE_NOISE_R = 0.62;
 
 /**
- * Harmonic multipliers for a ridge, each set coprime *as a set*.
- *
- * That is the load-bearing property: the silhouette's period is
- * `1/gcd(freqs)`, so `gcd(m) === 1` is what makes `gcd(g · m) === g` and lets
- * `g` alone decide how many times a range repeats across the frame.
- *
- * Leading multipliers stay small to keep the wavelength broad, and the largest
- * stays under 10 — the projection samples 192 times across the frame and
- * `1 - |sin|` peaks twice per period, so a top frequency much past 32 aliases
- * its own corners into noise.
- */
-const MULTIPLIER_SETS = [
-  [1, 3, 7],
-  [1, 4, 9],
-  [1, 5, 8],
-  [2, 5, 9],
-  [2, 3, 7],
-  [2, 7, 9],
-];
-
-/**
  * Arc a spoke tip sweeps per loop, as a fraction of the wheel's reach.
  *
  * Tuned against the measurement rather than by eye — see the note in
@@ -1598,7 +1577,7 @@ const brokenRing: SampledGenerator<RingBand[]> = {
   },
 };
 
-/* ── modular-circle ───────────────────────────────────────────────────────── */
+/* ── orbit-rings ──────────────────────────────────────────────────────────── */
 
 interface Orbit {
   /** Base radius as a fraction of reach. */
@@ -1619,6 +1598,12 @@ const ORBIT_BAND = 0.2;
 /**
  * Concentric rings of points that gather and scatter.
  *
+ * Named for what it is, not for what inspired it. This began as an adaptation
+ * of the reference's `modular_circle` and ended up nothing like it — that one
+ * is a triangular lattice inside a hexagon with tangent line families radiating
+ * off its vertices, a kaleidoscope. This is beads on rings. The kaleidoscope is
+ * still worth building; it is not this.
+ *
  * The motion is angular, not radial: each ring's points ease toward a focus
  * angle and spread back out again, so the ring visibly bunches on one side and
  * thins on the other while staying a ring. Radial movement is deliberately
@@ -1632,7 +1617,7 @@ const ORBIT_BAND = 0.2;
  * converge — near points barely move, far ones travel a long way, and the ring
  * closes up like a drawstring.
  */
-const modularCircle: SampledGenerator<Orbit[]> = {
+const orbitRings: SampledGenerator<Orbit[]> = {
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
     const rings = Math.round(lerp(4, 10, p.density));
@@ -1724,7 +1709,7 @@ export const SAMPLED_GENERATORS = {
   'iso-cubes': isoCubes,
   'flow-lines': flowLines,
   'broken-ring': brokenRing,
-  'modular-circle': modularCircle,
+  'orbit-rings': orbitRings,
 };
 
 export type GeneratorName = keyof typeof SAMPLED_GENERATORS;

@@ -95,10 +95,10 @@ const META: Record<
       'Counter-rotating polygon bands, mostly missing — the negative space is the structure.',
     defaults: { density: 0.5, strokeWidth: 1.5 },
   },
-  'modular-circle': {
-    label: 'Modular Circle',
+  'orbit-rings': {
+    label: 'Orbit Rings',
     description:
-      'Rings of points that gather toward a focus and scatter back, wandering an outer band.',
+      'Rings of beads that gather toward a focus and scatter back, wandering an outer band.',
     defaults: { density: 0.5, strokeWidth: 1.5 },
   },
   'iso-cubes': {
