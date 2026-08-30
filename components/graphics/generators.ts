@@ -51,7 +51,7 @@
  * reintroduced by the code adding the animation.
  */
 import { type LatticeCell, lattice, scaledPath } from './lattice';
-import { withAlpha } from './palette';
+import { mix, withAlpha } from './palette';
 import { chance, intRange, mulberry32, type Rng, range } from './rng';
 import type { GraphicParams, SampledGenerator } from './types';
 
@@ -90,6 +90,26 @@ const wobble = (t: number, k: number, phase: number): number =>
  * reads as a still image. A generator that satisfies every coherence property
  * and does not visibly move has not been animated.
  */
+/**
+ * Which multiples of `f0` a ridge's harmonics take.
+ *
+ * Non-consecutive, to break the plain 1,2,3 series that made every period an
+ * identical spike — but capped at 5 rather than the 7 tried first. The
+ * projection samples 192 times across the frame and `1 - |sin|` peaks twice per
+ * period, so the top harmonic has to stay under about 32 or its corners alias
+ * into noise; `f0 = 5` with a 7 step reaches 35 and does exactly that.
+ */
+const HARMONIC_STEPS = [1, 2, 5];
+
+/**
+ * Arc a spoke tip sweeps per loop, as a fraction of the wheel's reach.
+ *
+ * Tuned against the measurement rather than by eye — see the note in
+ * `radial-spokes`' `project`. It is an arc length, not an angle, because
+ * equalising arc across radius is the whole point.
+ */
+const SPOKE_ARC = 0.2;
+
 const ORBIT_OF_CELL = 0.13;
 const DRIFT_OF_FRAME = 0.035;
 
@@ -664,14 +684,37 @@ const ridgeline: SampledGenerator<Ridge[]> = {
       // The one number deciding both how fine this range is and how slowly it
       // drifts. Jittered upward by at most one, so seeds differ without the
       // far-to-near ordering inverting.
-      const f0 = Math.round(lerp(8, 3, depth)) + intRange(rng, 0, 1);
+      // Repeats across the frame, and the reason this is low.
+      //
+      // Every harmonic must be a whole multiple of `f0` for the loop to close,
+      // which makes a range's silhouette periodic with period `1/f0` — that is
+      // unavoidable, so the fix is to have *few* periods rather than to pretend
+      // there are none. At `f0 = 8` a far range put sixteen near-identical
+      // peaks across the frame and read as a comb; at 2–4 the repeat is hard to
+      // pick out, and `speed = 1/f0` still stays under half a frame-width.
+      // No random term any more. It was `+ intRange(rng, 0, 1)`, which was
+      // survivable at the old 8..3 spread and is not at 5..3: adjacent layers
+      // often share a base, so a single random step inverts their parallax and
+      // a far range overtakes a near one. Seed variety comes from the
+      // amplitudes and phases below; the depth ladder stays strictly ordered.
+      // The floor of 3 also matters — `f0 = 2` gives `speed = 0.5` exactly,
+      // and the drift bound is strict.
+      const f0 = Math.round(lerp(5, 3, depth));
       const harmonics: Harmonic[] = [];
       for (let h = 0; h < 3; h++) {
         harmonics.push({
           // Every harmonic a multiple of f0 — that is what lets `speed` be a
-          // fraction and still land the loop.
-          freq: f0 * (h + 1),
-          amp: range(rng, 0.8, 1.2) / (h + 1),
+          // fraction and still land the loop. Sparse, non-consecutive
+          // multiples rather than 1,2,3: the sum is periodic either way, but a
+          // plain harmonic series makes every period an identical symmetrical
+          // spike, and skipping steps gives the profile within one period some
+          // structure to look at.
+          freq: f0 * HARMONIC_STEPS[h],
+          // Halving per harmonic, not `1/(h + 1)`. The gentler decay left the
+          // overtones nearly as loud as the fundamental, which is what turned
+          // terrain into a comb — real relief is self-similar, so each octave
+          // must contribute meaningfully less than the one below it.
+          amp: range(rng, 0.8, 1.2) / 2 ** h,
           phase: range(rng, 0, TAU),
         });
       }
@@ -695,7 +738,15 @@ const ridgeline: SampledGenerator<Ridge[]> = {
       // Depth is carried by contrast, not perspective: far ranges are faint and
       // thin, near ranges bright and heavy.
       const stroke = withAlpha(p.accent, 0.22 + depth * 0.68);
-      const fillA = withAlpha(p.accent, 0.04 + depth * 0.07);
+      // Opaque, so a near range hides the ones behind it.
+      //
+      // This was `withAlpha(p.accent, 0.04 + depth * 0.07)` — alpha 0.04 to
+      // 0.11, through which every far range stayed fully visible. The layers
+      // were stacked in draw order and occluded nothing, so depth was carried
+      // entirely by stroke contrast and the result read as a pile of
+      // overlapping line charts. Mountains hide what is behind them, and that
+      // is most of what makes a range look like distance rather than noise.
+      const fillA = mix(p.occlusion, p.accent, 0.05 + depth * 0.12);
       const relief = lerp(0.3, 0.12, depth) * p.height;
 
       let d = `M0 ${p.height} `;
@@ -790,15 +841,26 @@ const radialSpokes: SampledGenerator<Wheel> = {
     const faint = withAlpha(p.accent, 0.3);
     const bright = withAlpha(p.accent, 0.95);
     const ringColor = withAlpha(p.accent, 0.4);
-    // One turn per loop. Whole by construction, so `t = 1` lands back on `t = 0`.
-    const sweep = t * TAU;
+    // A shear, not a spin.
+    //
+    // This turned the whole wheel once per loop, and it was much the fastest
+    // thing in the set — peak displacement 1581px against 155px for the next
+    // busiest generator. Rigid rotation cannot be otherwise: tangential speed
+    // is `ω · r`, so the rim always outruns the hub, and the outer ends were
+    // covering the full circumference while the middle barely moved.
+    //
+    // So each spoke sweeps through an angle *inversely* proportional to how far
+    // out it reaches, which is what makes every tip travel roughly the same arc
+    // — a constant-speed field rather than a rigid body. The inner spokes turn
+    // further than the outer ones, which shears the wheel and reads as the
+    // spiral the rigid version was only hinting at.
+    const arc = SPOKE_ARC * w.reach;
     let out = '';
     for (const s of w.spokes) {
-      const a = s.angle + sweep;
-      // A travelling pulse around the wheel: the length term depends on the
-      // spoke's own angle, so the swell runs round the rim instead of every
-      // spoke breathing in unison.
-      const pulse = 1 + 0.16 * Math.sin(s.angle * 3 + sweep * 2);
+      const a = s.angle + (arc / s.outer) * wobble(t, 1, 0);
+      // A travelling pulse around the wheel, on its own whole-cycle phase so it
+      // no longer depends on the sweep — which is now far too small to drive it.
+      const pulse = 1 + 0.16 * Math.sin(s.angle * 3 + t * TAU * 2);
       const x1 = w.cx + Math.cos(a) * s.inner;
       const y1 = w.cy + Math.sin(a) * s.inner;
       const x2 = w.cx + Math.cos(a) * s.outer * pulse;
@@ -806,7 +868,7 @@ const radialSpokes: SampledGenerator<Wheel> = {
       out += `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${s.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (s.hot ? 2.2 : 1))}"/>`;
     }
     for (const ring of w.rings) {
-      const r = ring.r * (1 + 0.06 * Math.sin(sweep * 2 + ring.r * 0.02));
+      const r = ring.r * (1 + 0.06 * Math.sin(t * TAU * 2 + ring.r * 0.02));
       out += `<circle cx="${r2(w.cx)}" cy="${r2(w.cy)}" r="${r2(r)}" fill="none" stroke="${ring.hot ? bright : ringColor}" stroke-width="${p.strokeWidth}"/>`;
     }
     return frame(p, out);
@@ -1177,6 +1239,307 @@ const isoCubes: SampledGenerator<Cube[]> = {
   },
 };
 
+/* ── flow-lines ───────────────────────────────────────────────────────────── */
+
+interface Streamline {
+  /** Points integrated once, in `sample`, where there is no `t` to destabilise. */
+  points: [number, number][];
+  hot: boolean;
+  phase: number;
+  drift: number;
+}
+
+/** Integration steps per streamline. */
+const LINE_STEPS = 30;
+
+/** Segments a streamline is cut into, for the travelling highlight. */
+const LINE_SEGMENTS = 10;
+
+/**
+ * Long streamlines through a vector field — the striking half of `flow_lines`,
+ * with the instability designed out rather than tuned down.
+ *
+ * `flow-field` draws the direction field because *advecting* it per frame is
+ * chaotic: each integration step feeds the next, so near a separatrix a tail
+ * switches channel instead of drifting, and the smoothness ratio collapses to
+ * 1.0. That finding stands, and it is why this generator does not move the
+ * field either.
+ *
+ * What it does instead is put the integration in `sample`, which is the half of
+ * the split with no `t` in it at all. The curves are traced once and then never
+ * re-integrated. `project` moves each point by a bounded term computed from its
+ * *own sampled position* — no point's displacement is a function of the
+ * previous point's displacement, so there is no feedback to compound and the
+ * motion is exactly as smooth as `dot-grid`'s.
+ *
+ * The flow itself is carried by brightness rather than by geometry: each curve
+ * is cut into segments lit by a wave travelling along its length, so the line
+ * reads as something moving *through* it while the curve barely stirs. That is
+ * the part advection was wanted for, and it turns out not to need advection.
+ */
+const flowLines: SampledGenerator<Streamline[]> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const count = Math.round(lerp(18, 70, p.density));
+    const a = range(rng, 1.1, 2.2);
+    const b = range(rng, 1.1, 2.2);
+    const step = Math.min(p.width, p.height) * 0.032;
+    const lines: Streamline[] = [];
+    for (let i = 0; i < count; i++) {
+      let x = range(rng, -0.1, 1.1) * p.width;
+      let y = range(rng, -0.1, 1.1) * p.height;
+      const points: [number, number][] = [[x, y]];
+      for (let k = 0; k < LINE_STEPS; k++) {
+        // Integration lives here and only here. Chaotic sensitivity is
+        // harmless in `sample`, because `sample` is called once.
+        const ang =
+          Math.sin((x / p.width) * a * TAU) * 1.35 +
+          Math.cos((y / p.height) * b * TAU) * 1.35;
+        x += Math.cos(ang) * step;
+        y += Math.sin(ang) * step;
+        points.push([x, y]);
+      }
+      lines.push({
+        points,
+        hot: chance(rng, 0.14),
+        phase: range(rng, 0, TAU),
+        drift: range(rng, 0.5, 1),
+      });
+    }
+    return lines;
+  },
+  project: (lines, p, t) => {
+    const sway = Math.min(p.width, p.height) * 0.035;
+    let out = '';
+    for (const line of lines) {
+      const k = cycles(line.drift, 2);
+      // One displacement per point, each from that point's own sampled
+      // coordinates. Neighbours move nearly together because the term varies
+      // smoothly in space, so the curve bends rather than shattering.
+      const moved = line.points.map(([px, py]) => {
+        const ph = line.phase + (px + py) * 0.004;
+        return [
+          px + sway * line.drift * wobble(t, k, ph),
+          py + sway * line.drift * wobble(t, k, ph + Math.PI / 2),
+        ] as [number, number];
+      });
+      const per = Math.max(1, Math.floor((moved.length - 1) / LINE_SEGMENTS));
+      for (let sIdx = 0; sIdx * per < moved.length - 1; sIdx++) {
+        const from = sIdx * per;
+        const to = Math.min(moved.length - 1, from + per);
+        let d = '';
+        for (let i = from; i <= to; i++) {
+          d += `${i === from ? 'M' : 'L'}${r2(moved[i][0])} ${r2(moved[i][1])}`;
+        }
+        // The travelling highlight. Whole cycles per loop, so it closes; the
+        // segment index sets where it is along the curve, so the pulse runs
+        // from head to tail rather than the whole line blinking.
+        const lit = (Math.sin(sIdx * 0.9 - t * TAU * 2 + line.phase) + 1) / 2;
+        const alpha = (line.hot ? 0.35 : 0.14) + lit * (line.hot ? 0.6 : 0.3);
+        out += `<path d="${d}" fill="none" stroke="${withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(p.strokeWidth * (line.hot ? 1.7 : 0.9))}" stroke-linecap="round"/>`;
+      }
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── broken-ring ──────────────────────────────────────────────────────────── */
+
+interface RingBand {
+  /** Inner and outer radius as fractions of reach. */
+  r0: number;
+  r1: number;
+  /** Cells around the band. */
+  cells: { fill: boolean; hot: boolean }[];
+  /** Whole cycles per loop, signed — adjacent bands counter-rotate. */
+  spin: number;
+  phase: number;
+}
+
+/**
+ * Concentric polygon bands, cut into cells, most of them missing.
+ *
+ * The reference's *Broken Ring*. Its whole character is the negative space —
+ * a complete annulus is a target, and one with two thirds of its cells knocked
+ * out is a structure. The bands are polygonal rather than circular, so the
+ * facets catch the rotation; a true circle rotating is invisible.
+ *
+ * Bands counter-rotate at their own whole-cycle rates, which is the dynamism a
+ * centred form can have that an edge-to-edge texture cannot: there is a fixed
+ * middle for the eye to hold while everything around it shears past.
+ */
+const brokenRing: SampledGenerator<RingBand[]> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const bands = Math.round(lerp(4, 9, p.density));
+    const perBand = Math.round(lerp(14, 30, p.density));
+    const out: RingBand[] = [];
+    for (let i = 0; i < bands; i++) {
+      const r0 = 0.16 + (i / bands) * 0.78;
+      const r1 = r0 + (0.78 / bands) * 0.78;
+      const cells = Array.from({ length: perBand }, () => ({
+        fill: chance(rng, 0.34),
+        hot: chance(rng, 0.08),
+      }));
+      out.push({
+        r0,
+        r1,
+        cells,
+        // Signed, so neighbouring bands turn opposite ways and the gaps between
+        // them shear rather than sliding as a block.
+        //
+        // One turn per loop, never two. `cycles(v, 2)` would sometimes return
+        // 2, and at this reach that doubles the rim to roughly 470px/s — the
+        // speed `radial-spokes` was called out for. One revolution per loop is
+        // about 5rpm and reads as stately.
+        spin: cycles(rng(), 1) * (i % 2 ? -1 : 1),
+        phase: range(rng, 0, TAU),
+      });
+    }
+    return out;
+  },
+  project: (bands, p, t) => {
+    const cx = p.width / 2;
+    const cy = p.height / 2;
+    const reach = Math.min(p.width, p.height) * 0.62;
+    const edge = withAlpha(p.accent, 0.34);
+    let out = '';
+    for (const band of bands) {
+      const n = band.cells.length;
+      const step = TAU / n;
+      // Rotation consumed by cos/sin rather than printed as a `rotate()`:
+      // `360` and `0` draw the same picture and are different strings, so a
+      // printed whole turn would fail the loop-closure test that this passes.
+      const spin = band.phase + t * TAU * band.spin;
+      const inner = band.r0 * reach;
+      const outer = band.r1 * reach;
+      for (let i = 0; i < n; i++) {
+        const cell = band.cells[i];
+        const a0 = spin + i * step;
+        const a1 = a0 + step * 0.86;
+        const pt = (a: number, r: number) =>
+          `${r2(cx + Math.cos(a) * r)},${r2(cy + Math.sin(a) * r)}`;
+        // Every cell is emitted whether or not it is filled — an omitted cell
+        // would change the emitted-number count with the sample, which is what
+        // the confetti test watches for.
+        const fill = cell.hot
+          ? withAlpha(p.accent, 0.9)
+          : cell.fill
+            ? withAlpha(p.accent, 0.22)
+            : 'none';
+        out += `<polygon points="${pt(a0, inner)} ${pt(a1, inner)} ${pt(a1, outer)} ${pt(a0, outer)}" fill="${fill}" stroke="${cell.fill || cell.hot ? edge : 'none'}" stroke-width="${p.strokeWidth}"/>`;
+      }
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── modular-circle ───────────────────────────────────────────────────────── */
+
+interface Orbit {
+  /** Base radius as a fraction of reach. */
+  r: number;
+  points: { angle: number; rad: number; hot: boolean }[];
+  /** Angle the ring's points gather toward. */
+  focus: number;
+  /** Whole cycles per loop for the gather/scatter. */
+  beat: number;
+  /** Offset so the rings do not all gather on the same beat. */
+  phase: number;
+  spin: number;
+}
+
+/** How far into the ring's own width a point may wander, as a fraction. */
+const ORBIT_BAND = 0.2;
+
+/**
+ * Concentric rings of points that gather and scatter.
+ *
+ * The motion is angular, not radial: each ring's points ease toward a focus
+ * angle and spread back out again, so the ring visibly bunches on one side and
+ * thins on the other while staying a ring. Radial movement is deliberately
+ * confined to the outer fifth of each ring's width (`ORBIT_BAND`) — enough to
+ * stop the points looking pinned to a wire, little enough that the concentric
+ * structure never blurs into a disc.
+ *
+ * Gathering is a lerp toward the focus rather than an added offset, because an
+ * offset moves every point by the same amount and reads as rotation. Pulling
+ * each point a *fraction of its own distance* to the focus is what makes them
+ * converge — near points barely move, far ones travel a long way, and the ring
+ * closes up like a drawstring.
+ */
+const modularCircle: SampledGenerator<Orbit[]> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const rings = Math.round(lerp(4, 10, p.density));
+    const out: Orbit[] = [];
+    for (let i = 0; i < rings; i++) {
+      const count = Math.round(lerp(10, 30, p.density)) + intRange(rng, 0, 6);
+      out.push({
+        r: 0.2 + (i / Math.max(1, rings - 1)) * 0.76,
+        points: Array.from({ length: count }, (_, j) => ({
+          angle: (j / count) * TAU,
+          rad: range(rng, 2.6, 5.6),
+          hot: chance(rng, 0.12),
+        })),
+        focus: range(rng, 0, TAU),
+        beat: cycles(rng(), 3),
+        phase: range(rng, 0, TAU),
+        // One turn per loop, for the same reason as `broken-ring`. The
+        // gather/scatter `beat` may run faster because it travels a short
+        // angular distance, not the whole circumference.
+        spin: cycles(rng(), 1) * (i % 2 ? -1 : 1),
+      });
+    }
+    return out;
+  },
+  project: (rings, p, t) => {
+    const cx = p.width / 2;
+    const cy = p.height / 2;
+    const reach = Math.min(p.width, p.height) * 0.46;
+    const bandWidth = reach / Math.max(1, rings.length);
+    let out = '';
+    for (const ring of rings) {
+      const base = ring.r * reach;
+      // A faint guide per ring. Without it the concentric structure never
+      // reads: the points alone are just a scatter that happens to be round,
+      // and the whole idea is that they are gathering *on* something.
+      out += `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(base)}" fill="none" stroke="${withAlpha(p.accent, 0.12)}" stroke-width="${r2(p.strokeWidth * 0.6)}"/>`;
+      // 0 at rest, 1 fully gathered. `wobble` keeps it zero at both ends of the
+      // loop, so the ring starts and finishes evenly spaced.
+      const gather = 0.42 * wobble(t, ring.beat, ring.phase);
+      // No fractional multiplier here. A `* 0.5` looked like a reasonable way
+      // to halve the speed and left an odd `spin` mid-turn at `t = 1`, which
+      // the loop-closure test caught immediately. Slower means a smaller
+      // `cycles()` ceiling, never a fraction of one.
+      const spin = t * TAU * ring.spin;
+      for (const pt of ring.points) {
+        // Shortest way round to the focus, so a point never takes the long
+        // route and swings through the far side of the ring to get there.
+        let delta = ring.focus - pt.angle;
+        delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+        const a = pt.angle + delta * gather + spin;
+        // Radial wander, confined to the outer band — and zero at rest.
+        //
+        // This was a plain `sin(angle * 3 + …)`, which is non-zero at `t = 0`
+        // and so pushed every point off its ring before anything had moved.
+        // The rings stopped looking like rings and the whole form read as a
+        // scatter. `wobble` starts it at zero, so the still frame is clean
+        // concentric rings and the wander is something that *happens* to them.
+        const r =
+          base +
+          bandWidth *
+            ORBIT_BAND *
+            wobble(t, ring.beat, pt.angle * 3 + ring.phase);
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r;
+        out += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(pt.rad)}" fill="${withAlpha(p.accent, pt.hot ? 0.98 : 0.68)}"/>`;
+      }
+    }
+    return frame(p, out);
+  },
+};
+
 /* ── registry ─────────────────────────────────────────────────────────────── */
 
 /** The split form, for renderers that want to sample once and project per frame. */
@@ -1195,6 +1558,9 @@ export const SAMPLED_GENERATORS = {
   'flow-field': flowField,
   'truchet-arcs': truchetArcs,
   'iso-cubes': isoCubes,
+  'flow-lines': flowLines,
+  'broken-ring': brokenRing,
+  'modular-circle': modularCircle,
 };
 
 export type GeneratorName = keyof typeof SAMPLED_GENERATORS;
