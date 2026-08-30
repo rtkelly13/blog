@@ -4,7 +4,6 @@ import {
   chance,
   cycles,
   frame,
-  lattice,
   lerp,
   mulberry32,
   r2,
