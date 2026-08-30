@@ -83,6 +83,24 @@ const META: Record<
       'Quarter-arc tiles that turn — long curves form and break across the frame.',
     defaults: { density: 0.5, strokeWidth: 2 },
   },
+  'flow-lines': {
+    label: 'Flow Lines',
+    description:
+      'Long streamlines with a pulse running along them — traced once, lit per frame.',
+    defaults: { density: 0.5, strokeWidth: 2 },
+  },
+  'broken-ring': {
+    label: 'Broken Ring',
+    description:
+      'Counter-rotating polygon bands, mostly missing — the negative space is the structure.',
+    defaults: { density: 0.5, strokeWidth: 1.5 },
+  },
+  'modular-circle': {
+    label: 'Modular Circle',
+    description:
+      'Rings of points that gather toward a focus and scatter back, wandering an outer band.',
+    defaults: { density: 0.5, strokeWidth: 1.5 },
+  },
   'iso-cubes': {
     // Density is capped lower than the rest by default: cubes are five polygons
     // each, and this is the generator most able to blow the data-URI budget.
