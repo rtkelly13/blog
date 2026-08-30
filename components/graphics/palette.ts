@@ -88,3 +88,24 @@ export function withAlpha(hex: string, alpha: number): string {
   const b = Number.parseInt(m[3], 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/**
+ * Blend two `#rrggbb` colours, returning an opaque `#rrggbb`.
+ *
+ * The opaque counterpart to {@link withAlpha}, and it exists for the same
+ * reason `occlusion` does: a layer that has to *hide* what is behind it cannot
+ * be expressed as an alpha over the accent, however faint. Tinting the surface
+ * colour towards the accent gives the same visual weight while staying solid.
+ */
+export function mix(hexA: string, hexB: string, amount: number): string {
+  const parse = (hex: string) => {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+    return m ? [1, 2, 3].map((i) => Number.parseInt(m[i], 16)) : null;
+  };
+  const a = parse(hexA);
+  const b = parse(hexB);
+  if (!a || !b) return hexA;
+  const k = Math.min(1, Math.max(0, amount));
+  const to2 = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+  return `#${a.map((v, i) => to2(v + (b[i] - v) * k)).join('')}`;
+}

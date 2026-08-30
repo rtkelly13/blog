@@ -376,8 +376,18 @@ describe('occlusion: opaque, and its own colour', () => {
     expect(svg).not.toContain('rgba(10, 10, 26');
   });
 
+  it('is used by ridgeline, whose ranges have to hide each other', () => {
+    // Added after the fact: the layered ranges were filled with alpha 0.04-0.11
+    // and occluded nothing, so the stack read as overlapping line charts rather
+    // than as distance. This is the assertion that stops that regressing.
+    const base = params({ accent: '#22d3ee' });
+    expect(
+      renderGraphic('ridgeline', { ...base, occlusion: '#111111' }),
+    ).not.toBe(renderGraphic('ridgeline', { ...base, occlusion: '#222222' }));
+  });
+
   it('leaves generators that do not stack geometry untouched', () => {
-    for (const name of ['dot-grid', 'contour', 'ridgeline']) {
+    for (const name of ['dot-grid', 'contour', 'diagonal-hatch']) {
       expect(renderGraphic(name, params({ occlusion: '#ff0000' }))).toBe(
         renderGraphic(name, params({ occlusion: '#00ff00' })),
       );

@@ -36,8 +36,12 @@ export default function BackgroundsLab() {
     duration,
     playing,
     t: scrub,
-    width: 640,
-    height: 640,
+    // 16:9, because that is what these are *for* — talk slides via
+    // SpectacleDeck and full-bleed page headers. Previewing them square was
+    // misrepresenting them: the landscape generators in particular squeeze
+    // their horizontal detail into a narrower frame and read as repetitive.
+    width: 1280,
+    height: 720,
   };
 
   return (
@@ -192,10 +196,10 @@ export default function BackgroundsLab() {
           <code>t</code> is.
         </p>
 
-        <div className="grid grid-cols-1 gap-2 bg-zinc-800 p-2 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 bg-zinc-800 p-2 lg:grid-cols-2">
           {GENERATOR_LIST.map((g) => (
             <figure key={g.name} className="bg-black">
-              <div className="aspect-square overflow-hidden">
+              <div className="aspect-video overflow-hidden">
                 <AnimatedBackground
                   generator={g.name}
                   {...shared}
