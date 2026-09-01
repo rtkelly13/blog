@@ -80,7 +80,9 @@ export default defineGenerator<Flow>({
   defaults: { density: 0.5, strokeWidth: 2 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const gap = lerp(64, 26, p.density);
+    // Wider floor than the look alone wants: at a 26px gap this emitted
+    // 1,530 quills at density 1, over the element budget.
+    const gap = lerp(64, 36, p.density);
     const quills: Quill[] = [];
     // Half a cell of bleed, so the field does not stop short of the frame.
     for (let y = -gap / 2; y < p.height + gap; y += gap) {

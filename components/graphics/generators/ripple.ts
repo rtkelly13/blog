@@ -145,7 +145,8 @@ export default defineGenerator<Field>({
     cy /= sources.length;
     const far = Math.hypot(p.width, p.height) * 0.6;
 
-    const gap = lerp(46, 26, p.density);
+    // Floor raised for the element budget — 26px put 1,530 dots on screen.
+    const gap = lerp(46, 36, p.density);
     const dots: Dot[] = [];
     // Half a gap of inset all round, and one extra ring of cells past each edge:
     // dots near the border are pushed *outward* as often as inward, and without

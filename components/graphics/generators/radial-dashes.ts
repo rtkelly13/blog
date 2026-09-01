@@ -110,7 +110,9 @@ export default defineGenerator<Dash[]>({
     const rings = Math.round(lerp(5, 10, p.density));
     // Arc length between neighbouring ticks. Constant across rings, which is
     // what keeps the angular texture even.
-    const spacing = lerp(34, 18, p.density);
+    // Tick spacing floor raised for the element budget — 18px put 1,318
+    // dashes on screen, and the annulus reads the same at 26.
+    const spacing = lerp(34, 28, p.density);
     const dashes: Dash[] = [];
     for (let i = 0; i < rings; i++) {
       const u = rings === 1 ? 1 : i / (rings - 1);

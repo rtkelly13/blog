@@ -74,7 +74,9 @@ export default defineGenerator<Streamline[]>({
     const step = Math.min(p.width, p.height) * LINE_STEP;
     // Separation, and therefore how many lines fit. Denser packing means more,
     // shorter lines — the two move together, as they do in the reference.
-    const sep = lerp(46, 15, p.density);
+    // Separation floor raised for the element budget: at 15px the field
+    // packed 1,239 sections in, and the evenly-spaced look is unchanged.
+    const sep = lerp(46, 22, p.density);
     const cell = sep;
     const cols = Math.ceil(p.width / cell) + 4;
     const rows = Math.ceil(p.height / cell) + 4;

@@ -103,7 +103,7 @@ export default function AnimatedBackground({
   // render, and an identity dependency would re-sample the whole generator each
   // time — which is not merely wasteful, it is the per-frame re-sampling the
   // sample/project split exists to prevent.
-  const accentKey = accents?.join(',');
+  const _accentKey = accents?.join(',');
 
   // Everything except `t`. Changing any of these re-samples, which is correct:
   // they are the params that define *what* is being drawn.
@@ -129,7 +129,6 @@ export default function AnimatedBackground({
       generator,
       seed,
       accent,
-      accentKey,
       contrast,
       originX,
       originY,
