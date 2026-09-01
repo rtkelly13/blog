@@ -1,14 +1,15 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── phyllotaxis ──────────────────────────────────────────────────────────── */
@@ -64,6 +65,27 @@ interface Seed {
  */
 interface Band {
   alpha: number;
+  /**
+   * Where this band sits on the colour ramp: the mean normalised radius of its
+   * own marks.
+   *
+   * Radius is the axis this generator is about — a seed head is a disc that
+   * grows outward, and everything else here (which parastichy is nearest, how
+   * long a dash is, when the wave arrives) is already a function of it. So the
+   * ramp is sampled by radius, inner marks at one end and outer at the other.
+   *
+   * It has to be *per band* rather than per mark, and that is a consequence of
+   * the batching decision documented above rather than a preference. A `<path>`
+   * carries one stroke, so the path is the finest unit a colour can vary over;
+   * giving each mark its own radius on the ramp would mean one element per
+   * mark, which is the 190KB version, or re-batching the marks into radial
+   * shells, which would move every coordinate to a different document index and
+   * break both the goldens and the coherence suite. Bands are drawn from the
+   * whole disc, so this is a gentle separation rather than a sweep — the strong
+   * radial read belongs to `spiral-dots`, which emits a circle per mark and can
+   * therefore afford one.
+   */
+  pos: number;
   width: number;
   phase: number;
   /** Whole cycles per loop of this band's shimmer. */
@@ -129,12 +151,24 @@ export default defineGenerator<Head>({
 
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const cx = p.width / 2;
-    const cy = p.height / 2;
-    // The frame's own circumradius, so the head reaches the corners. Anything
-    // less and the rim of the disc is inside the frame, which turns a texture
-    // that fills the page into an object sitting on it.
-    const reach = Math.hypot(p.width, p.height) / 2;
+    // The centre is a parameter rather than the middle of the frame: the
+    // radial family exists so a background can sit behind a title, which needs
+    // the head pushed off to the side the words are not on. `centre` returns
+    // the frame centre at the default origin, so no golden moved.
+    const [cx, cy] = centre(p);
+    // Far enough to reach the furthest corner *from the chosen origin*.
+    // Anything less and the rim of the disc is inside the frame, which turns a
+    // texture that fills the page into an object sitting on it — and that is
+    // exactly what half the diagonal, which this used to be, does the moment
+    // `originX` moves the head off the middle. At the default origin the
+    // furthest corner is half the diagonal away, so the two agree to the bit
+    // and no golden moved.
+    const reach = Math.max(
+      Math.hypot(cx, cy),
+      Math.hypot(p.width - cx, cy),
+      Math.hypot(cx, p.height - cy),
+      Math.hypot(p.width - cx, p.height - cy),
+    );
     const count = Math.round(lerp(1600, 3000, p.density));
     // The head's own orientation. The only thing the seed may move: the
     // placement rule is the subject, so jittering the positions would be
@@ -161,6 +195,7 @@ export default defineGenerator<Head>({
       width: p.strokeWidth * lerp(0.55, 1, b / (BAND_COUNT - 1)),
       phase: range(rng, 0, TAU),
       beat: cycles(rng(), 3),
+      pos: 0,
       seeds: [],
     }));
 
@@ -189,6 +224,16 @@ export default defineGenerator<Head>({
       );
     }
 
+    // Mean radius per band, taken once the membership is settled. Cheaper than
+    // carrying a running sum, and it cannot be done earlier: the band a mark
+    // lands in is a roll, so no band knows its own extent until every mark has
+    // been dealt.
+    for (const band of bands) {
+      let sum = 0;
+      for (const s of band.seeds) sum += s.u;
+      band.pos = band.seeds.length ? sum / band.seeds.length : 0.5;
+    }
+
     return { cx, cy, bands, waveCycles: cycles(rng(), 3) };
   },
 
@@ -215,7 +260,7 @@ export default defineGenerator<Head>({
       // than being a region of it, so this scintillates instead of sweeping.
       const alpha =
         band.alpha * (0.82 + 0.18 * Math.sin(band.phase + t * TAU * band.beat));
-      out += `<path d="${d}" fill="none" stroke="${withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(band.width)}" stroke-linecap="round"/>`;
+      out += `<path d="${d}" fill="none" stroke="${ink(p, band.pos, r2(alpha))}" stroke-width="${r2(band.width)}" stroke-linecap="round"/>`;
     }
     return frame(p, out);
   },

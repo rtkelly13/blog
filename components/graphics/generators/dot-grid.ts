@@ -5,13 +5,13 @@ import {
   cycles,
   disorderAt,
   frame,
+  ink,
   lerp,
   mulberry32,
   ORBIT_OF_CELL,
   r2,
   range,
   scramble,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -60,8 +60,6 @@ export default defineGenerator<Dot[]>({
   // pair every position with a different dot — but a per-dot orbit bounded by
   // the cell moves plainly without ever colliding or leaving a bare edge.
   project: (dots, p, t) => {
-    const faint = withAlpha(p.accent, 0.4);
-    const bright = withAlpha(p.accent, 0.95);
     const orbit = lerp(96, 34, p.density) * ORBIT_OF_CELL;
     let out = '';
     for (const d of dots) {
@@ -70,7 +68,12 @@ export default defineGenerator<Dot[]>({
       const cx = d.x + orbit * wobble(t, k, phase);
       const cy = d.y + orbit * wobble(t, k, phase + Math.PI / 2);
       const rad = d.rad * (1 + 0.4 * wobble(t, k, phase));
-      out += `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(rad)}" fill="${d.hot ? bright : faint}"/>`;
+      // Ramp position is the dot's own height down the frame — the same axis
+      // `disorderAt` runs along, so the hue shift and the lattice coming apart
+      // are read as one gradient rather than two. Sampled `d.y`, not the
+      // orbiting `cy`, so a dot keeps its colour as it moves.
+      const fill = ink(p, d.y / p.height, d.hot ? 0.95 : 0.4);
+      out += `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(rad)}" fill="${fill}"/>`;
     }
     return frame(p, out);
   },

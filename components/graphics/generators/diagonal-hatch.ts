@@ -4,11 +4,11 @@ import {
   chance,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -50,15 +50,21 @@ export default defineGenerator<Rule[]>({
   // per-mark identity to mismatch — so this is the most legible motion in the
   // set, and the cheapest.
   project: (rules, p, t) => {
-    const faint = withAlpha(p.accent, 0.32);
-    const bright = withAlpha(p.accent, 0.9);
+    // Rules are generated from `-height` to `width`, so that span is the axis
+    // the hatch is built on; normalising the offset across it puts one end of
+    // the ramp at the first rule and the other at the last, and the gradient
+    // runs perpendicular to the rules rather than along them. The *sampled*
+    // offset, not the slid one, so the field slides without the colours
+    // crawling through it.
+    const span = p.width + p.height;
     const slide = lerp(70, 20, p.density) * 0.9 * wobble(t, 1, 0);
     let out = '';
     for (const rule of rules) {
       const o = rule.o + slide;
       const w =
         rule.w * (1 + 0.3 * wobble(t, cycles(rule.w, 2), rule.o * 0.02));
-      out += `<line x1="${r2(o)}" y1="0" x2="${r2(o + p.height)}" y2="${p.height}" stroke="${rule.hot ? bright : faint}" stroke-width="${r2(w)}"/>`;
+      const stroke = ink(p, (rule.o + p.height) / span, rule.hot ? 0.9 : 0.32);
+      out += `<line x1="${r2(o)}" y1="0" x2="${r2(o + p.height)}" y2="${p.height}" stroke="${stroke}" stroke-width="${r2(w)}"/>`;
     }
     return frame(p, out);
   },

@@ -3,12 +3,12 @@ import type { LatticeCell, Rng } from './shared';
 import {
   cycles,
   frame,
+  ink,
   lattice,
   lerp,
   mulberry32,
   r2,
   wave,
-  withAlpha,
 } from './shared';
 
 /* ── ribbon-grid ──────────────────────────────────────────────────────────── */
@@ -71,7 +71,6 @@ export default defineGenerator<RibbonGrid>({
     // under half, and still have to look like a surface rather than artwork at
     // full opacity in the gallery. So the whole alpha range lives low — the
     // unlit facets are barely-there texture and only the lit ones carry weight.
-    const line = withAlpha(p.accent, 0.13);
     let out = '';
     for (let i = 0; i < cells.length; i++) {
       const c = cells[i];
@@ -126,7 +125,15 @@ export default defineGenerator<RibbonGrid>({
       // Cubed, not linear: a linear ramp spends most of the sweep in the
       // mid-tones and the facets all read as the same grey. The cube keeps the
       // faint side genuinely faint, so the lit band is a band.
-      const fill = withAlpha(p.accent, r2(0.015 + lit ** 3 * weight * 0.34));
+      // Position on the ramp is `lit` — the tilt the brightness already reads
+      // off. The sweep is the subject, so a facet turned into the light and its
+      // neighbour turned away should differ in hue as well as in weight, and
+      // the wavefront then reads as light of a colour crossing the lattice
+      // rather than as the same accent brightening.
+      const fill = ink(p, lit, r2(0.015 + lit ** 3 * weight * 0.34));
+      // The outline takes the same position, so a facet's edge never belongs
+      // to a different part of the ramp than its face.
+      const line = ink(p, lit, 0.13);
       out += `<polygon points="${points}" fill="${fill}" stroke="${line}" stroke-width="${p.strokeWidth}"/>`;
     }
     return frame(p, out);

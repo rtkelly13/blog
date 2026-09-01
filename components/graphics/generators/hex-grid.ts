@@ -2,13 +2,13 @@ import { defineGenerator } from '../types';
 import type { Rng, Tiled } from './shared';
 import {
   frame,
+  ink,
   lattice,
   lerp,
   mulberry32,
   r2,
   scaledPath,
   wave,
-  withAlpha,
 } from './shared';
 
 /* ── hex-grid ─────────────────────────────────────────────────────────────── */
@@ -46,7 +46,6 @@ export default defineGenerator<Tiled>({
     return { cells, rolls: cells.map(() => rng()) };
   },
   project: ({ cells, rolls }, p, t) => {
-    const line = withAlpha(p.accent, 0.3);
     let out = '';
     for (let i = 0; i < cells.length; i++) {
       const c = cells[i];
@@ -65,7 +64,13 @@ export default defineGenerator<Tiled>({
       // cannot be. The coherence suite catches it as a change in mark count.
       const weight = 1 - rolls[i];
       const d = scaledPath(c, 0.72 + energy * 0.26, r2);
-      out += `<path d="${d}" fill="${withAlpha(p.accent, r2(0.02 + weight * energy * 0.6))}" stroke="${line}" stroke-width="${p.strokeWidth}"/>`;
+      // The dominant wave travels along x, so x is the direction the light
+      // moves; ramping on it means the crest picks up hue as it crosses rather
+      // than merely brightening, and the honeycomb keeps one gradient while
+      // the field animates over it. Fixed to `c.cx`, not to `energy`, so the
+      // colour belongs to the cell and the wave passes through it.
+      const pos = c.cx / p.width;
+      out += `<path d="${d}" fill="${ink(p, pos, r2(0.02 + weight * energy * 0.6))}" stroke="${ink(p, pos, 0.3)}" stroke-width="${p.strokeWidth}"/>`;
     }
     return frame(p, out);
   },

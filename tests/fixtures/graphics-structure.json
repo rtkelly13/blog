@@ -2,12 +2,17 @@
   "brockmann-arcs": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "path": 14
     },
-    "marks": 92,
+    "marks": 15,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 4,
+    "bounds": [
+      0,
+      0,
+      1039,
+      918
+    ]
   },
   "broken-ring": {
     "elements": {
@@ -17,7 +22,12 @@
     "marks": 155,
     "viewBox": "0 0 1280 720",
     "colours": 4,
-    "bounds": [232, -48, 1048, 768]
+    "bounds": [
+      232,
+      -48,
+      1048,
+      768
+    ]
   },
   "cell-mask": {
     "elements": {
@@ -28,7 +38,12 @@
     "marks": 241,
     "viewBox": "0 0 1280 720",
     "colours": 5,
-    "bounds": [0, 0, 1352, 1352]
+    "bounds": [
+      0,
+      0,
+      1352,
+      1352
+    ]
   },
   "contour": {
     "elements": {
@@ -38,7 +53,12 @@
     "marks": 17,
     "viewBox": "0 0 1280 720",
     "colours": 3,
-    "bounds": [0, 1, 1253, 724]
+    "bounds": [
+      0,
+      1,
+      1253,
+      724
+    ]
   },
   "cube-helix": {
     "elements": {
@@ -49,7 +69,12 @@
     "marks": 102,
     "viewBox": "0 0 1280 720",
     "colours": 6,
-    "bounds": [-98, 123, 1548, 602]
+    "bounds": [
+      -98,
+      123,
+      1548,
+      602
+    ]
   },
   "diagonal-hatch": {
     "elements": {
@@ -59,7 +84,12 @@
     "marks": 46,
     "viewBox": "0 0 1280 720",
     "colours": 2,
-    "bounds": [0, 0, 0, 0]
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "dot-grid": {
     "elements": {
@@ -69,7 +99,12 @@
     "marks": 221,
     "viewBox": "0 0 1280 720",
     "colours": 2,
-    "bounds": [33, 33, 1268, 683]
+    "bounds": [
+      33,
+      33,
+      1268,
+      683
+    ]
   },
   "flow-field": {
     "elements": {
@@ -79,7 +114,12 @@
     "marks": 541,
     "viewBox": "0 0 1280 720",
     "colours": 35,
-    "bounds": [0, 0, 0, 0]
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "flow-lines": {
     "elements": {
@@ -89,7 +129,12 @@
     "marks": 561,
     "viewBox": "0 0 1280 720",
     "colours": 61,
-    "bounds": [-29, -30, 1309, 747]
+    "bounds": [
+      -29,
+      -30,
+      1309,
+      747
+    ]
   },
   "hex-grid": {
     "elements": {
@@ -99,7 +144,12 @@
     "marks": 177,
     "viewBox": "0 0 1280 720",
     "colours": 44,
-    "bounds": [-133, -133, 1401, 782]
+    "bounds": [
+      -133,
+      -133,
+      1401,
+      782
+    ]
   },
   "interference": {
     "elements": {
@@ -109,17 +159,28 @@
     "marks": 32,
     "viewBox": "0 0 1280 720",
     "colours": 3,
-    "bounds": [0, 1, 1272, 716]
+    "bounds": [
+      0,
+      1,
+      1272,
+      716
+    ]
   },
   "iso-blocks": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "polygon": 276,
+      "path": 69
     },
-    "marks": 92,
+    "marks": 346,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 48,
+    "bounds": [
+      125,
+      -25,
+      1218,
+      680
+    ]
   },
   "iso-cubes": {
     "elements": {
@@ -130,7 +191,12 @@
     "marks": 901,
     "viewBox": "0 0 1280 720",
     "colours": 5,
-    "bounds": [220, 59, 976, 521]
+    "bounds": [
+      220,
+      59,
+      976,
+      521
+    ]
   },
   "iso-grid": {
     "elements": {
@@ -140,17 +206,28 @@
     "marks": 545,
     "viewBox": "0 0 1280 720",
     "colours": 4,
-    "bounds": [-129, -50, 1376, 773]
+    "bounds": [
+      -129,
+      -50,
+      1376,
+      773
+    ]
   },
   "iso-terrain": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "polygon": 952,
+      "path": 238
     },
-    "marks": 92,
+    "marks": 1191,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 83,
+    "bounds": [
+      130,
+      72,
+      1060,
+      649
+    ]
   },
   "kaleidoscope": {
     "elements": {
@@ -160,17 +237,27 @@
     "marks": 148,
     "viewBox": "0 0 1280 720",
     "colours": 19,
-    "bounds": [0, 0, 0, 0]
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "line-circles": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "line": 88
     },
-    "marks": 92,
+    "marks": 89,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 2,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "lissajous": {
     "elements": {
@@ -180,7 +267,12 @@
     "marks": 10,
     "viewBox": "0 0 1280 720",
     "colours": 2,
-    "bounds": [-366, -99, 1519, 835]
+    "bounds": [
+      -366,
+      -99,
+      1519,
+      835
+    ]
   },
   "node-network": {
     "elements": {
@@ -191,7 +283,12 @@
     "marks": 76,
     "viewBox": "0 0 1280 720",
     "colours": 2,
-    "bounds": [55, 2, 1252, 716]
+    "bounds": [
+      55,
+      2,
+      1252,
+      716
+    ]
   },
   "orbit-rings": {
     "elements": {
@@ -201,7 +298,12 @@
     "marks": 168,
     "viewBox": "0 0 1280 720",
     "colours": 4,
-    "bounds": [322, 44, 958, 676]
+    "bounds": [
+      322,
+      44,
+      958,
+      676
+    ]
   },
   "phyllotaxis": {
     "elements": {
@@ -211,7 +313,12 @@
     "marks": 6,
     "viewBox": "0 0 1280 720",
     "colours": 6,
-    "bounds": [-93, -375, 1375, 1091]
+    "bounds": [
+      -93,
+      -375,
+      1375,
+      1091
+    ]
   },
   "polar-mesh": {
     "elements": {
@@ -221,17 +328,27 @@
     "marks": 56,
     "viewBox": "0 0 1280 720",
     "colours": 15,
-    "bounds": [-16, -275, 1271, 1013]
+    "bounds": [
+      -16,
+      -275,
+      1271,
+      1013
+    ]
   },
   "radial-dashes": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "line": 727
     },
-    "marks": 92,
+    "marks": 728,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 2,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "radial-spokes": {
     "elements": {
@@ -242,17 +359,27 @@
     "marks": 79,
     "viewBox": "0 0 1280 720",
     "colours": 4,
-    "bounds": [640, 360, 640, 360]
+    "bounds": [
+      640,
+      360,
+      640,
+      360
+    ]
   },
   "resonance": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "path": 33
     },
-    "marks": 92,
+    "marks": 34,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 34,
+    "bounds": [
+      0,
+      -10,
+      1276,
+      731
+    ]
   },
   "ribbon-grid": {
     "elements": {
@@ -262,7 +389,12 @@
     "marks": 331,
     "viewBox": "0 0 1280 720",
     "colours": 33,
-    "bounds": [-128, -89, 1441, 876]
+    "bounds": [
+      -128,
+      -89,
+      1441,
+      876
+    ]
   },
   "ridgeline": {
     "elements": {
@@ -272,17 +404,27 @@
     "marks": 6,
     "viewBox": "0 0 1280 720",
     "colours": 10,
-    "bounds": [0, 217, 1280, 720]
+    "bounds": [
+      0,
+      217,
+      1280,
+      720
+    ]
   },
   "ripple": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "circle": 836
     },
-    "marks": 92,
+    "marks": 837,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 58,
+    "bounds": [
+      -28,
+      -26,
+      1319,
+      744
+    ]
   },
   "rose-curve": {
     "elements": {
@@ -292,7 +434,12 @@
     "marks": 7,
     "viewBox": "0 0 1280 720",
     "colours": 3,
-    "bounds": [122, -91, 1046, 823]
+    "bounds": [
+      122,
+      -91,
+      1046,
+      823
+    ]
   },
   "scatter-blocks": {
     "elements": {
@@ -302,7 +449,12 @@
     "marks": 46,
     "viewBox": "0 0 1280 720",
     "colours": 4,
-    "bounds": [0, 0, 0, 0]
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "signal-decay": {
     "elements": {
@@ -312,17 +464,27 @@
     "marks": 31,
     "viewBox": "0 0 1280 720",
     "colours": 3,
-    "bounds": [0, 4, 1280, 715]
+    "bounds": [
+      0,
+      4,
+      1280,
+      715
+    ]
   },
   "spiral-dots": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "line": 540
     },
-    "marks": 92,
+    "marks": 541,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 49,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "spiral-mesh": {
     "elements": {
@@ -332,7 +494,12 @@
     "marks": 42,
     "viewBox": "0 0 1280 720",
     "colours": 23,
-    "bounds": [-22, -306, 1315, 1039]
+    "bounds": [
+      -22,
+      -306,
+      1315,
+      1039
+    ]
   },
   "spiral-warp": {
     "elements": {
@@ -342,7 +509,12 @@
     "marks": 300,
     "viewBox": "0 0 1280 720",
     "colours": 43,
-    "bounds": [0, 0, 0, 0]
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "swept-polygons": {
     "elements": {
@@ -353,7 +525,12 @@
     "marks": 607,
     "viewBox": "0 0 1280 720",
     "colours": 3,
-    "bounds": [209, -67, 1041, 773]
+    "bounds": [
+      209,
+      -67,
+      1041,
+      773
+    ]
   },
   "terrain-mesh": {
     "elements": {
@@ -363,7 +540,12 @@
     "marks": 48,
     "viewBox": "0 0 1280 720",
     "colours": 41,
-    "bounds": [-282, 174, 1562, 720]
+    "bounds": [
+      -282,
+      174,
+      1562,
+      720
+    ]
   },
   "triangle-grid": {
     "elements": {
@@ -373,7 +555,12 @@
     "marks": 301,
     "viewBox": "0 0 1280 720",
     "colours": 57,
-    "bounds": [-104, -90, 1482, 825]
+    "bounds": [
+      -104,
+      -90,
+      1482,
+      825
+    ]
   },
   "truchet-arcs": {
     "elements": {
@@ -383,27 +570,42 @@
     "marks": 171,
     "viewBox": "0 0 1280 720",
     "colours": 3,
-    "bounds": [0, 0, 1411, 1403]
+    "bounds": [
+      0,
+      0,
+      1411,
+      1403
+    ]
   },
   "truchet-mirror": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "path": 84
     },
-    "marks": 92,
+    "marks": 85,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 3,
+    "bounds": [
+      0,
+      0,
+      1452,
+      1433
+    ]
   },
   "truchet-single": {
     "elements": {
       "g": 1,
-      "circle": 91
+      "path": 104
     },
-    "marks": 92,
+    "marks": 105,
     "viewBox": "0 0 1280 720",
-    "colours": 1,
-    "bounds": [50, 50, 1250, 650]
+    "colours": 3,
+    "bounds": [
+      0,
+      0,
+      1417,
+      1363
+    ]
   },
   "void-field": {
     "elements": {
@@ -413,7 +615,12 @@
     "marks": 690,
     "viewBox": "0 0 1280 720",
     "colours": 31,
-    "bounds": [0, 0, 0, 0]
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
   },
   "weave": {
     "elements": {
@@ -424,6 +631,11 @@
     "marks": 355,
     "viewBox": "0 0 1280 720",
     "colours": 19,
-    "bounds": [-168, -168, 1428, 851]
+    "bounds": [
+      -168,
+      -168,
+      1428,
+      851
+    ]
   }
 }
