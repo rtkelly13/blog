@@ -66,6 +66,7 @@ export default function BackgroundsLab() {
   // all additive — a test pins that omitting them reproduces the old output
   // byte for byte — so the honest way to show what they add is to show both.
   const [compare, setCompare] = useState(false);
+  const [fps, setFps] = useState(24);
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
   // Per-tile overrides on top of the global transport. A name present here wins
@@ -138,6 +139,7 @@ export default function BackgroundsLab() {
     occlusion: SURFACES.darkBg,
     duration,
     speed,
+    fps,
     contrast,
     accents: RAMPS[ramp].colours,
     originX: origin[0],
@@ -388,6 +390,21 @@ export default function BackgroundsLab() {
               step={0.05}
               value={contrast}
               onChange={(e) => setContrast(Number(e.target.value))}
+              className="w-full accent-brutalist-cyan"
+            />
+          </label>
+
+          <label className="min-w-[150px]">
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              FPS · {fps}
+            </div>
+            <input
+              type="range"
+              min={6}
+              max={60}
+              step={2}
+              value={fps}
+              onChange={(e) => setFps(Number(e.target.value))}
               className="w-full accent-brutalist-cyan"
             />
           </label>

@@ -57,10 +57,15 @@ export interface Tile {
 export const FLIP_BAND = 0.11;
 
 /**
- * Arcs nested at each corner. Four reads as a ribbon; one reads as texture, and
- * more than five closes the gaps between neighbouring bands into a solid.
+ * Arcs nested at each corner.
+ *
+ * Was four, and four was too many: at the weight a hairline needs to stay a
+ * hairline, four nested lines per corner read as mud rather than as a ribbon —
+ * the individual lines stop being separable and the frame goes grey. Three
+ * carries the ribbon while leaving air between the lines. One is
+ * `truchet-single`, which is a different generator for that reason.
  */
-export const ARC_RINGS = 4;
+export const ARC_RINGS = 3;
 
 /** How the two variants differ from the parent when they lay out a grid. */
 export interface TruchetGrid {
@@ -194,7 +199,11 @@ export default defineGenerator<Tile[]>({
       // confetti test watches for.
       const stroke = !tile.show
         ? 'none'
-        : ink(p, bandPos(tile, span), tile.hot ? 0.95 : 0.38);
+        : // Raised from 0.38. A ribbon of nested hairlines needs each line to be
+          // individually legible, and at a third of full weight three of them
+          // average into a grey wash instead — the tiling was technically
+          // present and visually absent.
+          ink(p, bandPos(tile, span), tile.hot ? 0.98 : 0.62);
       const rot = r2(tile.flip * 90 + 90 * flipStep(tile, t, span));
       const cx = tile.x + size / 2;
       const cy = tile.y + size / 2;
@@ -215,7 +224,7 @@ export default defineGenerator<Tile[]>({
           `M${r2(tile.x + size - rad)} ${r2(tile.y + size)} A${r2(rad)} ${r2(rad)} 0 0 1 ${r2(tile.x + size)} ${r2(tile.y + size - rad)} `;
       }
       d = d.trim();
-      out += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${r2(p.strokeWidth * (tile.hot ? 1.5 : 0.75))}" transform="rotate(${rot} ${r2(cx)} ${r2(cy)})" stroke-linecap="butt"/>`;
+      out += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${r2(p.strokeWidth * (tile.hot ? 2.2 : 1.05))}" transform="rotate(${rot} ${r2(cx)} ${r2(cy)})" stroke-linecap="butt"/>`;
     }
     return frame(p, out);
   },
