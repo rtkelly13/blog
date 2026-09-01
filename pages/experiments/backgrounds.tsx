@@ -131,6 +131,27 @@ export default function BackgroundsLab() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const paper = paperPin ?? (mounted && resolvedTheme === 'sketch');
+
+  // Changing the site theme clears the pin.
+  //
+  // Without this, one click on Surface silently opted the page out of the theme
+  // for the rest of the session: switch the site to sketch afterwards and the
+  // gallery stayed dark, which reads as the colours simply not following. A
+  // manual override should last until the next explicit signal about which
+  // surface is wanted, and changing the theme *is* that signal.
+  //
+  // Written against a ref rather than as a bare `[resolvedTheme]` dependency on
+  // purpose: an effect that lists a value it never reads is an unnecessary
+  // dependency by the linter's reckoning, and `biome check --write --unsafe`
+  // duly deleted it — leaving an effect that ran once on mount and a pin that
+  // never cleared. Reading it here makes the dependency real.
+  const lastTheme = useRef(resolvedTheme);
+  useEffect(() => {
+    if (lastTheme.current !== resolvedTheme) {
+      lastTheme.current = resolvedTheme;
+      setPaperPin(null);
+    }
+  }, [resolvedTheme]);
   // Swatches and ramps follow the surface. Offering neon on paper was the other
   // half of what made the sketch theme unusable here.
   const RAMPS = paper ? PAPER_RAMPS : NEON_RAMPS;
