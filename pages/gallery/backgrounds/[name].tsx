@@ -5,7 +5,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   SlidersHorizontal,
-  X,
 } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
@@ -17,6 +16,7 @@ import {
   PAPER_ACCENTS,
   SURFACES,
 } from '@/components/graphics';
+import ConfigSheet from '@/components/graphics/ConfigSheet';
 import GeneratorControls, {
   type ControlsValue,
   rampsFor,
@@ -46,12 +46,6 @@ import { buildGraphicsUrl, parseGraphicsUrl } from '@/lib/graphicsUrl';
  * The panel component is shared and knows about neither — it owns no state and
  * no layout, so the two shells differ only in the box they put it in.
  *
- * The sheet is rendered through a portal to `document.body`, and that is not
- * incidental. `LayoutWrapper` gives `<main>` a `relative z-10` and the footer is
- * a later sibling at the same level, so a `z-50` overlay *inside* main is still
- * scoped to main's stacking context and the footer paints straight through it —
- * which it did, over the colour controls. No z-index can fix that from inside;
- * the overlay has to leave the context.
  *
  * ## Configuration lives in the URL
  *
@@ -277,37 +271,13 @@ export default function BackgroundDetail() {
             </button>,
             document.body,
           )}
-        {sheet &&
-          mounted &&
-          createPortal(
-            <div className="fixed inset-0 z-[100] flex flex-col justify-end lg:hidden">
-              {/* The scrim stops at the sheet, so the top of the graphic stays
-                  visible and adjustments are not made blind. */}
-              <button
-                type="button"
-                aria-label="Close controls"
-                onClick={() => setSheet(false)}
-                className="flex-1 bg-black/50"
-              />
-              <div className="max-h-[62vh] overflow-y-auto border-t-2 border-white bg-black">
-                <div className="sticky top-0 flex items-center justify-between border-b-2 border-zinc-800 bg-black px-4 py-3">
-                  <span className="font-display text-sm font-bold uppercase text-white">
-                    {gen.label}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setSheet(false)}
-                    aria-label="Close controls"
-                    className="border-2 border-zinc-700 p-1.5 text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-                {panel}
-              </div>
-            </div>,
-            document.body,
-          )}
+        <ConfigSheet
+          open={sheet}
+          onClose={() => setSheet(false)}
+          title={gen.label}
+        >
+          {panel}
+        </ConfigSheet>
       </div>
     </>
   );
