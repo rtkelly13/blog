@@ -82,6 +82,7 @@ export default defineGenerator<Helix>({
   description:
     'Isometric cubes threaded along a sine helix, nearer ones hiding those behind.',
   group: 'isometric',
+  sketch: true,
   // Slower than the lattice generators, and the reason is geometric: a turn
   // at full reach covers the whole circumference, so what reads as a stately
   // rotation on a small form is a blur on a frame-filling one. See

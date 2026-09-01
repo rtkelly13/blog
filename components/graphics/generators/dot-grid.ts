@@ -31,6 +31,7 @@ export default defineGenerator<Dot[]>({
   label: 'Dot Grid',
   description: 'Regular grid of dots with a scatter flaring to full accent.',
   group: 'lattice',
+  sketch: true,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

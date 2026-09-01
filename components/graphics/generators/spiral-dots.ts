@@ -140,6 +140,7 @@ export default defineGenerator<Field>({
   description:
     'Golden-angle placement drawn as dots on visible spiral arms rather than as dashes.',
   group: 'radial',
+  sketch: true,
   // Radial forms need a pace of their own: tangential speed is `omega · r`, so
   // one turn per loop at full reach is a blur unless the loop is stretched.
   // Slower than the parent's, because a sparse field gives the eye individual

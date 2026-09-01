@@ -29,6 +29,7 @@ export default defineGenerator<Cell[]>({
   label: 'Iso Grid',
   description: 'Isometric lattice of diamonds; some cells fill with accent.',
   group: 'isometric',
+  sketch: true,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

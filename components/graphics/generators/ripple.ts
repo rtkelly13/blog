@@ -106,6 +106,7 @@ export default defineGenerator<Field>({
   description:
     'Concentric wave distortion drawn as a field of marks rather than as rules.',
   group: 'field',
+  sketch: true,
   speed: 0.9,
   defaults: { density: 0.5, strokeWidth: 1 },
 

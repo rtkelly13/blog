@@ -6,6 +6,7 @@ import {
   AnimatedBackground,
   GENERATOR_GROUPS,
   generatorsInGroup,
+  PAPER_ACCENTS,
   SURFACES,
 } from '@/components/graphics';
 import { PageSEO } from '@/components/SEO';
@@ -67,6 +68,7 @@ export default function BackgroundsLab() {
   // byte for byte — so the honest way to show what they add is to show both.
   const [compare, setCompare] = useState(false);
   const [fps, setFps] = useState(24);
+  const [paper, setPaper] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
   // Per-tile overrides on top of the global transport. A name present here wins
@@ -133,10 +135,14 @@ export default function BackgroundsLab() {
 
   const shared = {
     seed,
-    accent,
+    // Paper mode renders exactly what the light `sketch` theme does: ink on
+    // paper at the theme's own weight. It is here because the sketch pass could
+    // not be judged in a gallery that only ever drew on black.
+    accent: paper ? PAPER_ACCENTS.ink : accent,
     density,
     disorder,
-    occlusion: SURFACES.darkBg,
+    occlusion: paper ? SURFACES.paper : SURFACES.darkBg,
+    opacity: paper ? 0.52 : 1,
     duration,
     speed,
     fps,
@@ -364,6 +370,20 @@ export default function BackgroundsLab() {
 
           <div>
             <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Surface
+            </div>
+            <button
+              type="button"
+              onClick={() => setPaper((v) => !v)}
+              className={`mb-2 border-2 px-3 py-1.5 font-mono text-xs uppercase ${
+                paper
+                  ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
+                  : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
+              }`}
+            >
+              {paper ? 'paper' : 'dark'}
+            </button>
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
               Compare
             </div>
             <button
@@ -488,7 +508,7 @@ export default function BackgroundsLab() {
                       if (el) tiles.current.set(g.name, el);
                       else tiles.current.delete(g.name);
                     }}
-                    className={`bg-black transition-shadow ${
+                    className={`transition-shadow ${paper ? 'bg-[#f5f3ec]' : 'bg-black'} ${
                       central.includes(g.name)
                         ? 'shadow-[inset_0_0_0_2px_var(--brutalist-cyan,#22d3ee)]'
                         : ''

@@ -27,6 +27,7 @@ export default defineGenerator<Tiled>({
   description:
     'Interlocking triangles, the two orientations driven in antiphase.',
   group: 'lattice',
+  sketch: true,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

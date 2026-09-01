@@ -133,6 +133,8 @@ export interface Generator {
   group: GeneratorGroup;
   /** Loop-duration multiplier; see {@link GeneratorModule.speed}. */
   speed: number;
+  /** Holds up as ink on paper; see {@link GeneratorModule.sketch}. */
+  sketch: boolean;
   /** Stable id used in frontmatter and the registry (kebab-case). */
   name: string;
   /** Human label for the gallery. */
@@ -182,6 +184,33 @@ export interface GeneratorModule<S = unknown> {
    * behavioural hangs off it.
    */
   group: GeneratorGroup;
+  /**
+   * Whether this generator holds up in the light `sketch` theme — ink on paper.
+   *
+   * Not a taste call: it follows from how the generator carries its structure,
+   * and it was decided by rendering all of them in the paper palette and
+   * looking.
+   *
+   * The first pass at this excluded every generator whose depth cue is filled
+   * area — the lattices, the isometrics, `weave` — because they all rendered as
+   * a flat grey wash. That diagnosis was right and the remedy was wrong: the
+   * cause is not the generator, it is that **the same alpha is far heavier as
+   * ink on white than as an accent on black**. 30% cyan over black is a hint;
+   * 30% graphite over paper is a solid grey.
+   *
+   * So the light theme now defaults to roughly half weight
+   * (`graphicThemeDefaults`), and six of the eight rejects came back looking
+   * like print rather than mud. Only two remain out:
+   *
+   * - `weave` — large filled bands are most of its area, so halving the weight
+   *   leaves a grey slab rather than a lighter texture.
+   * - `void-field` — its subject is a hole in a dark field. On paper the field
+   *   is already pale, so the hole has nothing to be absent *from*.
+   *
+   * Required rather than defaulted, so a new generator has to be rendered on
+   * paper and looked at before it ships.
+   */
+  sketch: boolean;
   /** Per-generator defaults, merged over {@link BASE_PARAMS}. */
   defaults?: Partial<GraphicParams>;
   /**

@@ -104,6 +104,7 @@ export default defineGenerator<Plan>({
   description:
     'A flat field of cubes at even height, widely spaced — architecture, not terrain.',
   group: 'isometric',
+  sketch: true,
   speed: 0.8,
   defaults: { density: 0.5, strokeWidth: 1.5 },
 
