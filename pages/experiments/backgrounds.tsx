@@ -38,6 +38,20 @@ const GROUP_BLURB: Record<GeneratorGroup, string> = {
     'Stacked geometry with opaque faces, so nearer solids hide farther ones.',
 };
 
+/**
+ * Ramps offered in the lab. The first is a single accent, which is the historic
+ * behaviour and byte-identical to it — everything else is a genuine gradient
+ * with the *generator's own axis* driving position, not decoration laid over
+ * the top.
+ */
+const RAMPS: { label: string; colours: string[] | undefined }[] = [
+  { label: 'single', colours: undefined },
+  { label: 'cyan→pink', colours: ['#22d3ee', '#ec4899'] },
+  { label: 'yellow→pink→cyan', colours: ['#facc15', '#ec4899', '#22d3ee'] },
+  { label: 'green→cyan', colours: ['#39ff14', '#22d3ee'] },
+  { label: 'pink→yellow', colours: ['#ec4899', '#facc15'] },
+];
+
 export default function BackgroundsLab() {
   const [accent, setAccent] = useState('#22d3ee');
   const [seed, setSeed] = useState(7);
@@ -45,6 +59,8 @@ export default function BackgroundsLab() {
   const [disorder, setDisorder] = useState(0);
   const [duration, setDuration] = useState(12);
   const [speed, setSpeed] = useState(1);
+  const [contrast, setContrast] = useState(1);
+  const [ramp, setRamp] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
   // Per-tile overrides on top of the global transport. A name present here wins
@@ -117,6 +133,8 @@ export default function BackgroundsLab() {
     occlusion: SURFACES.darkBg,
     duration,
     speed,
+    contrast,
+    accents: RAMPS[ramp].colours,
     t: scrub,
     // 16:9, because that is what these are *for* — talk slides via
     // SpectacleDeck and full-bleed page headers. Previewing them square was
@@ -263,6 +281,51 @@ export default function BackgroundsLab() {
               step={1}
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
+              className="w-full accent-brutalist-cyan"
+            />
+          </label>
+
+          <div>
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Ramp
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {RAMPS.map((r, i) => (
+                <button
+                  key={r.label}
+                  type="button"
+                  onClick={() => setRamp(i)}
+                  className={`flex items-center gap-2 border-2 px-2 py-1 font-mono text-[10px] uppercase ${
+                    ramp === i
+                      ? 'border-brutalist-cyan text-brutalist-cyan'
+                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-400'
+                  }`}
+                >
+                  <span
+                    className="h-3 w-8 border border-zinc-600"
+                    style={{
+                      background: r.colours
+                        ? `linear-gradient(90deg, ${r.colours.join(', ')})`
+                        : accent,
+                    }}
+                  />
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <label className="min-w-[150px]">
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Contrast · {contrast.toFixed(2)}
+            </div>
+            <input
+              type="range"
+              min={0.2}
+              max={1.8}
+              step={0.05}
+              value={contrast}
+              onChange={(e) => setContrast(Number(e.target.value))}
               className="w-full accent-brutalist-cyan"
             />
           </label>

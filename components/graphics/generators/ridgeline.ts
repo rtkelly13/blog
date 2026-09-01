@@ -2,15 +2,16 @@ import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
   frame,
+  ink,
   intRange,
   lerp,
   mix,
   mulberry32,
   r2,
   range,
+  solidInk,
   TAU,
   valueNoise,
-  withAlpha,
 } from './shared';
 
 /* ── ridgeline ────────────────────────────────────────────────────────────── */
@@ -210,13 +211,18 @@ export default defineGenerator<Ridge[]>({
       const depth = ridges.length === 1 ? 1 : i / (ridges.length - 1);
       // Depth is carried by contrast, not perspective: far ranges are faint and
       // thin, near ranges bright and heavy.
-      const stroke = withAlpha(p.accent, 0.22 + depth * 0.68);
+      // Position on the ramp is `depth` — the axis this generator is already
+      // about. With a single accent this is byte-identical to the old
+      // `withAlpha(p.accent, …)`; with a ramp, the far ranges take one end of
+      // it and the near ranges the other, so distance is carried by hue as well
+      // as by contrast.
+      const stroke = ink(p, depth, 0.22 + depth * 0.68);
       // Opaque, so a near range hides the ones behind it. This was
       // `withAlpha(p.accent, 0.04 + depth * 0.07)` — alpha 0.04 to 0.11,
       // through which every far range stayed fully visible, so the layers were
       // stacked in draw order and occluded nothing. Mountains hide what is
       // behind them, and that is most of what makes a range read as distance.
-      const fillA = mix(p.occlusion, p.accent, 0.05 + depth * 0.12);
+      const fillA = mix(p.occlusion, solidInk(p, depth), 0.05 + depth * 0.12);
       // Distance flattens, so relief grows toward the viewer. It used to run
       // the other way and gave the furthest range the deepest spikes.
       const relief = lerp(0.16, 0.26, depth) * p.height;
