@@ -117,6 +117,11 @@ export default function AnimatedBackground({
     [accentKey],
   );
 
+  // Only in the light theme, and only as much as the generator asks for — see
+  // `GeneratorModule.sketchWeight` for why this cannot be one theme-wide number.
+  const gen = getGenerator(generator);
+  const paperWeight = resolvedTheme === 'sketch' ? (gen?.sketchWeight ?? 1) : 1;
+
   // Everything except `t`. Changing any of these re-samples, which is correct:
   // they are the params that define *what* is being drawn.
   const params = useMemo(
@@ -131,7 +136,7 @@ export default function AnimatedBackground({
         background: background ?? theme.background,
         occlusion: occlusion ?? theme.occlusion,
         density,
-        opacity: opacity ?? theme.opacity,
+        opacity: (opacity ?? theme.opacity) * paperWeight,
         strokeWidth,
         disorder,
         width,
@@ -150,6 +155,7 @@ export default function AnimatedBackground({
       density,
       opacity,
       theme.opacity,
+      paperWeight,
       strokeWidth,
       disorder,
       width,
@@ -160,7 +166,6 @@ export default function AnimatedBackground({
     ],
   );
 
-  const gen = getGenerator(generator);
   // Sampled once per param set and held across every frame of the loop.
   const structure = useMemo(
     () => (gen ? gen.sample(params) : null),
