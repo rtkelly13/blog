@@ -129,6 +129,7 @@ export default defineGenerator<Cube[]>({
   description:
     'Stacked cubes on a rolling height field — opaque faces, so depth survives.',
   group: 'isometric',
+  sketch: true,
   defaults: { density: 0.4, strokeWidth: 1.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

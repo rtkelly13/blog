@@ -83,6 +83,7 @@ export default defineGenerator<ArcBand[]>({
   description:
     'A handful of very thick concentric arc segments — poster weight, not fine structure.',
   group: 'radial',
+  sketch: true,
   // Radial generators must slow themselves down: tangential speed is `ω · r`,
   // and one turn per loop at full reach is already brisk. Slower than the
   // sibling again, because a mark this large makes its own speed obvious.

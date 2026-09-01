@@ -112,6 +112,7 @@ export default defineGenerator<Field>({
   description:
     'Two-source wave interference as displaced rules; the fringes exist only in the sum.',
   group: 'field',
+  sketch: true,
   defaults: { density: 0.55, strokeWidth: 2 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

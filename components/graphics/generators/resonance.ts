@@ -126,6 +126,7 @@ export default defineGenerator<Field>({
   description:
     'Interference from many sources at once, where the fringes stop being traceable.',
   group: 'field',
+  sketch: true,
   speed: 0.9,
   defaults: { density: 0.5, strokeWidth: 1.5 },
 

@@ -95,6 +95,7 @@ export default defineGenerator<Dash[]>({
   description:
     'A dense annulus of short radial ticks, with the middle left open for something else.',
   group: 'radial',
+  sketch: true,
   // Radial generators must slow themselves down: tangential speed is `ω · r`,
   // and this one's marks all live at large `r`. Slightly quicker than the
   // sibling because a tick travels its own length in far less arc than a spoke

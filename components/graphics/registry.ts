@@ -21,6 +21,7 @@ export const GENERATOR_LIST: Generator[] = GENERATOR_MODULES.map((m) => ({
   description: m.description,
   group: m.group,
   speed: m.speed ?? 1,
+  sketch: m.sketch,
   defaults: { ...BASE_PARAMS, ...m.defaults },
   render: (p: GraphicParams) => m.project(m.sample(p), p, p.t ?? 0),
   sample: m.sample,
@@ -31,6 +32,11 @@ const BY_NAME = new Map(GENERATOR_LIST.map((g) => [g.name, g]));
 
 export function getGenerator(name: string): Generator | undefined {
   return BY_NAME.get(name);
+}
+
+/** Generators that hold up as ink on paper. See {@link GeneratorModule.sketch}. */
+export function sketchSafeGenerators(): Generator[] {
+  return GENERATOR_LIST.filter((g) => g.sketch);
 }
 
 /** Generators in one family, in registry order. For grouped galleries. */

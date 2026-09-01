@@ -61,6 +61,7 @@ export default defineGenerator<Rule[]>({
   description:
     'Stacked oscillating rules under an envelope that decays across the frame.',
   group: 'terrain',
+  sketch: true,
   defaults: { density: 0.55, strokeWidth: 1.5 },
 
   sample: (p) => {

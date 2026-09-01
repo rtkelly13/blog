@@ -53,21 +53,34 @@ export function graphicThemeDefaults(theme?: string): {
   accent: string;
   background: string;
   occlusion: string;
+  opacity: number;
 } {
   // `occlusion` is the one that cannot be transparent — it is what stacked
   // geometry paints its faces with to hide what is behind them, so it has to be
   // the opaque surface the graphic is sitting on. Paper under `sketch`, the
   // brutalist near-black otherwise.
+  //
+  // `opacity` is the one that is not obvious. The same alpha is *much* heavier
+  // as ink on white than as an accent on black: 30% cyan over black is a hint,
+  // 30% graphite over paper is a solid grey. So every generator whose depth cue
+  // is filled area — the lattices, the isometrics, `weave` — rendered as a flat
+  // grey wash in the light theme while looking correct in the dark one.
+  //
+  // Halving the weight for paper fixes almost all of them, and it was arrived
+  // at by rendering the whole set in both palettes and comparing, not by taste.
+  // It is a *default*, so a caller who wants full weight on paper still has it.
   return theme === 'sketch'
     ? {
         accent: PAPER_ACCENTS.ink,
         background: 'transparent',
         occlusion: SURFACES.paper,
+        opacity: 0.52,
       }
     : {
         accent: BRUTALIST_ACCENTS.cyan,
         background: 'transparent',
         occlusion: SURFACES.darkBg,
+        opacity: 1,
       };
 }
 

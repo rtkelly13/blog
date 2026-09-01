@@ -178,6 +178,9 @@ export default defineGenerator<Field>({
   description:
     'A quiet vertical grain with cavities melted out of it — they drift, merge and pinch apart.',
   group: 'lattice',
+  // Its depth cue is filled area at varying alpha, which reads as distance on
+  // black and as flat grey ink on paper. See `GeneratorModule.sketch`.
+  sketch: false,
   // Viscous. The cavities cross a good part of the frame over a loop, and at
   // pace 1 that reads as sliding rather than as flowing.
   speed: 0.3,

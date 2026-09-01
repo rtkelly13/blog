@@ -71,6 +71,9 @@ export default defineGenerator<Weave>({
   description:
     'Interlaced bands passing over and under each other — occlusion without isometry.',
   group: 'lattice',
+  // Its depth cue is filled area at varying alpha, which reads as distance on
+  // black and as flat grey ink on paper. See `GeneratorModule.sketch`.
+  sketch: false,
   defaults: { density: 0.5, strokeWidth: 1.5 },
 
   sample: (p) => {

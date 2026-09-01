@@ -41,6 +41,7 @@ export default defineGenerator<Mark[]>({
   description:
     'Grid of windows, each showing the fragment of an oversized disc or square that falls inside it.',
   group: 'lattice',
+  sketch: true,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

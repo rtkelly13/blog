@@ -57,6 +57,7 @@ export default defineGenerator<Tile[]>({
   description:
     'Mirrored tiles, so arcs meet as butterflies rather than carrying straight through.',
   group: 'lattice',
+  sketch: true,
   // A shade slower than the parent: the sweep here makes and unmakes whole
   // figures, and a wing appearing wants longer on screen than a curve
   // re-routing does.

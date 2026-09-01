@@ -66,6 +66,7 @@ export default defineGenerator<Streamline[]>({
   description:
     'Long streamlines with a pulse running along them — traced once, lit per frame.',
   group: 'field',
+  sketch: true,
   defaults: { density: 0.5, strokeWidth: 2 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
