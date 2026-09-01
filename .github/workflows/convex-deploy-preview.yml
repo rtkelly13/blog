@@ -9,7 +9,8 @@ name: Deploy Convex (preview)
 # frontends compatible with the deployed preview schema. A branch that changes
 # no `convex/` file while the train is idle skips both the merge and this
 # workflow entirely and is pushed to its slot raw — see
-# `docs/adr/0004-preview-environments-and-auth.md` and `scripts/preview-slot.sh`.
+# `docs/adr/0010-preview-slots-skip-the-schema-train-by-default.md` and
+# `scripts/preview-slot.sh`.
 #
 # Requires the `CONVEX_DEPLOY_KEY_PREVIEW` repo secret — a *Preview* deploy key
 # from the Convex dashboard (Project Settings → Deploy Keys). Absent the

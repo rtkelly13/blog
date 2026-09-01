@@ -6,15 +6,19 @@
 #   scripts/preview-slot.sh 2 my-ref --train  # force the convex-preview merge
 #   scripts/preview-slot.sh 2 --release  # slot/2 = convex-preview (idle)
 #
-# Two paths, picked automatically (see docs/adr/0004-preview-environments-and-auth.md):
+# Two paths, picked automatically (see
+# docs/adr/0010-preview-slots-skip-the-schema-train-by-default.md):
 #
 #   direct  push the raw ref. Chosen when the ref changes nothing under convex/
 #           AND convex-preview is an ancestor of main (the train is idle). The
-#           deployed preview backend is then already what the branch expects, so
-#           the merge and the Convex deploy would both be pure overhead.
+#           deployed backend is then already what the branch expects, so the
+#           merge would only make the slot differ from the commit CI tested.
 #   train   push convex-preview + the ref, merged. Chosen when the branch owns
 #           schema work, or when convex-preview is ahead of main and so carries
 #           someone else's unmerged schema that the frontend must match.
+#
+# Note this script never pushes convex-preview and so never deploys Convex —
+# moving the train is a separate, deliberate act.
 #
 # `--train` forces the train path if the detection is ever wrong. Releasing a
 # slot resets it to `convex-preview`, not main, so an idle subdomain still shows
