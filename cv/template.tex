@@ -1,0 +1,156 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Twenty Seconds Resume/CV
+% Auto-generated from data/about/*.json via scripts/generate-cv-tex.mjs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[letterpaper]{twentysecondcv}
+
+% Command for printing skill overview
+\newcommand\skils{
+    \href{https://github.com/Resultful}{Open source projects under organisation \textbf{Resultful} for functional .NET.}
+    
+    \vspace{1.5mm}
+    \href{https://www.youtube.com/playlist?list=PLo9sP7bLtjB4v80KxhT-2J3kx5HWZ_b9C}{Speaker on F\#, .NET architecture, and functional engineering.}
+    
+    \vspace{1.5mm}
+    {\textbf{Core \& Languages}}
+    {\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item C\#
+    \item F\#
+    \item .NET / Native AOT
+    \item TypeScript / JavaScript
+    \item Python
+    \item SQL
+    \end{itemize}}
+    \vspace{1mm}
+    {\textbf{Cloud, Data \& Infrastructure}}
+    {\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item AWS
+    \item Apache Iceberg
+    \item Apache Parquet
+    \item Pulumi
+    \item Terraform
+    \item Elasticsearch / OpenSearch
+    \item OpenTelemetry (OTEL)
+    \end{itemize}}
+    \vspace{1mm}
+    {\textbf{Engineering \& Practices}}
+    {\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item Roslyn Source Generators
+    \item Compiler Plugins / Type Providers
+    \item CI/CD (GitHub Actions)
+    \item Distributed Systems
+    \item AI Code Agent Workflows
+    \item TDD \& High-Throughput Benchmarking
+    \end{itemize}}
+}
+
+% Projects and references sidebar text
+\projects{
+\textbf{Robert Roe} --- Tech Lead at Zuto \\
+\textbf{\href{https://www.linkedin.com/in/dan-cartwright-23b30b38/}{Dan Cartwright}} --- Product Manager at AutoCoding Systems \\
+\vspace{1mm}
+\textbf{Contact Details:} Provided on request
+}
+
+%----------------------------------------------------------------------------------------
+%	 PERSONAL INFORMATION
+%----------------------------------------------------------------------------------------
+
+\cvname{RYAN KELLY}
+\cvjobtitle{ Principal Software Engineer }
+
+\cvlinkedin{/in/rtkelly94/}
+\cvgithub{rtkelly13}
+\cvnumberphone{}
+\cvmail{94ryan.kelly@gmail.com}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\makeprofile % Print the sidebar
+
+%----------------------------------------------------------------------------------------
+%	 Personal Profile
+%----------------------------------------------------------------------------------------
+
+\section{Personal Profile}
+
+I have always had a keen interest in all things technology related. Developing software is not just a career for me—I strive to advance my skills both inside and outside of work. Utilising agile software practices alongside working within a collaborative team is key to building great software. Motivated by complex technical challenges, high-throughput data processing, zero-reflection compile-time performance, and agentic workflows.
+
+\vspace{2mm}
+
+%----------------------------------------------------------------------------------------
+%	 Employment
+%----------------------------------------------------------------------------------------
+\section{Employment History}
+\begin{twenty}
+    \twentyitem
+        {May 2019 -}
+        {Present}
+        {Software Developer (Senior / Principal)}
+        {\href{https://sentricmusic.com/}{Sentric Music}}
+        {}
+        {
+          \begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+             \item Architected and built large-scale royalty processing systems scaling to billions of records, leading Apache Iceberg adoption and Python data engineering tooling.
+             \item Spearheaded long-term technology strategy to migrate legacy .NET Framework applications using a two-tier approach: extracting common components into modern .NET and creating a Storybook-driven React design system backed by REST APIs.
+             \item Pioneered AI Code Agent workflows across the engineering team, optimizing developer experience and bridging software design with autonomous tooling.
+             \item Introduced centralized observability via Serilog, Elastic Stack, and OpenTelemetry (OTEL) for real-time monitoring of high-volume event pipelines.
+             \item Migrated enterprise source control and CI/CD pipelines to GitHub Actions and codified infrastructure using Pulumi for AWS resource management.
+          \end{itemize}
+          \vspace{1mm}
+        }
+
+    \twentyitem
+        {Nov 2017 -}
+        {May 2019}
+        {Software Developer (Professional / Senior)}
+        {\href{https://zuto.com/}{Zuto}}
+        {}
+        {
+          \begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+             \item Engineered high-availability cloud lender integrations on AWS, maintaining and modernizing scalable fintech services with strict observability standards.
+          \end{itemize}
+          \vspace{1mm}
+        }
+
+    \twentyitem
+        {Jul 2014 -}
+        {Nov 2017}
+        {Software Developer (Placement / Graduate)}
+        {\href{https://autocodingsystems.com/}{AutoCoding Systems Ltd}}
+        {}
+        {
+          \begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+             \item Built packaging line automation software deployed to factory floors worldwide, developing critical features for the automated date and code printing engine.
+          \end{itemize}
+          \vspace{1mm}
+        }
+\end{twenty}
+
+%----------------------------------------------------------------------------------------
+%	 Education
+%----------------------------------------------------------------------------------------
+\section{Education}
+\begin{twenty}
+    \twentyitem
+        {2012 - 2016}
+        {}
+        {BSc Computer Science with a Year in Industry}
+        {\href{https://www.liverpool.ac.uk/}{University of Liverpool}}
+        {\textbf{First Class Honours}}
+        {
+             Final year dissertation on 3D procedural maze generation with statistical graph analysis, built in Unity 3D with C\#, SOLID, and TDD practices. \vspace{1mm}}
+
+    \twentyitem
+        {2010 - 2012}
+        {}
+        {A-Levels}
+        {\href{http://www.carmel.ac.uk/}{Carmel College}}
+        {\textbf{Computing (A), Chemistry (A), Mathematics (B)}}
+        {}
+\end{twenty}
+
+\end{document}

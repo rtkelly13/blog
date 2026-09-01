@@ -1,0 +1,56 @@
+name: Build & Render CV
+
+on:
+  push:
+    paths:
+      - 'cv/**'
+      - '.github/workflows/cv-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate LaTeX template from modular data
+        run: node scripts/generate-cv-tex.mjs
+
+      - name: Compile LaTeX CV (XeLaTeX)
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: template.tex
+          working_directory: cv
+          latexmk_use_xelatex: true
+
+      - name: Move generated PDF to public directory
+        run: |
+          mkdir -p public
+          cp cv/template.pdf public/cv.pdf
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cv-pdf
+          path: public/cv.pdf
+
+      - name: Commit compiled CV to repo (if on main)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/cv.pdf
+          if git diff --staged --quiet; then
+            echo "No changes to cv.pdf."
+          else
+            git commit -m "chore(cv): auto-compile cv.pdf via XeLaTeX [skip ci]"
+            git push
+          fi
