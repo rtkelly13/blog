@@ -98,6 +98,7 @@ export default defineGenerator<Ring[]>({
   description:
     'Rings deconstructed into loose tangential segments rather than beads.',
   group: 'radial',
+  sketch: true,
   // Radial forms need a pace of their own: tangential speed is `omega · r`, so
   // a turn that is stately on a small form is a blur at full reach. A little
   // slower than the parent, because a straight mark shows its own motion more

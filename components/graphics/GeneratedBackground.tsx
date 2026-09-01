@@ -39,7 +39,8 @@ export default function GeneratedBackground({
   // under the light `sketch` theme, neon otherwise. An explicit `accent` (e.g.
   // a talk's signature colour, or the gallery picker) always wins.
   const { resolvedTheme } = useTheme();
-  const themedAccent = accent ?? graphicThemeDefaults(resolvedTheme).accent;
+  const theme = graphicThemeDefaults(resolvedTheme);
+  const themedAccent = accent ?? theme.accent;
 
   // Memoise on the individual primitive params (not the rest object, which is a
   // fresh reference each render) so the SVG is only rebuilt when a value changes.
@@ -51,7 +52,7 @@ export default function GeneratedBackground({
         accent: themedAccent,
         background,
         density,
-        opacity,
+        opacity: opacity ?? theme.opacity,
         strokeWidth,
         width,
         height,
@@ -64,6 +65,7 @@ export default function GeneratedBackground({
       background,
       density,
       opacity,
+      theme.opacity,
       strokeWidth,
       width,
       height,

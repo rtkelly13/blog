@@ -70,6 +70,7 @@ export default defineGenerator<Terrain>({
   description:
     'A wireframe height field — terrain drawn as a grid rather than as a silhouette.',
   group: 'terrain',
+  sketch: true,
   defaults: { density: 0.5, strokeWidth: 2 },
 
   sample: (p) => {

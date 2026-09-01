@@ -53,6 +53,7 @@ export default defineGenerator<Tile[]>({
   description:
     'One arc per corner instead of a nest — the classic thin Truchet, all line and no ribbon.',
   group: 'lattice',
+  sketch: true,
   // Longer legible paths want longer to be read, and with a tenth as many
   // strokes on screen the sweep is far more conspicuous than it is in the
   // parent's texture — so the same pulse wants a slower loop.

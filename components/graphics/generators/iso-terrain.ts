@@ -130,6 +130,7 @@ export default defineGenerator<Terrain>({
   description:
     'Cubes on a noise height field — an isometric landscape rather than a regular stack.',
   group: 'isometric',
+  sketch: true,
   speed: 0.8,
   defaults: { density: 0.5, strokeWidth: 1.5 },
 

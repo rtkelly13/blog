@@ -81,6 +81,7 @@ export default defineGenerator<Warp>({
   description:
     'A rectangular lattice of dashes, dragged into an Archimedean spiral toward the centre.',
   group: 'lattice',
+  sketch: true,
   defaults: { density: 0.5, strokeWidth: 1.6 },
 
   sample: (p) => {
