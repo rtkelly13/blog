@@ -132,8 +132,9 @@ export default defineGenerator<Cube[]>({
   defaults: { density: 0.4, strokeWidth: 1.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const cols = Math.round(lerp(7, 16, p.density));
-    const rows = Math.round(lerp(9, 20, p.density));
+    // Five polygons per cube — see the element budget note in `iso-terrain`.
+    const cols = Math.round(lerp(7, 12, p.density));
+    const rows = Math.round(lerp(9, 15, p.density));
     const cubes: Cube[] = [];
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
