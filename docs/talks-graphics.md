@@ -176,7 +176,7 @@ Backgrounds are safe to keep at the opacities in use.
 
 ## Authoring recipes
 
-**Add a background to a talk:** open `/experiments/backgrounds`, tune the controls,
+**Add a background to a talk:** open `/gallery/backgrounds`, pick a generator, tune the controls,
 copy a card's Config block into the talk's frontmatter. For multiple backdrops,
 add more named entries and switch per slide with `{/* bg: name */}`. Keep opacity
 low (~0.12–0.3) behind text-heavy slides.

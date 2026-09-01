@@ -32,7 +32,7 @@ import { expect, test } from '@playwright/test';
  */
 test.skip(process.platform !== 'linux', 'Visual tests only run on Linux CI');
 
-const BASE = '/experiments/backgrounds';
+const BASE = '/gallery/backgrounds';
 
 /** A spread across the families, so one snapshot exercises several mechanisms. */
 const SAMPLE = [
