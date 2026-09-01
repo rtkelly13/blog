@@ -1,4 +1,5 @@
 import { Pause, Play, Radio, RotateCcw } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GeneratorGroup } from '@/components/graphics';
 import {
@@ -68,7 +69,24 @@ export default function BackgroundsLab() {
   // byte for byte — so the honest way to show what they add is to show both.
   const [compare, setCompare] = useState(false);
   const [fps, setFps] = useState(24);
-  const [paper, setPaper] = useState(false);
+  // Null means "follow the site theme"; a click pins it either way.
+  //
+  // This page used to force a dark surface and a cyan accent regardless. In the
+  // `sketch` theme that is invisible: the design system remaps `bg-black` to
+  // paper, so the tiles turned light while the generators kept drawing in cyan.
+  // Nothing was broken in the generators or in `AnimatedBackground`, which take
+  // their colours from the theme when a caller does not override them — it was
+  // this page overriding them and then not following through.
+  const [paperPin, setPaperPin] = useState<boolean | null>(null);
+  const { resolvedTheme } = useTheme();
+  // `resolvedTheme` is undefined on the server and known only after mount, so
+  // reading it during the first render is a hydration mismatch — the server
+  // sends the dark markup and the client immediately disagrees. Gating on
+  // `mounted` makes the first client render identical to the server's and lets
+  // the theme take effect on the next one.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const paper = paperPin ?? (mounted && resolvedTheme === 'sketch');
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
   // Per-tile overrides on top of the global transport. A name present here wins
@@ -374,7 +392,7 @@ export default function BackgroundsLab() {
             </div>
             <button
               type="button"
-              onClick={() => setPaper((v) => !v)}
+              onClick={() => setPaperPin(!paper)}
               className={`mb-2 border-2 px-3 py-1.5 font-mono text-xs uppercase ${
                 paper
                   ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
@@ -508,7 +526,10 @@ export default function BackgroundsLab() {
                       if (el) tiles.current.set(g.name, el);
                       else tiles.current.delete(g.name);
                     }}
-                    className={`transition-shadow ${paper ? 'bg-[#f5f3ec]' : 'bg-black'} ${
+                    style={{
+                      backgroundColor: paper ? SURFACES.paper : '#000000',
+                    }}
+                    className={`transition-shadow ${
                       central.includes(g.name)
                         ? 'shadow-[inset_0_0_0_2px_var(--brutalist-cyan,#22d3ee)]'
                         : ''
