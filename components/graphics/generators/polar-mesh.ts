@@ -1,8 +1,10 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
@@ -10,7 +12,6 @@ import {
   TAU,
   valueNoise,
   wave,
-  withAlpha,
 } from './shared';
 
 /* ── polar-mesh ───────────────────────────────────────────────────────────── */
@@ -120,8 +121,7 @@ export default defineGenerator<PolarMesh>({
    * the surface is deforming while it turns.
    */
   project: (m, p, t) => {
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    const [cx, cy] = centre(p);
     // Past the corners, so the outermost ring never shows as an edge.
     const maxR = Math.hypot(p.width, p.height) * 0.44;
     const step = maxR / m.rings;
@@ -171,9 +171,15 @@ export default defineGenerator<PolarMesh>({
       let d = `M${r2(cx)} ${r2(cy)} `;
       for (let j = 0; j < m.rings; j++)
         d += `L${r2(xs[j][i])} ${r2(ys[j][i])} `;
-      out += `<path d="${d.trim()}" fill="none" stroke="${withAlpha(p.accent, 0.3)}" stroke-width="${r2(p.strokeWidth * 0.5)}"/>`;
+      // Position on the ramp is normalised radius, which is what the mesh is
+      // indexed by. A spoke crosses every ring, so it has no radius of its own
+      // and takes the middle of the ramp — the average of what it passes
+      // through, and the colour the rings it crosses average to.
+      out += `<path d="${d.trim()}" fill="none" stroke="${ink(p, 0.5, 0.3)}" stroke-width="${r2(p.strokeWidth * 0.5)}"/>`;
     }
     for (let j = 0; j < m.rings; j++) {
+      // `depth` is the ring's normalised radius, so the ramp runs from the
+      // centre out — the axis the rings are already ordered and faded along.
       const depth = m.rings === 1 ? 0 : j / (m.rings - 1);
       let d = '';
       for (let i = 0; i < m.spokes; i++) {
@@ -181,7 +187,7 @@ export default defineGenerator<PolarMesh>({
       }
       // Closed, because a ring is closed. `Z` rather than repeating the first
       // vertex — fewer numbers, and the join is mitred properly.
-      out += `<path d="${d.trim()} Z" fill="none" stroke="${withAlpha(p.accent, r2(lerp(0.75, 0.32, depth)))}" stroke-width="${r2(p.strokeWidth * lerp(0.9, 0.4, depth))}" stroke-linejoin="round"/>`;
+      out += `<path d="${d.trim()} Z" fill="none" stroke="${ink(p, depth, r2(lerp(0.75, 0.32, depth)))}" stroke-width="${r2(p.strokeWidth * lerp(0.9, 0.4, depth))}" stroke-linejoin="round"/>`;
     }
     return frame(p, out);
   },

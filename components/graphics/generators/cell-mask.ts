@@ -4,12 +4,12 @@ import {
   chance,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -105,15 +105,14 @@ export default defineGenerator<Mark[]>({
     // dozen cells and everything else barely there. An earlier pass ran these
     // at 0.9/0.3 with near-full coverage and it competed with the page rather
     // than sitting under it.
-    const bright = withAlpha(p.accent, 0.55);
-    const faint = withAlpha(p.accent, 0.16);
-    const outline = withAlpha(p.accent, 0.32);
-    // The window itself. It is what makes the clip *readable*: a fragment on
-    // its own is a shape that happens to be that size, whereas a fragment sat
-    // flush inside a visible frame is a shape that carries on past it. It also
-    // carries the composition — the grid is the constant, and the fragments are
-    // free to be sparse because the frames are already holding the rhythm.
-    const cell = withAlpha(p.accent, 0.1);
+    //
+    // Position on the ramp is where the cell sits across the frame, taken down
+    // the diagonal so neither axis is privileged. The window and the fragment
+    // inside it share it, which is the point: the grid is the constant here,
+    // and a cell whose frame and fragment drift apart in hue would read as two
+    // overlaid lattices rather than as one ramped field. The fragment's reveal
+    // fraction was the alternative and it has no counterpart on the frame.
+
     // Recomputed rather than stored: it is a pure function of `density`, which
     // `project` already has, and duplicating it into every mark would be the
     // same number written a few hundred times into the sampled structure.
@@ -121,6 +120,16 @@ export default defineGenerator<Mark[]>({
     const drift = spacing * 0.3;
     let out = '';
     for (const m of marks) {
+      const pos = (m.cx + m.cy) / (p.width + p.height);
+      const bright = ink(p, pos, 0.55);
+      const faint = ink(p, pos, 0.16);
+      const outline = ink(p, pos, 0.32);
+      // The window itself. It is what makes the clip *readable*: a fragment on
+      // its own is a shape that happens to be that size, whereas a fragment sat
+      // flush inside a visible frame is a shape that carries on past it. It also
+      // carries the composition — the grid is the constant, and the fragments are
+      // free to be sparse because the frames are already holding the rhythm.
+      const cell = ink(p, pos, 0.1);
       const k = cycles(m.size, 3);
       const phase = m.roll * TAU;
       // The mark wanders inside — and out of — its cell, so the window shows a

@@ -4,13 +4,13 @@ import {
   chance,
   cycles,
   frame,
+  ink,
   intRange,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── cube-helix ───────────────────────────────────────────────────────────── */
@@ -125,11 +125,18 @@ export default defineGenerator<Helix>({
     // it costs nothing: the cubes beyond the edge are clipped by the viewBox.
     const marginX = -p.width * 0.14;
     const orbit = p.height * 0.2;
-    const edge = withAlpha(p.accent, 0.6);
-    const thread = withAlpha(p.accent, 0.22);
-    const litTop = withAlpha(p.accent, 0.9);
-    const dimTop = withAlpha(p.accent, 0.18);
     const rot = TAU * spin * t;
+    // Position on the ramp is `u`, the station along the helix axis — which is
+    // also this generator's depth, since `u` is what sets both the size and the
+    // draw order. The thread therefore graduates end to end, and a cube's hue
+    // says how far along it sits, which is the one thing the near-edge-on view
+    // otherwise leaves to size alone.
+    //
+    // The wire is a single path spanning the whole axis, so it cannot take a
+    // position of its own: cutting it into per-segment strokes would change how
+    // many marks the frame contains. It takes the midpoint, which is where a
+    // one-colour line across a ramp belongs.
+    const thread = ink(p, 0.5, 0.22);
 
     /** Where station `u` sits on screen, at the current phase. */
     const at = (u: number, lean: number) => {
@@ -160,6 +167,9 @@ export default defineGenerator<Helix>({
 
     for (const c of cubes) {
       const q = at(c.u, c.lean);
+      const edge = ink(p, c.u, 0.6);
+      const litTop = ink(p, c.u, 0.9);
+      const dimTop = ink(p, c.u, 0.18);
       // Nearer cubes are bigger. Monotonic in `u`, which is the same quantity
       // the draw order uses, so size and occlusion can never disagree.
       const cw = lerp(0.6, 1.2, c.u) * lerp(46, 38, p.density);
