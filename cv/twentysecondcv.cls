@@ -149,7 +149,7 @@
 \newcommand{\cvjobtitle}[1]{\renewcommand{\cvjobtitle}{#1}}
 
 % Command for printing the contact information icons
-\newcommand*\icon[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=1pt, fill=mainblue,mainblue,text=white] (char) {#1};}}
+\newcommand*\icon[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=1.8pt, fill=mainblue,mainblue,text=white] (char) {\small #1};}}
 
 % Command for printing skill progress bars
 \newcommand\programming[1]{ 
@@ -185,24 +185,24 @@
 
     %------------------------------------------------
     
-        \vspace{4mm}
+    \vspace{4mm}
     {\Huge\color{pblue}\cvname}
     
-    \vspace{2mm}
+    \vspace{1.5mm}
 
     %------------------------------------------------
     
-    {\Large\color{black!80}\cvjobtitle}
+    {\large\textbf{\color{black!75}\cvjobtitle}}
 
     %------------------------------------------------
     
-    \vspace{3mm}
-    \renewcommand{\arraystretch}{2}
-    \begin{tabular}{p{1cm} @{\hskip 0.5cm}p{5cm}}
+    \vspace{2.5mm}
+    \renewcommand{\arraystretch}{1.6}
+    \begin{tabular}{p{0.8cm} @{\hskip 0.3cm}p{5.2cm}}
       \ifthenelse{\equal{\cvnumberphone}{}}{}{
       		{$
               \begin{array}{l}
-              \hspace{4mm} \Huge \textnormal{\faMobile} 
+              \hspace{1mm} \large \textnormal{\textcolor{mainblue}{\faMobile}} 
               \end{array}
               $} 
             & \cvnumberphone\\}
@@ -210,7 +210,7 @@
       \ifthenelse{\equal{\cvmail}{}}{}{
             {$
               \begin{array}{l}
-              \hspace{2.5mm} \huge \textnormal{\textcolor{yt}{\faEnvelopeO}}
+              \hspace{1mm} \small \textnormal{\textcolor{mainblue}{\faEnvelope}}
               \end{array}
               $} 
             & \href{mailto:\cvmail}{\cvmail} \\}
@@ -218,14 +218,14 @@
        \ifthenelse{\equal{\cvlinkedin}{}}{}{
             {$
               \begin{array}{l}
-              \hspace{3mm} \huge \textnormal{\textcolor{linkedin}{\faLinkedin}}
+              \hspace{1mm} \small \textnormal{\textcolor{mainblue}{\faLinkedin}}
               \end{array}
               $} & \href{https://www.linkedin.com\cvlinkedin}{\cvlinkedin} \\
             }  
         \ifthenelse{\equal{\cvgithub}{}}{}{
             {$
               \begin{array}{l}
-              \hspace{3mm} \huge \textnormal{\faGithub}
+              \hspace{1mm} \small \textnormal{\textcolor{mainblue}{\faGithub}}
               \end{array}
               $} & \href{https://www.github.com/\cvgithub}{\cvgithub} \\
             }   
@@ -236,18 +236,18 @@
     \vspace{1mm}
     \profilesection{Technologies}{1.8cm}
     
+    \vspace{1.5mm}
     {\large \textbf{Overview}}
 
 	\skils
         
     %------------------------------------------------
         
-       
-         
     \vspace{1mm}
     \profilesection{References}{2.5cm} 
         
-        \projects
+    \vspace{1.5mm}
+    \projects
       
   \end{textblock}
 }
@@ -264,18 +264,18 @@
 
 \def\@sectioncolor#1#2#3{%
 	{%
-		\color{pblue} #1#2#3%
+		\color{pblue}\textbf{#1#2#3}%
 	}%
 }
 
 
 \renewcommand{\section}[1]{
-  \par\vspace{\parskip}
+  \par\vspace{0.8\parskip}
 	{%
 		\LARGE\headingfont\color{headercolor}%
 		\@sectioncolor #1%
 	}
-  \par\vspace{\parskip}
+  \par\vspace{0.6\parskip}
 }
 
 \renewcommand{\subsection}[1]{
@@ -300,23 +300,13 @@
 	\end{tabular*}
 }
 
-% \newcommand{\twentyitem}[5]{%
-% 	#1&\parbox[t]{0.83\textwidth}{%
-% 		\textbf{#2}% 
-% 		\hfill%
-% 		{\footnotesize#3}\\%
-%         \ifblank{#4}{}{#4 \\}
-% 		#5\vspace{\parsep}%
-% 	}\\
-% }
-
 \newcommand{\twentyitem}[6]{%
-	#1&\parbox[t]{0.83\textwidth}{%
-		\textbf{#3}% 
+	{\footnotesize\color{black!70}#1}&\parbox[t]{0.83\textwidth}{%
+		\textbf{\large#3}% 
 		\hfill%
-		{\footnotesize#4}%
+		{\footnotesize\color{mainblue}#4}%
         }\\%
-    #2&\parbox[t]{0.83\textwidth}{%
+    {\footnotesize\color{black!70}#2}&\parbox[t]{0.83\textwidth}{%
 		\ifblank{#5}{}{#5 \\}
 		#6%
 	}\\
