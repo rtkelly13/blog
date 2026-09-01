@@ -38,6 +38,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { GENERATOR_LIST } from '../components/graphics/registry';
 import type { GraphicParams } from '../components/graphics/types';
+import { textSafeOpacity } from '../lib/graphicsLegibility';
 
 /**
  * Elements a generator may emit at density 1.
@@ -120,9 +121,16 @@ describe('rendering budget', () => {
       '',
       `Budget: **${ELEMENT_BUDGET} elements**, **${BYTE_BUDGET / 1000}KB** raw SVG.`,
       '',
-      '| Generator | Elements | KB | project() ms |',
-      '| --- | ---: | ---: | ---: |',
-      ...rows.map((r) => `| \`${r.name}\` | ${r.els} | ${r.kb} | ${r.ms} |`),
+      'The last column is the highest global `opacity` at which the generator stays',
+      'safe to put text over — see `docs/graphics-legibility.md`. At full weight',
+      'these are artwork; as backdrops they are used dimmed, and this says how far.',
+      '',
+      '| Generator | Elements | KB | project() ms | text-safe opacity |',
+      '| --- | ---: | ---: | ---: | ---: |',
+      ...rows.map(
+        (r) =>
+          `| \`${r.name}\` | ${r.els} | ${r.kb} | ${r.ms} | ${textSafeOpacity(r.name).toFixed(2)} |`,
+      ),
       '',
       `Median elements: **${[...rows].sort((a, b) => a.els - b.els)[Math.floor(rows.length / 2)].els}**. ` +
         `Total \`project()\` if every generator drew at once: **${rows.reduce((a, b) => a + b.ms, 0).toFixed(0)}ms**.`,
