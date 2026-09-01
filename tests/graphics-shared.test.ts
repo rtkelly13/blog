@@ -40,6 +40,9 @@ const P = (over: Partial<GraphicParams> = {}): GraphicParams => ({
   strokeWidth: 2,
   occlusion: '#0a0a1a',
   disorder: 0,
+  contrast: 1,
+  originX: 0.5,
+  originY: 0.5,
   ...over,
 });
 

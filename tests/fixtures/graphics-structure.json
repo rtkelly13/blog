@@ -1,4 +1,14 @@
 {
+  "brockmann-arcs": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
+  },
   "broken-ring": {
     "elements": {
       "g": 1,
@@ -101,6 +111,16 @@
     "colours": 3,
     "bounds": [0, 1, 1272, 716]
   },
+  "iso-blocks": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
+  },
   "iso-cubes": {
     "elements": {
       "g": 1,
@@ -122,6 +142,16 @@
     "colours": 4,
     "bounds": [-129, -50, 1376, 773]
   },
+  "iso-terrain": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
+  },
   "kaleidoscope": {
     "elements": {
       "g": 1,
@@ -131,6 +161,16 @@
     "viewBox": "0 0 1280 720",
     "colours": 19,
     "bounds": [0, 0, 0, 0]
+  },
+  "line-circles": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
   },
   "lissajous": {
     "elements": {
@@ -183,6 +223,16 @@
     "colours": 15,
     "bounds": [-16, -275, 1271, 1013]
   },
+  "radial-dashes": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
+  },
   "radial-spokes": {
     "elements": {
       "g": 1,
@@ -193,6 +243,16 @@
     "viewBox": "0 0 1280 720",
     "colours": 4,
     "bounds": [640, 360, 640, 360]
+  },
+  "resonance": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
   },
   "ribbon-grid": {
     "elements": {
@@ -213,6 +273,16 @@
     "viewBox": "0 0 1280 720",
     "colours": 10,
     "bounds": [0, 217, 1280, 720]
+  },
+  "ripple": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
   },
   "rose-curve": {
     "elements": {
@@ -243,6 +313,16 @@
     "viewBox": "0 0 1280 720",
     "colours": 3,
     "bounds": [0, 4, 1280, 715]
+  },
+  "spiral-dots": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
   },
   "spiral-mesh": {
     "elements": {
@@ -304,6 +384,26 @@
     "viewBox": "0 0 1280 720",
     "colours": 3,
     "bounds": [0, 0, 1411, 1403]
+  },
+  "truchet-mirror": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
+  },
+  "truchet-single": {
+    "elements": {
+      "g": 1,
+      "circle": 91
+    },
+    "marks": 92,
+    "viewBox": "0 0 1280 720",
+    "colours": 1,
+    "bounds": [50, 50, 1250, 650]
   },
   "void-field": {
     "elements": {
