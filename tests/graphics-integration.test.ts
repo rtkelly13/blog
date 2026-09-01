@@ -112,6 +112,66 @@ describe('params → svg → data uri', () => {
   );
 });
 
+describe('the colour options are additive', () => {
+  // The constraint the ramp was added under: a single accent must keep working
+  // exactly as it did, so every one of these is opt-in and none of them can
+  // quietly change an existing consumer. Asserted per generator rather than
+  // trusted, because `ink()` is called from 42 files and one of them getting it
+  // wrong would be invisible until someone noticed a colour had shifted.
+
+  it.each(NAMES)('%s: omitting the new options renders the classic output', (name) => {
+    const classic = renderGraphic(name, { seed: 4 });
+    expect(
+      renderGraphic(name, {
+        seed: 4,
+        accents: undefined,
+        contrast: 1,
+        originX: 0.5,
+        originY: 0.5,
+      }),
+    ).toBe(classic);
+  });
+
+  it.each(NAMES)('%s: a one-colour ramp equals that colour as the accent', (name) => {
+    // A ramp of one is not a gradient, and must degrade to the plain case
+    // rather than to some interpolated approximation of it.
+    expect(renderGraphic(name, { seed: 4, accents: ['#22d3ee'] })).toBe(
+      renderGraphic(name, { seed: 4, accent: '#22d3ee' }),
+    );
+  });
+
+  it.each(NAMES)('%s: contrast of 1 is a no-op', (name) => {
+    expect(renderGraphic(name, { seed: 4, contrast: 1 })).toBe(
+      renderGraphic(name, { seed: 4 }),
+    );
+  });
+
+  it.each(NAMES)('%s: a two-colour ramp actually changes something', (name) => {
+    // Guards the guard: every assertion above is satisfied by a generator that
+    // ignores `accents` entirely, so without this "additive" could quietly mean
+    // "inert".
+    expect(
+      renderGraphic(name, { seed: 4, accents: ['#22d3ee', '#ec4899'] }),
+    ).not.toBe(renderGraphic(name, { seed: 4 }));
+  });
+
+  it.each(NAMES)('%s: contrast away from 1 actually changes something', (name) => {
+    expect(renderGraphic(name, { seed: 4, contrast: 0.4 })).not.toBe(
+      renderGraphic(name, { seed: 4 }),
+    );
+  });
+
+  it('a moved origin shifts every centred generator', () => {
+    // And is inert for the rest, which is why this is not `it.each` over all of
+    // them — a lattice has no centre to move.
+    for (const g of GENERATOR_LIST.filter((x) => x.group === 'radial')) {
+      expect(renderGraphic(g.name, { seed: 4, originX: 0.25 })).not.toBe(
+        renderGraphic(g.name, { seed: 4 }),
+      );
+    }
+  });
+});
+
 describe('the whole list', () => {
   it('renders every generator at both density extremes without throwing', () => {
     for (const g of GENERATOR_LIST) {

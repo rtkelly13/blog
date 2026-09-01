@@ -61,6 +61,11 @@ export default function BackgroundsLab() {
   const [speed, setSpeed] = useState(1);
   const [contrast, setContrast] = useState(1);
   const [ramp, setRamp] = useState(0);
+  const [origin, setOrigin] = useState<[number, number]>([0.5, 0.5]);
+  // Side-by-side against the classic single-accent render. The new options are
+  // all additive — a test pins that omitting them reproduces the old output
+  // byte for byte — so the honest way to show what they add is to show both.
+  const [compare, setCompare] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
   // Per-tile overrides on top of the global transport. A name present here wins
@@ -135,6 +140,8 @@ export default function BackgroundsLab() {
     speed,
     contrast,
     accents: RAMPS[ramp].colours,
+    originX: origin[0],
+    originY: origin[1],
     t: scrub,
     // 16:9, because that is what these are *for* — talk slides via
     // SpectacleDeck and full-bleed page headers. Previewing them square was
@@ -142,6 +149,15 @@ export default function BackgroundsLab() {
     // their horizontal detail into a narrower frame and read as repetitive.
     width: 1280,
     height: 720,
+  };
+
+  /** The classic render: accent only, no ramp, no contrast, centred. */
+  const baseline = {
+    ...shared,
+    accents: undefined,
+    contrast: 1,
+    originX: 0.5,
+    originY: 0.5,
   };
 
   return (
@@ -315,6 +331,52 @@ export default function BackgroundsLab() {
             </div>
           </div>
 
+          <div>
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Origin · {origin[0].toFixed(2)}, {origin[1].toFixed(2)}
+            </div>
+            <div className="flex gap-2">
+              {(
+                [
+                  ['centre', [0.5, 0.5]],
+                  ['left', [0.22, 0.5]],
+                  ['right', [0.78, 0.5]],
+                  ['low', [0.5, 0.8]],
+                ] as const
+              ).map(([label, o]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setOrigin([o[0], o[1]])}
+                  className={`border-2 px-2 py-1 font-mono text-[10px] uppercase ${
+                    origin[0] === o[0] && origin[1] === o[1]
+                      ? 'border-brutalist-cyan text-brutalist-cyan'
+                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-400'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Compare
+            </div>
+            <button
+              type="button"
+              onClick={() => setCompare((v) => !v)}
+              className={`border-2 px-3 py-1.5 font-mono text-xs uppercase ${
+                compare
+                  ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
+                  : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
+              }`}
+            >
+              {compare ? 'split on' : 'split off'}
+            </button>
+          </div>
+
           <label className="min-w-[150px]">
             <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
               Contrast · {contrast.toFixed(2)}
@@ -415,13 +477,33 @@ export default function BackgroundsLab() {
                         : ''
                     }`}
                   >
-                    <div className="aspect-video overflow-hidden">
-                      <AnimatedBackground
-                        generator={g.name}
-                        {...shared}
-                        playing={isPlaying(g.name)}
-                        className="h-full w-full"
-                      />
+                    <div className="flex aspect-video overflow-hidden">
+                      {compare && (
+                        <div className="relative w-1/2 border-r-2 border-zinc-700">
+                          <AnimatedBackground
+                            generator={g.name}
+                            {...baseline}
+                            playing={isPlaying(g.name)}
+                            className="h-full w-full"
+                          />
+                          <span className="absolute bottom-1 left-1 bg-black/70 px-1 font-mono text-[9px] uppercase text-zinc-500">
+                            accent only
+                          </span>
+                        </div>
+                      )}
+                      <div className={compare ? 'relative w-1/2' : 'w-full'}>
+                        <AnimatedBackground
+                          generator={g.name}
+                          {...shared}
+                          playing={isPlaying(g.name)}
+                          className="h-full w-full"
+                        />
+                        {compare && (
+                          <span className="absolute bottom-1 left-1 bg-black/70 px-1 font-mono text-[9px] uppercase text-brutalist-cyan">
+                            with options
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <figcaption className="border-t-2 border-zinc-800 p-4">
                       <div className="flex items-baseline justify-between gap-3">
