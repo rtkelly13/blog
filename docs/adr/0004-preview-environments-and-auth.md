@@ -74,3 +74,43 @@ one of the options above is adopted.
 - If per-branch previews are wired up before an auth story exists, admin flows
   will appear broken on previews even though the backend is healthy — document
   the bypass in the same change to avoid that trap.
+
+## Addendum (2026-09-01): most branches do not need a Convex deploy at all
+
+The slot mechanics above (`scripts/preview-slot.sh`, `convex-deploy-preview.yml`)
+route **every** preview through `convex-preview`, the schema train, because every
+slot shares one preview backend. That is the right default for schema work and
+pure overhead for everything else — the blog is mostly MDX, CSS, and static
+pages, so the common branch touches no `convex/` file and gains nothing from a
+merge onto the train or from a backend deploy.
+
+**Rule: a preview branch needs the schema train only if it changes `convex/`.**
+Concretely, take the raw head — no merge, no Convex deploy — when both hold:
+
+1. `git diff --name-only origin/main...<ref> -- convex/` is empty (the branch
+   does not touch the backend), **and**
+2. `origin/convex-preview` is an ancestor of `origin/main` (the train is idle and
+   carries nobody else's unmerged schema).
+
+If (1) fails the branch owns schema work: merge onto `convex-preview`, push the
+train, let `convex-deploy-preview.yml` deploy, and expect the slot to be the
+merge. If (2) fails, someone else's schema is live on the shared backend, so even
+a frontend-only branch must be merged onto the train to stay compatible with the
+functions actually deployed. `preview-slot.sh` evaluates both and says which path
+it took; `--train` forces the merge path when the check is wrong.
+
+Why this is worth writing down:
+
+- **Cost.** The Convex deploy is the slow, stateful, secret-requiring half of a
+  preview. Skipping it for a CSS change removes the whole `CONVEX_DEPLOY_KEY_PREVIEW`
+  / schema-compatibility surface from the majority of previews.
+- **Blast radius.** Pushing the train redeploys the backend shared by all three
+  slots. A branch with no backend changes should never be able to disturb a
+  slot it does not own.
+- **It makes the cheap path correct.** The bare
+  `git push -f origin HEAD:slot/N` aliases (documented as "wrong the moment
+  `convex-preview` diverges") are in fact exactly right under conditions 1 and 2
+  — which is the usual case.
+
+This addendum changes nothing about the auth decision above: previews still have
+no admin sign-in, so slots verify public/audience surfaces and static pages only.

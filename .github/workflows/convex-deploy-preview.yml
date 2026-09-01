@@ -4,8 +4,12 @@ name: Deploy Convex (preview)
 # `convex-preview` branch moves. Every Vercel preview slot shares this one
 # Convex backend, so `convex-preview` is the schema train: it always exists,
 # defaults to identical to main, and is the only branch that deploys here.
-# Slot branches (`slot/1..3`) are `convex-preview` plus a PR's commits, which
-# keeps their frontends compatible with the deployed preview schema.
+# Slot branches (`slot/1..3`) are `convex-preview` plus a PR's commits whenever
+# the PR touches `convex/` (or the train is ahead of main), which keeps their
+# frontends compatible with the deployed preview schema. A branch that changes
+# no `convex/` file while the train is idle skips both the merge and this
+# workflow entirely and is pushed to its slot raw — see
+# `docs/adr/0004-preview-environments-and-auth.md` and `scripts/preview-slot.sh`.
 #
 # Requires the `CONVEX_DEPLOY_KEY_PREVIEW` repo secret — a *Preview* deploy key
 # from the Convex dashboard (Project Settings → Deploy Keys). Absent the
