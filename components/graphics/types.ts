@@ -23,6 +23,46 @@ export interface GraphicParams {
   t: number;
   /** Foreground "ink" colour (the themeable accent). */
   accent: string;
+  /**
+   * An ordered colour ramp, used *instead of* `accent` when it has two or more
+   * entries. One entry, or none, behaves exactly as `accent` alone does.
+   *
+   * Every generator used to derive its whole range from one colour and an
+   * alpha, which conflates two different things: "further away" and "more
+   * transparent". They are only the same on a dark backdrop, and even there it
+   * means the entire set is monochrome — a graphic can be quiet or loud but
+   * never warm at one end and cool at the other.
+   *
+   * A ramp separates them. `ink()` takes a *position* alongside the alpha, and
+   * the position is the part that carries meaning: depth for `ridgeline`,
+   * radius for the radial family, height for `iso-cubes`, field strength for
+   * `flow-field`. Handing it an arbitrary number would produce a gradient that
+   * is merely decorative; handing it the axis the generator is already about
+   * produces one that reads.
+   */
+  accents?: string[];
+  /**
+   * Spread of the internal weight range, 1 by default.
+   *
+   * Distinct from `opacity`, and the distinction is the point: `opacity` scales
+   * everything by the same factor, so a graphic dimmed to 0.2 still has its
+   * brightest marks four times its faintest. `contrast` compresses the range
+   * itself — below 1 the loud and quiet marks converge, which is what a
+   * backdrop behind body text actually wants; above 1 it exaggerates, for hero
+   * art. Applied about a fixed midpoint so its effect is predictable across
+   * generators that chose different ranges.
+   */
+  contrast: number;
+  /**
+   * Where a centred generator puts its centre, in normalised frame coordinates.
+   * `[0.5, 0.5]` by default.
+   *
+   * The radial family exists so a background can sit *behind a title* rather
+   * than merely under it — which only works if the centre can be moved to
+   * wherever the title is not. Ignored by generators with no centre.
+   */
+  originX: number;
+  originY: number;
   /** Backdrop fill, or `'transparent'` to let a parent background show through. */
   background: string;
   /** How busy the graphic is, 0..1. Meaning is per-generator but monotonic. */
@@ -210,4 +250,7 @@ export const BASE_PARAMS: GraphicParams = {
   strokeWidth: 2,
   occlusion: '#0a0a1a',
   disorder: 0,
+  contrast: 1,
+  originX: 0.5,
+  originY: 0.5,
 };
