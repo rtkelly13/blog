@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>graphics rendering benchmark</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #0b1120;
+      }
+      /* A realistic gallery tile, not a full-bleed hero: the size the cost
+         actually shows up at. */
+      #host {
+        width: 600px;
+        height: 338px;
+        line-height: 0;
+        overflow: hidden;
+      }
+      #stage {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .tile {
+        width: 300px;
+        height: 169px;
+        line-height: 0;
+        overflow: hidden;
+      }
+      #host svg,
+      #host canvas,
+      .tile svg,
+      .tile canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="host"></div>
+    <div id="stage"></div>
+    <script src="./bundle.js"></script>
+  </body>
+</html>
