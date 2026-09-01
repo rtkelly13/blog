@@ -131,6 +131,9 @@ export default defineGenerator<Terrain>({
     'Cubes on a noise height field — an isometric landscape rather than a regular stack.',
   group: 'isometric',
   sketch: true,
+  // Filled cells cover most of the frame, and on paper that is a grey wash
+  // rather than the recessive tone it reads as on black.
+  sketchWeight: 0.5,
   speed: 0.8,
   defaults: { density: 0.5, strokeWidth: 1.5 },
 

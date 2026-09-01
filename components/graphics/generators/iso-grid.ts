@@ -30,6 +30,9 @@ export default defineGenerator<Cell[]>({
   description: 'Isometric lattice of diamonds; some cells fill with accent.',
   group: 'isometric',
   sketch: true,
+  // Filled cells cover most of the frame, and on paper that is a grey wash
+  // rather than the recessive tone it reads as on black.
+  sketchWeight: 0.5,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

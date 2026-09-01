@@ -28,6 +28,9 @@ export default defineGenerator<Tiled>({
     'Interlocking triangles, the two orientations driven in antiphase.',
   group: 'lattice',
   sketch: true,
+  // Filled cells cover most of the frame, and on paper that is a grey wash
+  // rather than the recessive tone it reads as on black.
+  sketchWeight: 0.5,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
