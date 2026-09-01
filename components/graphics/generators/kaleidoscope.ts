@@ -1,14 +1,15 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   chance,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── kaleidoscope ─────────────────────────────────────────────────────────── */
@@ -146,8 +147,7 @@ export default defineGenerator<Mandala>({
 
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    const [cx, cy] = centre(p);
     // The frame's own circumradius — every fan is cut to this, so the mandala
     // covers the corners without any coordinate escaping the diagonal.
     const reach = Math.hypot(p.width, p.height) / 2;
@@ -215,8 +215,14 @@ export default defineGenerator<Mandala>({
   },
 
   project: (m, p, t) => {
-    const faint = withAlpha(p.accent, 0.3);
-    const bright = withAlpha(p.accent, 0.7);
+    // Position on the ramp is radius over the frame's circumradius — the axis
+    // the whole figure is built on, since the lattice is defined by a hexagon
+    // of one radius and the fans by tangent circles of growing ones. The
+    // interior therefore takes one end of the ramp and the fans reaching for
+    // the corners the other, which is the same distinction the geometry
+    // already makes; the colours could not be hoisted out of the loops any
+    // more, because that distinction is per-mark.
+    const reach = Math.hypot(p.width, p.height) / 2;
     const latticeRot = m.phase + t * TAU * LATTICE_SPIN;
     const fanRot = m.phase + t * TAU * FAN_SPIN;
     let out = '';
@@ -226,7 +232,10 @@ export default defineGenerator<Mandala>({
       const y0 = m.cy + Math.sin(c.a0 + latticeRot) * c.r0;
       const x1 = m.cx + Math.cos(c.a1 + latticeRot) * c.r1;
       const y1 = m.cy + Math.sin(c.a1 + latticeRot) * c.r1;
-      out += `<line x1="${r2(x0)}" y1="${r2(y0)}" x2="${r2(x1)}" y2="${r2(y1)}" stroke="${c.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (c.hot ? 1.5 : 0.9))}"/>`;
+      // A chord's own mid-radius: the innermost chords pass close to the
+      // centre, the outermost are the hexagon's edges.
+      const pos = (c.r0 + c.r1) / 2 / reach;
+      out += `<line x1="${r2(x0)}" y1="${r2(y0)}" x2="${r2(x1)}" y2="${r2(y1)}" stroke="${c.hot ? ink(p, pos, 0.7) : ink(p, pos, 0.3)}" stroke-width="${r2(p.strokeWidth * (c.hot ? 1.5 : 0.9))}"/>`;
     }
 
     for (const f of m.fans) {
@@ -242,7 +251,7 @@ export default defineGenerator<Mandala>({
       const alpha = (f.hot ? 0.34 + 0.3 * glow : 0.1 + 0.3 * glow) * f.fade;
       const px = m.cx + nx * f.d;
       const py = m.cy + ny * f.d;
-      out += `<line x1="${r2(px - ny * f.half)}" y1="${r2(py + nx * f.half)}" x2="${r2(px + ny * f.half)}" y2="${r2(py - nx * f.half)}" stroke="${withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(p.strokeWidth * (f.hot ? 1.4 : 0.7))}"/>`;
+      out += `<line x1="${r2(px - ny * f.half)}" y1="${r2(py + nx * f.half)}" x2="${r2(px + ny * f.half)}" y2="${r2(py - nx * f.half)}" stroke="${ink(p, f.d / reach, r2(alpha))}" stroke-width="${r2(p.strokeWidth * (f.hot ? 1.4 : 0.7))}"/>`;
     }
 
     return frame(p, out);

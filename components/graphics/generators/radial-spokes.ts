@@ -1,14 +1,15 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   chance,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -47,6 +48,19 @@ interface Wheel {
 
 export const SPOKE_ARC = 0.2;
 
+/**
+ * The band of reach a spoke tip lands in, as a fraction of the wheel's reach.
+ *
+ * Named rather than inlined because the same two numbers do two jobs: they are
+ * the range the tips are drawn from, and they are the range the ramp position
+ * is normalised against. Sampling `[0.55, 1]` and then handing `outer / reach`
+ * straight to `ink()` would confine every spoke to the top half of the ramp and
+ * throw away the colours at the near end; normalising against the band the
+ * spokes actually occupy spends the whole ramp on the variation that exists.
+ */
+export const SPOKE_OUTER_MIN = 0.55;
+export const SPOKE_OUTER_MAX = 1;
+
 export default defineGenerator<Wheel>({
   name: 'radial-spokes',
   label: 'Radial Spokes',
@@ -61,8 +75,10 @@ export default defineGenerator<Wheel>({
   defaults: { density: 0.5, strokeWidth: 1.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    // Not the frame centre: `centre()` honours `originX`/`originY`, which is
+    // what lets this sit behind a title rather than on top of one. The default
+    // origin is (0.5, 0.5), so the sampled wheel is unmoved.
+    const [cx, cy] = centre(p);
     // Reach past the corner, so the wheel bleeds off every edge rather than
     // floating as a disc with visible sides.
     const reach = Math.hypot(p.width, p.height) / 2;
@@ -77,7 +93,7 @@ export default defineGenerator<Wheel>({
       spokes.push({
         angle,
         inner: reach * range(rng, 0.08, 0.34),
-        outer: reach * range(rng, 0.55, 1),
+        outer: reach * range(rng, SPOKE_OUTER_MIN, SPOKE_OUTER_MAX),
         hot,
       });
     }
@@ -89,9 +105,14 @@ export default defineGenerator<Wheel>({
     return { spokes, rings, cx, cy, reach };
   },
   project: (w, p, t) => {
-    const faint = withAlpha(p.accent, 0.3);
-    const bright = withAlpha(p.accent, 0.95);
-    const ringColor = withAlpha(p.accent, 0.4);
+    // Position on the ramp is **normalised radius**, which is the axis a radial
+    // form is already about: the hub takes one end of the ramp and the rim the
+    // other, so distance from the centre is carried by hue as well as by
+    // weight. Anything else — the spoke index, say — would produce a pinwheel
+    // of colour that fights the geometry instead of describing it.
+    //
+    // With a single accent `ink(p, …, a)` is `withAlpha(p.accent, a)` byte for
+    // byte, which is why this could be adopted under the goldens.
     // A shear, not a spin.
     //
     // This turned the whole wheel once per loop, and it was much the fastest
@@ -116,11 +137,21 @@ export default defineGenerator<Wheel>({
       const y1 = w.cy + Math.sin(a) * s.inner;
       const x2 = w.cx + Math.cos(a) * s.outer * pulse;
       const y2 = w.cy + Math.sin(a) * s.outer * pulse;
-      out += `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${s.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (s.hot ? 2.2 : 1))}"/>`;
+      // Where this spoke's tip sits within the band tips are drawn from.
+      const pos =
+        (s.outer / w.reach - SPOKE_OUTER_MIN) /
+        (SPOKE_OUTER_MAX - SPOKE_OUTER_MIN);
+      const stroke = s.hot ? ink(p, pos, 0.95) : ink(p, pos, 0.3);
+      out += `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${stroke}" stroke-width="${r2(p.strokeWidth * (s.hot ? 2.2 : 1))}"/>`;
     }
     for (const ring of w.rings) {
       const r = ring.r * (1 + 0.06 * Math.sin(t * TAU * 2 + ring.r * 0.02));
-      out += `<circle cx="${r2(w.cx)}" cy="${r2(w.cy)}" r="${r2(r)}" fill="none" stroke="${ring.hot ? bright : ringColor}" stroke-width="${p.strokeWidth}"/>`;
+      // A ring is a single radius, so its own radius *is* its ramp position —
+      // the sampled one, not the pulsing one, since a ring changing hue as it
+      // breathes would read as a flicker rather than as depth.
+      const pos = ring.r / w.reach;
+      const stroke = ring.hot ? ink(p, pos, 0.95) : ink(p, pos, 0.4);
+      out += `<circle cx="${r2(w.cx)}" cy="${r2(w.cy)}" r="${r2(r)}" fill="none" stroke="${stroke}" stroke-width="${p.strokeWidth}"/>`;
     }
     return frame(p, out);
   },

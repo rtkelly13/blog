@@ -4,12 +4,12 @@ import {
   chance,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── contour ──────────────────────────────────────────────────────────────── */
@@ -56,10 +56,14 @@ export default defineGenerator<Band[]>({
   project: (bands, p, t) => {
     const step = p.width / 48;
     let out = '';
-    for (const b of bands) {
-      const stroke = b.hot
-        ? withAlpha(p.accent, 0.9)
-        : withAlpha(p.accent, 0.32);
+    for (let i = 0; i < bands.length; i++) {
+      const b = bands[i];
+      // The stack is already a depth ordering — band 0 at the top of the frame
+      // through to the last at the bottom — so its index through the stack is
+      // the axis this generator is about, and the ramp reads as the terrain
+      // receding rather than as a recolouring.
+      const depth = bands.length === 1 ? 1 : i / (bands.length - 1);
+      const stroke = ink(p, depth, b.hot ? 0.9 : 0.32);
       // A travelling wave rather than a wobble: the phase advances by whole
       // cycles over the loop, so the crests move across the frame and land back
       // where they started.

@@ -1,14 +1,15 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -108,8 +109,7 @@ export default defineGenerator<SpiralMesh>({
    * relax with it.
    */
   project: (m, p, t) => {
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    const [cx, cy] = centre(p);
     // Past the corners: the outermost ring should leave the frame rather than
     // sit inside it as a visible boundary.
     const maxR = Math.hypot(p.width, p.height) * 0.46;
@@ -141,12 +141,16 @@ export default defineGenerator<SpiralMesh>({
     // Cross-links first, arms over them — the arms are the structure the eye
     // should follow, and the rings are what tells it there is a surface there.
     for (let k = 0; k < m.steps; k++) {
+      // Position on the ramp is normalised radius: a cross-link ring is the
+      // set of vertices at one step index, and step index *is* radius here (up
+      // to `RADIAL_POWER`). The rings already fade and thin outward, so hue
+      // joins the cues that are all saying the same thing.
       const depth = m.steps === 1 ? 0 : k / (m.steps - 1);
       let d = '';
       for (let a = 0; a < m.arms; a++) {
         d += `${a === 0 ? 'M' : 'L'}${r2(xs[a][k])} ${r2(ys[a][k])} `;
       }
-      out += `<path d="${d.trim()} Z" fill="none" stroke="${withAlpha(p.accent, r2(lerp(0.5, 0.12, depth)))}" stroke-width="${r2(p.strokeWidth * lerp(0.55, 0.3, depth))}" stroke-linejoin="round"/>`;
+      out += `<path d="${d.trim()} Z" fill="none" stroke="${ink(p, depth, r2(lerp(0.5, 0.12, depth)))}" stroke-width="${r2(p.strokeWidth * lerp(0.55, 0.3, depth))}" stroke-linejoin="round"/>`;
     }
     for (let a = 0; a < m.arms; a++) {
       // From the centre, so the arms converge rather than starting at a ragged
@@ -154,7 +158,9 @@ export default defineGenerator<SpiralMesh>({
       let d = `M${r2(cx)} ${r2(cy)} `;
       for (let k = 0; k < m.steps; k++)
         d += `L${r2(xs[a][k])} ${r2(ys[a][k])} `;
-      out += `<path d="${d.trim()}" fill="none" stroke="${withAlpha(p.accent, 0.55)}" stroke-width="${r2(p.strokeWidth * 0.6)}" stroke-linejoin="round"/>`;
+      // An arm runs the whole radius, so like `polar-mesh`'s spokes it has no
+      // radius of its own and takes the middle of the ramp.
+      out += `<path d="${d.trim()}" fill="none" stroke="${ink(p, 0.5, 0.55)}" stroke-width="${r2(p.strokeWidth * 0.6)}" stroke-linejoin="round"/>`;
     }
     return frame(p, out);
   },

@@ -1,15 +1,6 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
-import {
-  chance,
-  frame,
-  lerp,
-  mulberry32,
-  r2,
-  range,
-  TAU,
-  withAlpha,
-} from './shared';
+import { chance, frame, ink, lerp, mulberry32, r2, range, TAU } from './shared';
 
 /* ── flow-lines ───────────────────────────────────────────────────────────── */
 
@@ -191,7 +182,14 @@ export default defineGenerator<Streamline[]>({
           p.strokeWidth * (line.hot ? 1.7 : 0.9) * (0.45 + 0.55 * extent);
         const alpha =
           (line.hot ? 0.4 : 0.18) + extent * (line.hot ? 0.55 : 0.4);
-        out += `<path d="${d}" fill="none" stroke="${withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(w)}" stroke-linecap="round"/>`;
+        // Position on the ramp is how far along the streamline this section
+        // sits — the axis the sections are already cut on, and the one the
+        // extent wave already travels down. Each line is therefore its own
+        // gradient from head to tail, so the ramp reads as direction of flow
+        // rather than as a wash over the frame; neighbouring lines running the
+        // same way agree, and one doubling back does not.
+        const pos = sIdx / (LINE_SECTIONS - 1);
+        out += `<path d="${d}" fill="none" stroke="${ink(p, pos, r2(alpha))}" stroke-width="${r2(w)}" stroke-linecap="round"/>`;
       }
     }
     return frame(p, out);

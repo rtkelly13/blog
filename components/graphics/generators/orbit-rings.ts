@@ -1,16 +1,17 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   chance,
   cycles,
   frame,
+  ink,
   intRange,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -92,8 +93,12 @@ export default defineGenerator<Orbit[]>({
     return out;
   },
   project: (rings, p, t) => {
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    // The centre is a parameter, not `width / 2`. The radial family exists so a
+    // background can sit *behind* a title rather than merely under it, and that
+    // only works if the rings can be pushed off to one side of the frame while
+    // the words take the other. At the default origin this returns the frame
+    // centre exactly, which is why adopting it moved no golden.
+    const [cx, cy] = centre(p);
     const reach = Math.min(p.width, p.height) * 0.46;
     const bandWidth = reach / Math.max(1, rings.length);
     let out = '';
@@ -102,7 +107,18 @@ export default defineGenerator<Orbit[]>({
       // A faint guide per ring. Without it the concentric structure never
       // reads: the points alone are just a scatter that happens to be round,
       // and the whole idea is that they are gathering *on* something.
-      out += `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(base)}" fill="none" stroke="${withAlpha(p.accent, 0.12)}" stroke-width="${r2(p.strokeWidth * 0.6)}"/>`;
+      //
+      // Position on the ramp is `ring.r` — the ring's radius as a fraction of
+      // reach, which is the axis this generator is already about. Every other
+      // property here (bead size, spin direction, focus) is per-ring noise;
+      // radius is the one thing that is *ordered*, so it is the only choice
+      // that produces a gradient the eye reads as structure rather than as
+      // decoration: the innermost ring takes one end of the ramp and the
+      // outermost the other, and the concentric form gains a second cue on top
+      // of geometry. With a single accent `ink` is byte-identical to the old
+      // `withAlpha(p.accent, …)` regardless of position, which is what let this
+      // be adopted under the goldens.
+      out += `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(base)}" fill="none" stroke="${ink(p, ring.r, 0.12)}" stroke-width="${r2(p.strokeWidth * 0.6)}"/>`;
       // 0 at rest, 1 fully gathered. `wobble` keeps it zero at both ends of the
       // loop, so the ring starts and finishes evenly spaced.
       const gather = 0.42 * wobble(t, ring.beat, ring.phase);
@@ -131,7 +147,12 @@ export default defineGenerator<Orbit[]>({
             wobble(t, ring.beat, pt.angle * 3 + ring.phase);
         const x = cx + Math.cos(a) * r;
         const y = cy + Math.sin(a) * r;
-        out += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(pt.rad)}" fill="${withAlpha(p.accent, pt.hot ? 0.98 : 0.68)}"/>`;
+        // The bead takes its ring's ramp position rather than its own wandered
+        // radius, deliberately: the wander is a fifth of one band's width, so
+        // sampling the ramp at it would only add a flicker of hue that has
+        // nothing to do with which ring a bead belongs to. The ring is the
+        // structure; the wander is texture on it.
+        out += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(pt.rad)}" fill="${ink(p, ring.r, pt.hot ? 0.98 : 0.68)}"/>`;
       }
     }
     return frame(p, out);

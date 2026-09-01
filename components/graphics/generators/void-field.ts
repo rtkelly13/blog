@@ -3,12 +3,12 @@ import type { Rng } from './shared';
 import {
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   smooth,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -164,7 +164,11 @@ export default defineGenerator<Field>({
       const alpha = r2(
         BASE_TONES[b.tone] + rim * 0.5 * (1 - BASE_TONES[b.tone]),
       );
-      out += `<rect x="${r2(b.x)}" y="${r2(by - h / 2)}" width="${r2(b.w)}" height="${r2(h)}" fill="${withAlpha(p.accent, alpha)}"/>`;
+      // Position on the ramp is `rim` — the distance to the void the falloff
+      // already computes. The hole is what this generator is about, so the
+      // ramp's hot end lands on the bars ringing it and cools outward into the
+      // undisturbed field.
+      out += `<rect x="${r2(b.x)}" y="${r2(by - h / 2)}" width="${r2(b.w)}" height="${r2(h)}" fill="${ink(p, rim, alpha)}"/>`;
     }
     return frame(p, out);
   },

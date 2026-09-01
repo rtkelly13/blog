@@ -1,15 +1,6 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
-import {
-  cycles,
-  frame,
-  lerp,
-  mulberry32,
-  r2,
-  range,
-  TAU,
-  withAlpha,
-} from './shared';
+import { cycles, frame, ink, lerp, mulberry32, r2, range, TAU } from './shared';
 
 /* ── swept-polygons ───────────────────────────────────────────────────────── */
 
@@ -120,8 +111,12 @@ export default defineGenerator<Ring[]>({
       };
     };
 
-    const sweep = withAlpha(p.accent, 0.18);
-    const edge = withAlpha(p.accent, 0.55);
+    // Position on the ramp is the ring index — the only ordering this figure
+    // has, and the one the nesting is built from. The rings then graduate from
+    // the innermost outward, and a band of chords takes the half-step between
+    // the two rings it spans, so a band sits in the ramp exactly where it sits
+    // in the geometry.
+    const span = Math.max(1, rings.length - 1);
     let out = '';
 
     // Rotations first, so a band can read both of its rings' current angles.
@@ -135,13 +130,14 @@ export default defineGenerator<Ring[]>({
         const a = spins[i] + (v * TAU) / SIDES;
         pts += `${r2(cx + Math.cos(a) * r)},${r2(cy + Math.sin(a) * r)} `;
       }
-      out += `<polygon points="${pts.trim()}" fill="none" stroke="${edge}" stroke-width="${r2(p.strokeWidth)}"/>`;
+      out += `<polygon points="${pts.trim()}" fill="none" stroke="${ink(p, i / span, 0.55)}" stroke-width="${r2(p.strokeWidth)}"/>`;
 
       // The band between this ring and the next. The last ring has no outer
       // partner, so it emits no chords — a fixed asymmetry in the structure,
       // not a per-frame one, so the count stays constant across the loop.
       if (i + 1 >= rings.length) continue;
       const outer = rings[i + 1];
+      const sweep = ink(p, (i + 0.5) / span, 0.18);
       const rOut = outer.radius * reach;
       for (let k = 0; k < SWEEPS; k++) {
         const s = k / SWEEPS;
