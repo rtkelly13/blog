@@ -4,7 +4,6 @@ import {
   Palette,
   Projector,
   Radio,
-  Sparkles,
   Terminal,
   Type,
 } from 'lucide-react';
@@ -40,22 +39,13 @@ const experiments = [
     components: 3,
   },
   {
-    name: 'Graphics Generators',
-    path: '/experiments/graphics',
-    description:
-      'Seed-driven SVG background + graphic generators for talks and heroes',
-    icon: <Sparkles className="w-12 h-12" />,
-    status: 'active',
-    components: 14,
-  },
-  {
     name: 'Backgrounds Lab',
     path: '/experiments/backgrounds',
     description:
-      'Every background generator animated — sampled once, projected per frame, every loop seamless',
+      'Every background generator: 41 of them, animated, with ramps, contrast, density and a paper mode',
     icon: <Radio className="w-12 h-12" />,
     status: 'active',
-    components: 14,
+    components: 41,
   },
   {
     name: 'Talk Animations',

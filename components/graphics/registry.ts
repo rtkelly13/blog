@@ -22,6 +22,7 @@ export const GENERATOR_LIST: Generator[] = GENERATOR_MODULES.map((m) => ({
   group: m.group,
   speed: m.speed ?? 1,
   sketch: m.sketch,
+  sketchWeight: m.sketchWeight ?? 1,
   defaults: { ...BASE_PARAMS, ...m.defaults },
   render: (p: GraphicParams) => m.project(m.sample(p), p, p.t ?? 0),
   sample: m.sample,

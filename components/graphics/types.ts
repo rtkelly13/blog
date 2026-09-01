@@ -135,6 +135,8 @@ export interface Generator {
   speed: number;
   /** Holds up as ink on paper; see {@link GeneratorModule.sketch}. */
   sketch: boolean;
+  /** Paper-only opacity multiplier; see {@link GeneratorModule.sketchWeight}. */
+  sketchWeight: number;
   /** Stable id used in frontmatter and the registry (kebab-case). */
   name: string;
   /** Human label for the gallery. */
@@ -211,6 +213,19 @@ export interface GeneratorModule<S = unknown> {
    * paper and looked at before it ships.
    */
   sketch: boolean;
+  /**
+   * Opacity multiplier applied only in the light `sketch` theme. Default 1.
+   *
+   * The same alpha is far heavier as ink on white than as an accent on black,
+   * but *how much* heavier depends on how much area the generator covers. A
+   * lattice of filled cells becomes a grey wash and wants damping; a sparse
+   * field of hairlines is already faint and wants none. A single theme-wide
+   * dimming was tried first and did both — it fixed the lattices and turned the
+   * line work into ghosts.
+   *
+   * So it lives here, per generator, set by rendering on paper and looking.
+   */
+  sketchWeight?: number;
   /** Per-generator defaults, merged over {@link BASE_PARAMS}. */
   defaults?: Partial<GraphicParams>;
   /**

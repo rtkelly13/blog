@@ -60,21 +60,22 @@ export function graphicThemeDefaults(theme?: string): {
   // the opaque surface the graphic is sitting on. Paper under `sketch`, the
   // brutalist near-black otherwise.
   //
-  // `opacity` is the one that is not obvious. The same alpha is *much* heavier
-  // as ink on white than as an accent on black: 30% cyan over black is a hint,
-  // 30% graphite over paper is a solid grey. So every generator whose depth cue
-  // is filled area — the lattices, the isometrics, `weave` — rendered as a flat
-  // grey wash in the light theme while looking correct in the dark one.
+  // `opacity` stays at 1 for both, and the history is worth keeping: paper
+  // briefly defaulted to half weight, because the same alpha is much heavier as
+  // ink on white than as an accent on black — 30% cyan over black is a hint,
+  // 30% graphite over paper is a solid grey. That rescued the fill-heavy
+  // lattices and quietly ruined the sparse line generators, which were already
+  // faint and became ghosts.
   //
-  // Halving the weight for paper fixes almost all of them, and it was arrived
-  // at by rendering the whole set in both palettes and comparing, not by taste.
-  // It is a *default*, so a caller who wants full weight on paper still has it.
+  // One number cannot serve both, because the problem is not the theme but what
+  // a given generator does with area. It is per-generator now:
+  // `GeneratorModule.sketchWeight`.
   return theme === 'sketch'
     ? {
         accent: PAPER_ACCENTS.ink,
         background: 'transparent',
         occlusion: SURFACES.paper,
-        opacity: 0.52,
+        opacity: 1,
       }
     : {
         accent: BRUTALIST_ACCENTS.cyan,
@@ -83,6 +84,21 @@ export function graphicThemeDefaults(theme?: string): {
         opacity: 1,
       };
 }
+
+/**
+ * Swatches for the light `sketch` theme.
+ *
+ * The brutalist neons are unusable as ink: cyan and neon green on paper are
+ * highlighter, not drawing. These are the `.sketch` accents — graphite plus
+ * three saturated-but-dark pigments that read as pen on a page.
+ */
+export const PAPER_SWATCHES: {
+  name: keyof typeof PAPER_ACCENTS;
+  value: string;
+}[] = (['ink', 'blue', 'red', 'green'] as const).map((name) => ({
+  name,
+  value: PAPER_ACCENTS[name],
+}));
 
 /** Ordered swatch list for the gallery's colour picker. */
 export const ACCENT_SWATCHES: { name: AccentName; value: string }[] = (

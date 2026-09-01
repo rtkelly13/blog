@@ -105,6 +105,9 @@ export default defineGenerator<Plan>({
     'A flat field of cubes at even height, widely spaced — architecture, not terrain.',
   group: 'isometric',
   sketch: true,
+  // Filled cells cover most of the frame, and on paper that is a grey wash
+  // rather than the recessive tone it reads as on black.
+  sketchWeight: 0.6,
   speed: 0.8,
   defaults: { density: 0.5, strokeWidth: 1.5 },
 
