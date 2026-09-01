@@ -25,6 +25,7 @@
     "test:snapshots:remote": "node scripts/update-snapshots.mjs",
     "post:create": "node scripts/create-post.mjs",
     "post:wizard": "node scripts/compose.mjs",
+    "bench:graphics": "BENCH_GRAPHICS=1 vitest run --project unit tests/graphics-budget.test.ts",
     "check:seo": "node scripts/audit-seo.mjs",
     "archive-links": "node scripts/archive-links.mjs",
     "check:deploy": "node scripts/verify-deployment.mjs",
