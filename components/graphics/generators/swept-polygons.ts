@@ -1,6 +1,16 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
-import { cycles, frame, ink, lerp, mulberry32, r2, range, TAU } from './shared';
+import {
+  centre,
+  cycles,
+  frame,
+  ink,
+  lerp,
+  mulberry32,
+  r2,
+  range,
+  TAU,
+} from './shared';
 
 /* ── swept-polygons ───────────────────────────────────────────────────────── */
 
@@ -79,8 +89,9 @@ export default defineGenerator<Ring[]>({
   },
 
   project: (rings, p, t) => {
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    // Honours `originX`/`originY`; at the default it is the frame centre, so
+    // this changed nothing for existing callers.
+    const [cx, cy] = centre(p);
     const reach = Math.min(p.width, p.height) * 0.6;
     // Six to eight sides would mean sampling it, and a sampled side count
     // changes the emitted-number count with the seed rather than with `t`,
