@@ -40,6 +40,8 @@ const REPS = Number(arg('reps', 240));
 const LOOP_MS = Number(arg('loop-ms', 2000));
 const WIDTH = Number(arg('width', 1280));
 const HEIGHT = Number(arg('height', 720));
+/** Override the generator's default density — the level-of-detail lever. */
+const DENSITY = arg('density', null) === null ? undefined : Number(arg('density'));
 const JSON_OUT = arg('json', null);
 /** Directory to write correctness screenshots into. `--verify <dir>`. */
 const VERIFY = arg('verify', null);
@@ -109,6 +111,7 @@ for (const generator of GENERATORS) {
           loopMs: LOOP_MS,
           width: WIDTH,
           height: HEIGHT,
+          density: DENSITY,
         },
       );
       results.push(r);
@@ -128,7 +131,14 @@ const gallery = [];
 if (TILES.length) {
   for (const strategy of STRATEGIES) {
     for (const tiles of TILES) {
-      process.stderr.write(`  gallery ${GENERATORS[0]} x${tiles} / ${strategy} ... `);
+      process.stderr.write(
+        `  gallery ${GENERATORS[0]} x${tiles} / ${strategy} ... `,
+      );
+      // Fresh page per configuration. Without this the numbers carry the
+      // previous strategy's garbage: an 8-tile bitmap run leaves ~600MB for the
+      // collector to reclaim, and whichever configuration follows it pays.
+      await page.goto(`http://127.0.0.1:${port}/`);
+      await page.waitForFunction(() => !!window.BENCH);
       try {
         const g = await page.evaluate(
           (spec) => window.BENCH.gallery(spec),
@@ -215,6 +225,8 @@ if (VERIFY) {
   }
 }
 
+await page.goto(`http://127.0.0.1:${port}/`);
+await page.waitForFunction(() => !!window.BENCH);
 const micro = await page.evaluate(() => window.BENCH.useInstancingMicro(1200));
 
 await browser.close();

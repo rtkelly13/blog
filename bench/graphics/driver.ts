@@ -305,22 +305,29 @@ export function useInstancingMicro(n: number): {
   expanded += '</svg>';
   used += '</svg>';
 
-  const time = (html: string) => {
-    const samples: number[] = [];
-    for (let i = 0; i < 40; i++) {
-      host.innerHTML = '';
-      void host.getBoundingClientRect();
-      const t0 = performance.now();
-      host.innerHTML = html;
-      void (host.firstElementChild as SVGGraphicsElement).getBBox();
-      samples.push(performance.now() - t0);
-    }
-    samples.sort((a, b) => a - b);
-    return samples[Math.floor(samples.length / 2)];
+  const once = (html: string) => {
+    host.innerHTML = '';
+    void host.getBoundingClientRect();
+    const t0 = performance.now();
+    host.innerHTML = html;
+    void (host.firstElementChild as SVGGraphicsElement).getBBox();
+    return performance.now() - t0;
   };
 
-  const expandedMs = time(expanded);
-  const useMs = time(used);
+  // Interleaved, not one batch after the other: measured sequentially the
+  // second form inherits whatever heap state the first left behind, which was
+  // worth a factor of two on its own.
+  const a: number[] = [];
+  const b: number[] = [];
+  for (let i = 0; i < 10; i++) once(i % 2 ? expanded : used); // warm
+  for (let i = 0; i < 40; i++) {
+    a.push(once(expanded));
+    b.push(once(used));
+  }
+  const median = (xs: number[]) => {
+    xs.sort((x, y) => x - y);
+    return xs[Math.floor(xs.length / 2)];
+  };
   host.innerHTML = '';
-  return { expandedMs, useMs };
+  return { expandedMs: median(a), useMs: median(b) };
 }
