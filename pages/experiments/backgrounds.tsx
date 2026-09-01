@@ -1,4 +1,5 @@
 import { Check, Copy, Pause, Play, Radio, RotateCcw } from 'lucide-react';
+import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GeneratorGroup } from '@/components/graphics';
@@ -13,6 +14,7 @@ import {
 } from '@/components/graphics';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
+import { parseGraphicsUrl } from '@/lib/graphicsUrl';
 
 /**
  * The animation half of the graphics work, which nothing on the site showed.
@@ -96,23 +98,34 @@ function frontmatterSnippet(
 }
 
 export default function BackgroundsLab() {
-  const [accent, setAccent] = useState('#22d3ee');
-  const [paperAccent, setPaperAccent] = useState(PAPER_ACCENTS.ink);
-  const [opacity, setOpacity] = useState(1);
+  // Every control is addressable from the query string. See `lib/graphicsUrl.ts`
+  // — the short version is that a visual regression test needs a deterministic
+  // page, and a URL is the only fixture that survives the controls being
+  // rearranged.
+  const router = useRouter();
+  const url = parseGraphicsUrl(router.query);
+  const [accent, setAccent] = useState(url.accent ?? '#22d3ee');
+  const [paperAccent, setPaperAccent] = useState(
+    url.accent ?? PAPER_ACCENTS.ink,
+  );
+  const [opacity, setOpacity] = useState(url.opacity);
   const [copied, setCopied] = useState<string | null>(null);
-  const [seed, setSeed] = useState(7);
-  const [density, setDensity] = useState(0.55);
-  const [disorder, setDisorder] = useState(0);
+  const [seed, setSeed] = useState(url.seed);
+  const [density, setDensity] = useState(url.density);
+  const [disorder, setDisorder] = useState(url.disorder);
   const [duration, setDuration] = useState(12);
-  const [speed, setSpeed] = useState(1);
-  const [contrast, setContrast] = useState(1);
+  const [speed, setSpeed] = useState(url.speed);
+  const [contrast, setContrast] = useState(url.contrast);
   const [ramp, setRamp] = useState(0);
-  const [origin, setOrigin] = useState<[number, number]>([0.5, 0.5]);
+  const [origin, setOrigin] = useState<[number, number]>([
+    url.originX,
+    url.originY,
+  ]);
   // Side-by-side against the classic single-accent render. The new options are
   // all additive — a test pins that omitting them reproduces the old output
   // byte for byte — so the honest way to show what they add is to show both.
   const [compare, setCompare] = useState(false);
-  const [fps, setFps] = useState(24);
+  const [fps, setFps] = useState(url.fps);
   // Null means "follow the site theme"; a click pins it either way.
   //
   // This page used to force a dark surface and a cyan accent regardless. In the
@@ -121,8 +134,8 @@ export default function BackgroundsLab() {
   // Nothing was broken in the generators or in `AnimatedBackground`, which take
   // their colours from the theme when a caller does not override them — it was
   // this page overriding them and then not following through.
-  const [paperPin, setPaperPin] = useState<boolean | null>(null);
-  const { resolvedTheme } = useTheme();
+  const [paperPin, setPaperPin] = useState<boolean | null>(url.paper ?? null);
+  const { resolvedTheme, setTheme } = useTheme();
   // `resolvedTheme` is undefined on the server and known only after mount, so
   // reading it during the first render is a hydration mismatch — the server
   // sends the dark markup and the client immediately disagrees. Gating on
@@ -130,6 +143,44 @@ export default function BackgroundsLab() {
   // the theme take effect on the next one.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Seed the controls from the URL once the router knows what it is.
+  //
+  // `useState(url.x)` is not enough on the Pages Router: `router.query` is empty
+  // on the first render of a statically optimised page and populated a tick
+  // later, so a state initialiser captures the *default* and never hears about
+  // the real value. Values read during render (`only`, `chrome`, `accents`)
+  // were fine and the ones behind `useState` silently were not — a fixture link
+  // would set the generator list and quietly ignore the accent.
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (!router.isReady || seeded.current) return;
+    seeded.current = true;
+    const u = parseGraphicsUrl(router.query);
+    if (u.accent) {
+      setAccent(u.accent);
+      setPaperAccent(u.accent);
+    }
+    if (u.paper !== undefined) setPaperPin(u.paper);
+    if (u.group) setOnly(u.group as GeneratorGroup);
+    setSeed(u.seed);
+    setDensity(u.density);
+    setOpacity(u.opacity);
+    setContrast(u.contrast);
+    setDisorder(u.disorder);
+    setSpeed(u.speed);
+    setFps(u.fps);
+    setOrigin([u.originX, u.originY]);
+    setScrub(u.t);
+    setPlaying(u.playing);
+  }, [router.isReady, router.query]);
+
+  // A theme named in the URL is applied on load, so a fixture link describes the
+  // whole page rather than depending on whatever the visitor last chose.
+  const urlTheme = url.theme;
+  useEffect(() => {
+    if (urlTheme) setTheme(urlTheme);
+  }, [urlTheme, setTheme]);
   const paper = paperPin ?? (mounted && resolvedTheme === 'sketch');
 
   // Changing the site theme clears the pin.
@@ -155,14 +206,19 @@ export default function BackgroundsLab() {
   // Swatches and ramps follow the surface. Offering neon on paper was the other
   // half of what made the sketch theme unusable here.
   const RAMPS = paper ? PAPER_RAMPS : NEON_RAMPS;
+  // A ramp given in the URL wins over the picker: the picker's options are a
+  // convenience, and a regression fixture must be able to name exact colours.
+  const urlRamp = url.accents;
   const SWATCHES = paper ? PAPER_SWATCHES : ACCENT_SWATCHES;
-  const [playing, setPlaying] = useState(true);
-  const [scrub, setScrub] = useState(0);
+  const [playing, setPlaying] = useState(url.playing);
+  const [scrub, setScrub] = useState(url.t);
   // Per-tile overrides on top of the global transport. A name present here wins
   // over `playing`; the global buttons clear the map so they always mean what
   // they say rather than being silently countermanded by a stale override.
   const [solo, setSolo] = useState<Record<string, boolean>>({});
-  const [only, setOnly] = useState<GeneratorGroup | 'all'>('all');
+  const [only, setOnly] = useState<GeneratorGroup | 'all'>(
+    (url.group as GeneratorGroup) ?? 'all',
+  );
 
   // Only the two tiles nearest the middle of the viewport run.
   //
@@ -253,7 +309,7 @@ export default function BackgroundsLab() {
     speed,
     fps,
     contrast,
-    accents: RAMPS[Math.min(ramp, RAMPS.length - 1)].colours,
+    accents: urlRamp ?? RAMPS[Math.min(ramp, RAMPS.length - 1)].colours,
     originX: origin[0],
     originY: origin[1],
     t: scrub,
@@ -280,350 +336,367 @@ export default function BackgroundsLab() {
         title={`Backgrounds Lab - ${siteMetadata.author}`}
         description="Every background generator, animated — sampled once and projected per frame"
       />
-      <div className="border-2 border-white bg-black">
-        <div className="border-b-2 border-white bg-zinc-900 px-6 pt-8 pb-8">
-          <div className="mb-4 flex items-center gap-4">
-            <Radio className="h-9 w-9 text-brutalist-cyan" />
-            <h1 className="font-display text-4xl font-bold uppercase text-white md:text-5xl">
-              [ BACKGROUNDS_LAB ]
-            </h1>
-          </div>
-          <p className="max-w-3xl font-mono text-sm text-zinc-400">
-            <span className="text-brutalist-yellow">&gt;</span> Every generator
-            animated. Each one is sampled <em>once</em> and projected per frame,
-            so the structure on screen is provably the same structure from one
-            frame to the next — adjacent <code>t</code> gives adjacent images,
-            not an independent roll of the dice.
-          </p>
-          <p className="mt-2 max-w-3xl font-mono text-xs text-zinc-500">
-            <span className="text-brutalist-cyan">&gt;</span> Grouped by family.
-            Speed multiplies each generator&rsquo;s own declared pace — the
-            radial ones run slower by default, because a turn at full reach
-            covers the whole circumference. Only the two tiles nearest the
-            middle of the window run — the outlined ones — so scroll to drive
-            the rest, or hit Play on any tile to pin it. Every loop closes:
-            <code> t = 1</code> renders identically to <code>t = 0</code>, so
-            nothing seams. Pause to scrub a single loop by hand.
-          </p>
-        </div>
-
-        {/* Controls */}
-        <div className="flex flex-wrap items-end gap-8 border-b-2 border-white bg-black px-6 py-6">
-          <div>
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Accent
+      <div className={url.chrome ? 'border-2 border-white bg-black' : ''}>
+        {url.chrome && (
+          <>
+            <div className="border-b-2 border-white bg-zinc-900 px-6 pt-8 pb-8">
+              <div className="mb-4 flex items-center gap-4">
+                <Radio className="h-9 w-9 text-brutalist-cyan" />
+                <h1 className="font-display text-4xl font-bold uppercase text-white md:text-5xl">
+                  [ BACKGROUNDS_LAB ]
+                </h1>
+              </div>
+              <p className="max-w-3xl font-mono text-sm text-zinc-400">
+                <span className="text-brutalist-yellow">&gt;</span> Every
+                generator animated. Each one is sampled <em>once</em> and
+                projected per frame, so the structure on screen is provably the
+                same structure from one frame to the next — adjacent{' '}
+                <code>t</code> gives adjacent images, not an independent roll of
+                the dice.
+              </p>
+              <p className="mt-2 max-w-3xl font-mono text-xs text-zinc-500">
+                <span className="text-brutalist-cyan">&gt;</span> Grouped by
+                family. Speed multiplies each generator&rsquo;s own declared
+                pace — the radial ones run slower by default, because a turn at
+                full reach covers the whole circumference. Only the two tiles
+                nearest the middle of the window run — the outlined ones — so
+                scroll to drive the rest, or hit Play on any tile to pin it.
+                Every loop closes:
+                <code> t = 1</code> renders identically to <code>t = 0</code>,
+                so nothing seams. Pause to scrub a single loop by hand.
+              </p>
             </div>
-            <div className="flex gap-2">
-              {SWATCHES.map((s) => (
-                <button
-                  key={s.name}
-                  type="button"
-                  aria-label={s.name}
-                  onClick={() =>
-                    paper ? setPaperAccent(s.value) : setAccent(s.value)
-                  }
-                  className={`h-8 w-8 border-2 transition-transform ${
-                    (paper ? paperAccent : accent) === s.value
-                      ? 'scale-110 border-white'
-                      : 'border-zinc-700 hover:border-zinc-400'
-                  }`}
-                  style={{ backgroundColor: s.value }}
+
+            {/* Controls */}
+            <div className="flex flex-wrap items-end gap-8 border-b-2 border-white bg-black px-6 py-6">
+              <div>
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Accent
+                </div>
+                <div className="flex gap-2">
+                  {SWATCHES.map((s) => (
+                    <button
+                      key={s.name}
+                      type="button"
+                      aria-label={s.name}
+                      onClick={() =>
+                        paper ? setPaperAccent(s.value) : setAccent(s.value)
+                      }
+                      className={`h-8 w-8 border-2 transition-transform ${
+                        (paper ? paperAccent : accent) === s.value
+                          ? 'scale-110 border-white'
+                          : 'border-zinc-700 hover:border-zinc-400'
+                      }`}
+                      style={{ backgroundColor: s.value }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Transport
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAll(!playing)}
+                    className="flex items-center gap-2 border-2 border-white bg-zinc-900 px-3 py-1.5 font-mono text-xs uppercase text-white hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                  >
+                    {playing ? (
+                      <>
+                        <Pause className="h-4 w-4" /> Pause
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" /> Play
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSeed(Math.floor(Math.random() * 9999))}
+                    className="flex items-center gap-2 border-2 border-white bg-zinc-900 px-3 py-1.5 font-mono text-xs uppercase text-white hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                  >
+                    <RotateCcw className="h-4 w-4" /> Seed {seed}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Family
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(['all', ...GENERATOR_GROUPS] as const).map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setOnly(g)}
+                      className={`border-2 px-2.5 py-1 font-mono text-xs uppercase ${
+                        only === g
+                          ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
+                          : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
+                      }`}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className="min-w-[190px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Scrub · t = {scrub.toFixed(3)}
+                  {playing && (
+                    <span className="text-zinc-600"> (paused only)</span>
+                  )}
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.001}
+                  value={scrub}
+                  disabled={playing}
+                  onChange={(e) => setScrub(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan disabled:opacity-40"
                 />
-              ))}
-            </div>
-          </div>
+              </label>
 
-          <div>
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Transport
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setAll(!playing)}
-                className="flex items-center gap-2 border-2 border-white bg-zinc-900 px-3 py-1.5 font-mono text-xs uppercase text-white hover:border-brutalist-cyan hover:text-brutalist-cyan"
-              >
-                {playing ? (
-                  <>
-                    <Pause className="h-4 w-4" /> Pause
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" /> Play
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSeed(Math.floor(Math.random() * 9999))}
-                className="flex items-center gap-2 border-2 border-white bg-zinc-900 px-3 py-1.5 font-mono text-xs uppercase text-white hover:border-brutalist-cyan hover:text-brutalist-cyan"
-              >
-                <RotateCcw className="h-4 w-4" /> Seed {seed}
-              </button>
-            </div>
-          </div>
+              <label className="min-w-[150px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Loop · {duration}s
+                </div>
+                <input
+                  type="range"
+                  min={3}
+                  max={30}
+                  step={1}
+                  value={duration}
+                  onChange={(e) => setDuration(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan"
+                />
+              </label>
 
-          <div>
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Family
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {(['all', ...GENERATOR_GROUPS] as const).map((g) => (
+              <div>
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Ramp
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {RAMPS.map((r, i) => (
+                    <button
+                      key={r.label}
+                      type="button"
+                      onClick={() => setRamp(i)}
+                      className={`flex items-center gap-2 border-2 px-2 py-1 font-mono text-[10px] uppercase ${
+                        ramp === i
+                          ? 'border-brutalist-cyan text-brutalist-cyan'
+                          : 'border-zinc-700 text-zinc-400 hover:border-zinc-400'
+                      }`}
+                    >
+                      <span
+                        className="h-3 w-8 border border-zinc-600"
+                        style={{
+                          background: r.colours
+                            ? `linear-gradient(90deg, ${r.colours.join(', ')})`
+                            : accent,
+                        }}
+                      />
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Origin · {origin[0].toFixed(2)}, {origin[1].toFixed(2)}
+                </div>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      ['centre', [0.5, 0.5]],
+                      ['left', [0.22, 0.5]],
+                      ['right', [0.78, 0.5]],
+                      ['low', [0.5, 0.8]],
+                    ] as const
+                  ).map(([label, o]) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setOrigin([o[0], o[1]])}
+                      className={`border-2 px-2 py-1 font-mono text-[10px] uppercase ${
+                        origin[0] === o[0] && origin[1] === o[1]
+                          ? 'border-brutalist-cyan text-brutalist-cyan'
+                          : 'border-zinc-700 text-zinc-400 hover:border-zinc-400'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Surface
+                </div>
                 <button
-                  key={g}
                   type="button"
-                  onClick={() => setOnly(g)}
-                  className={`border-2 px-2.5 py-1 font-mono text-xs uppercase ${
-                    only === g
+                  onClick={() => setPaperPin(!paper)}
+                  className={`mb-2 border-2 px-3 py-1.5 font-mono text-xs uppercase ${
+                    paper
                       ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
                       : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
                   }`}
                 >
-                  {g}
+                  {paper ? 'paper' : 'dark'}
                 </button>
-              ))}
-            </div>
-          </div>
-
-          <label className="min-w-[190px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Scrub · t = {scrub.toFixed(3)}
-              {playing && <span className="text-zinc-600"> (paused only)</span>}
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.001}
-              value={scrub}
-              disabled={playing}
-              onChange={(e) => setScrub(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan disabled:opacity-40"
-            />
-          </label>
-
-          <label className="min-w-[150px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Loop · {duration}s
-            </div>
-            <input
-              type="range"
-              min={3}
-              max={30}
-              step={1}
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
-            />
-          </label>
-
-          <div>
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Ramp
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {RAMPS.map((r, i) => (
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Compare
+                </div>
                 <button
-                  key={r.label}
                   type="button"
-                  onClick={() => setRamp(i)}
-                  className={`flex items-center gap-2 border-2 px-2 py-1 font-mono text-[10px] uppercase ${
-                    ramp === i
-                      ? 'border-brutalist-cyan text-brutalist-cyan'
-                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-400'
+                  onClick={() => setCompare((v) => !v)}
+                  className={`border-2 px-3 py-1.5 font-mono text-xs uppercase ${
+                    compare
+                      ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
+                      : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
                   }`}
                 >
-                  <span
-                    className="h-3 w-8 border border-zinc-600"
-                    style={{
-                      background: r.colours
-                        ? `linear-gradient(90deg, ${r.colours.join(', ')})`
-                        : accent,
-                    }}
-                  />
-                  {r.label}
+                  {compare ? 'split on' : 'split off'}
                 </button>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div>
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Origin · {origin[0].toFixed(2)}, {origin[1].toFixed(2)}
-            </div>
-            <div className="flex gap-2">
-              {(
-                [
-                  ['centre', [0.5, 0.5]],
-                  ['left', [0.22, 0.5]],
-                  ['right', [0.78, 0.5]],
-                  ['low', [0.5, 0.8]],
-                ] as const
-              ).map(([label, o]) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => setOrigin([o[0], o[1]])}
-                  className={`border-2 px-2 py-1 font-mono text-[10px] uppercase ${
-                    origin[0] === o[0] && origin[1] === o[1]
-                      ? 'border-brutalist-cyan text-brutalist-cyan'
-                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-400'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+              <label className="min-w-[150px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Opacity · {opacity.toFixed(2)}
+                </div>
+                <input
+                  type="range"
+                  min={0.1}
+                  max={1}
+                  step={0.05}
+                  value={opacity}
+                  onChange={(e) => setOpacity(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan"
+                />
+              </label>
 
-          <div>
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Surface
-            </div>
-            <button
-              type="button"
-              onClick={() => setPaperPin(!paper)}
-              className={`mb-2 border-2 px-3 py-1.5 font-mono text-xs uppercase ${
-                paper
-                  ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
-                  : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
-              }`}
-            >
-              {paper ? 'paper' : 'dark'}
-            </button>
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Compare
-            </div>
-            <button
-              type="button"
-              onClick={() => setCompare((v) => !v)}
-              className={`border-2 px-3 py-1.5 font-mono text-xs uppercase ${
-                compare
-                  ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
-                  : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
-              }`}
-            >
-              {compare ? 'split on' : 'split off'}
-            </button>
-          </div>
+              <label className="min-w-[150px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Contrast · {contrast.toFixed(2)}
+                </div>
+                <input
+                  type="range"
+                  min={0.2}
+                  max={1.8}
+                  step={0.05}
+                  value={contrast}
+                  onChange={(e) => setContrast(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan"
+                />
+              </label>
 
-          <label className="min-w-[150px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Opacity · {opacity.toFixed(2)}
-            </div>
-            <input
-              type="range"
-              min={0.1}
-              max={1}
-              step={0.05}
-              value={opacity}
-              onChange={(e) => setOpacity(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
-            />
-          </label>
+              <label className="min-w-[150px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  FPS · {fps}
+                </div>
+                <input
+                  type="range"
+                  min={6}
+                  max={60}
+                  step={2}
+                  value={fps}
+                  onChange={(e) => setFps(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan"
+                />
+              </label>
 
-          <label className="min-w-[150px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Contrast · {contrast.toFixed(2)}
-            </div>
-            <input
-              type="range"
-              min={0.2}
-              max={1.8}
-              step={0.05}
-              value={contrast}
-              onChange={(e) => setContrast(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
-            />
-          </label>
+              <label className="min-w-[150px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Speed · {speed.toFixed(2)}&times;
+                </div>
+                <input
+                  type="range"
+                  min={0.2}
+                  max={2}
+                  step={0.1}
+                  value={speed}
+                  onChange={(e) => setSpeed(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan"
+                />
+              </label>
 
-          <label className="min-w-[150px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              FPS · {fps}
-            </div>
-            <input
-              type="range"
-              min={6}
-              max={60}
-              step={2}
-              value={fps}
-              onChange={(e) => setFps(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
-            />
-          </label>
+              <label className="min-w-[150px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Density · {density.toFixed(2)}
+                </div>
+                <input
+                  type="range"
+                  min={0.15}
+                  max={1}
+                  step={0.05}
+                  value={density}
+                  onChange={(e) => setDensity(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan"
+                />
+              </label>
 
-          <label className="min-w-[150px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Speed · {speed.toFixed(2)}&times;
+              <label className="min-w-[150px]">
+                <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+                  Disorder · {disorder.toFixed(2)}
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={disorder}
+                  onChange={(e) => setDisorder(Number(e.target.value))}
+                  className="w-full accent-brutalist-cyan"
+                />
+              </label>
             </div>
-            <input
-              type="range"
-              min={0.2}
-              max={2}
-              step={0.1}
-              value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
-            />
-          </label>
 
-          <label className="min-w-[150px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Density · {density.toFixed(2)}
-            </div>
-            <input
-              type="range"
-              min={0.15}
-              max={1}
-              step={0.05}
-              value={density}
-              onChange={(e) => setDensity(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
-            />
-          </label>
-
-          <label className="min-w-[150px]">
-            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
-              Disorder · {disorder.toFixed(2)}
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={disorder}
-              onChange={(e) => setDisorder(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
-            />
-          </label>
-        </div>
-
-        <p className="border-b-2 border-white bg-zinc-950 px-6 py-3 font-mono text-xs text-zinc-500">
-          <span className="text-brutalist-yellow">&gt;</span> Density and
-          disorder both re-sample — they change <em>what</em> is drawn, not
-          where it is in its loop, so they are deliberately not animatable. Only{' '}
-          <code>t</code> is.
-        </p>
+            <p className="border-b-2 border-white bg-zinc-950 px-6 py-3 font-mono text-xs text-zinc-500">
+              <span className="text-brutalist-yellow">&gt;</span> Density and
+              disorder both re-sample — they change <em>what</em> is drawn, not
+              where it is in its loop, so they are deliberately not animatable.
+              Only <code>t</code> is.
+            </p>
+          </>
+        )}
 
         {GENERATOR_GROUPS.filter(
           (group) => only === 'all' || only === group,
         ).map((group) => {
-          const inGroup = generatorsInGroup(group);
+          const inGroup = url.only.length
+            ? generatorsInGroup(group).filter((g) => url.only.includes(g.name))
+            : generatorsInGroup(group);
           if (inGroup.length === 0) return null;
           return (
             <section key={group}>
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-y-2 border-white bg-zinc-900 px-6 py-4">
-                <h2 className="font-display text-xl font-bold uppercase tracking-tight text-white">
-                  [ {group} ]
-                </h2>
-                <span className="font-mono text-xs text-brutalist-cyan">
-                  {inGroup.length}
-                </span>
-                <p className="font-mono text-xs text-zinc-400">
-                  {GROUP_BLURB[group]}
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-2 bg-zinc-800 p-2 lg:grid-cols-2">
+              {url.chrome && (
+                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-y-2 border-white bg-zinc-900 px-6 py-4">
+                  <h2 className="font-display text-xl font-bold uppercase tracking-tight text-white">
+                    [ {group} ]
+                  </h2>
+                  <span className="font-mono text-xs text-brutalist-cyan">
+                    {inGroup.length}
+                  </span>
+                  <p className="font-mono text-xs text-zinc-400">
+                    {GROUP_BLURB[group]}
+                  </p>
+                </div>
+              )}
+              <div
+                className="grid gap-2 bg-zinc-800 p-2"
+                style={{
+                  gridTemplateColumns: `repeat(${url.chrome ? 2 : url.cols}, minmax(0, 1fr))`,
+                }}
+              >
                 {inGroup.map((g) => (
                   <figure
                     key={g.name}
@@ -668,53 +741,55 @@ export default function BackgroundsLab() {
                         )}
                       </div>
                     </div>
-                    <figcaption className="border-t-2 border-zinc-800 p-4">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <h3 className="font-display text-lg font-bold uppercase text-white">
-                          {g.label}
-                        </h3>
-                        <div className="flex items-center gap-3">
-                          <code className="font-mono text-xs text-brutalist-cyan">
-                            {g.name}
-                          </code>
-                          <button
-                            type="button"
-                            onClick={() => copySnippet(g.name)}
-                            aria-label={`Copy frontmatter for ${g.label}`}
-                            className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
-                          >
-                            {copied === g.name ? (
-                              <>
-                                <Check className="h-3 w-3" /> Copied
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="h-3 w-3" /> Config
-                              </>
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => toggleOne(g.name)}
-                            aria-label={`${isPlaying(g.name) ? 'Pause' : 'Play'} ${g.label}`}
-                            className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
-                          >
-                            {isPlaying(g.name) ? (
-                              <>
-                                <Pause className="h-3 w-3" /> Pause
-                              </>
-                            ) : (
-                              <>
-                                <Play className="h-3 w-3" /> Play
-                              </>
-                            )}
-                          </button>
+                    {url.chrome && (
+                      <figcaption className="border-t-2 border-zinc-800 p-4">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h3 className="font-display text-lg font-bold uppercase text-white">
+                            {g.label}
+                          </h3>
+                          <div className="flex items-center gap-3">
+                            <code className="font-mono text-xs text-brutalist-cyan">
+                              {g.name}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={() => copySnippet(g.name)}
+                              aria-label={`Copy frontmatter for ${g.label}`}
+                              className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                            >
+                              {copied === g.name ? (
+                                <>
+                                  <Check className="h-3 w-3" /> Copied
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3 w-3" /> Config
+                                </>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => toggleOne(g.name)}
+                              aria-label={`${isPlaying(g.name) ? 'Pause' : 'Play'} ${g.label}`}
+                              className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                            >
+                              {isPlaying(g.name) ? (
+                                <>
+                                  <Pause className="h-3 w-3" /> Pause
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="h-3 w-3" /> Play
+                                </>
+                              )}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <p className="mt-1 font-mono text-xs text-zinc-400">
-                        {g.description}
-                      </p>
-                    </figcaption>
+                        <p className="mt-1 font-mono text-xs text-zinc-400">
+                          {g.description}
+                        </p>
+                      </figcaption>
+                    )}
                   </figure>
                 ))}
               </div>
