@@ -44,6 +44,22 @@ jobs:
         working-directory: blog
         run: pnpm build
 
+      # Published from main so PR runs have something to diff their own
+      # benchmark against — same pattern as the coverage baseline above.
+      - name: Graphics benchmark
+        if: always()
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm bench:graphics
+      - name: Upload graphics benchmark baseline (main only)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: graphics-benchmark-main
+          path: blog/docs/graphics-benchmark.md
+          retention-days: 30
+          if-no-files-found: ignore
+
       - name: SEO audit
         working-directory: blog
         run: pnpm check:seo

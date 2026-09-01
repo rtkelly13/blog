@@ -104,6 +104,38 @@ jobs:
         continue-on-error: true
         working-directory: blog
         run: pnpm test:coverage
+      # The graphics *budget* is asserted inside the unit run above and blocks
+      # like any other test: element counts and byte sizes are deterministic, so
+      # they behave on a shared runner.
+      #
+      # This step publishes the accompanying benchmark — the same table plus
+      # `project()` timings — to the run summary. It never fails the build, on
+      # purpose: timings on a shared runner move with whatever else is on the
+      # box, and a check that goes red for reasons nobody can act on is a check
+      # people learn to ignore. It is here to be read, and to be diffed against
+      # the artifact published from main.
+      - name: Graphics benchmark
+        if: always()
+        continue-on-error: true
+        working-directory: blog
+        run: |
+          pnpm bench:graphics
+          {
+            echo "## Graphics rendering benchmark"
+            echo
+            echo "Timings are from a shared runner and are indicative only."
+            echo "Element and byte counts are deterministic and asserted by the unit run."
+            echo
+            tail -n +5 docs/graphics-benchmark.md
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload graphics benchmark
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: graphics-benchmark-pr
+          path: blog/docs/graphics-benchmark.md
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Upload PR coverage
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
