@@ -6,7 +6,6 @@ test.describe('CV Pipeline & Artifact Baseline Tests', () => {
   const rootDir = path.resolve(__dirname, '..');
   const cvPdfPath = path.join(rootDir, 'public/cv.pdf');
   const templateTexPath = path.join(rootDir, 'cv/template.tex');
-  const aboutProfilePath = path.join(rootDir, 'data/about/profile.json');
 
   test('cv.pdf exists and is non-empty', async () => {
     expect(fs.existsSync(cvPdfPath)).toBe(true);

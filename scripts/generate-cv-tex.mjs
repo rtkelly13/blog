@@ -6,10 +6,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-const profile = JSON.parse(fs.readFileSync(path.join(rootDir, 'data/about/profile.json'), 'utf8'));
-const skills = JSON.parse(fs.readFileSync(path.join(rootDir, 'data/about/skills.json'), 'utf8'));
-const experience = JSON.parse(fs.readFileSync(path.join(rootDir, 'data/about/experience.json'), 'utf8'));
-const education = JSON.parse(fs.readFileSync(path.join(rootDir, 'data/about/education.json'), 'utf8'));
+const profile = JSON.parse(
+  fs.readFileSync(path.join(rootDir, 'data/about/profile.json'), 'utf8'),
+);
+const skills = JSON.parse(
+  fs.readFileSync(path.join(rootDir, 'data/about/skills.json'), 'utf8'),
+);
+const experience = JSON.parse(
+  fs.readFileSync(path.join(rootDir, 'data/about/experience.json'), 'utf8'),
+);
+const education = JSON.parse(
+  fs.readFileSync(path.join(rootDir, 'data/about/education.json'), 'utf8'),
+);
 
 function escapeLatex(str) {
   if (!str) return '';
@@ -29,7 +37,9 @@ function escapeLatex(str) {
 // Generate LaTeX skills list for sidebar
 const skillsLatex = skills
   .map((cat) => {
-    const items = cat.items.map((i) => `    \\item ${escapeLatex(i)}`).join('\n');
+    const items = cat.items
+      .map((i) => `    \\item ${escapeLatex(i)}`)
+      .join('\n');
     return `    {\\textbf{${escapeLatex(cat.category)}}}\n    {\\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]\n${items}\n    \\end{itemize}}`;
   })
   .join('\n    \\vspace{1mm}\n');
@@ -40,7 +50,7 @@ const experienceLatex = experience
     const periodParts = job.period.split(' - ');
     const fromDate = periodParts[0] ? `${periodParts[0]} -` : '';
     const toDate = periodParts[1] || '';
-    
+
     const highlights = job.highlights
       .map((h) => `             \\item ${escapeLatex(h)}`)
       .join('\n');
@@ -63,7 +73,9 @@ ${highlights}
 // Generate LaTeX Education
 const educationLatex = education
   .map((edu) => {
-    const details = edu.details ? `\n             ${escapeLatex(edu.details)} \\vspace{1mm}` : '';
+    const details = edu.details
+      ? `\n             ${escapeLatex(edu.details)} \\vspace{1mm}`
+      : '';
     const grade = edu.grade ? `{\\textbf{${escapeLatex(edu.grade)}}}` : '{}';
 
     return `    \\twentyitem
