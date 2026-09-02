@@ -1,0 +1,11 @@
+{
+  "name": "Ryan Kelly",
+  "role": "Principal Software Engineer",
+  "location": "United Kingdom",
+  "summary": "Hands-on Principal Software Engineer specializing in scalable full-stack and cloud architectures, high-throughput data processing, and enterprise modernization. Proven track record architecting distributed systems processing billions of events, driving zero-downtime legacy migrations, and establishing modern design systems. Active technical leader, open-source contributor in high-performance .NET/Parquet tooling, and co-organizer of the AWS Liverpool user group.",
+  "social": {
+    "github": "https://github.com/rtkelly13",
+    "linkedin": "https://www.linkedin.com/in/rtkelly94/",
+    "email": "94ryan.kelly@gmail.com"
+  }
+}

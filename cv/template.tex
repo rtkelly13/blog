@@ -1,86 +1,61 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Twenty Seconds Resume/CV
-% LaTeX Template
-% Version 1.0 (14/7/16)
-%
-% Original author:
-% Carmine Spagnuolo (cspagnuolo@unisa.it) with major modifications by 
-% Vel (vel@LaTeXTemplates.com) and Harsh (harsh.gadgil@gmail.com)
-%
-% License:
-% The MIT License (see included LICENSE file)
-%
+% Auto-generated from data/about/*.json via scripts/generate-cv-tex.mjs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%----------------------------------------------------------------------------------------
-%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
-%----------------------------------------------------------------------------------------
+\documentclass[letterpaper]{twentysecondcv}
 
-\documentclass[letterpaper]{twentysecondcv} % a4paper for A4
-
-% Command for printing skill overview bubbles
-\newcommand\skils{ 
-    %~
-    %\smartdiagram[bubble diagram]{
-    %    \textbf{Full Stack}\\\textbf{Web Dev},
-    %    \textbf{knockout.js},
-    %    \textbf{Git / GitLab},
-    %    \textbf{ASP.NET}\\\textbf{MVC / WebAPI},
-    %    \textbf{Bootstrap},
-    %    \textbf{MongoDB}
-    %}
+% Command for printing skill overview
+\newcommand\skils{
+    \href{https://www.meetup.com/aws-liverpool-user-group/}{Co-organizer of the \textbf{AWS Liverpool User Group} \& technical speaker on functional cloud architectures.}
     
-    \href{https://github.com/Resultful}{I have some open source projects under the organisation \textbf{Resultful} their aim is to enable exceptionless programming using a functional programming style.}
-     \href{https://www.youtube.com/playlist?list=PLo9sP7bLtjB4v80KxhT-2J3kx5HWZ_b9C}{I have done several talks to a local developer group advocating F\#, its tools and functional programming in general. But coming from the Perspective of a C\# developer }
-    
-    {\large \textbf{Experience}}
-    
-    {\begin{itemize}
-    \item .NET
-    \item Typescript
-    \item MySQL/ SQL Server
-    \item C\# / F\# 
-    \item CI / CD
-    \item Terraform/ Pulumi
-	\end{itemize}}
+    \vspace{2mm}
+    {\textbf{Core \& Languages}}
+    {\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item C\# (.NET / Native AOT)
+    \item F\# (Functional / Type Providers)
+    \item TypeScript (React / Next.js)
+    \item Python (Data Lake / PyIceberg)
+    \item SQL (MySQL / SQL Server)
+    \end{itemize}}
+    \vspace{1mm}
+    {\textbf{Cloud, Data \& Infrastructure}}
+    {\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item AWS
+    \item Apache Iceberg / Parquet
+    \item IaC (Pulumi / Terraform)
+    \item Elasticsearch
+    \item OpenTelemetry (OTEL)
+    \end{itemize}}
+    \vspace{1mm}
+    {\textbf{Engineering \& Practices}}
+    {\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item Distributed Systems
+    \item CI/CD (GitHub Actions)
+    \item AI Code Agent Workflows
+    \item TDD \& High-Throughput Benchmarking
+    \end{itemize}}
 }
 
-
-
-% Projects text
+% Projects and references sidebar text
 \projects{
-
-%\textbf{\href{https://www.linkedin.com/in/roberteroe/}{Robert Roe}} \\
-%Previous Tech Lead at Zuto\\
-%07754894279\\
-
-%\\
-%\\
-
-\textbf{Robert Roe} \\
-Tech Lead at Zuto
-
-\textbf{\href{https://www.linkedin.com/in/dan-cartwright-23b30b38/}{Dan Cartwright}}\\
-Product Manager at AutoCoding Systems \\
-
-{\large \textbf{Contact Details}} \\
-Will be provided on request \\
-
+\textbf{Robert Roe} --- Tech Lead at Zuto \\
+\textbf{\href{https://www.linkedin.com/in/dan-cartwright-23b30b38/}{Dan Cartwright}} --- Product Manager at AutoCoding Systems \\
+\vspace{1mm}
+\textbf{Contact Details:} Provided on request
 }
 
 %----------------------------------------------------------------------------------------
 %	 PERSONAL INFORMATION
 %----------------------------------------------------------------------------------------
-% If you don't need one or more of the below, just remove the content leaving the command, e.g. \cvnumberphone{}
 
-\cvname{RYAN KELLY} % Your name
-\cvjobtitle{ Software Developer } % Job
-% title/career
+\cvname{RYAN KELLY}
+\cvjobtitle{ Principal Software Engineer }
 
 \cvlinkedin{/in/rtkelly94/}
 \cvgithub{rtkelly13}
-\cvnumberphone{} % Phone number
-\cvmail{} % Email address
+\cvnumberphone{}
+\cvmail{94ryan.kelly@gmail.com}
 
 %----------------------------------------------------------------------------------------
 
@@ -94,57 +69,60 @@ Will be provided on request \\
 
 \section{Personal Profile}
 
-I have always had a keen interest in all things technology related. Developing software is not just a career for me, I strive to advance my skills both inside and outside of work. Utilising agile software practices alongside working within a collaborative team is something I believe is key to building great software. I am motivated by technical challenges and won’t stop until the solution is complete. 
-\\
-I am now looking for a new challenge within an environment where I can have creative control as well as the support I need to develop and progress in my career. 
+Hands-on Principal Software Engineer specializing in scalable full-stack and cloud architectures, high-throughput data processing, and enterprise modernization. Proven track record architecting distributed systems processing billions of events, driving zero-downtime legacy migrations, and establishing modern design systems. Active technical leader, open-source contributor in high-performance .NET/Parquet tooling, and co-organizer of the AWS Liverpool user group.
+
+\vspace{1mm}
 
 %----------------------------------------------------------------------------------------
 %	 Employment
 %----------------------------------------------------------------------------------------
 \section{Employment History}
 \begin{twenty}
-    
     \twentyitem
         {May 2019 -}
-		{Present}
-        {Software Developer (Senior/Principal)}
+        {Present}
+        {Principal Software Engineer}
         {\href{https://sentricmusic.com/}{Sentric Music}}
         {}
         {
-             My main responsibility at Sentric Music was to build a system to process royalties, this system had to scale to billions of records. \par 
-             As part of this I had to learn a significant amount about the Data Engineering space, pushing for Iceberg Adoption, learned Python during this period as well. \par
-
-             
-
-            In regards to the technology stack.
-
-            I introduced the Elastic stack for Observability via Serilog, this allowed monitoring of a massive number of items being processed.
-            Pushed for OTEL to continue evolving our approach.
-            Adopted Pulumi as our IAC provider for AWS Resource management.
-            Moved all repositories from Bitbucket(Mercuial) to GitHub.
-            Revamped our CI/CD pipeline continually, Jenkins to Github Actions. 
+          \begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+             \item Architected and engineered the core royalty processing system to scale reliably across billions of usage events and financial records.
+             \item Spearheaded enterprise Apache Iceberg adoption and Python data engineering tooling to modernize data lake warehousing.
+             \item Led technical strategy migrating legacy .NET Framework services to modern .NET, establishing a Storybook React design system backed by REST APIs.
+             \item Pioneered AI Code Agent workflows across engineering, optimizing developer experience and autonomous tooling adoption.
+             \item Introduced centralized observability via Serilog, Elastic Stack, and OpenTelemetry (OTEL) for real-time monitoring of event pipelines.
+             \item Standardized CI/CD on GitHub Actions and codified cloud infrastructure using Pulumi for AWS resource management.
+          \end{itemize}
+          \vspace{1mm}
         }
-        
+
     \twentyitem
         {Nov 2017 -}
-		{May 2019}
-        {Software Developer (Professional/ Senior)}
+        {May 2019}
+        {Senior Software Engineer}
         {\href{https://zuto.com/}{Zuto}}
         {}
         {
-            Building Lender Integrations. This had to be a scalable, observable cloud based solutions on AWS using maintaining and evolving a large codebase.
+          \begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+             \item Engineered high-availability cloud lender integrations on AWS, leading brownfield modernization and cloud porting of critical financial services.
+             \item Established rigorous uptime monitoring, synthetic health checks, and alerting across high-throughput lender API gateways.
+          \end{itemize}
+          \vspace{1mm}
         }
+
     \twentyitem
-    	{July 2014 -}
-		{Nov 2017}
-        {Software developer (Placement/ Graduate)}
+        {Jul 2014 -}
+        {Nov 2017}
+        {Software Engineer}
         {\href{https://autocodingsystems.com/}{AutoCoding Systems Ltd}}
         {}
         {
-            I built software that automated food packaging lines, deployed to factories all around the world. Built a number of core features especially around our Date Printing engine.  
-            \vspace{2mm}
+          \begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1pt,partopsep=0pt,parsep=0pt]
+             \item Built packaging line automation software deployed to factory floors worldwide, developing critical features for the automated date and code printing engine.
+             \item Engineered orchestration tooling and workflow logic in C\# on top of core device driver libraries for automated packaging machinery.
+          \end{itemize}
+          \vspace{1mm}
         }
-        
 \end{twenty}
 
 %----------------------------------------------------------------------------------------
@@ -152,27 +130,40 @@ I am now looking for a new challenge within an environment where I can have crea
 %----------------------------------------------------------------------------------------
 \section{Education}
 \begin{twenty}
-	\twentyitem
-    	{2012 -2016}
-        {University}
-        {Computer Science with a Year in Industry} 
-        {\href{https://www.liverpool.ac.uk/}{University of Liverpool}}
-        {\textbf{First Class} with Honours \vspace{1mm}}
-        {
-             My final year project involved creating a 3D maze generation tool which is available on GitHub, Called \href{https://github.com/rtkelly13/ProceduralGeneration3DMazes}{ProceduralGeneration3DMazes}. The dissertation focused on the properties of the generated mazes and I performed a statistical analysis on many different configurations and their results.\par
-            Leveraging technologies and practices from my placement (C\#, SOLID and TDD) to build a system in Unity 3D. 
-            \vspace{2mm}
-        }
-        
     \twentyitem
-    	{2010 - 2012}
-		{College}
-        {A-Levels}
-        {\href{http://www.carmel.ac.uk/}{Carmel College}}
-        {Computing \textbf{A}, Chemistry \textbf{A}, Maths \textbf{B}}
+        {2012 - 2016}
+        {}
+        {BSc Computer Science with a Year in Industry}
+        {}
+        {\href{https://www.liverpool.ac.uk/}{\textbf{University of Liverpool}} \hfill \textbf{First Class Honours}}
         {
-            
+             Final year dissertation on 3D procedural maze generation with statistical graph analysis, built in Unity 3D with C\#, SOLID, and TDD practices.}
+\end{twenty}
+
+%----------------------------------------------------------------------------------------
+%	 Open Source & Technical Contributions
+%----------------------------------------------------------------------------------------
+\section{Open Source \& Technical Contributions}
+\begin{twenty}
+    \twentyitem
+        {2024 - Present}
+        {}
+        {Parquet.SourceGenerator \& Parquet.TypeProvider}
+        {\href{https://github.com/rtkelly13/Parquet.SourceGenerator}{GitHub / NuGet}}
+        {\textbf{Creator \& Maintainer}}
+        {
+            High-performance Roslyn C\# source generators and F\# Type Providers emitting zero-reflection compile-time serialization for Apache Parquet.
+        }
+
+    \twentyitem
+        {2020 - Present}
+        {}
+        {Resultful \& Community Talks}
+        {\href{https://github.com/Resultful}{Resultful / YouTube}}
+        {\textbf{Author \& Speaker}}
+        {
+            Functional .NET error handling libraries and tech talks advocating F\#, compiler tooling, and robust domain modeling.
         }
 \end{twenty}
 
-\end{document} 
+\end{document}

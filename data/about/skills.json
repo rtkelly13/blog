@@ -1,0 +1,31 @@
+[
+  {
+    "category": "Core & Languages",
+    "items": [
+      "C# (.NET / Native AOT)",
+      "F# (Functional / Type Providers)",
+      "TypeScript (React / Next.js)",
+      "Python (Data Lake / PyIceberg)",
+      "SQL (MySQL / SQL Server)"
+    ]
+  },
+  {
+    "category": "Cloud, Data & Infrastructure",
+    "items": [
+      "AWS",
+      "Apache Iceberg / Parquet",
+      "IaC (Pulumi / Terraform)",
+      "Elasticsearch",
+      "OpenTelemetry (OTEL)"
+    ]
+  },
+  {
+    "category": "Engineering & Practices",
+    "items": [
+      "Distributed Systems",
+      "CI/CD (GitHub Actions)",
+      "AI Code Agent Workflows",
+      "TDD & High-Throughput Benchmarking"
+    ]
+  }
+]

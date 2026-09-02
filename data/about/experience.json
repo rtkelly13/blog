@@ -1,0 +1,36 @@
+[
+  {
+    "period": "May 2019 - Present",
+    "role": "Principal Software Engineer",
+    "company": "Sentric Music",
+    "companyUrl": "https://sentricmusic.com/",
+    "highlights": [
+      "Architected and engineered the core royalty processing system to scale reliably across billions of usage events and financial records.",
+      "Spearheaded enterprise Apache Iceberg adoption and Python data engineering tooling to modernize data lake warehousing.",
+      "Led technical strategy migrating legacy .NET Framework services to modern .NET, establishing a Storybook React design system backed by REST APIs.",
+      "Pioneered AI Code Agent workflows across engineering, optimizing developer experience and autonomous tooling adoption.",
+      "Introduced centralized observability via Serilog, Elastic Stack, and OpenTelemetry (OTEL) for real-time monitoring of event pipelines.",
+      "Standardized CI/CD on GitHub Actions and codified cloud infrastructure using Pulumi for AWS resource management."
+    ]
+  },
+  {
+    "period": "Nov 2017 - May 2019",
+    "role": "Senior Software Engineer",
+    "company": "Zuto",
+    "companyUrl": "https://zuto.com/",
+    "highlights": [
+      "Engineered high-availability cloud lender integrations on AWS, leading brownfield modernization and cloud porting of critical financial services.",
+      "Established rigorous uptime monitoring, synthetic health checks, and alerting across high-throughput lender API gateways."
+    ]
+  },
+  {
+    "period": "Jul 2014 - Nov 2017",
+    "role": "Software Engineer",
+    "company": "AutoCoding Systems Ltd",
+    "companyUrl": "https://autocodingsystems.com/",
+    "highlights": [
+      "Built packaging line automation software deployed to factory floors worldwide, developing critical features for the automated date and code printing engine.",
+      "Engineered orchestration tooling and workflow logic in C# on top of core device driver libraries for automated packaging machinery."
+    ]
+  }
+]
