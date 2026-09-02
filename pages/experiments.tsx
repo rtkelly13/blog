@@ -39,8 +39,8 @@ const experiments = [
     components: 3,
   },
   {
-    name: 'Backgrounds Lab',
-    path: '/experiments/backgrounds',
+    name: 'Backgrounds Gallery',
+    path: '/gallery/backgrounds',
     description:
       'Every background generator: 41 of them, animated, with ramps, contrast, density and a paper mode',
     icon: <Radio className="w-12 h-12" />,

@@ -195,3 +195,12 @@ machine-generated diagram exports.
 - `next-remote-watch` powers content hot-reload in the `start` script.
 - Mixed JS/TS in the data layer (`siteMetadata.js` vs `headerNavLinks.ts`).
 - Storybook uses the Vite adapter (`@storybook/nextjs-vite`).
+
+## Accessibility and long-term intent
+
+- [accessibility.md](./accessibility.md) — the WCAG target, what is enforced
+  where, and the known gaps.
+- [graphics-legibility.md](./graphics-legibility.md) — why a backdrop is
+  constrained from above, and the numbers that follow.
+- [ADR 0009](./adr/0009-design-system-is-the-durable-asset.md) — why the effort
+  here is disproportionate to a blog on purpose.
