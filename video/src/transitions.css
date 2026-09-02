@@ -1,0 +1,22 @@
+/*
+ * Every visual change must come from `useCurrentFrame()`.
+ *
+ * The design system carries 19 `transition` declarations, all hover-intent, so
+ * all inert in a video — until a composition animates a prop that happens to
+ * land on one. The browser then starts a 150ms wall-clock interpolation that
+ * Remotion's seeking knows nothing about, and the property lags the frame
+ * driving it by whatever the render happened to take. It is a race, so it does
+ * not reproduce identically between runs.
+ *
+ * CSS may describe a state. It may not describe a change between states.
+ */
+*,
+*::before,
+*::after {
+  /* biome-ignore lint/complexity/noImportantStyles: reversing the cascade is
+     the entire purpose. This has to beat every transition the design system
+     declares, from a file that knows nothing about their selectors. */
+  transition: none !important;
+  /* biome-ignore lint/complexity/noImportantStyles: as above. */
+  animation: none !important;
+}
