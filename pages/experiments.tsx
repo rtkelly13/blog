@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Beaker,
   Boxes,
   Palette,
@@ -46,6 +47,15 @@ const experiments = [
     icon: <Sparkles className="w-12 h-12" />,
     status: 'active',
     components: 6,
+  },
+  {
+    name: 'd3 Charts',
+    path: '/experiments/d3-charts',
+    description:
+      "A brutalist chart primitive on named d3 submodules — charting this repo's own bundle measurements, plus the d3-force determinism proof",
+    icon: <BarChart3 className="w-12 h-12" />,
+    status: 'active',
+    components: 3,
   },
   {
     name: 'Talk Animations',

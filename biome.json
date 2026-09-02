@@ -33,7 +33,18 @@
         "noArrayIndexKey": "off"
       },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "d3": "Import the named d3-* submodule instead. The meta-package is 18.1 KB gzip tree-shaken and 94.1 KB when the namespace escapes \u2014 see docs/d3-research.md.",
+              "d3-selection": "React owns the marks here; d3 computes only. See docs/d3-research.md.",
+              "d3-transition": "motion is the animation library; d3-transition brings a second clock. See docs/d3-research.md.",
+              "d3-axis": "d3-axis hardcodes font-family: sans-serif. Use scale.ticks() plus JSX. See docs/d3-research.md."
+            }
+          }
+        }
       },
       "security": {
         "noDangerouslySetInnerHtml": "off"
