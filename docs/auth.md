@@ -39,7 +39,7 @@ design and identity is enforced where writes happen.
 | Local dev (localhost:3002) | `keen-shark-231` (dev) | ✅ own OAuth app | ✅ enabled | `SITE_URL=http://localhost:3002`; dev server **must run on 3002** |
 | Feature-branch previews (Vercel) | Convex **preview deployments**, one per branch | ❌ (ephemeral callback URL — ADR-0004) | ✅ via project-default env vars; **sign-in button auto-offered** (`NEXT_PUBLIC_VERCEL_ENV === 'preview'`) | The recommended way to test feature branches — admin-gated pages (/ideas, /admin) are reachable on previews; see §6 |
 | CI (live-e2e workflow) | dedicated E2E deployment (or a preview) | ❌ | ✅ | Secrets in GitHub Actions; job self-activates when provisioned |
-| `test-github` branch | *none yet — deliberately* | (would be ✅) | ❌ hard-coded off in the client | Stable branch URL `https://my-blog-0j5s-git-test-github-rtkelly13s-projects.vercel.app` reserved for a pre-prod OAuth rehearsal env. With the per-ship prod OAuth check (§8) it may never be needed — dormant until decided |
+| `test-github` branch | *none yet — deliberately* | (would be ✅) | ❌ hard-coded off in the client | Stable branch URL `https://blog-git-test-github-rtkelly13s-projects.vercel.app` reserved for a pre-prod OAuth rehearsal env. With the per-ship prod OAuth check (§8) it may never be needed — dormant until decided |
 
 ## 4. The `e2e` bypass provider (shipped, PR #48)
 
@@ -160,7 +160,7 @@ Per-branch, zero-setup, isolated full-stack environments:
    preview deployment named for the branch, inheriting the defaults — so the
    bypass is armed on every preview automatically. Previews expire after ~5
    days' inactivity (free tier).
-3. **Testing**: `pnpm signin:e2e https://my-blog-0j5s-git-<branch>-….vercel.app`
+3. **Testing**: `pnpm signin:e2e https://blog-git-<branch>-….vercel.app`
    for a human; the harness/CI uses the same primitives headlessly. Branch
    URLs are deterministic aliases and stable across pushes.
 
