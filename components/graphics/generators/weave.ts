@@ -1,15 +1,6 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
-import {
-  cycles,
-  frame,
-  lerp,
-  mulberry32,
-  r2,
-  range,
-  TAU,
-  withAlpha,
-} from './shared';
+import { cycles, frame, ink, lerp, mulberry32, r2, range, TAU } from './shared';
 
 /* ── weave ────────────────────────────────────────────────────────────────── */
 
@@ -131,8 +122,15 @@ export default defineGenerator<Weave>({
     // One undulation period spans two pitches — over one crossing and under the
     // next — which is what makes the waviness agree with the over/under field.
     const k = Math.PI / pitch;
-    const edge = withAlpha(p.accent, 0.5);
     const phase = t * TAU * travel;
+
+    // Position on the ramp is the thread direction: warp at one end, weft at
+    // the other. It is the axis the whole generator is about — an interlace is
+    // two families of threads crossing — and with a ramp it makes the cloth
+    // read in two colours the way real woven fabric does, so which thread won
+    // a crossing is legible from hue alone.
+    const strand = (warp: boolean) => (warp ? 1 : 0);
+    const edge = (warp: boolean) => ink(p, strand(warp), 0.5);
 
     /** Centreline of a band at distance `s` along its own length. */
     const centre = (b: Band, s: number) =>
@@ -143,7 +141,7 @@ export default defineGenerator<Weave>({
     // shades survived, so over and under are readable in a still frame rather
     // than only in the geometry.
     const tint = (b: Band, warp: boolean) =>
-      withAlpha(p.accent, r2((warp ? 0.34 : 0.1) + b.tone * 0.18));
+      ink(p, strand(warp), r2((warp ? 0.34 : 0.1) + b.tone * 0.18));
 
     // Sampled finely enough that a period gets eight vertices; below that the
     // sine reads as a zigzag and the cloth looks creased rather than woven.
@@ -176,7 +174,7 @@ export default defineGenerator<Weave>({
       // Opaque first, then the accent over it. The opaque pass is the whole
       // point — it is what stops the band behind showing through.
       out += `<polygon points="${points}" fill="${p.occlusion}"/>`;
-      out += `<polygon points="${points}" fill="${tint(b, warp)}" stroke="${edge}" stroke-width="${p.strokeWidth}"/>`;
+      out += `<polygon points="${points}" fill="${tint(b, warp)}" stroke="${edge(warp)}" stroke-width="${p.strokeWidth}"/>`;
     };
 
     for (const b of rows) draw(ribbon(b, startX, endX, false), b, true);
@@ -217,7 +215,7 @@ export default defineGenerator<Weave>({
         // `none`: identical numbers, invisible ink.
         out += `<polygon points="${points}" fill="${on ? p.occlusion : 'none'}"/>`;
         out += `<polygon points="${points}" fill="${on ? tint(row, true) : 'none'}"/>`;
-        out += `<path d="${top}${bot}" fill="none" stroke="${on ? edge : 'none'}" stroke-width="${p.strokeWidth}"/>`;
+        out += `<path d="${top}${bot}" fill="none" stroke="${on ? edge(true) : 'none'}" stroke-width="${p.strokeWidth}"/>`;
       }
     }
 

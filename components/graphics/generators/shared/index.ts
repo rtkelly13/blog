@@ -45,6 +45,7 @@
  * | `motion` | `cycles` and `wobble` — the loop-closure primitives |
  * | `noise` | deterministic value noise; sample it on a circle to loop |
  * | `disorder` | the order-to-chaos ramp, hashed rather than drawn |
+ * | `ink` | choosing a colour: the ramp, `contrast`, and `centre()` |
  * | `svg` | the `<svg>` wrapper every `project` returns |
  * | `tiling` | lattice re-exports, and the travelling-field helper |
  *
@@ -58,6 +59,7 @@ export type { Rng } from '../../rng';
 export { chance, intRange, mulberry32, pick, range } from '../../rng';
 
 export * from './disorder';
+export * from './ink';
 export * from './math';
 export * from './motion';
 export * from './noise';

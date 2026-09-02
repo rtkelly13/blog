@@ -1,15 +1,16 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   chance,
   cycles,
   DRIFT_OF_FRAME,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -72,8 +73,15 @@ export default defineGenerator<Network>({
     return { nodes, edges };
   },
   project: ({ nodes, edges }, p, t) => {
-    const edgeColor = withAlpha(p.accent, 0.35);
-    const dotColor = withAlpha(p.accent, 0.95);
+    // A constellation has no depth and no ordering, so the one axis it is
+    // already about is *reach*: how far out from the origin a node sits. Radius
+    // from the centre, normalised by the half-diagonal, so the core takes one
+    // end of the ramp and the outliers the other and the graph reads as
+    // spreading outwards. Edges take the position of their midpoint, which puts
+    // a wire between the colours of the two nodes it joins.
+    const [ox, oy] = centre(p);
+    const maxR = Math.hypot(p.width / 2, p.height / 2);
+    const reach = (x: number, y: number) => Math.hypot(x - ox, y - oy) / maxR;
     const drift = Math.min(p.width, p.height) * DRIFT_OF_FRAME;
 
     // Each node orbits its sampled position. Edges are then drawn between the
@@ -90,10 +98,14 @@ export default defineGenerator<Network>({
 
     let lines = '';
     for (const [i, j] of edges) {
+      const mx = (at[i].x + at[j].x) / 2;
+      const my = (at[i].y + at[j].y) / 2;
+      const edgeColor = ink(p, reach(mx, my), 0.35);
       lines += `<line x1="${r2(at[i].x)}" y1="${r2(at[i].y)}" x2="${r2(at[j].x)}" y2="${r2(at[j].y)}" stroke="${edgeColor}" stroke-width="${p.strokeWidth}"/>`;
     }
     let dots = '';
     for (const n of at) {
+      const dotColor = ink(p, reach(n.x, n.y), 0.95);
       dots += `<circle cx="${r2(n.x)}" cy="${r2(n.y)}" r="${r2(n.rad)}" fill="${dotColor}"/>`;
     }
     return frame(p, lines + dots);

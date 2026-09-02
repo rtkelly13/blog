@@ -3,14 +3,15 @@ import type { Rng } from './shared';
 import {
   cycles,
   frame,
+  ink,
   lerp,
   mix,
   mulberry32,
   r2,
   range,
+  solidInk,
   TAU,
   valueNoise,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -172,6 +173,11 @@ export default defineGenerator<Terrain>({
     let out = '';
     for (let j = 0; j < rows; j++) {
       const depth = rows === 1 ? 1 : j / (rows - 1);
+      // Position on the ramp is `depth`, exactly as `ridgeline` uses it and for
+      // the same reason: distance is what this generator is about, and it is
+      // already carried by weight, relief and alpha. Putting hue on the same
+      // axis means the far rows and the near ones differ in every cue at once
+      // instead of the colour arguing with the perspective.
       // The band of cross-links reaching forward from the row behind. Emitted
       // as one path of `M`/`L` pairs rather than `cols` separate `<line>`s: the
       // same numbers, a third of the bytes, and one element instead of fifty.
@@ -180,7 +186,7 @@ export default defineGenerator<Terrain>({
         for (let i = 0; i < cols; i++) {
           band += `M${r2(xs[j - 1][i])} ${r2(ys[j - 1][i])} L${r2(xs[j][i])} ${r2(ys[j][i])} `;
         }
-        out += `<path d="${band.trim()}" fill="none" stroke="${withAlpha(p.accent, r2(lerp(0.12, 0.42, depth)))}" stroke-width="${r2(p.strokeWidth * 0.35)}"/>`;
+        out += `<path d="${band.trim()}" fill="none" stroke="${ink(p, depth, r2(lerp(0.12, 0.42, depth)))}" stroke-width="${r2(p.strokeWidth * 0.35)}"/>`;
       }
       // The row's vertices, written once and used twice: as the mask that hides
       // what is behind, and as the ridge line itself.
@@ -197,8 +203,8 @@ export default defineGenerator<Terrain>({
       // horizontal line across the sky.
       const lx = r2(-p.width * 0.2);
       const rx2 = r2(p.width * 1.2);
-      out += `<path d="M${lx} ${p.height} L${lx} ${r2(ys[j][0])} ${verts}L${rx2} ${r2(ys[j][cols - 1])} L${rx2} ${p.height} Z" fill="${mix(p.occlusion, p.accent, r2(lerp(0.02, 0.12, depth)))}" stroke="none"/>`;
-      out += `<path d="M${r2(xs[j][0])} ${r2(ys[j][0])} ${verts.trim()}" fill="none" stroke="${withAlpha(p.accent, r2(lerp(0.2, 0.9, depth)))}" stroke-width="${r2(p.strokeWidth * lerp(0.4, 1.15, depth))}" stroke-linejoin="round"/>`;
+      out += `<path d="M${lx} ${p.height} L${lx} ${r2(ys[j][0])} ${verts}L${rx2} ${r2(ys[j][cols - 1])} L${rx2} ${p.height} Z" fill="${mix(p.occlusion, solidInk(p, depth), r2(lerp(0.02, 0.12, depth)))}" stroke="none"/>`;
+      out += `<path d="M${r2(xs[j][0])} ${r2(ys[j][0])} ${verts.trim()}" fill="none" stroke="${ink(p, depth, r2(lerp(0.2, 0.9, depth)))}" stroke-width="${r2(p.strokeWidth * lerp(0.4, 1.15, depth))}" stroke-linejoin="round"/>`;
     }
     return frame(p, out);
   },

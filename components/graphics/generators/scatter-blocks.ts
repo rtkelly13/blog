@@ -4,13 +4,13 @@ import {
   cycles,
   DRIFT_OF_FRAME,
   frame,
+  ink,
   intRange,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -46,17 +46,20 @@ export default defineGenerator<Block[]>({
     return blocks;
   },
   project: (blocks, p, t) => {
-    const outline = withAlpha(p.accent, 0.5);
-    const faint = withAlpha(p.accent, 0.22);
-    const solid = withAlpha(p.accent, 0.95);
     let out = '';
     for (const b of blocks) {
+      // Size is the only thing that separates one piece of confetti from
+      // another — position is uniform noise and rotation is arbitrary — so it
+      // is the axis to ramp along: the small chips take one end and the big
+      // slabs the other, and the scatter gains a reading it did not have.
+      // Matches the `range(rng, 8, 46)` the sampler draws from.
+      const pos = (b.size - 8) / 38;
       const style =
         b.roll < 0.18
-          ? `fill="${solid}"`
+          ? `fill="${ink(p, pos, 0.95)}"`
           : b.roll < 0.5
-            ? `fill="${faint}"`
-            : `fill="none" stroke="${outline}" stroke-width="${p.strokeWidth}"`;
+            ? `fill="${ink(p, pos, 0.22)}"`
+            : `fill="none" stroke="${ink(p, pos, 0.5)}" stroke-width="${p.strokeWidth}"`;
       // A rock, not a spin. Whole turns would also close the loop, but only
       // *geometrically* — `rot + 720` and `rot` draw the same square while
       // being different strings, and normalising with `% 360` trades that for a

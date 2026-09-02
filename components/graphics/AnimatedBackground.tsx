@@ -51,12 +51,16 @@ export default function AnimatedBackground({
   style,
   seed,
   accent,
+  accents,
   background,
   occlusion,
   density,
   opacity,
   strokeWidth,
   disorder,
+  contrast,
+  originX,
+  originY,
   width,
   height,
 }: AnimatedBackgroundProps) {
@@ -65,6 +69,13 @@ export default function AnimatedBackground({
   const { resolvedTheme } = useTheme();
   const theme = graphicThemeDefaults(resolvedTheme);
 
+  // Depended on by *content*, not identity. A caller writing
+  // `accents={['#22d3ee', '#ec4899']}` inline hands over a fresh array every
+  // render, and an identity dependency would re-sample the whole generator each
+  // time — which is not merely wasteful, it is the per-frame re-sampling the
+  // sample/project split exists to prevent.
+  const accentKey = accents?.join(',');
+
   // Everything except `t`. Changing any of these re-samples, which is correct:
   // they are the params that define *what* is being drawn.
   const params = useMemo(
@@ -72,6 +83,10 @@ export default function AnimatedBackground({
       resolveParams(generator, {
         seed,
         accent: accent ?? theme.accent,
+        accents,
+        contrast,
+        originX,
+        originY,
         background: background ?? theme.background,
         occlusion: occlusion ?? theme.occlusion,
         density,
@@ -85,6 +100,10 @@ export default function AnimatedBackground({
       generator,
       seed,
       accent,
+      accentKey,
+      contrast,
+      originX,
+      originY,
       background,
       occlusion,
       density,
@@ -96,6 +115,7 @@ export default function AnimatedBackground({
       theme.accent,
       theme.background,
       theme.occlusion,
+      accents,
     ],
   );
 

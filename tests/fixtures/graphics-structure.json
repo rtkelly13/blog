@@ -1,4 +1,19 @@
 {
+  "brockmann-arcs": {
+    "elements": {
+      "g": 1,
+      "path": 14
+    },
+    "marks": 15,
+    "viewBox": "0 0 1280 720",
+    "colours": 4,
+    "bounds": [
+      0,
+      0,
+      1039,
+      918
+    ]
+  },
   "broken-ring": {
     "elements": {
       "g": 1,
@@ -151,6 +166,22 @@
       716
     ]
   },
+  "iso-blocks": {
+    "elements": {
+      "g": 1,
+      "polygon": 276,
+      "path": 69
+    },
+    "marks": 346,
+    "viewBox": "0 0 1280 720",
+    "colours": 48,
+    "bounds": [
+      125,
+      -25,
+      1218,
+      680
+    ]
+  },
   "iso-cubes": {
     "elements": {
       "g": 1,
@@ -182,6 +213,22 @@
       773
     ]
   },
+  "iso-terrain": {
+    "elements": {
+      "g": 1,
+      "polygon": 952,
+      "path": 238
+    },
+    "marks": 1191,
+    "viewBox": "0 0 1280 720",
+    "colours": 83,
+    "bounds": [
+      130,
+      72,
+      1060,
+      649
+    ]
+  },
   "kaleidoscope": {
     "elements": {
       "g": 1,
@@ -190,6 +237,21 @@
     "marks": 148,
     "viewBox": "0 0 1280 720",
     "colours": 19,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "line-circles": {
+    "elements": {
+      "g": 1,
+      "line": 88
+    },
+    "marks": 89,
+    "viewBox": "0 0 1280 720",
+    "colours": 2,
     "bounds": [
       0,
       0,
@@ -273,6 +335,21 @@
       1013
     ]
   },
+  "radial-dashes": {
+    "elements": {
+      "g": 1,
+      "line": 727
+    },
+    "marks": 728,
+    "viewBox": "0 0 1280 720",
+    "colours": 2,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
   "radial-spokes": {
     "elements": {
       "g": 1,
@@ -287,6 +364,21 @@
       360,
       640,
       360
+    ]
+  },
+  "resonance": {
+    "elements": {
+      "g": 1,
+      "path": 33
+    },
+    "marks": 34,
+    "viewBox": "0 0 1280 720",
+    "colours": 34,
+    "bounds": [
+      0,
+      -10,
+      1276,
+      731
     ]
   },
   "ribbon-grid": {
@@ -317,6 +409,21 @@
       217,
       1280,
       720
+    ]
+  },
+  "ripple": {
+    "elements": {
+      "g": 1,
+      "circle": 836
+    },
+    "marks": 837,
+    "viewBox": "0 0 1280 720",
+    "colours": 58,
+    "bounds": [
+      -28,
+      -26,
+      1319,
+      744
     ]
   },
   "rose-curve": {
@@ -362,6 +469,21 @@
       4,
       1280,
       715
+    ]
+  },
+  "spiral-dots": {
+    "elements": {
+      "g": 1,
+      "line": 540
+    },
+    "marks": 541,
+    "viewBox": "0 0 1280 720",
+    "colours": 49,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
     ]
   },
   "spiral-mesh": {
@@ -453,6 +575,36 @@
       0,
       1411,
       1403
+    ]
+  },
+  "truchet-mirror": {
+    "elements": {
+      "g": 1,
+      "path": 84
+    },
+    "marks": 85,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [
+      0,
+      0,
+      1452,
+      1433
+    ]
+  },
+  "truchet-single": {
+    "elements": {
+      "g": 1,
+      "path": 104
+    },
+    "marks": 105,
+    "viewBox": "0 0 1280 720",
+    "colours": 3,
+    "bounds": [
+      0,
+      0,
+      1417,
+      1363
     ]
   },
   "void-field": {

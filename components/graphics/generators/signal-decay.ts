@@ -4,12 +4,12 @@ import {
   chance,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── signal-decay ─────────────────────────────────────────────────────────── */
@@ -131,9 +131,14 @@ export default defineGenerator<Rule[]>({
         // phase; the increment is the local frequency times the step.
         phase += (TAU * rule.freq * env * dx) / p.width;
       }
-      const stroke = rule.hot
-        ? withAlpha(p.accent, 0.85)
-        : withAlpha(p.accent, 0.3);
+      // Position on the ramp is the rule's own place under the vertical
+      // window — the same `cos²` of `slot` that set its amplitude in `sample`,
+      // recomputed here rather than stored because it is derived, not drawn.
+      // The envelope is what this generator is about, so the live middle of the
+      // lens and the dead flat rules at the margins now differ in hue as well
+      // as in swing, and the eye is not the only thing telling them apart.
+      const lens = Math.cos(rule.slot * Math.PI) ** 2;
+      const stroke = rule.hot ? ink(p, lens, 0.85) : ink(p, lens, 0.3);
       out += `<path d="${d.trim()}" fill="none" stroke="${stroke}" stroke-width="${r2(rule.hot ? p.strokeWidth * 1.6 : p.strokeWidth)}"/>`;
     }
     return frame(p, out);

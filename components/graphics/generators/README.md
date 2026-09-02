@@ -20,6 +20,7 @@ export default defineGenerator<Mark[]>({
   label: 'My Generator',
   description: 'One line, under 140 characters — it is rendered as a caption.',
   group: 'lattice',                 // see GENERATOR_GROUPS in ../types.ts
+  speed: 0.6,                       // loop-duration multiplier; radial ones need < 1
   defaults: { density: 0.5 },       // merged over BASE_PARAMS
 
   sample: (p) => { /* consumes the rng; depends on everything except `t` */ },
@@ -47,6 +48,7 @@ against all of the following automatically, the moment it appears in the index:
 | peak displacement > 10px | "animated" must not mean "technically moving" |
 | no `NaN`, `Infinity` or `undefined` | at any `t`, at any density |
 | coordinates stay near the frame | bleed is fine, four frames out is a runaway |
+| radial generators declare `speed` < 1 | a turn at full reach covers the whole circumference |
 | under 400 KB as a data URI at full density | these get inlined into HTML |
 
 The three rules that catch people:
@@ -68,6 +70,50 @@ The three rules that catch people:
 Anything sampled — `density`, `disorder` — must not be animated. It moves a loop
 bound in `sample`, which re-rolls the composition. Only `t` is animatable.
 
+## Colour
+
+Never reach for `withAlpha(p.accent, a)`. Use `ink(p, pos, a)`, and `solidInk(p, pos)`
+where the fill must stay opaque (occlusion faces).
+
+```ts
+const stroke = ink(p, depth, 0.22 + depth * 0.68);
+```
+
+`pos` is a 0..1 **position on the ramp**, and choosing it is the actual design
+work — the plumbing is trivial. It must be an axis the generator is *already
+about*:
+
+| Generator | `pos` |
+| --- | --- |
+| `ridgeline`, `terrain-mesh` | depth of the range |
+| the radial family | normalised radius |
+| `iso-cubes` | column height |
+| `flow-field` | the weight field it already computes |
+| `flow-lines` | position along the line, so each is its own gradient |
+| `weave` | warp versus weft — the two thread families |
+
+An arbitrary position gives a gradient laid over the top like a filter. The
+generator's own axis gives one that reads as part of the form: `weave` in two
+colours by thread direction makes which thread won a crossing legible in a still
+frame, which no amount of alpha can do.
+
+Three things to know:
+
+- **With a single accent, `ink()` is byte-identical to `withAlpha()`.** That is
+  what let the ramp be adopted across generators pinned by goldens, and it is
+  why adopting it in a new place must never move one.
+- **A colour hoisted above the mark loop has to move inside it** once `pos`
+  varies per mark. Check the golden afterwards; that is the step that catches a
+  mistake here.
+- **If your marks are batched into shared `<path>` elements, the colour unit is
+  the batch, not the mark.** `phyllotaxis` can only ramp per band for exactly
+  this reason: re-batching would move every coordinate to a new document index
+  and break both the goldens and the coherence suite. Decide batching in
+  `sample` with that in mind.
+
+`contrast` and the ramp are applied by `ink()` itself, so nothing else has to
+know about them.
+
 ## What `./shared` gives you
 
 | Module | Responsibility |
@@ -76,6 +122,7 @@ bound in `sample`, which re-rolls the composition. Only `t` is animatable.
 | `motion` | `cycles`, `wobble` — the loop-closure primitives |
 | `noise` | deterministic value noise; sample it **on a circle** to loop |
 | `disorder` | the order-to-chaos ramp, hashed rather than drawn |
+| `ink` | `ink()`, `solidInk()`, and `centre()` for the origin |
 | `svg` | `frame()`, the wrapper every `project` returns |
 | `tiling` | lattice re-exports, and the travelling-field helper |
 

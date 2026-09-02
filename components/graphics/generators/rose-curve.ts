@@ -1,9 +1,11 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   chance,
   cycles,
   frame,
+  ink,
   intRange,
   lerp,
   mulberry32,
@@ -11,7 +13,6 @@ import {
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── rose-curve ───────────────────────────────────────────────────────────── */
@@ -115,8 +116,7 @@ export default defineGenerator<Rose[]>({
     return roses;
   },
   project: (roses, p, t) => {
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    const [cx, cy] = centre(p);
     // Sized off the diagonal, not the short edge. Tangent to the top and bottom
     // is the tidier disc and the weaker composition: at 16:9 it leaves a third
     // of the width empty on either side, so the flower floats in the middle of
@@ -124,10 +124,16 @@ export default defineGenerator<Rose[]>({
     // outermost petals leave the frame, which is what makes it read as a
     // background rather than as an illustration of a flower.
     const reach = (Math.hypot(p.width, p.height) / 2) * 0.62;
-    const faint = withAlpha(p.accent, 0.3);
-    const bright = withAlpha(p.accent, 0.95);
     let out = '';
-    for (const rose of roses) {
+    // Position on the ramp is the nesting index — the one thing that
+    // distinguishes one rose from another here, since radius is quantised to it
+    // and the composition *is* the nesting. The innermost rose takes one end of
+    // the ramp and the outermost the other, so reading outward from the middle
+    // now walks the ramp; the colours could not stay hoisted above the loop,
+    // because they vary per rose.
+    for (let n = 0; n < roses.length; n++) {
+      const rose = roses[n];
+      const pos = roses.length === 1 ? 1 : n / (roses.length - 1);
       const radius = reach * rose.scale;
       const spin = t * TAU * rose.turn;
       let d = '';
@@ -150,7 +156,7 @@ export default defineGenerator<Rose[]>({
         const y = cy + Math.sin(a) * r;
         d += `${i === 0 ? 'M' : 'L'}${r2(x)} ${r2(y)} `;
       }
-      out += `<path d="${d.trim()}Z" fill="none" stroke="${rose.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (rose.hot ? 1.5 : 0.9))}"/>`;
+      out += `<path d="${d.trim()}Z" fill="none" stroke="${rose.hot ? ink(p, pos, 0.95) : ink(p, pos, 0.3)}" stroke-width="${r2(p.strokeWidth * (rose.hot ? 1.5 : 0.9))}"/>`;
     }
     return frame(p, out);
   },

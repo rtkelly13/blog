@@ -1,4 +1,5 @@
 import type { GeneratorModule } from '../types';
+import brockmannArcs from './brockmann-arcs';
 import brokenRing from './broken-ring';
 import cellMask from './cell-mask';
 import contour from './contour';
@@ -9,26 +10,35 @@ import flowField from './flow-field';
 import flowLines from './flow-lines';
 import hexGrid from './hex-grid';
 import interference from './interference';
+import isoBlocks from './iso-blocks';
 import isoCubes from './iso-cubes';
 import isoGrid from './iso-grid';
+import isoTerrain from './iso-terrain';
 import kaleidoscope from './kaleidoscope';
+import lineCircles from './line-circles';
 import lissajous from './lissajous';
 import nodeNetwork from './node-network';
 import orbitRings from './orbit-rings';
 import phyllotaxis from './phyllotaxis';
 import polarMesh from './polar-mesh';
+import radialDashes from './radial-dashes';
 import radialSpokes from './radial-spokes';
+import resonance from './resonance';
 import ribbonGrid from './ribbon-grid';
 import ridgeline from './ridgeline';
+import ripple from './ripple';
 import roseCurve from './rose-curve';
 import scatterBlocks from './scatter-blocks';
 import signalDecay from './signal-decay';
+import spiralDots from './spiral-dots';
 import spiralMesh from './spiral-mesh';
 import spiralWarp from './spiral-warp';
 import sweptPolygons from './swept-polygons';
 import terrainMesh from './terrain-mesh';
 import triangleGrid from './triangle-grid';
 import truchetArcs from './truchet-arcs';
+import truchetMirror from './truchet-mirror';
+import truchetSingle from './truchet-single';
 import voidField from './void-field';
 import weave from './weave';
 
@@ -85,6 +95,16 @@ export const GENERATOR_MODULES: GeneratorModule<unknown>[] = [
   cellMask,
   cubeHelix,
   sweptPolygons,
+  truchetSingle,
+  truchetMirror,
+  radialDashes,
+  brockmannArcs,
+  lineCircles,
+  resonance,
+  ripple,
+  isoTerrain,
+  isoBlocks,
+  spiralDots,
 ] as GeneratorModule<unknown>[];
 
 /** Back-compat shape: id → the sample/project pair. */

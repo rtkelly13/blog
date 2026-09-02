@@ -5,11 +5,11 @@ import {
   cycles,
   disorderAt,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   scramble,
-  withAlpha,
   wobble,
 } from './shared';
 
@@ -58,9 +58,6 @@ export default defineGenerator<Cell[]>({
   project: (cells, p, t) => {
     const cw = lerp(120, 52, p.density);
     const ch = cw * 0.58;
-    const line = withAlpha(p.accent, 0.36);
-    const fill = withAlpha(p.accent, 0.22);
-    const hot = withAlpha(p.accent, 0.85);
     let out = '';
     for (const c of cells) {
       // The lattice cannot move without tearing, so the diamonds themselves
@@ -70,7 +67,17 @@ export default defineGenerator<Cell[]>({
       const hw = (cw / 2) * s;
       const hh = (ch / 2) * s;
       const path = `M${r2(c.cx)} ${r2(c.cy - hh)} L${r2(c.cx + hw)} ${r2(c.cy)} L${r2(c.cx)} ${r2(c.cy + hh)} L${r2(c.cx - hw)} ${r2(c.cy)} Z`;
-      out += `<path d="${path}" fill="${c.flare ? hot : c.filled ? fill : 'none'}" stroke="${line}" stroke-width="${p.strokeWidth}"/>`;
+      // `cx + cy` is the lattice's own axis: it counts steps along the
+      // isometric diagonal, the direction the rows actually recede in. A ramp
+      // laid on it reads as the plane going away from the viewer, where plain
+      // x or y would cut across the tiling.
+      const pos = (c.cx / p.width + c.cy / p.height) / 2;
+      const fill = c.flare
+        ? ink(p, pos, 0.85)
+        : c.filled
+          ? ink(p, pos, 0.22)
+          : 'none';
+      out += `<path d="${path}" fill="${fill}" stroke="${ink(p, pos, 0.36)}" stroke-width="${p.strokeWidth}"/>`;
     }
     return frame(p, out);
   },

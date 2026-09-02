@@ -4,6 +4,7 @@ import {
   cycles,
   disorderAt,
   frame,
+  ink,
   intRange,
   lerp,
   mulberry32,
@@ -11,7 +12,6 @@ import {
   range,
   scramble,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── spiral-warp ──────────────────────────────────────────────────────────── */
@@ -125,6 +125,11 @@ export default defineGenerator<Warp>({
       const theta = Math.atan2(dy, dx);
       const ramp = Math.max(0, 1 - r / reach);
       const grip = ramp * ramp * ramp;
+      // Position on the ramp is `grip`: the corners, which the warp never
+      // reaches and which stay a plain lattice, sit at one end, and the centre
+      // the spiral gathers everything into sits at the other. It is the same
+      // number that does the warping, so hue and deformation cannot disagree.
+
       // Zero on an arm, and signed either side of it.
       const arm = arms * (theta - rot) - twist * r;
       const off = Math.sin(arm);
@@ -143,7 +148,7 @@ export default defineGenerator<Warp>({
       const angle = tangent * grip;
       const hx = m.half * Math.cos(angle);
       const hy = m.half * Math.sin(angle);
-      out += `<line x1="${r2(px - hx)}" y1="${r2(py - hy)}" x2="${r2(px + hx)}" y2="${r2(py + hy)}" stroke="${withAlpha(p.accent, r2(m.tone))}" stroke-width="${p.strokeWidth}" stroke-linecap="round"/>`;
+      out += `<line x1="${r2(px - hx)}" y1="${r2(py - hy)}" x2="${r2(px + hx)}" y2="${r2(py + hy)}" stroke="${ink(p, grip, r2(m.tone))}" stroke-width="${p.strokeWidth}" stroke-linecap="round"/>`;
     }
     return frame(p, out);
   },

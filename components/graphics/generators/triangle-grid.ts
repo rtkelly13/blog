@@ -2,13 +2,13 @@ import { defineGenerator } from '../types';
 import type { Rng, Tiled } from './shared';
 import {
   frame,
+  ink,
   lattice,
   lerp,
   mulberry32,
   r2,
   scaledPath,
   wave,
-  withAlpha,
 } from './shared';
 
 /* ── triangle-grid ────────────────────────────────────────────────────────── */
@@ -38,7 +38,6 @@ export default defineGenerator<Tiled>({
     return { cells, rolls: cells.map(() => rng()) };
   },
   project: ({ cells, rolls }, p, t) => {
-    const line = withAlpha(p.accent, 0.26);
     let out = '';
     for (let i = 0; i < cells.length; i++) {
       const c = cells[i];
@@ -49,7 +48,13 @@ export default defineGenerator<Tiled>({
       // Continuous alpha, for the reason spelled out in `hex-grid`.
       const weight = 1 - rolls[i];
       const d = scaledPath(c, 0.62 + energy * 0.34, r2);
-      out += `<path d="${d}" fill="${withAlpha(p.accent, r2(0.02 + weight * energy * 0.62))}" stroke="${line}" stroke-width="${p.strokeWidth}"/>`;
+      // `u` is already the coordinate the travelling field is evaluated at —
+      // the diagonal the shimmer sweeps along — so it is the axis this
+      // generator is about, and reusing it puts the ramp exactly under the
+      // motion instead of across it. The antiphase offset is deliberately not
+      // included: it belongs to the timing, not to where the cell sits.
+      const fill = ink(p, u, r2(0.02 + weight * energy * 0.62));
+      out += `<path d="${d}" fill="${fill}" stroke="${ink(p, u, 0.26)}" stroke-width="${p.strokeWidth}"/>`;
     }
     return frame(p, out);
   },
