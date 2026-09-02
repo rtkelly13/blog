@@ -32,7 +32,8 @@ export default defineGenerator<Cell[]>({
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const cw = lerp(120, 52, p.density);
+    // Cell floor raised for the element budget: 52px gave 1,377 diamonds.
+    const cw = lerp(120, 68, p.density);
     const ch = cw * 0.58;
     const cells: Cell[] = [];
     for (let row = -1; row * ch * 0.5 < p.height + ch; row++) {

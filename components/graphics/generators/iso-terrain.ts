@@ -135,8 +135,11 @@ export default defineGenerator<Terrain>({
 
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
-    const cols = Math.round(lerp(9, 18, p.density));
-    const rows = Math.round(lerp(11, 22, p.density));
+    // Five polygons per cube, so the lattice is the element budget: at
+    // 18x22 this emitted 1,980 elements at density 1, which on its own is
+    // most of a 60fps frame in `innerHTML` reparse. 12x15 lands near 900.
+    const cols = Math.round(lerp(8, 12, p.density));
+    const rows = Math.round(lerp(10, 15, p.density));
     // Where in noise space this landscape is cut from. Drawn, not derived, so
     // the seed picks a genuinely different valley rather than the same one
     // viewed from a different corner.
