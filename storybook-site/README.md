@@ -59,7 +59,7 @@ to be ticked by hand once, per project.
 
 | Vercel project | Root directory | Builds |
 | --- | --- | --- |
-| `my-blog-0j5s` | repo root | the Next.js blog, at `ryankelly.dev` |
+| `blog` | repo root | the Next.js blog, at `ryankelly.dev` / `blog.ryankelly.dev` |
 | `blog-storybook` | `storybook-site` | this Storybook |
 
 `blog-storybook` is served on its generated `*.vercel.app` URL and composed into
