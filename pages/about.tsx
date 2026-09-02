@@ -2,6 +2,7 @@ import {
   Briefcase,
   Download,
   ExternalLink,
+  FolderGit2,
   GraduationCap,
   Sparkles,
   Terminal,
@@ -15,6 +16,7 @@ import educationData from '@/data/about/education.json';
 import experienceData from '@/data/about/experience.json';
 import profileData from '@/data/about/profile.json';
 import skillsData from '@/data/about/skills.json';
+import projectsData from '@/data/projectsData';
 
 export const getStaticProps: GetStaticProps = async () => {
   return {
@@ -23,6 +25,7 @@ export const getStaticProps: GetStaticProps = async () => {
       skills: skillsData,
       experience: experienceData,
       education: educationData,
+      projects: projectsData,
     },
   };
 };
@@ -32,6 +35,7 @@ export default function About({
   skills,
   experience,
   education,
+  projects,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
@@ -210,6 +214,75 @@ export default function About({
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Open Source & Projects */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between border-b-2 border-zinc-800 pb-2">
+            <div className="flex items-center gap-2">
+              <FolderGit2 className="w-5 h-5 text-brutalist-cyberOrange" />
+              <h2 className="text-xl font-bold uppercase text-white tracking-wider">
+                Open Source &amp; Projects
+              </h2>
+            </div>
+            <a
+              href="/projects"
+              className="text-xs font-bold text-brutalist-cyan hover:underline uppercase tracking-wider flex items-center gap-1"
+            >
+              View All &gt;
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {projects.map((project) => (
+              <div
+                key={project.title}
+                className="bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors p-5 rounded-md flex flex-col justify-between space-y-4"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-white uppercase tracking-wider">
+                      {project.title}
+                    </h3>
+                    {project.asciiArt && (
+                      <span className="font-mono text-xs text-brutalist-cyberOrange select-none">
+                        {project.asciiArt}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    {project.description}
+                  </p>
+                </div>
+
+                <div className="space-y-3 pt-2 border-t border-zinc-900">
+                  {project.tags && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {project.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 text-[10px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-300 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {project.href && (
+                    <a
+                      href={project.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-brutalist-cyan hover:underline font-semibold"
+                    >
+                      <span>Code &amp; Repository</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>

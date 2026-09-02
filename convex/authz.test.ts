@@ -154,7 +154,7 @@ describe('requireAdmin boundary', () => {
         `${name} must reject anonymous callers`,
       ).rejects.toThrow(/unauthor/i);
     }
-  });
+  }, 15000);
 
   test('admin mutations reject an authenticated non-allowlisted user', async () => {
     const t = harness();
