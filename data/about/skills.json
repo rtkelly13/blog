@@ -22,10 +22,8 @@
   {
     "category": "Engineering & Practices",
     "items": [
-      "Roslyn Source Generators",
-      "Compiler Plugins / Type Providers",
-      "CI/CD (GitHub Actions)",
       "Distributed Systems",
+      "CI/CD (GitHub Actions)",
       "AI Code Agent Workflows",
       "TDD & High-Throughput Benchmarking"
     ]

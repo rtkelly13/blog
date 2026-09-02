@@ -97,12 +97,9 @@ const texContent = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Command for printing skill overview
 \\newcommand\\skils{
-    \\href{https://github.com/rtkelly13/Parquet.SourceGenerator}{Creator of \\textbf{Parquet.SourceGenerator} \\& \\textbf{Parquet.TypeProvider} for zero-reflection high-throughput data processing.}
-    
-    \\vspace{1.5mm}
     \\href{https://www.meetup.com/aws-liverpool-user-group/}{Co-organizer of the \\textbf{AWS Liverpool User Group} \\& technical speaker on functional cloud architectures.}
     
-    \\vspace{1.5mm}
+    \\vspace{2mm}
 ${skillsLatex}
 }
 
@@ -140,7 +137,7 @@ ${skillsLatex}
 
 ${escapeLatex(profile.summary)}
 
-\\vspace{2mm}
+\\vspace{1mm}
 
 %----------------------------------------------------------------------------------------
 %	 Employment
@@ -156,6 +153,32 @@ ${experienceLatex}
 \\section{Education}
 \\begin{twenty}
 ${educationLatex}
+\\end{twenty}
+
+%----------------------------------------------------------------------------------------
+%	 Open Source & Technical Contributions
+%----------------------------------------------------------------------------------------
+\\section{Open Source \\& Technical Contributions}
+\\begin{twenty}
+    \\twentyitem
+        {2024 - Present}
+        {}
+        {Parquet.SourceGenerator \\& Parquet.TypeProvider}
+        {\\href{https://github.com/rtkelly13/Parquet.SourceGenerator}{GitHub / NuGet}}
+        {\\textbf{Creator \\& Maintainer}}
+        {
+            High-performance Roslyn C\\# source generators and F\\# Type Providers emitting zero-reflection compile-time serialization for Apache Parquet.
+        }
+
+    \\twentyitem
+        {2020 - Present}
+        {}
+        {Resultful \\& Community Talks}
+        {\\href{https://github.com/Resultful}{Resultful / YouTube}}
+        {\\textbf{Author \\& Speaker}}
+        {
+            Functional .NET error handling libraries and tech talks advocating F\\#, compiler tooling, and robust domain modeling.
+        }
 \\end{twenty}
 
 \\end{document}
