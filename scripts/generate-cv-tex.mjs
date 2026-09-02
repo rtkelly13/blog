@@ -76,14 +76,14 @@ const educationLatex = education
     const details = edu.details
       ? `\n             ${escapeLatex(edu.details)} \\vspace{1mm}`
       : '';
-    const grade = edu.grade ? `{\\textbf{${escapeLatex(edu.grade)}}}` : '{}';
+    const gradeText = edu.grade ? `\\textbf{${escapeLatex(edu.grade)}}` : '';
 
     return `    \\twentyitem
         {${escapeLatex(edu.period)}}
         {}
         {${escapeLatex(edu.qualification)}}
         {\\href{${edu.institutionUrl}}{${escapeLatex(edu.institution)}}}
-        ${grade}
+        {${gradeText}}
         {${details}}`;
   })
   .join('\n\n');

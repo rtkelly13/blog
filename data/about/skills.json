@@ -1,7 +1,13 @@
 [
   {
     "category": "Core & Languages",
-    "items": [".NET (C# / F# / Native AOT)", "TypeScript", "Python", "SQL"]
+    "items": [
+      "C# (.NET 9, Native AOT, Roslyn)",
+      "F# (Functional Architecture, Type Providers)",
+      "TypeScript (React, Next.js, Node)",
+      "Python (Data Lake & PyIceberg)",
+      "SQL (PostgreSQL, SQL Server)"
+    ]
   },
   {
     "category": "Cloud, Data & Infrastructure",

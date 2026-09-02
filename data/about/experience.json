@@ -19,7 +19,8 @@
     "company": "Zuto",
     "companyUrl": "https://zuto.com/",
     "highlights": [
-      "Engineered high-availability cloud lender integrations on AWS, maintaining and modernizing scalable fintech services with strict observability standards."
+      "Engineered high-availability cloud lender integrations on AWS, maintaining and modernizing scalable fintech services with strict observability standards.",
+      "Transitioned monolithic backend services to event-driven microservices on AWS (ECS, Lambda, SQS), significantly increasing loan application throughput."
     ]
   },
   {
@@ -28,7 +29,8 @@
     "company": "AutoCoding Systems Ltd",
     "companyUrl": "https://autocodingsystems.com/",
     "highlights": [
-      "Built packaging line automation software deployed to factory floors worldwide, developing critical features for the automated date and code printing engine."
+      "Built packaging line automation software deployed to factory floors worldwide, developing critical features for the automated date and code printing engine.",
+      "Engineered high-performance device communication protocols and real-time desktop UI controls in C# and WPF for mission-critical industrial packaging."
     ]
   }
 ]
