@@ -169,27 +169,37 @@ describe('generator coherence (the property animation needs)', () => {
   );
 
   it.each(cases)(
-    '%s: every value moves continuously, frame to frame',
+    '%s: moves smoothly relative to how far it travels',
     (_name, gen) => {
-      // Bound set from measurement, not guessed: the fastest mark in the set is
-      // a scatter-block at 1.68 units per step. Raising every amplitude to make
-      // the motion visible did not move that — capping the cycle counts at 2
-      // lowered the rate even as the distance grew. A generator that re-rolled
-      // between frames would blow past this by orders of magnitude, which is
-      // what the bound is for.
-      const MAX_STEP_DELTA = 3;
+      // Measured as a ratio, not an absolute distance.
+      //
+      // This was `worst < 3` — a number read off the wobbling generators, which
+      // all move a mark a little about a fixed point. `ridgeline` translates a
+      // whole silhouette instead, so it legitimately moves 20 units a step and
+      // failed a bound that was never a law, just the previous set's ceiling.
+      //
+      // The property actually worth testing is scale-free: smooth motion covers
+      // its distance in many small steps, so peak displacement is far larger
+      // than any single step. A generator re-rolling between frames reaches its
+      // full range in *one* step, so the ratio collapses to about 1. Every
+      // generator here scores 4.6 or better and most score 35+; the threshold
+      // catches the failure without pinning anything to a canvas size.
+      const MIN_SMOOTHNESS = 4;
       const p = params({ seed: 7, density: 0.6 });
       const s = gen.sample(p);
-      let prev = numbers(gen.project(s, p, 0));
+      const base = numbers(gen.project(s, p, 0));
+      let prev = base;
+      let peak = 0;
       let worst = 0;
       for (let i = 1; i <= STEPS; i++) {
         const next = numbers(gen.project(s, p, i / STEPS));
-        for (let k = 0; k < prev.length; k++) {
+        for (let k = 0; k < base.length; k++) {
+          peak = Math.max(peak, Math.abs(next[k] - base[k]));
           worst = Math.max(worst, Math.abs(next[k] - prev[k]));
         }
         prev = next;
       }
-      expect(worst).toBeLessThan(MAX_STEP_DELTA);
+      expect(peak / worst).toBeGreaterThan(MIN_SMOOTHNESS);
     },
   );
 
@@ -221,6 +231,62 @@ describe('generator coherence (the property animation needs)', () => {
     for (let i = 0; i <= STEPS; i++) {
       expect(gen.project(s, p, i / STEPS)).not.toContain('NaN');
     }
+  });
+});
+
+describe('ridgeline parallax', () => {
+  interface Ridge {
+    speed: number;
+    harmonics: { freq: number }[];
+  }
+
+  const ridges = () => {
+    const gen = GENERATOR_LIST.find((g) => g.name === 'ridgeline');
+    if (!gen) throw new Error('ridgeline is not registered');
+    return gen.sample(params({ seed: 7, density: 0.6 })) as Ridge[];
+  };
+
+  it('drifts faster the nearer the range', () => {
+    // The parallax, asserted rather than eyeballed. Layers are sampled far to
+    // near, so speed must rise monotonically — a range that overtook the one in
+    // front of it would read as the depth order inverting.
+    const speeds = ridges().map((r) => r.speed);
+    expect(speeds.length).toBeGreaterThan(2);
+    for (let i = 1; i < speeds.length; i++) {
+      expect(speeds[i]).toBeGreaterThanOrEqual(speeds[i - 1]);
+    }
+    expect(speeds[speeds.length - 1]).toBeGreaterThan(speeds[0]);
+  });
+
+  it('never crosses the frame in a loop', () => {
+    // What "too fast" meant concretely: this used to reach 3 frame-widths per
+    // loop, which blurs rather than drifts.
+    for (const r of ridges()) {
+      expect(r.speed).toBeGreaterThan(0);
+      expect(r.speed).toBeLessThan(0.5);
+    }
+  });
+
+  it('gives every harmonic a whole number of cycles per loop', () => {
+    // This is *why* the speeds can be fractional at all. Each frequency is a
+    // multiple of the layer's base, so `freq * speed` is an integer and the
+    // range lands exactly where it started — the loop-closure test proves the
+    // result, this one names the mechanism.
+    for (const r of ridges()) {
+      for (const h of r.harmonics) {
+        expect(h.freq * r.speed).toBeCloseTo(Math.round(h.freq * r.speed), 10);
+      }
+    }
+  });
+
+  it('samples finely enough not to alias its own peaks', () => {
+    // `1 - |sin|` peaks twice per period, and the projection samples 192 times
+    // across the frame. Below about four samples per peak the corners alias
+    // into noise, which is the opposite of the crisp silhouette intended.
+    const top = Math.max(
+      ...ridges().flatMap((r) => r.harmonics.map((h) => h.freq)),
+    );
+    expect(192 / (2 * top)).toBeGreaterThan(3);
   });
 });
 

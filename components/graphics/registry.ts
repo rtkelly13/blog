@@ -41,6 +41,24 @@ const META: Record<
     description: 'Brutalist confetti of rotated squares — outlined to solid.',
     defaults: { density: 0.5 },
   },
+  'hex-grid': {
+    label: 'Hex Grid',
+    description:
+      'Honeycomb lit by a wave crossing it; cells breathe with the field.',
+    defaults: { density: 0.5 },
+  },
+  'triangle-grid': {
+    label: 'Triangle Grid',
+    description:
+      'Interlocking triangles, the two orientations driven in antiphase.',
+    defaults: { density: 0.5 },
+  },
+  ridgeline: {
+    label: 'Ridgeline',
+    description:
+      'Layered angular mountains, parallaxing — depth by contrast, not perspective.',
+    defaults: { density: 0.55, strokeWidth: 2 },
+  },
 };
 
 export const GENERATOR_LIST: Generator[] = Object.entries(
