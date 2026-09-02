@@ -62,6 +62,7 @@ export default defineGenerator<Orbit[]>({
   description:
     'Rings of beads that gather toward a focus and scatter back, wandering an outer band.',
   group: 'radial',
+  sketch: true,
   // Slower than the lattice generators, and the reason is geometric: a turn
   // at full reach covers the whole circumference, so what reads as a stately
   // rotation on a small form is a blur on a frame-filling one. See

@@ -32,6 +32,10 @@ export default defineGenerator<Tiled>({
   description:
     'Honeycomb lit by a wave crossing it; cells breathe with the field.',
   group: 'lattice',
+  sketch: true,
+  // Filled cells cover most of the frame, and on paper that is a grey wash
+  // rather than the recessive tone it reads as on black.
+  sketchWeight: 0.45,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

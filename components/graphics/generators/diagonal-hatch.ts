@@ -27,6 +27,7 @@ export default defineGenerator<Rule[]>({
   label: 'Diagonal Hatch',
   description: 'Parallel 45° rules — a few pop, the rest stay ghostly.',
   group: 'lattice',
+  sketch: true,
   defaults: { density: 0.55, strokeWidth: 2 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

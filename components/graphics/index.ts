@@ -7,6 +7,7 @@ export {
   BRUTALIST_ACCENTS,
   graphicThemeDefaults,
   PAPER_ACCENTS,
+  PAPER_SWATCHES,
   SURFACES,
   withAlpha,
 } from './palette';

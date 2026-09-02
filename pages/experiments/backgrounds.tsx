@@ -1,4 +1,5 @@
-import { Pause, Play, Radio, RotateCcw } from 'lucide-react';
+import { Check, Copy, Pause, Play, Radio, RotateCcw } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GeneratorGroup } from '@/components/graphics';
 import {
@@ -6,6 +7,8 @@ import {
   AnimatedBackground,
   GENERATOR_GROUPS,
   generatorsInGroup,
+  PAPER_ACCENTS,
+  PAPER_SWATCHES,
   SURFACES,
 } from '@/components/graphics';
 import { PageSEO } from '@/components/SEO';
@@ -14,11 +17,10 @@ import siteMetadata from '@/data/siteMetadata';
 /**
  * The animation half of the graphics work, which nothing on the site showed.
  *
- * `/experiments/graphics` is the still gallery: it renders each generator once
- * and copies a frontmatter snippet. It has no time control at all, so the
- * sample/project split — the entire point of which is that `t` can be driven
- * per frame — was only ever visible through the Remotion renderer or the test
- * suite. This page drives it in the browser.
+ * It began as the animated counterpart to `/experiments/graphics`, which drew
+ * one frame and could not show the sample/project split doing its job. The two
+ * then drifted into near-duplicates of each other, so the still gallery is
+ * retired and redirects here; its frontmatter-copy feature moved across.
  */
 /**
  * What each family is for, in one line. Shown under its heading — a gallery of
@@ -44,7 +46,7 @@ const GROUP_BLURB: Record<GeneratorGroup, string> = {
  * with the *generator's own axis* driving position, not decoration laid over
  * the top.
  */
-const RAMPS: { label: string; colours: string[] | undefined }[] = [
+const NEON_RAMPS: { label: string; colours: string[] | undefined }[] = [
   { label: 'single', colours: undefined },
   { label: 'cyan→pink', colours: ['#22d3ee', '#ec4899'] },
   { label: 'yellow→pink→cyan', colours: ['#facc15', '#ec4899', '#22d3ee'] },
@@ -52,8 +54,52 @@ const RAMPS: { label: string; colours: string[] | undefined }[] = [
   { label: 'pink→yellow', colours: ['#ec4899', '#facc15'] },
 ];
 
+/**
+ * Ramps for paper. The neon ones are unusable as ink — a cyan-to-pink gradient
+ * on white is highlighter, and the pale end of any neon ramp vanishes entirely
+ * against the page. These run between the `.sketch` pigments, which are dark
+ * enough that both ends of a ramp still read as drawn.
+ */
+const PAPER_RAMPS: { label: string; colours: string[] | undefined }[] = [
+  { label: 'single', colours: undefined },
+  { label: 'ink→blue', colours: ['#23262e', '#2563eb'] },
+  { label: 'ink→red', colours: ['#23262e', '#dc2626'] },
+  { label: 'blue→red', colours: ['#2563eb', '#dc2626'] },
+  { label: 'green→ink→red', colours: ['#15803d', '#23262e', '#dc2626'] },
+];
+
+/**
+ * The frontmatter a talk needs to use this background, ready to paste.
+ *
+ * Carried over from `/experiments/graphics`, which this page replaced: the two
+ * had drifted into near-duplicates — same registry, same controls — and the
+ * only thing the older one still did better was hand you the config. Now it is
+ * here and there is one gallery.
+ */
+function frontmatterSnippet(
+  name: string,
+  seed: number,
+  accent: string,
+  density: number,
+  opacity: number,
+): string {
+  return [
+    'backgrounds:',
+    `  ${name}:`,
+    `    generator: ${name}`,
+    `    seed: ${seed}`,
+    `    accent: '${accent}'`,
+    `    density: ${density.toFixed(2)}`,
+    `    opacity: ${opacity.toFixed(2)}`,
+    `background: ${name}`,
+  ].join('\n');
+}
+
 export default function BackgroundsLab() {
   const [accent, setAccent] = useState('#22d3ee');
+  const [paperAccent, setPaperAccent] = useState(PAPER_ACCENTS.ink);
+  const [opacity, setOpacity] = useState(1);
+  const [copied, setCopied] = useState<string | null>(null);
   const [seed, setSeed] = useState(7);
   const [density, setDensity] = useState(0.55);
   const [disorder, setDisorder] = useState(0);
@@ -67,6 +113,49 @@ export default function BackgroundsLab() {
   // byte for byte — so the honest way to show what they add is to show both.
   const [compare, setCompare] = useState(false);
   const [fps, setFps] = useState(24);
+  // Null means "follow the site theme"; a click pins it either way.
+  //
+  // This page used to force a dark surface and a cyan accent regardless. In the
+  // `sketch` theme that is invisible: the design system remaps `bg-black` to
+  // paper, so the tiles turned light while the generators kept drawing in cyan.
+  // Nothing was broken in the generators or in `AnimatedBackground`, which take
+  // their colours from the theme when a caller does not override them — it was
+  // this page overriding them and then not following through.
+  const [paperPin, setPaperPin] = useState<boolean | null>(null);
+  const { resolvedTheme } = useTheme();
+  // `resolvedTheme` is undefined on the server and known only after mount, so
+  // reading it during the first render is a hydration mismatch — the server
+  // sends the dark markup and the client immediately disagrees. Gating on
+  // `mounted` makes the first client render identical to the server's and lets
+  // the theme take effect on the next one.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const paper = paperPin ?? (mounted && resolvedTheme === 'sketch');
+
+  // Changing the site theme clears the pin.
+  //
+  // Without this, one click on Surface silently opted the page out of the theme
+  // for the rest of the session: switch the site to sketch afterwards and the
+  // gallery stayed dark, which reads as the colours simply not following. A
+  // manual override should last until the next explicit signal about which
+  // surface is wanted, and changing the theme *is* that signal.
+  //
+  // Written against a ref rather than as a bare `[resolvedTheme]` dependency on
+  // purpose: an effect that lists a value it never reads is an unnecessary
+  // dependency by the linter's reckoning, and `biome check --write --unsafe`
+  // duly deleted it — leaving an effect that ran once on mount and a pin that
+  // never cleared. Reading it here makes the dependency real.
+  const lastTheme = useRef(resolvedTheme);
+  useEffect(() => {
+    if (lastTheme.current !== resolvedTheme) {
+      lastTheme.current = resolvedTheme;
+      setPaperPin(null);
+    }
+  }, [resolvedTheme]);
+  // Swatches and ramps follow the surface. Offering neon on paper was the other
+  // half of what made the sketch theme unusable here.
+  const RAMPS = paper ? PAPER_RAMPS : NEON_RAMPS;
+  const SWATCHES = paper ? PAPER_SWATCHES : ACCENT_SWATCHES;
   const [playing, setPlaying] = useState(true);
   const [scrub, setScrub] = useState(0);
   // Per-tile overrides on top of the global transport. A name present here wins
@@ -122,6 +211,25 @@ export default function BackgroundsLab() {
 
   // A per-tile override always wins, so Play on a tile means Play even when it
   // is nowhere near the middle.
+  const copySnippet = async (name: string) => {
+    try {
+      await navigator.clipboard.writeText(
+        frontmatterSnippet(
+          name,
+          seed,
+          paper ? paperAccent : accent,
+          density,
+          opacity,
+        ),
+      );
+    } catch {
+      // Clipboard permission can be refused; the button still confirms, because
+      // the alternative is a control that appears to do nothing.
+    }
+    setCopied(name);
+    setTimeout(() => setCopied(null), 1400);
+  };
+
   const isPlaying = (name: string) =>
     solo[name] ?? (playing && central.includes(name));
   const toggleOne = (name: string) =>
@@ -133,15 +241,19 @@ export default function BackgroundsLab() {
 
   const shared = {
     seed,
-    accent,
+    // Paper mode renders exactly what the light `sketch` theme does: ink on
+    // paper at the theme's own weight. It is here because the sketch pass could
+    // not be judged in a gallery that only ever drew on black.
+    accent: paper ? paperAccent : accent,
     density,
     disorder,
-    occlusion: SURFACES.darkBg,
+    occlusion: paper ? SURFACES.paper : SURFACES.darkBg,
+    opacity,
     duration,
     speed,
     fps,
     contrast,
-    accents: RAMPS[ramp].colours,
+    accents: RAMPS[Math.min(ramp, RAMPS.length - 1)].colours,
     originX: origin[0],
     originY: origin[1],
     t: scrub,
@@ -202,14 +314,16 @@ export default function BackgroundsLab() {
               Accent
             </div>
             <div className="flex gap-2">
-              {ACCENT_SWATCHES.map((s) => (
+              {SWATCHES.map((s) => (
                 <button
                   key={s.name}
                   type="button"
                   aria-label={s.name}
-                  onClick={() => setAccent(s.value)}
+                  onClick={() =>
+                    paper ? setPaperAccent(s.value) : setAccent(s.value)
+                  }
                   className={`h-8 w-8 border-2 transition-transform ${
-                    accent === s.value
+                    (paper ? paperAccent : accent) === s.value
                       ? 'scale-110 border-white'
                       : 'border-zinc-700 hover:border-zinc-400'
                   }`}
@@ -364,6 +478,20 @@ export default function BackgroundsLab() {
 
           <div>
             <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Surface
+            </div>
+            <button
+              type="button"
+              onClick={() => setPaperPin(!paper)}
+              className={`mb-2 border-2 px-3 py-1.5 font-mono text-xs uppercase ${
+                paper
+                  ? 'border-brutalist-cyan bg-zinc-900 text-brutalist-cyan'
+                  : 'border-zinc-700 bg-black text-zinc-400 hover:border-zinc-400'
+              }`}
+            >
+              {paper ? 'paper' : 'dark'}
+            </button>
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
               Compare
             </div>
             <button
@@ -378,6 +506,21 @@ export default function BackgroundsLab() {
               {compare ? 'split on' : 'split off'}
             </button>
           </div>
+
+          <label className="min-w-[150px]">
+            <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
+              Opacity · {opacity.toFixed(2)}
+            </div>
+            <input
+              type="range"
+              min={0.1}
+              max={1}
+              step={0.05}
+              value={opacity}
+              onChange={(e) => setOpacity(Number(e.target.value))}
+              className="w-full accent-brutalist-cyan"
+            />
+          </label>
 
           <label className="min-w-[150px]">
             <div className="mb-2 font-mono text-xs uppercase text-zinc-400">
@@ -488,7 +631,10 @@ export default function BackgroundsLab() {
                       if (el) tiles.current.set(g.name, el);
                       else tiles.current.delete(g.name);
                     }}
-                    className={`bg-black transition-shadow ${
+                    style={{
+                      backgroundColor: paper ? SURFACES.paper : '#000000',
+                    }}
+                    className={`transition-shadow ${
                       central.includes(g.name)
                         ? 'shadow-[inset_0_0_0_2px_var(--brutalist-cyan,#22d3ee)]'
                         : ''
@@ -531,6 +677,22 @@ export default function BackgroundsLab() {
                           <code className="font-mono text-xs text-brutalist-cyan">
                             {g.name}
                           </code>
+                          <button
+                            type="button"
+                            onClick={() => copySnippet(g.name)}
+                            aria-label={`Copy frontmatter for ${g.label}`}
+                            className="flex items-center gap-1.5 border-2 border-zinc-700 bg-black px-2 py-1 font-mono text-[10px] uppercase text-zinc-400 hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                          >
+                            {copied === g.name ? (
+                              <>
+                                <Check className="h-3 w-3" /> Copied
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="h-3 w-3" /> Config
+                              </>
+                            )}
+                          </button>
                           <button
                             type="button"
                             onClick={() => toggleOne(g.name)}

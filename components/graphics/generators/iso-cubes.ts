@@ -129,6 +129,10 @@ export default defineGenerator<Cube[]>({
   description:
     'Stacked cubes on a rolling height field — opaque faces, so depth survives.',
   group: 'isometric',
+  sketch: true,
+  // Filled cells cover most of the frame, and on paper that is a grey wash
+  // rather than the recessive tone it reads as on black.
+  sketchWeight: 0.55,
   defaults: { density: 0.4, strokeWidth: 1.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

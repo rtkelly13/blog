@@ -1,7 +1,7 @@
 import { useTheme } from 'next-themes';
 import { useMemo } from 'react';
 import { graphicThemeDefaults } from './palette';
-import { renderGraphic } from './registry';
+import { getGenerator, renderGraphic } from './registry';
 import type { GraphicParams } from './types';
 
 interface GeneratedBackgroundProps extends Partial<GraphicParams> {
@@ -39,7 +39,14 @@ export default function GeneratedBackground({
   // under the light `sketch` theme, neon otherwise. An explicit `accent` (e.g.
   // a talk's signature colour, or the gallery picker) always wins.
   const { resolvedTheme } = useTheme();
-  const themedAccent = accent ?? graphicThemeDefaults(resolvedTheme).accent;
+  const theme = graphicThemeDefaults(resolvedTheme);
+  const themedAccent = accent ?? theme.accent;
+  // Only in the light theme, and only as much as the generator asks for — see
+  // `GeneratorModule.sketchWeight`.
+  const paperWeight =
+    resolvedTheme === 'sketch'
+      ? (getGenerator(generator)?.sketchWeight ?? 1)
+      : 1;
 
   // Memoise on the individual primitive params (not the rest object, which is a
   // fresh reference each render) so the SVG is only rebuilt when a value changes.
@@ -51,7 +58,7 @@ export default function GeneratedBackground({
         accent: themedAccent,
         background,
         density,
-        opacity,
+        opacity: (opacity ?? theme.opacity) * paperWeight,
         strokeWidth,
         width,
         height,
@@ -64,6 +71,8 @@ export default function GeneratedBackground({
       background,
       density,
       opacity,
+      theme.opacity,
+      paperWeight,
       strokeWidth,
       width,
       height,

@@ -37,6 +37,7 @@ export default defineGenerator<Band[]>({
   label: 'Contour',
   description: 'Stacked topographic waves with occasional bright bands.',
   group: 'terrain',
+  sketch: true,
   defaults: { density: 0.6, strokeWidth: 2 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

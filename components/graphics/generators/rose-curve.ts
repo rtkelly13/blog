@@ -33,7 +33,7 @@ interface Rose {
 }
 
 /**
- * Points per rose. See the note in `lissajous.ts` — one constant for every
+ * Points per rose. One constant for every
  * curve, because the count of emitted numbers has to be identical at every `t`
  * and the surest way to guarantee that is for it never to depend on anything.
  *
@@ -85,6 +85,7 @@ export default defineGenerator<Rose[]>({
   label: 'Rose Curve',
   description: 'Petal curves from r = cos(k.theta), nested and turning.',
   group: 'radial',
+  sketch: true,
   // Slower than the lattice generators, and the reason is geometric: a turn
   // at full reach covers the whole circumference, so what reads as a stately
   // rotation on a small form is a blur on a frame-filling one. See

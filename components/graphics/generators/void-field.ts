@@ -178,6 +178,9 @@ export default defineGenerator<Field>({
   description:
     'A quiet vertical grain with cavities melted out of it — they drift, merge and pinch apart.',
   group: 'lattice',
+  // Its depth cue is filled area at varying alpha, which reads as distance on
+  // black and as flat grey ink on paper. See `GeneratorModule.sketch`.
+  sketch: false,
   // Viscous. The cavities cross a good part of the frame over a loop, and at
   // pace 1 that reads as sliding rather than as flowing.
   speed: 0.3,
@@ -191,7 +194,12 @@ export default defineGenerator<Field>({
     // would make the composition's one deliberate element the one thing that
     // jumps when the density slider moves. Drawn first, the voids stay put and
     // density only changes how finely the field around them is combed.
-    const count = intRange(rng, 3, 4);
+    // Two or three, not three or four. Negative space reads as the subject only
+    // when it is *large*, and four cavities sharing a frame forces every one of
+    // them small — the result was a mottled field with clearings rather than a
+    // field with holes punched through it. Fewer and bigger also merge more
+    // dramatically, which is the whole point of the smooth union.
+    const count = intRange(rng, 2, 3);
     const cavities: Cavity[] = [];
     for (let i = 0; i < count; i++) {
       cavities.push({
@@ -207,7 +215,11 @@ export default defineGenerator<Field>({
         y: p.height * (0.5 + (i % 2 === 0 ? -1 : 1) * range(rng, 0.08, 0.24)),
         // A spread of sizes, so the composition has a subject and a chorus
         // rather than several equal blobs.
-        r: min * range(rng, 0.12, 0.22),
+        // Roughly doubled. At 0.12–0.22 of the short side a cavity was an
+        // eighth of the frame's width and read as a clearing; at 0.24–0.38 it
+        // is unmistakably a hole, and two of them at that size dominate the
+        // composition the way the reference pattern's void does.
+        r: min * range(rng, 0.24, 0.38),
         // Big enough that neighbouring slots overlap at some point in the
         // loop — that overlap is when they merge, and a lava lamp that never
         // merges is just several holes. The two axes are drawn separately so
@@ -221,7 +233,12 @@ export default defineGenerator<Field>({
       });
     }
 
-    const colPitch = lerp(30, 21, p.density);
+    // Tightened from 30..21. The field was sitting at 618 elements against a
+    // 900 ceiling and reading as scattered dashes rather than as a surface,
+    // which is fatal here: a void is absence, and absence only registers
+    // against something present. Spending the headroom on *columns* rather
+    // than on rows is the efficient direction — see the note below.
+    const colPitch = lerp(24, 17, p.density);
     // Rows four times as far apart as columns, which is the whole element
     // budget in one number.
     //
@@ -267,7 +284,12 @@ export default defineGenerator<Field>({
           x: jx,
           y: jy,
           half: rowPitch * lerp(0.49, 0.6, n),
-          base: lerp(0.18, 0.46, n),
+          // Raised from 0.18..0.46. At the old range the comb was barely
+          // present against black, so a cavity full of black was a hole in
+          // nothing. Still well short of full accent — this sits behind body
+          // text — but the field has to be a surface before its absence means
+          // anything.
+          base: lerp(0.3, 0.68, n),
           col,
         });
       }

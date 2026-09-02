@@ -109,6 +109,30 @@ describe('generator modules', () => {
     }
   });
 
+  it.each(GENERATOR_MODULES.map((m) => [m.name, m] as const))(
+    '%s: declares whether it holds up on paper',
+    (_name, m) => {
+      // Required rather than defaulted, so a new generator has to be rendered
+      // in the paper palette and looked at before it ships. A default of `true`
+      // would quietly ship mud into the sketch theme; a default of `false`
+      // would quietly withhold something perfectly good.
+      expect(typeof m.sketch).toBe('boolean');
+    },
+  );
+
+  it('keeps a usable set of sketch-safe generators', () => {
+    // The light theme needs real choice, not a token one. If this ever drops
+    // near zero, something systemic has gone wrong with how fills are handled.
+    const safe = GENERATOR_MODULES.filter((m) => m.sketch);
+    expect(safe.length).toBeGreaterThan(GENERATOR_MODULES.length / 2);
+  });
+
+  it('is honest that some generators are not sketch-safe', () => {
+    // Guards the guard: marking everything `true` would satisfy the check above
+    // and defeat the point of having the field at all.
+    expect(GENERATOR_MODULES.some((m) => !m.sketch)).toBe(true);
+  });
+
   it('reaches the registry with its group intact', () => {
     for (const m of GENERATOR_MODULES) {
       const g = GENERATOR_LIST.find((x) => x.name === m.name);

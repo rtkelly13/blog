@@ -77,6 +77,7 @@ export default defineGenerator<Flow>({
   description:
     'Streamlines swimming along a vector field written as two crossed sines.',
   group: 'field',
+  sketch: true,
   defaults: { density: 0.5, strokeWidth: 2 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);
