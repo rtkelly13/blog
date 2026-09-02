@@ -1,9 +1,9 @@
 ---
 name: Ryan Kelly
 avatar: /static/images/myprofile.jpg
-occupation: Senior Software Developer
+occupation: Principal Software Engineer
 company: Sentric Music
-email: me@ryankelly.dev
+email: 94ryan.kelly@gmail.com
 twitter: https://twitter.com/RTKelly25
 linkedin: https://www.linkedin.com/in/rtkelly94/
 github: https://github.com/rtkelly13

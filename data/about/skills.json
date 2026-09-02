@@ -1,0 +1,36 @@
+[
+  {
+    "category": "Core & Languages",
+    "items": [
+      "C#",
+      "F#",
+      ".NET / Native AOT",
+      "TypeScript / JavaScript",
+      "Python",
+      "SQL"
+    ]
+  },
+  {
+    "category": "Cloud, Data & Infrastructure",
+    "items": [
+      "AWS",
+      "Apache Iceberg",
+      "Apache Parquet",
+      "Pulumi",
+      "Terraform",
+      "Elasticsearch / OpenSearch",
+      "OpenTelemetry (OTEL)"
+    ]
+  },
+  {
+    "category": "Engineering & Practices",
+    "items": [
+      "Roslyn Source Generators",
+      "Compiler Plugins / Type Providers",
+      "CI/CD (GitHub Actions)",
+      "Distributed Systems",
+      "AI Code Agent Workflows",
+      "TDD & High-Throughput Benchmarking"
+    ]
+  }
+]

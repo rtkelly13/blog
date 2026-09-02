@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'cv/**'
+      - 'data/about/**'
+      - 'scripts/generate-cv-tex.mjs'
       - '.github/workflows/cv-build.yml'
   workflow_dispatch:
 
@@ -13,6 +15,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate LaTeX template from modular data
+        run: node scripts/generate-cv-tex.mjs
 
       - name: Compile LaTeX CV (XeLaTeX)
         uses: xu-cheng/latex-action@v3

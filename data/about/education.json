@@ -1,0 +1,18 @@
+[
+  {
+    "period": "2012 - 2016",
+    "institution": "University of Liverpool",
+    "institutionUrl": "https://www.liverpool.ac.uk/",
+    "qualification": "BSc Computer Science with a Year in Industry",
+    "grade": "First Class Honours",
+    "details": "Final year dissertation on 3D procedural maze generation with statistical graph analysis, built in Unity 3D with C#, SOLID, and TDD practices."
+  },
+  {
+    "period": "2010 - 2012",
+    "institution": "Carmel College",
+    "institutionUrl": "http://www.carmel.ac.uk/",
+    "qualification": "A-Levels",
+    "grade": "Computing (A), Chemistry (A), Mathematics (B)",
+    "details": ""
+  }
+]

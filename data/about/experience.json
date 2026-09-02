@@ -1,0 +1,33 @@
+[
+  {
+    "period": "May 2019 - Present",
+    "role": "Software Developer (Senior / Principal)",
+    "company": "Sentric Music",
+    "companyUrl": "https://sentricmusic.com/",
+    "highlights": [
+      "Architected and built large-scale royalty processing systems scaling to billions of records, leading Apache Iceberg adoption and Python data engineering tooling.",
+      "Spearheaded long-term technology strategy to migrate legacy .NET Framework applications using a two-tier approach: extracting common components into modern .NET and creating a Storybook-driven React design system backed by REST APIs.",
+      "Pioneered AI Code Agent workflows across the engineering team, optimizing developer experience and bridging software design with autonomous tooling.",
+      "Introduced centralized observability via Serilog, Elastic Stack, and OpenTelemetry (OTEL) for real-time monitoring of high-volume event pipelines.",
+      "Migrated enterprise source control and CI/CD pipelines to GitHub Actions and codified infrastructure using Pulumi for AWS resource management."
+    ]
+  },
+  {
+    "period": "Nov 2017 - May 2019",
+    "role": "Software Developer (Professional / Senior)",
+    "company": "Zuto",
+    "companyUrl": "https://zuto.com/",
+    "highlights": [
+      "Engineered high-availability cloud lender integrations on AWS, maintaining and modernizing scalable fintech services with strict observability standards."
+    ]
+  },
+  {
+    "period": "Jul 2014 - Nov 2017",
+    "role": "Software Developer (Placement / Graduate)",
+    "company": "AutoCoding Systems Ltd",
+    "companyUrl": "https://autocodingsystems.com/",
+    "highlights": [
+      "Built packaging line automation software deployed to factory floors worldwide, developing critical features for the automated date and code printing engine."
+    ]
+  }
+]

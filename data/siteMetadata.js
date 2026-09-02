@@ -16,7 +16,7 @@ const siteMetadata = {
   siteLogo: '/static/images/logo-square.svg',
   image: '/static/images/myprofile.jpg',
   socialBanner: '/static/images/og-card.png',
-  email: 'me@ryankelly.dev',
+  email: '94ryan.kelly@gmail.com',
   github: 'https://github.com/rtkelly13',
   x: 'https://x.com/RTKelly25',
   // `twitter:site` wants an @handle, not a profile URL.
