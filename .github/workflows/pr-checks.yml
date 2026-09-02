@@ -14,7 +14,7 @@ on:
 # comment) and is the single required status check ("PR checks") that blocks
 # merge — it fails only when a *blocking* check failed.
 #
-#   Blocking : lockfile, lint, typecheck, unit (+coverage), build, e2e-visual
+#   Blocking : lockfile, lint, typecheck, seo, unit (+coverage), build, e2e-visual
 #
 # Nothing here writes to the repository. The visual baselines in
 # `tests/__snapshots__` are compared against, never regenerated: a visual diff
@@ -87,6 +87,21 @@ jobs:
         continue-on-error: true
         working-directory: blog
         run: pnpm typecheck
+
+  seo:
+    name: SEO audit
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.seo.outcome }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+      - id: seo
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm check:seo
 
   unit:
     name: Unit tests + coverage
@@ -205,7 +220,7 @@ jobs:
   conclusion:
     name: PR checks
     runs-on: ubuntu-latest
-    needs: [lockfile, lint, typecheck, unit, build, e2e-visual]
+    needs: [lockfile, lint, typecheck, seo, unit, build, e2e-visual]
     if: always()
     permissions:
       contents: read
@@ -261,6 +276,7 @@ jobs:
           LOCKFILE: ${{ needs.lockfile.outputs.outcome }}
           LINT: ${{ needs.lint.outputs.outcome }}
           TYPECHECK: ${{ needs.typecheck.outputs.outcome }}
+          SEO: ${{ needs.seo.outputs.outcome }}
           UNIT: ${{ needs.unit.outputs.outcome }}
           BUILD: ${{ needs.build.outputs.outcome }}
           E2E: ${{ needs.e2e-visual.outputs.outcome }}
@@ -295,6 +311,7 @@ jobs:
             echo "| Lockfile protocol guard | $(icon "$LOCKFILE") | blocking |"
             echo "| Lint (biome) | $(icon "$LINT") | blocking |"
             echo "| Type check (tsc) | $(icon "$TYPECHECK") | blocking |"
+            echo "| SEO audit | $(icon "$SEO") | blocking |"
             echo "| Unit tests + coverage | $(icon "$UNIT") | blocking |"
             echo "| Build | $(icon "$BUILD") | blocking |"
             echo "| E2E + visual regression | $(icon "$E2E") | blocking |"
@@ -339,6 +356,7 @@ jobs:
           LOCKFILE: ${{ needs.lockfile.outputs.outcome }}
           LINT: ${{ needs.lint.outputs.outcome }}
           TYPECHECK: ${{ needs.typecheck.outputs.outcome }}
+          SEO: ${{ needs.seo.outputs.outcome }}
           UNIT: ${{ needs.unit.outputs.outcome }}
           BUILD: ${{ needs.build.outputs.outcome }}
           E2E: ${{ needs.e2e-visual.outputs.outcome }}
@@ -348,7 +366,7 @@ jobs:
           # E2E (incl. visual regression) is blocking. When build fails it is
           # skipped (empty outcome), not a failure here — the build failure
           # already blocks.
-          for check in LOCKFILE LINT TYPECHECK UNIT BUILD E2E; do
+          for check in LOCKFILE LINT TYPECHECK SEO UNIT BUILD E2E; do
             if [ "${!check}" = "failure" ]; then
               echo "::error::${check} failed — blocking merge"
               failed=true

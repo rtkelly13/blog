@@ -22,6 +22,8 @@ const NO_SEO_REQUIRED = new Set([
   'pages/talks/[slug]/present.tsx',
   // Client-side redirect to /admin; emits its own `noindex`.
   'pages/live/manage.tsx',
+  // Client-side redirect to /about; emits its own `noindex`.
+  'pages/cv.tsx',
   // Renders `AuthorLayout` through MDXLayoutRenderer, and the layout carries
   // the PageSEO — the check below only reads the page file itself.
   'pages/about.tsx',
