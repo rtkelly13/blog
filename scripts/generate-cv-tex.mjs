@@ -164,8 +164,8 @@ ${educationLatex}
         {2024 - Present}
         {}
         {Parquet.SourceGenerator \\& Parquet.TypeProvider}
-        {\\href{https://github.com/rtkelly13/Parquet.SourceGenerator}{GitHub / NuGet}}
-        {\\textbf{Creator \\& Maintainer}}
+        {}
+        {\\textbf{Creator \\& Maintainer} \\hfill \\href{https://github.com/rtkelly13/Parquet.SourceGenerator}{GitHub / NuGet}}
         {
             High-performance Roslyn C\\# source generators and F\\# Type Providers emitting zero-reflection compile-time serialization for Apache Parquet.
         }
@@ -174,8 +174,8 @@ ${educationLatex}
         {2020 - Present}
         {}
         {Resultful \\& Community Talks}
-        {\\href{https://github.com/Resultful}{Resultful / YouTube}}
-        {\\textbf{Author \\& Speaker}}
+        {}
+        {\\textbf{Author \\& Speaker} \\hfill \\href{https://github.com/Resultful}{Resultful / YouTube}}
         {
             Functional .NET error handling libraries and tech talks advocating F\\#, compiler tooling, and robust domain modeling.
         }
