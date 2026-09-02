@@ -1,19 +1,13 @@
 [
   {
     "category": "Core & Languages",
-    "items": [
-      ".NET (C# / F# / Native AOT)",
-      "TypeScript / JavaScript",
-      "Python",
-      "SQL"
-    ]
+    "items": [".NET (C# / F# / Native AOT)", "TypeScript", "Python", "SQL"]
   },
   {
     "category": "Cloud, Data & Infrastructure",
     "items": [
       "AWS",
-      "Apache Iceberg",
-      "Apache Parquet",
+      "Apache Iceberg / Parquet",
       "Pulumi",
       "Terraform",
       "Elasticsearch / OpenSearch",
