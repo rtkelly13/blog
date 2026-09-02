@@ -8,6 +8,9 @@ export interface Project {
   /** Small ASCII decoration rendered in the card header. */
   asciiArt?: string;
   tags?: string[];
+  badge?: string;
+  accent?: 'primary' | 'secondary' | 'tertiary';
+  category?: 'libraries' | 'tooling' | 'applications';
 }
 
 const projectsData: Project[] = [
@@ -18,6 +21,9 @@ const projectsData: Project[] = [
     href: 'https://github.com/rtkelly13/Parquet.SourceGenerator',
     filename: 'parquet_source_gen.cs',
     asciiArt: '⚡─⚡',
+    badge: 'Active OSS',
+    accent: 'secondary',
+    category: 'libraries',
     tags: [
       'C#',
       'Roslyn',
@@ -34,6 +40,9 @@ const projectsData: Project[] = [
     href: 'https://github.com/rtkelly13/Parquet.TypeProvider',
     filename: 'parquet_type_provider.fs',
     asciiArt: 'λ─λ',
+    badge: 'Active OSS',
+    accent: 'primary',
+    category: 'libraries',
     tags: ['F#', 'Type Provider', 'Parquet', 'Data Engineering', 'NuGet'],
   },
   {
@@ -43,6 +52,9 @@ const projectsData: Project[] = [
     href: 'https://github.com/rtkelly13/mermaid-toolkit',
     filename: 'mermaid_toolkit.ts',
     asciiArt: '◇─◇',
+    badge: 'Site Engine',
+    accent: 'secondary',
+    category: 'tooling',
     tags: ['TypeScript', 'Mermaid.js', 'ASCII', 'Design System'],
   },
   {
@@ -52,6 +64,9 @@ const projectsData: Project[] = [
     href: 'https://github.com/Resultful',
     filename: 'resultful.cs',
     asciiArt: '►─►',
+    badge: 'OSS Library',
+    accent: 'primary',
+    category: 'libraries',
     tags: ['.NET', 'C#', 'F#', 'Functional Programming'],
   },
   {
@@ -61,6 +76,9 @@ const projectsData: Project[] = [
     href: 'https://github.com/rtkelly13/ProceduralGeneration3DMazes',
     filename: 'procedural_mazes.cs',
     asciiArt: '▓▒░',
+    badge: 'Dissertation',
+    accent: 'tertiary',
+    category: 'applications',
     tags: ['Unity 3D', 'C#', 'Algorithms', 'Graph Theory'],
   },
   {
@@ -70,6 +88,9 @@ const projectsData: Project[] = [
     href: 'https://github.com/rtkelly13/blog',
     filename: 'ryankelly_dev.mdx',
     asciiArt: '★─★',
+    badge: 'Live Production',
+    accent: 'secondary',
+    category: 'applications',
     tags: ['Next.js', 'React', 'Tailwind CSS', 'Convex', 'MDX'],
   },
 ];
