@@ -8,8 +8,7 @@
     "items": [
       "AWS",
       "Apache Iceberg / Parquet",
-      "Pulumi",
-      "Terraform",
+      "IaC (Pulumi / Terraform)",
       "Elasticsearch / OpenSearch",
       "OpenTelemetry (OTEL)"
     ]
