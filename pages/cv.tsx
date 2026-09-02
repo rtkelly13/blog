@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
@@ -9,11 +10,16 @@ export default function CVRedirect() {
   }, [router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center font-mono space-y-4">
-      <p className="text-zinc-400">Redirecting to About & CV page...</p>
-      <a href="/about" className="text-brutalist-cyan underline text-sm">
-        Click here if not redirected
-      </a>
-    </div>
+    <>
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center font-mono space-y-4">
+        <p className="text-zinc-400">Redirecting to About & CV page...</p>
+        <a href="/about" className="text-brutalist-cyan underline text-sm">
+          Click here if not redirected
+        </a>
+      </div>
+    </>
   );
 }
