@@ -184,4 +184,3 @@ Procfile          text
 *.*rc             text
 # Ignore files (like .npmignore or .gitignore)
 *.*ignore         text
-cv/fonts/*.ttf filter=lfs diff=lfs merge=lfs -text
