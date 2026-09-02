@@ -311,12 +311,12 @@
 % }
 
 \newcommand{\twentyitem}[6]{%
-	{\footnotesize\color{black!70}#1}&\parbox[t]{0.88\textwidth}{%
+	{\footnotesize\color{black!70}#1}&\parbox[t]{0.83\textwidth}{%
 		\textbf{\large#3}% 
 		\hfill%
 		{\footnotesize\color{mainblue}#4}%
         }\\%
-    {\footnotesize\color{black!70}#2}&\parbox[t]{0.88\textwidth}{%
+    {\footnotesize\color{black!70}#2}&\parbox[t]{0.83\textwidth}{%
 		\ifblank{#5}{}{#5 \\}
 		#6%
 	}\\
@@ -336,7 +336,7 @@
 }
 
 \newcommand{\twentyitemshort}[2]{%
-	#1&\parbox[t]{0.88\textwidth}{%
+	#1&\parbox[t]{0.83\textwidth}{%
 		#2%
 	}\\
 }
@@ -345,7 +345,7 @@
 %	 MARGINS AND LINKS
 %----------------------------------------------------------------------------------------
 
-\RequirePackage[left=6.8cm,top=0.1cm,right=0.8cm,bottom=0.1cm,nohead,nofoot]{geometry}
+\RequirePackage[left=7.6cm,top=0.1cm,right=0.9cm,bottom=0.1cm,nohead,nofoot]{geometry}
 
 
 \usepackage{smartdiagram}
