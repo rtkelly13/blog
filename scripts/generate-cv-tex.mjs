@@ -97,10 +97,10 @@ const texContent = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Command for printing skill overview
 \\newcommand\\skils{
-    \\href{https://github.com/Resultful}{Open source projects under organisation \\textbf{Resultful} for functional .NET.}
+    \\href{https://github.com/rtkelly13/Parquet.SourceGenerator}{Creator of \\textbf{Parquet.SourceGenerator} \\& \\textbf{Parquet.TypeProvider} for zero-reflection high-throughput data processing.}
     
     \\vspace{1.5mm}
-    \\href{https://www.youtube.com/playlist?list=PLo9sP7bLtjB4v80KxhT-2J3kx5HWZ_b9C}{Speaker on F\\#, .NET architecture, and functional engineering.}
+    \\href{https://www.meetup.com/aws-liverpool-user-group/}{Co-organizer of the \\textbf{AWS Liverpool User Group} \\& technical speaker on functional cloud architectures.}
     
     \\vspace{1.5mm}
 ${skillsLatex}
