@@ -9,7 +9,7 @@
       "AWS",
       "Apache Iceberg / Parquet",
       "IaC (Pulumi / Terraform)",
-      "Elasticsearch / OpenSearch",
+      "Elasticsearch",
       "OpenTelemetry (OTEL)"
     ]
   },
