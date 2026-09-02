@@ -3,6 +3,7 @@ import {
   Boxes,
   Palette,
   Projector,
+  Shapes,
   Sparkles,
   Terminal,
   Type,
@@ -46,6 +47,15 @@ const experiments = [
     icon: <Sparkles className="w-12 h-12" />,
     status: 'active',
     components: 6,
+  },
+  {
+    name: 'Icon Packs',
+    path: '/experiments/icon-packs',
+    description:
+      'Thirteen public icon packs judged live against the brutalist dual-mode system — geometry, theming and the licence cost of publishing them',
+    icon: <Shapes className="w-12 h-12" />,
+    status: 'active',
+    components: 8,
   },
   {
     name: 'Talk Animations',
