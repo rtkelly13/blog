@@ -3,6 +3,7 @@ import {
   Boxes,
   Palette,
   Projector,
+  Radio,
   Sparkles,
   Terminal,
   Type,
@@ -45,7 +46,16 @@ const experiments = [
       'Seed-driven SVG background + graphic generators for talks and heroes',
     icon: <Sparkles className="w-12 h-12" />,
     status: 'active',
-    components: 6,
+    components: 14,
+  },
+  {
+    name: 'Backgrounds Lab',
+    path: '/experiments/backgrounds',
+    description:
+      'Every background generator animated — sampled once, projected per frame, every loop seamless',
+    icon: <Radio className="w-12 h-12" />,
+    status: 'active',
+    components: 14,
   },
   {
     name: 'Talk Animations',
