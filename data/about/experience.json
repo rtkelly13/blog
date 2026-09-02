@@ -5,11 +5,12 @@
     "company": "Sentric Music",
     "companyUrl": "https://sentricmusic.com/",
     "highlights": [
-      "Architected and built large-scale royalty processing systems scaling to billions of records, leading Apache Iceberg adoption and Python data engineering tooling.",
-      "Spearheaded long-term technology strategy to migrate legacy .NET Framework applications using a two-tier approach: extracting common components into modern .NET and creating a Storybook-driven React design system backed by REST APIs.",
-      "Pioneered AI Code Agent workflows across the engineering team, optimizing developer experience and bridging software design with autonomous tooling.",
-      "Introduced centralized observability via Serilog, Elastic Stack, and OpenTelemetry (OTEL) for real-time monitoring of high-volume event pipelines.",
-      "Migrated enterprise source control and CI/CD pipelines to GitHub Actions and codified infrastructure using Pulumi for AWS resource management."
+      "Architected and engineered the core royalty processing system to scale reliably across billions of usage events and financial records.",
+      "Spearheaded enterprise Apache Iceberg adoption and Python data engineering tooling to modernize data lake warehousing.",
+      "Led technical strategy migrating legacy .NET Framework services to modern .NET, establishing a Storybook React design system backed by REST APIs.",
+      "Pioneered AI Code Agent workflows across engineering, optimizing developer experience and autonomous tooling adoption.",
+      "Introduced centralized observability via Serilog, Elastic Stack, and OpenTelemetry (OTEL) for real-time monitoring of event pipelines.",
+      "Standardized CI/CD on GitHub Actions and codified cloud infrastructure using Pulumi for AWS resource management."
     ]
   },
   {
