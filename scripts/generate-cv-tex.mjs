@@ -74,7 +74,7 @@ ${highlights}
 const educationLatex = education
   .map((edu) => {
     const details = edu.details
-      ? `\n             ${escapeLatex(edu.details)} \\vspace{1mm}`
+      ? `\n             ${escapeLatex(edu.details)}`
       : '';
     const gradeText = edu.grade ? `\\textbf{${escapeLatex(edu.grade)}}` : '';
 
@@ -82,8 +82,8 @@ const educationLatex = education
         {${escapeLatex(edu.period)}}
         {}
         {${escapeLatex(edu.qualification)}}
-        {\\href{${edu.institutionUrl}}{${escapeLatex(edu.institution)}}}
-        {${gradeText}}
+        {}
+        {\\href{${edu.institutionUrl}}{\\textbf{${escapeLatex(edu.institution)}}} \\hfill ${gradeText}}
         {${details}}`;
   })
   .join('\n\n');

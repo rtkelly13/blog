@@ -2,11 +2,11 @@
   {
     "category": "Core & Languages",
     "items": [
-      "C# (.NET 9, Native AOT, Roslyn)",
-      "F# (Functional, Type Providers)",
-      "TypeScript (React, Next.js)",
-      "Python (Data & PyIceberg)",
-      "SQL (PostgreSQL, SQL Server)"
+      "C# (.NET / Native AOT)",
+      "F# (Functional / Type Providers)",
+      "TypeScript (React / Next.js)",
+      "Python (Data Lake / PyIceberg)",
+      "SQL (MySQL / SQL Server)"
     ]
   },
   {
