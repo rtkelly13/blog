@@ -1,0 +1,34 @@
+name: Build & Render CV
+
+on:
+  push:
+    paths:
+      - 'cv/**'
+      - '.github/workflows/cv-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX CV (XeLaTeX)
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: template.tex
+          working_directory: cv
+          latexmk_use_xelatex: true
+          args: -interaction=nonstopmode -halt-on-error
+
+      - name: Move generated PDF to public directory
+        run: |
+          mkdir -p public
+          cp cv/template.pdf public/cv.pdf
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cv-pdf
+          path: public/cv.pdf
