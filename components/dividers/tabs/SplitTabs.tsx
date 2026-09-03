@@ -42,14 +42,14 @@ export default function SplitTabs({
               onMouseEnter={openOnHover ? () => setActive(index) : undefined}
               className={`relative flex flex-1 items-center justify-center border-white border-b-2 transition-colors last:border-b-0 ${
                 open
-                  ? `z-10 -mr-0.5 bg-zinc-900 ${accent.text}`
-                  : 'border-r-2 bg-black text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                  ? `z-10 -mr-0.5 bg-zinc-900 font-bold text-white`
+                  : 'border-r-2 bg-black text-zinc-500 hover:bg-zinc-900 hover:text-white'
               }`}
             >
               <span
                 aria-hidden
-                className={`absolute inset-y-0 left-0 w-1.5 transition-opacity ${accent.bar} ${
-                  open ? 'opacity-100' : 'opacity-45'
+                className={`absolute inset-y-0 left-0 transition-all ${accent.bar} ${
+                  open ? 'w-2.5 opacity-100' : 'w-1 opacity-30'
                 }`}
               />
               <TabLabel>{divider.label}</TabLabel>

@@ -133,6 +133,27 @@ lines.
 Stack, Ledger, Fan. Kept because a rejected option is only convincing while
 you can still see it.
 
+### The state rule (non-negotiable, learned the hard way)
+
+**Selected state is carried by an accent `fill` or a 4px `edge`. Never by a
+surface pair.**
+
+The obvious way to mark a chosen tab is `bg-black` for it and `bg-zinc-900`
+for its siblings. That is *acceptable* on the terminal — `#000000` against
+`#18181b` — and **invisible on paper**, where the same two tokens remap to
+`#f5f3ec` and `#efeadf`: a 3% lightness difference doing the entire job of
+telling a reader where they are. Every widget here shipped with that bug once;
+`dividerAccents.ts` now documents the two devices that survive the remap:
+
+| Device | Class | Use |
+| ------ | ----- | --- |
+| `fill` | `bg-brutalist-* text-black` | The selection is the point of the widget |
+| `edge` | `border-b-brutalist-*` at 4px | A strip that should not shout |
+
+Pair either with a text-weight or text-colour change (`text-zinc-500` →
+`text-white`/inverted). Surface tokens stay the right tool for *layering* — a
+strip behind its tabs, a panel over a page — they are only wrong for state.
+
 **Nothing in here branches on the theme.** Every variation is built on
 remapped tokens only, so the identical markup reads as a lit side-rail on
 `dark`/`dim` and as paper index tabs under `sketch` — the dual-mode rule below,

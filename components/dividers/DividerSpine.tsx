@@ -44,14 +44,18 @@ export default function DividerSpine({
             ? 'h-full w-[5.5rem]'
             : 'h-full w-[3.25rem]'
           : 'h-11 w-full px-4'
-      } ${open ? 'bg-zinc-900' : 'bg-black hover:bg-zinc-900'}`}
+      } ${
+        open
+          ? accent.fill
+          : 'bg-black text-zinc-500 hover:bg-zinc-900 hover:text-white'
+      }`}
     >
       <span
         className={`font-mono text-xs font-bold uppercase tracking-[0.2em] transition-colors ${
           orientation === 'vertical'
             ? '[writing-mode:vertical-rl] rotate-180'
             : ''
-        } ${open ? accent.text : 'text-zinc-400 group-hover:text-white'}`}
+        }`}
       >
         {divider.label}
       </span>
