@@ -201,15 +201,17 @@ export default function CodeTabsSandbox() {
           <Variation
             id="merged"
             name="01 — MERGED"
-            tagline="The default, and the closest to the notebook read: the open tab takes the code block's own surface and drops the rule between them, so tab and block are one piece."
+            tagline="The default and the loudest: the open tab is a solid block of accent standing on the code block, its bottom rule dropped so the fill runs into it."
             render={() => <InstallTabs variant="merged" group="pkg" />}
             notes={
               <>
-                The strip pulls itself half a border down over the block&rsquo;s
-                top rule, so the seam is one 2px line rather than two stacked
-                ones — and so the open tab can paint over it. The same trick the{' '}
-                <span className="text-white">Flush</span> rail uses on its right
-                edge.
+                It started out marking the open tab with a surface swap —
+                <span className="text-white"> bg-black</span> against{' '}
+                <span className="text-white">bg-zinc-900</span> — which is a 3%
+                lightness difference on paper and told a reader nothing. The
+                accent fill is the same device the{' '}
+                <span className="text-white">Flush</span> rail uses, and the
+                reason that one always read.
               </>
             }
           />
@@ -217,7 +219,7 @@ export default function CodeTabsSandbox() {
           <Variation
             id="underline"
             name="02 — UNDERLINE"
-            tagline="Flat: no tab shapes at all, just labels, with the accent rule under the open one sitting on the seam between the strip and the block."
+            tagline="The quiet one: no tab shapes at all, just labels — a 4px accent rule on the seam and the open label at full strength against muted siblings."
             render={() => <InstallTabs variant="underline" group="pkg" />}
             notes={
               <>
@@ -232,7 +234,7 @@ export default function CodeTabsSandbox() {
           <Variation
             id="segmented"
             name="03 — SEGMENTED"
-            tagline="A title bar: the filename or subject on the left, a bordered segmented control on the right. The most developer-portal of the three, and the only one with somewhere to put a caption."
+            tagline="A title bar: the filename on the left, a bordered segmented control on the right whose chosen segment is a solid block of accent. The most developer-portal of the three, and the only one with somewhere to put a caption."
             render={() => (
               <InstallTabs variant="segmented" group="pkg" label="install.sh" />
             )}

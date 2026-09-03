@@ -44,13 +44,13 @@ export default function RibbonBlades({
             >
               <span
                 aria-hidden
-                className={`absolute inset-x-0 bottom-0 h-1 transition-opacity duration-300 ${accent.bar} ${
-                  open ? 'opacity-100' : 'opacity-0'
+                className={`absolute inset-x-0 bottom-0 transition-all duration-300 ${accent.bar} ${
+                  open ? 'h-1.5 opacity-100' : 'h-0.5 opacity-25'
                 }`}
               />
               <span
                 className={`block truncate font-mono text-xs font-bold uppercase tracking-[0.2em] transition-colors ${
-                  open ? accent.text : 'text-zinc-400'
+                  open ? 'font-bold text-white' : 'text-zinc-500'
                 }`}
               >
                 {divider.label}
