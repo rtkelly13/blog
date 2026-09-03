@@ -12,6 +12,7 @@ import {
   MousePointerClick,
   Orbit,
   Rows3,
+  SquareCode,
   Tags as TagsIcon,
   Type,
 } from 'lucide-react';
@@ -38,6 +39,13 @@ const components: {
     description:
       'Instead of a header: vertical tabs tight to the left edge, six treatments in both themes',
     icon: Bookmark,
+  },
+  {
+    name: 'Code Tabs',
+    path: '/design-sandbox/code-tabs',
+    description:
+      'Top-aligned tabs: the code block language switcher, with page-wide group sync',
+    icon: SquareCode,
   },
   {
     name: 'Blades — other geometries',

@@ -6,6 +6,7 @@ import {
   Palette,
   Projector,
   Sparkles,
+  SquareCode,
   Terminal,
   Type,
 } from 'lucide-react';
@@ -31,6 +32,15 @@ const experiments = [
     icon: <Bookmark className="w-12 h-12" />,
     status: 'active',
     components: 6,
+  },
+  {
+    name: 'Code Tabs',
+    path: '/design-sandbox/code-tabs',
+    description:
+      'Top-aligned tabs: a code block language switcher with page-wide group sync, the way dev docs portals do it',
+    icon: <SquareCode className="w-12 h-12" />,
+    status: 'active',
+    components: 3,
   },
   {
     name: 'Blades',
