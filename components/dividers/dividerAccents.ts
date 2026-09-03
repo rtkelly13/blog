@@ -1,26 +1,26 @@
-import type { BladeAccent } from './types';
+import type { DividerAccent } from './types';
 
 /**
- * Accent classes per blade, written out in full so Tailwind's scanner sees
+ * Accent classes per divider, written out in full so Tailwind's scanner sees
  * every one of them. All four entries resolve through the `--brutalist-*`
  * tokens (or `--color-white`), so they re-point themselves under `dim` and
  * `sketch` — neon cyan/pink/yellow on the terminal, blue/red/green pen on
  * paper.
  */
-export interface BladeAccentClasses {
-  /** Spine label + prompt glyph when the blade is open. */
+export interface DividerAccentClasses {
+  /** Spine label + prompt glyph when the divider is open. */
   text: string;
-  /** The blade's leading edge bar. */
+  /** The divider's leading edge bar. */
   bar: string;
-  /** Border when the blade is open. */
+  /** Border when the divider is open. */
   border: string;
-  /** Link hover inside an open blade. */
+  /** Link hover inside an open divider. */
   hover: string;
   /** Filled spine (used where the label sits on the accent, not beside it). */
   fill: string;
 }
 
-export const BLADE_ACCENTS: Record<BladeAccent, BladeAccentClasses> = {
+export const DIVIDER_ACCENTS: Record<DividerAccent, DividerAccentClasses> = {
   cyan: {
     text: 'text-brutalist-cyan',
     bar: 'bg-brutalist-cyan',
@@ -51,5 +51,5 @@ export const BLADE_ACCENTS: Record<BladeAccent, BladeAccentClasses> = {
   },
 };
 
-export const accentOf = (accent: BladeAccent): BladeAccentClasses =>
-  BLADE_ACCENTS[accent];
+export const accentOf = (accent: DividerAccent): DividerAccentClasses =>
+  DIVIDER_ACCENTS[accent];

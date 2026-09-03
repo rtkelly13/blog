@@ -6,21 +6,22 @@ import {
   LedgerBlades,
   RailBlades,
   RibbonBlades,
-  SITE_BLADES,
+  SITE_DIVIDERS,
   StackBlades,
   TabBlades,
-} from '@/components/blades';
+} from '@/components/dividers';
+import Link from '@/components/Link';
 import PageHeader from '@/components/PageHeader';
 import { PageSEO } from '@/components/SEO';
 import siteMetadata from '@/data/siteMetadata';
 
 /**
- * Blades — a foundation experiment.
+ * Blades — the geometries the notebook rail was chosen out of.
  *
- * The proposal: replace the top header bar with an ordered set of
- * edge-labelled panels. One model (`components/blades/`), seven geometries,
- * each rendered here in **both** first-class themes at once so the dual-mode
- * claim is verifiable rather than asserted.
+ * The proposal itself lives at `/design-sandbox/notebook-tabs`. This page is
+ * the working-out: seven other shapes the same `Divider` model can take, each
+ * rendered in **both** first-class themes at once so the dual-mode claim is
+ * verifiable rather than asserted.
  *
  * Every panel forces its theme by carrying the theme class itself — the token
  * remap is scoped to `.dark` / `.sketch`, so a nested container with that
@@ -102,60 +103,48 @@ export default function BladesSandbox() {
   return (
     <>
       <PageSEO
-        title={`Blades - ${siteMetadata.author}`}
-        description="A navigation foundation: paper dividers and dashboard blades from one model, in both design languages"
+        title={`Blades — other geometries - ${siteMetadata.author}`}
+        description="The geometry exploration the left-edge notebook rail was chosen out of"
       />
 
       <div className="divide-y divide-white border-2 border-white bg-black">
         <PageHeader
           title="BLADES"
           icon={Layers}
-          subtitle="Paper dividers / dashboard blades — one model, seven geometries, both languages"
+          subtitle="Other geometries tried — the shapes the notebook rail was chosen out of"
         />
 
         <div className="space-y-14 px-6 py-10">
-          {/* ── The argument ─────────────────────────────────────────── */}
+          {/* ── Where this page sits ─────────────────────────────────── */}
           <section className="space-y-4">
-            <p className="max-w-3xl font-mono text-sm leading-relaxed text-zinc-400">
-              <span className="text-brutalist-cyan">&gt;</span> A header bar is
-              a row of links with nowhere to put anything else. A{' '}
-              <span className="text-white">blade</span> is an ordered panel with
-              a label on its edge: shut, it costs a sliver; open, it has room
-              for the section&rsquo;s destinations, a line of copy and an accent
-              of its own.
-            </p>
-            <p className="max-w-3xl font-mono text-sm leading-relaxed text-zinc-400">
-              <span className="text-brutalist-cyan">&gt;</span> The reason this
-              belongs in <span className="text-white">Foundations</span> rather
-              than in a component folder is that it is one model with many
-              shapes. <span className="text-brutalist-yellow">Blade</span> — id,
-              spine label, hint, accent, links — is the whole contract;
-              everything below renders that same array and differs only in how
-              the set fans out.
-            </p>
-
             <div className="border-2 border-brutalist-yellow bg-zinc-900 p-5">
               <h2 className="mb-3 font-display text-lg font-bold uppercase text-brutalist-yellow">
-                [ ONE PRIMITIVE, TWO LANGUAGES ]
+                [ THIS IS NOT THE PROPOSAL ]
               </h2>
               <p className="max-w-3xl font-mono text-sm leading-relaxed text-white">
-                Nothing below branches on the theme. Each variation is built on
-                the remapped tokens only —{' '}
-                <span className="text-brutalist-cyan">bg-black</span>,{' '}
-                <span className="text-brutalist-cyan">border-white</span>,{' '}
-                <span className="text-brutalist-cyan">bg-zinc-900</span>,{' '}
-                <span className="text-brutalist-cyan">text-brutalist-*</span> —
-                so the identical markup reads as an edge-lit slab of a stacked
-                dashboard on midnight, and as a card divider in a filing box
-                under sketch. The geometry is the idea; the material is the
-                token set.
-              </p>
-              <p className="mt-3 max-w-3xl font-mono text-xs leading-relaxed text-zinc-400">
-                That is the test each panel pair below is running. If a
-                variation only works on one side, it is not a foundation — it is
-                a dark-mode flourish.
+                The navigation foundation is the{' '}
+                <Link
+                  href="/design-sandbox/notebook-tabs"
+                  className="font-bold text-brutalist-cyan underline hover:text-brutalist-pink"
+                >
+                  notebook rail
+                </Link>{' '}
+                — vertical tabs tight to the left edge. This page is the
+                working-out that landed on it: seven other shapes the same model
+                can take, kept because a rejected option is only convincing when
+                you can still see it.
               </p>
             </div>
+
+            <p className="max-w-3xl font-mono text-sm leading-relaxed text-zinc-400">
+              <span className="text-brutalist-cyan">&gt;</span> All of them
+              render the same{' '}
+              <span className="text-brutalist-yellow">Divider</span> array — id,
+              label, hint, accent, links — and differ only in how the set fans
+              out. None of them branches on the theme: each is built on the
+              remapped tokens only, so the identical markup reads as an edge-lit
+              slab on midnight and as a card divider on paper.
+            </p>
           </section>
 
           {/* ── The header replacement, at full width ─────────────────── */}
@@ -179,14 +168,14 @@ export default function BladesSandbox() {
                 label="midnight — neon terminal"
                 frame="min-h-[13rem]"
               >
-                <RibbonBlades blades={SITE_BLADES} initialIndex={0} />
+                <RibbonBlades dividers={SITE_DIVIDERS} initialIndex={0} />
               </ThemePanel>
               <ThemePanel
                 theme="sketch"
                 label="sketch — paper & ink"
                 frame="min-h-[13rem]"
               >
-                <RibbonBlades blades={SITE_BLADES} initialIndex={2} />
+                <RibbonBlades dividers={SITE_DIVIDERS} initialIndex={2} />
               </ThemePanel>
             </div>
 
@@ -205,7 +194,7 @@ export default function BladesSandbox() {
             id="rail"
             name="02 — RAIL"
             tagline="The literal blades read: full-height columns collapsed to their spines, one open at a time. Hover or focus a spine to open it."
-            render={() => <RailBlades blades={SITE_BLADES} />}
+            render={() => <RailBlades dividers={SITE_DIVIDERS} />}
             notes={
               <>
                 The whole navigation stays on screen, and opening a section
@@ -221,7 +210,7 @@ export default function BladesSandbox() {
             id="fold"
             name="03 — FOLD"
             tagline="A concertina. Shut blades hinge away from the reader on their left edge; the open one swings flat."
-            render={() => <FoldBlades blades={SITE_BLADES} />}
+            render={() => <FoldBlades dividers={SITE_DIVIDERS} />}
             notes={
               <>
                 The fold angle is <span className="text-white">60°</span> on
@@ -240,7 +229,7 @@ export default function BladesSandbox() {
             name="04 — TAB"
             tagline="Dividers seen from above: a stepped strip of tabs on one sheet, the open tab lifted and merged into the sheet below."
             frame="h-[18rem]"
-            render={() => <TabBlades blades={SITE_BLADES} />}
+            render={() => <TabBlades dividers={SITE_DIVIDERS} />}
             notes={
               <>
                 The conservative option, and the one that survives a narrow
@@ -255,7 +244,7 @@ export default function BladesSandbox() {
             id="stack"
             name="05 — STACK"
             tagline="A sheaf laid one over the next, each shifted far enough right that its edge ribbon stays readable. Pick a ribbon to pull that sheet forward."
-            render={() => <StackBlades blades={SITE_BLADES} />}
+            render={() => <StackBlades dividers={SITE_DIVIDERS} />}
             notes={
               <>
                 Order is a cycle, not a swap: the sheet you displace goes to the
@@ -270,7 +259,7 @@ export default function BladesSandbox() {
             id="ledger"
             name="06 — LEDGER"
             tagline="The address-book read: one card face, its siblings' tabs staggered down the right gutter, the rest of the box showing as offset edges behind."
-            render={() => <LedgerBlades blades={SITE_BLADES} />}
+            render={() => <LedgerBlades dividers={SITE_DIVIDERS} />}
             notes={
               <>
                 Where <span className="text-white">Rail</span> keeps every
@@ -286,7 +275,7 @@ export default function BladesSandbox() {
             name="07 — FAN"
             tagline="The deck. An almost-shut stack that splays about a pivot below the frame when the set is touched; picking a card lifts it out of the arc."
             frame="h-[26rem]"
-            render={() => <FanBlades blades={SITE_BLADES} />}
+            render={() => <FanBlades dividers={SITE_DIVIDERS} />}
             notes={
               <>
                 The pivot sits deliberately{' '}
@@ -370,49 +359,31 @@ export default function BladesSandbox() {
             </div>
           </section>
 
-          {/* ── What promoting this would take ────────────────────────── */}
           <section className="space-y-3 border-2 border-white bg-zinc-900 p-5">
             <h2 className="font-display text-lg font-bold uppercase text-white">
-              [ TO PROMOTE THIS TO THE DESIGN SYSTEM ]
+              [ WHY THE RAIL WON ]
             </h2>
-            <ul className="space-y-2 font-mono text-xs leading-relaxed text-zinc-400">
-              <li>
-                <span className="text-brutalist-cyan">&gt;</span> Pick the
-                shortlist. Seven geometries is an experiment; a foundation ships
-                two or three that answer different jobs — most likely{' '}
-                <span className="text-white">Ribbon</span>,{' '}
-                <span className="text-white">Rail</span> and one expressive one.
-              </li>
-              <li>
-                <span className="text-brutalist-cyan">&gt;</span> Move to
-                semantic roles. This prototype speaks the blog&rsquo;s current
-                vocabulary (<span className="text-white">brutalist-*</span>,{' '}
-                <span className="text-white">zinc-*</span>); the package now
-                addresses <span className="text-white">--ds-surface-*</span>,{' '}
-                <span className="text-white">--ds-text-*</span> and{' '}
-                <span className="text-white">--ds-accent-*</span> across a
-                four-rung ladder, so a port means a pass over every class here.
-              </li>
-              <li>
-                <span className="text-brutalist-cyan">&gt;</span> Keyboard and
-                roving focus. Spines are buttons and announce{' '}
-                <span className="text-white">aria-expanded</span>, but a real
-                navigation blade set wants arrow-key traversal and a documented
-                focus order before it replaces the header.
-              </li>
-              <li>
-                <span className="text-brutalist-cyan">&gt;</span> Reduced
-                motion. Fan, Fold and Stack all animate transform; each needs a{' '}
-                <span className="text-white">prefers-reduced-motion</span> path
-                that resolves to the same end state without the travel.
-              </li>
-              <li>
-                <span className="text-brutalist-cyan">&gt;</span> Small
-                viewports. Rail, Fold and Ledger assume horizontal room. Below
-                the <span className="text-white">lg</span> breakpoint they most
-                likely all collapse into Ribbon.
-              </li>
-            </ul>
+            <p className="max-w-3xl font-mono text-xs leading-relaxed text-zinc-400">
+              <span className="text-brutalist-cyan">&gt;</span> Every geometry
+              above spends either a band of height (Ribbon, Tab) or the middle
+              of the frame (Fan, Stack, Ledger). A vertical rail on the left
+              spends a column the reading measure was never using, and gives
+              back the whole horizontal band a sticky header takes out of every
+              screenful — which is the one resource a blog page is actually
+              short of.
+            </p>
+            <p className="max-w-3xl font-mono text-xs leading-relaxed text-zinc-400">
+              <span className="text-brutalist-cyan">&gt;</span> Rail and Fold
+              came closest, and the{' '}
+              <Link
+                href="/design-sandbox/notebook-tabs"
+                className="font-bold text-brutalist-cyan underline hover:text-brutalist-pink"
+              >
+                notebook rail
+              </Link>{' '}
+              is what they turn into once the panel stops competing with the
+              page for width and becomes a tab instead.
+            </p>
           </section>
         </div>
       </div>

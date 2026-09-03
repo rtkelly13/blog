@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
-import BladeBody from './BladeBody';
-import { accentOf } from './bladeAccents';
-import type { BladesProps } from './types';
+import DividerBody from '../DividerBody';
+import { accentOf } from '../dividerAccents';
+import type { DividerSetProps } from '../types';
 
 /**
  * **Ledger** — the address-book read: one card face with its siblings' tabs
@@ -14,12 +14,12 @@ import type { BladesProps } from './types';
  * a reading page, where the content is the point.
  */
 export default function LedgerBlades({
-  blades,
+  dividers,
   initialIndex = 0,
-}: BladesProps) {
+}: DividerSetProps) {
   const [active, setActive] = useState(initialIndex);
   const id = useId();
-  const current = blades[active];
+  const current = dividers[active];
 
   return (
     <div className="relative h-full w-full bg-black p-4">
@@ -37,17 +37,17 @@ export default function LedgerBlades({
         id={`${id}-face`}
         className="absolute inset-y-4 left-4 right-[6.5rem] border-2 border-white bg-zinc-900"
       >
-        {current ? <BladeBody blade={current} /> : null}
+        {current ? <DividerBody divider={current} /> : null}
       </div>
 
       <div className="absolute inset-y-4 right-4 flex w-[6.5rem] flex-col justify-start gap-1.5">
-        {blades.map((blade, index) => {
+        {dividers.map((divider, index) => {
           const open = index === active;
-          const accent = accentOf(blade.accent);
+          const accent = accentOf(divider.accent);
 
           return (
             <button
-              key={blade.id}
+              key={divider.id}
               type="button"
               aria-expanded={open}
               aria-controls={`${id}-face`}
@@ -61,7 +61,7 @@ export default function LedgerBlades({
               }`}
             >
               <span className="truncate font-mono text-[0.65rem] font-bold uppercase tracking-[0.15em]">
-                {blade.label}
+                {divider.label}
               </span>
             </button>
           );

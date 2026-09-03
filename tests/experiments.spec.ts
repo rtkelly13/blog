@@ -51,8 +51,60 @@ test.describe('Mermaid Diagrams', () => {
   });
 });
 
-test.describe('Blades foundation', () => {
-  test('every variation renders in both first-class themes', async ({
+test.describe('Notebook tabs foundation', () => {
+  test('every treatment renders in both first-class themes', async ({
+    page,
+  }) => {
+    await page.goto('/design-sandbox/notebook-tabs', {
+      waitUntil: 'domcontentloaded',
+    });
+
+    await expect(page.locator('h1')).toContainText('NOTEBOOK_TABS');
+
+    // Six treatments, each rendered once per theme. The pairing is the point
+    // of the page: a treatment that only works on one side is not a
+    // foundation. Scoped to <main> because <html> carries the reader's own
+    // theme class and would otherwise be counted.
+    await expect(page.locator('main .dark')).toHaveCount(6);
+    await expect(page.locator('main .sketch')).toHaveCount(6);
+  });
+
+  test('opening a tab closes the one it replaced', async ({ page }) => {
+    await page.goto('/design-sandbox/notebook-tabs', {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const rail = page.locator('#flush .dark');
+    const blog = rail.getByRole('button', { name: 'BLOG' });
+    const talks = rail.getByRole('button', { name: 'TALKS' });
+
+    await expect(blog).toHaveAttribute('aria-expanded', 'true');
+
+    await talks.click();
+
+    await expect(talks).toHaveAttribute('aria-expanded', 'true');
+    await expect(blog).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('the shell rail toggles its panel shut', async ({ page }) => {
+    await page.goto('/design-sandbox/notebook-tabs', {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const shell = page.locator('#shell .dark');
+    const blog = shell.getByRole('button', { name: 'BLOG' });
+
+    await expect(blog).toHaveAttribute('aria-expanded', 'true');
+
+    // Clicking the open tab shuts the panel, so the rail can sit at rest with
+    // nothing selected — the state a header bar has no equivalent of.
+    await blog.click();
+    await expect(blog).toHaveAttribute('aria-expanded', 'false');
+  });
+});
+
+test.describe('Blades — other geometries', () => {
+  test('every geometry renders in both first-class themes', async ({
     page,
   }) => {
     await page.goto('/design-sandbox/blades', {
@@ -61,10 +113,6 @@ test.describe('Blades foundation', () => {
 
     await expect(page.locator('h1')).toContainText('BLADES');
 
-    // Seven geometries, each rendered once per theme. The pairing is the
-    // point of the page: a variation that only works on one side is not a
-    // foundation. Scoped to <main> because <html> carries the reader's own
-    // theme class and would otherwise be counted.
     await expect(page.locator('main .dark')).toHaveCount(7);
     await expect(page.locator('main .sketch')).toHaveCount(7);
   });
