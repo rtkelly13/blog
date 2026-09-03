@@ -134,3 +134,53 @@ test.describe('Blades — other geometries', () => {
     await expect(blog).toHaveAttribute('aria-expanded', 'false');
   });
 });
+
+test.describe('Code tabs — top-aligned switcher', () => {
+  test('renders every variant in both first-class themes', async ({ page }) => {
+    await page.goto('/design-sandbox/code-tabs', {
+      waitUntil: 'domcontentloaded',
+    });
+
+    await expect(page.locator('h1')).toContainText('CODE_TABS');
+
+    // Five sections, each rendered once per theme. Scoped to <main> because
+    // <html> carries the reader's own theme class.
+    await expect(page.locator('main .dark')).toHaveCount(5);
+    await expect(page.locator('main .sketch')).toHaveCount(5);
+  });
+
+  test('a grouped block switches every block in its group', async ({
+    page,
+  }) => {
+    await page.goto('/design-sandbox/code-tabs', {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const selected = page.locator('[role="tab"][aria-selected="true"]');
+    const grouped = page.locator(
+      '#group-sync [role="tab"][aria-selected="true"]',
+    );
+
+    // Every block on the page except the ungrouped one shares group "pkg", so
+    // one click has to move all of them — that is the whole argument for the
+    // component over a plain tab widget.
+    await expect(grouped).toHaveText(['pnpm', 'pnpm', 'pnpm', 'pnpm']);
+
+    await page
+      .locator('#merged .dark [role="tab"]', { hasText: 'yarn' })
+      .first()
+      .click();
+
+    await expect(grouped).toHaveText(['yarn', 'yarn', 'yarn', 'yarn']);
+
+    // The ungrouped block keeps its own state while the group moves.
+    await expect(
+      page.locator('#ungrouped .dark [role="tab"][aria-selected="true"]'),
+    ).toHaveText('TypeScript');
+
+    // It is a real tablist, so arrow keys traverse it.
+    await selected.first().focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(grouped).toHaveText(['npm', 'npm', 'npm', 'npm']);
+  });
+});
