@@ -1,14 +1,14 @@
-import { accentOf } from './bladeAccents';
-import type { Blade } from './types';
+import { accentOf } from './dividerAccents';
+import type { Divider } from './types';
 
 /**
- * A blade's spine: the sliver that stays visible when the blade is shut. The
+ * A divider's spine: the sliver that stays visible when the divider is shut. The
  * label runs bottom-to-top (`vertical-rl` + a half turn) so a column of them
- * reads like the tabs on a filing box or the edge-on blades of a stacked
+ * reads like the tabs on a filing box or the edge-on dividers of a stacked
  * dashboard.
  */
-export default function BladeSpine({
-  blade,
+export default function DividerSpine({
+  divider,
   open,
   orientation = 'vertical',
   width = 'narrow',
@@ -16,7 +16,7 @@ export default function BladeSpine({
   onHover,
   controls,
 }: {
-  blade: Blade;
+  divider: Divider;
   open: boolean;
   orientation?: 'vertical' | 'horizontal';
   /**
@@ -28,7 +28,7 @@ export default function BladeSpine({
   onHover?: () => void;
   controls?: string;
 }) {
-  const accent = accentOf(blade.accent);
+  const accent = accentOf(divider.accent);
 
   return (
     <button
@@ -53,7 +53,7 @@ export default function BladeSpine({
             : ''
         } ${open ? accent.text : 'text-zinc-400 group-hover:text-white'}`}
       >
-        {blade.label}
+        {divider.label}
       </span>
     </button>
   );

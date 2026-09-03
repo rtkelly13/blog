@@ -1,37 +1,37 @@
 import { useId, useState } from 'react';
-import BladeBody from './BladeBody';
-import { accentOf } from './bladeAccents';
-import type { BladesProps } from './types';
+import DividerBody from '../DividerBody';
+import { accentOf } from '../dividerAccents';
+import type { DividerSetProps } from '../types';
 
 /**
  * **Ribbon** — the direct answer to "instead of a header": a full-width bar of
- * segments where the open segment widens and drops a blade down over the page.
+ * segments where the open segment widens and drops a divider down over the page.
  * Closed, it costs the same vertical space a header bar does; open, it hands
  * the section a whole panel.
  *
- * Clicking the open segment shuts the blade again, so the bar can sit at rest
+ * Clicking the open segment shuts the divider again, so the bar can sit at rest
  * with nothing selected.
  */
 export default function RibbonBlades({
-  blades,
+  dividers,
   initialIndex = 0,
   openOnHover = false,
-}: BladesProps) {
+}: DividerSetProps) {
   const [active, setActive] = useState<number | null>(initialIndex);
   const id = useId();
 
-  const current = active === null ? null : blades[active];
+  const current = active === null ? null : dividers[active];
 
   return (
     <div className="w-full">
       <div className="flex w-full border-2 border-white bg-black">
-        {blades.map((blade, index) => {
+        {dividers.map((divider, index) => {
           const open = index === active;
-          const accent = accentOf(blade.accent);
+          const accent = accentOf(divider.accent);
 
           return (
             <button
-              key={blade.id}
+              key={divider.id}
               type="button"
               aria-expanded={open}
               aria-controls={`${id}-panel`}
@@ -53,7 +53,7 @@ export default function RibbonBlades({
                   open ? accent.text : 'text-zinc-400'
                 }`}
               >
-                {blade.label}
+                {divider.label}
               </span>
             </button>
           );
@@ -61,7 +61,7 @@ export default function RibbonBlades({
       </div>
 
       {/* The drop. `grid-template-rows: 0fr -> 1fr` animates an auto height
-          without pinning a magic max-height that clips longer blades. */}
+          without pinning a magic max-height that clips longer dividers. */}
       <div
         id={`${id}-panel`}
         style={{ gridTemplateRows: current ? '1fr' : '0fr' }}
@@ -70,7 +70,7 @@ export default function RibbonBlades({
         <div className="overflow-hidden">
           {current ? (
             <div className="border-2 border-t-0 border-white bg-zinc-900">
-              <BladeBody blade={current} />
+              <DividerBody divider={current} />
             </div>
           ) : null}
         </div>

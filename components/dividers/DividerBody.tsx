@@ -1,21 +1,21 @@
 import Link from '@/components/Link';
-import { accentOf } from './bladeAccents';
-import type { Blade } from './types';
+import { accentOf } from './dividerAccents';
+import type { Divider } from './types';
 
 /**
- * The contents of an opened blade — identical in every variation, so only the
+ * The contents of an opened divider — identical in every variation, so only the
  * geometry differs between them. Built on remapped tokens only
  * (`text-white`, `text-zinc-400`, `text-brutalist-*`), so it reads as a lit
  * terminal panel on `dark`/`dim` and as ink on a divider card under `sketch`.
  */
-export default function BladeBody({
-  blade,
+export default function DividerBody({
+  divider,
   compact = false,
 }: {
-  blade: Blade;
+  divider: Divider;
   compact?: boolean;
 }) {
-  const accent = accentOf(blade.accent);
+  const accent = accentOf(divider.accent);
 
   return (
     <div
@@ -26,15 +26,15 @@ export default function BladeBody({
           compact ? 'text-base' : 'text-lg'
         }`}
       >
-        [ {blade.label} ]
+        [ {divider.label} ]
       </p>
 
       <p className="font-mono text-xs leading-relaxed text-zinc-400">
-        <span className={accent.text}>&gt;</span> {blade.hint}
+        <span className={accent.text}>&gt;</span> {divider.hint}
       </p>
 
       <ul className="space-y-1.5 pt-1">
-        {blade.items.map((item) => (
+        {divider.items.map((item) => (
           <li key={item.href} className="flex items-baseline gap-2">
             <span className={`font-mono text-xs ${accent.text}`}>—</span>
             <Link
