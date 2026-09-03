@@ -50,3 +50,39 @@ test.describe('Mermaid Diagrams', () => {
     await expect(diagram).toBeVisible({ timeout: 10000 });
   });
 });
+
+test.describe('Blades foundation', () => {
+  test('every variation renders in both first-class themes', async ({
+    page,
+  }) => {
+    await page.goto('/design-sandbox/blades', {
+      waitUntil: 'domcontentloaded',
+    });
+
+    await expect(page.locator('h1')).toContainText('BLADES');
+
+    // Seven geometries, each rendered once per theme. The pairing is the
+    // point of the page: a variation that only works on one side is not a
+    // foundation. Scoped to <main> because <html> carries the reader's own
+    // theme class and would otherwise be counted.
+    await expect(page.locator('main .dark')).toHaveCount(7);
+    await expect(page.locator('main .sketch')).toHaveCount(7);
+  });
+
+  test('opening a rail blade closes the one it replaced', async ({ page }) => {
+    await page.goto('/design-sandbox/blades', {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const rail = page.locator('#rail .dark');
+    const blog = rail.getByRole('button', { name: 'BLOG' });
+    const talks = rail.getByRole('button', { name: 'TALKS' });
+
+    await expect(blog).toHaveAttribute('aria-expanded', 'true');
+
+    await talks.click();
+
+    await expect(talks).toHaveAttribute('aria-expanded', 'true');
+    await expect(blog).toHaveAttribute('aria-expanded', 'false');
+  });
+});

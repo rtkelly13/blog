@@ -6,6 +6,7 @@ import {
   CreditCard,
   FileText,
   Image as ImageIcon,
+  Layers,
   type LucideIcon,
   MousePointerClick,
   Orbit,
@@ -29,6 +30,13 @@ const components: {
     path: '/design-sandbox/component-library',
     description: 'Every core component in both themes, side by side',
     icon: Boxes,
+  },
+  {
+    name: 'Blades',
+    path: '/design-sandbox/blades',
+    description:
+      'Header replacement: paper dividers / dashboard blades, seven geometries in both themes',
+    icon: Layers,
   },
   {
     name: 'Homepage Heroes',
