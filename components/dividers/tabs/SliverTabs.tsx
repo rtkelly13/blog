@@ -49,7 +49,7 @@ export default function SliverTabs({
               aria-controls={`${id}-sheet`}
               onClick={() => setActive(index)}
               className={`flex flex-1 items-center justify-center overflow-hidden transition-opacity ${accent.fill} ${
-                on ? 'opacity-100' : 'opacity-55 hover:opacity-80'
+                on ? 'opacity-100' : 'opacity-30 hover:opacity-60'
               }`}
             >
               <TabLabel

@@ -39,15 +39,15 @@ export default function TabBlades({
               onMouseEnter={openOnHover ? () => setActive(index) : undefined}
               className={`-ml-0.5 shrink-0 border-2 px-4 font-mono text-xs font-bold uppercase tracking-widest transition-all duration-200 first:ml-0 ${
                 open
-                  ? `translate-y-0.5 border-white border-b-zinc-900 bg-zinc-900 py-3 ${accent.text}`
-                  : 'border-white bg-black py-2 text-zinc-400 hover:text-white'
+                  ? `translate-y-0.5 border-white border-b-0 py-3 ${accent.fill}`
+                  : 'border-white bg-black py-2 text-zinc-500 hover:text-white'
               }`}
             >
               {/* A tab is a divider seen end-on, so it keeps the accent edge. */}
               <span className="flex items-center gap-2">
                 <span
                   aria-hidden
-                  className={`inline-block h-2 w-2 ${accent.bar} ${open ? 'opacity-100' : 'opacity-50'}`}
+                  className={`inline-block h-2 w-2 ${open ? 'bg-black' : `${accent.bar} opacity-60`}`}
                 />
                 {divider.label}
               </span>

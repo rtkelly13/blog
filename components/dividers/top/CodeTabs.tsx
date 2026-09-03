@@ -6,6 +6,7 @@ import {
   useId,
   useRef,
 } from 'react';
+import type { DividerAccentClasses } from '../dividerAccents';
 import { accentOf } from '../dividerAccents';
 import type { DividerAccent } from '../types';
 import { useTabGroup } from './codeTabsStore';
@@ -119,7 +120,7 @@ export default function CodeTabs({
     <div
       role="tablist"
       aria-label={label ?? group ?? 'Code variants'}
-      className="flex items-end"
+      className="flex items-end gap-1"
     >
       {tabs.map((tab, index) => {
         const active = tab.label === activeLabel;
@@ -138,7 +139,7 @@ export default function CodeTabs({
             tabIndex={active ? 0 : -1}
             onClick={() => select(tab.label)}
             onKeyDown={(event) => onKeyDown(event, index)}
-            className={tabClass(variant, active, tone.text, tone.border)}
+            className={tabClass(variant, active, tone)}
           >
             {tab.label}
           </button>
@@ -151,21 +152,23 @@ export default function CodeTabs({
     <div className="my-6">
       {/* Every variant pulls itself half a border down over the code block's
           own top rule, so the seam between strip and block is one 2px line
-          rather than two stacked ones — and, for `merged` and `underline`, so
-          the open tab can paint over it. */}
+          rather than two stacked ones — and so the selected tab can sit on
+          it. */}
       {variant === 'segmented' ? (
-        <div className="relative z-10 -mb-0.5 flex items-center justify-between gap-4 border-2 border-white border-b-0 bg-zinc-900 px-3 py-2">
+        <div className="relative z-10 -mb-0.5 flex items-center justify-between gap-4 border-2 border-white border-b-0 bg-zinc-900 px-3 py-2.5">
           <span className="truncate font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
             {label ?? group ?? 'source'}
           </span>
-          <div className="shrink-0 border-2 border-white">{tabList}</div>
+          <div className="shrink-0 border-2 border-white [&>[role=tablist]]:gap-0">
+            {tabList}
+          </div>
         </div>
       ) : (
         <div
           className={`relative z-10 -mb-0.5 overflow-x-auto border-2 border-white border-b-0 ${
             variant === 'merged'
-              ? 'bg-zinc-900 px-1 pt-1'
-              : 'bg-black px-2 pt-1'
+              ? 'bg-zinc-900 px-1.5 pt-1.5'
+              : 'bg-black px-3 pt-2'
           }`}
         >
           {tabList}
@@ -192,39 +195,42 @@ export default function CodeTabs({
 }
 
 /**
- * Three looks for the same widget, all built on remapped tokens so each reads
- * as a lit terminal tab strip on midnight and an index tab on paper.
+ * Three looks, at three volumes. Each marks the selected tab with `fill` or
+ * `edge` plus a weight change — never with a surface swap, which is a 3%
+ * lightness difference on paper and tells a reader nothing. See the state rule
+ * in `dividerAccents.ts`.
  */
 function tabClass(
   variant: CodeTabsVariant,
   active: boolean,
-  accentText: string,
-  accentBorder: string,
+  tone: DividerAccentClasses,
 ): string {
   const base =
     'shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-widest transition-colors';
 
   if (variant === 'segmented') {
-    return `${base} border-white border-r-2 px-3 py-1 last:border-r-0 ${
-      active
-        ? `bg-zinc-800 ${accentText}`
-        : 'bg-black text-zinc-400 hover:text-white'
+    // Loud, in a box: the chosen segment is a solid block of accent inside a
+    // bordered control, so the control reads as a switch rather than a label.
+    return `${base} border-white border-r-2 px-4 py-2 last:border-r-0 ${
+      active ? tone.fill : 'bg-black text-zinc-500 hover:text-white'
     }`;
   }
 
   if (variant === 'underline') {
-    return `${base} border-b-2 px-3 py-2 ${
+    // The quiet one: no tab shapes, a 4px accent rule on the seam, and the
+    // label goes from muted to full-strength white.
+    return `${base} border-b-4 px-4 py-2.5 ${
       active
-        ? `${accentBorder} ${accentText}`
-        : 'border-transparent text-zinc-400 hover:text-white'
+        ? `${tone.edge} text-white`
+        : 'border-b-transparent text-zinc-500 hover:text-white'
     }`;
   }
 
-  // merged: the open tab takes the code block's own surface and drops the rule
-  // between them, so tab and block read as one piece.
-  return `${base} border-2 px-3 py-1.5 ${
+  // merged, the default and the loudest: a solid accent tab standing on the
+  // code block, its bottom rule dropped so the fill runs into the block.
+  return `${base} border-2 px-4 py-2 ${
     active
-      ? `relative z-10 border-white border-b-black bg-black ${accentText}`
-      : 'border-transparent text-zinc-400 hover:text-white'
+      ? `relative z-10 border-white border-b-0 ${tone.fill}`
+      : 'border-transparent text-zinc-500 hover:border-white hover:text-white'
   }`;
 }

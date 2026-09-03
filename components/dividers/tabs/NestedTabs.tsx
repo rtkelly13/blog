@@ -49,7 +49,7 @@ export default function NestedTabs({
               className={`flex flex-1 items-center justify-center border-white border-b-2 transition-colors last:border-b-0 ${
                 open
                   ? tabAccent.fill
-                  : 'bg-black text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                  : 'bg-black text-zinc-500 hover:bg-zinc-900 hover:text-white'
               }`}
             >
               <TabLabel>{divider.label}</TabLabel>
@@ -73,8 +73,11 @@ export default function NestedTabs({
               onClick={() => setItemIndex(index)}
               className={`flex flex-1 items-center justify-center border-white border-b-2 transition-colors last:border-b-0 ${
                 on
-                  ? `bg-black ${accent.text}`
-                  : 'text-zinc-400 hover:text-white'
+                  ? // The second level is selected too, but it is not the same
+                    // level. A neutral fill keeps full contrast in both themes
+                    // while reading as subordinate to the accent above it.
+                    accentOf('white').fill
+                  : 'text-zinc-500 hover:text-white'
               }`}
             >
               <TabLabel className="text-[0.65rem]">{entry.label}</TabLabel>
