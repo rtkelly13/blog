@@ -8,6 +8,7 @@ React components: UI primitives, feature modules (diagrams, search, comments), a
 
 ```
 components/
+├── blades/           # Blades foundation — edge-labelled nav panels (experiment)
 ├── diagrams/         # Diagram renderers (Mermaid, SVG, ReactFlow)
 ├── hero/             # Shader hero harness + the lab's generative ideas
 ├── search/           # KBar command palette (Cmd+K)
@@ -25,6 +26,8 @@ components/
 
 Use these for imports:
 
+- `blades/index.ts` → RailBlades, FoldBlades, RibbonBlades, TabBlades, StackBlades,
+  LedgerBlades, FanBlades, BladeBody, BladeSpine, SITE_BLADES, `Blade` types
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
 - `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
 - `social-icons/index.tsx` → SocialIcon
@@ -70,6 +73,34 @@ mono `subtitle`. Drop it in as the first child of the standard page shell:
   aesthetic (they render as full-colour OS glyphs).
 - Detail pages use `PageTitle` (bordered bracket text), not `PageHeader`. Blog
   listing uses `ListLayoutWithTags`, which owns its own centred header.
+
+## BLADES (blades/) — navigation foundation, experimental
+
+A proposal to replace the top header bar: an ordered set of **edge-labelled
+panels**. One model, many geometries — `Blade` (`id`, spine `label`, `hint`,
+`accent`, `items`) is the whole contract, and every variation renders the same
+array, differing only in how the set fans out.
+
+| Variation | Geometry |
+| --------- | -------- |
+| `RibbonBlades` | Full-width segmented bar; the open segment widens and drops a panel |
+| `RailBlades`   | Full-height columns collapsed to spines; one opens and takes the width |
+| `FoldBlades`   | Concertina — shut blades hinge away on their left edge in 3D |
+| `TabBlades`    | Stepped tab strip on a sheet; the open tab lifts and merges |
+| `StackBlades`  | Offset sheaf; each sheet's edge ribbon stays clickable |
+| `LedgerBlades` | One card face with its siblings' tabs staggered down the gutter |
+| `FanBlades`    | A deck that splays about a pivot below the frame |
+
+**Nothing in here branches on the theme.** Every variation is built on remapped
+tokens only, so the identical markup reads as an edge-lit dashboard blade on
+`dark`/`dim` and as a paper divider under `sketch` — the dual-mode rule below,
+applied to a whole pattern rather than one component. Colour never appears as a
+literal: `bladeAccents.ts` holds the four accent roles as full static class
+strings so Tailwind's scanner sees them.
+
+All seven render in both themes at once at **`/design-sandbox/blades`**, which
+also carries the shortlist argument and what promoting this to
+`@rtkelly13/design-system` would cost.
 
 ## DUAL-MODE THEMING (non-negotiable)
 
