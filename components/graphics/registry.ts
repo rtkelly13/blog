@@ -1,5 +1,10 @@
-import { GENERATORS } from './generators';
-import { BASE_PARAMS, type Generator, type GraphicParams } from './types';
+import { SAMPLED_GENERATORS } from './generators';
+import {
+  BASE_PARAMS,
+  type Generator,
+  type GraphicParams,
+  type SampledGenerator,
+} from './types';
 
 /** Per-generator metadata + default params (merged over BASE_PARAMS). */
 const META: Record<
@@ -38,15 +43,20 @@ const META: Record<
   },
 };
 
-export const GENERATOR_LIST: Generator[] = Object.entries(GENERATORS).map(
-  ([name, render]) => ({
+export const GENERATOR_LIST: Generator[] = Object.entries(
+  SAMPLED_GENERATORS,
+).map(([name, generator]) => {
+  const g = generator as SampledGenerator<unknown>;
+  return {
     name,
     label: META[name]?.label ?? name,
     description: META[name]?.description ?? '',
     defaults: { ...BASE_PARAMS, ...META[name]?.defaults },
-    render,
-  }),
-);
+    render: (p: GraphicParams) => g.project(g.sample(p), p, p.t ?? 0),
+    sample: g.sample,
+    project: g.project,
+  };
+});
 
 const BY_NAME = new Map(GENERATOR_LIST.map((g) => [g.name, g]));
 
