@@ -1,5 +1,6 @@
 import {
   Beaker,
+  Bookmark,
   Boxes,
   Layers,
   Palette,
@@ -23,10 +24,19 @@ const experiments = [
     components: 5,
   },
   {
+    name: 'Notebook Tabs',
+    path: '/design-sandbox/notebook-tabs',
+    description:
+      'A navigation foundation instead of a header: vertical tabs tight to the left edge, six treatments in both themes',
+    icon: <Bookmark className="w-12 h-12" />,
+    status: 'active',
+    components: 6,
+  },
+  {
     name: 'Blades',
     path: '/design-sandbox/blades',
     description:
-      'A navigation foundation instead of a header: paper dividers / dashboard blades, seven geometries in both themes',
+      'The other geometries the notebook rail was chosen out of — stacks, fans, folds, a top ribbon',
     icon: <Layers className="w-12 h-12" />,
     status: 'active',
     components: 7,

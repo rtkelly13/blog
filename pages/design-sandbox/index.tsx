@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Bookmark,
   Boxes,
   CaseSensitive,
   Compass,
@@ -32,10 +33,16 @@ const components: {
     icon: Boxes,
   },
   {
-    name: 'Blades',
-    path: '/design-sandbox/blades',
+    name: 'Notebook Tabs',
+    path: '/design-sandbox/notebook-tabs',
     description:
-      'Header replacement: paper dividers / dashboard blades, seven geometries in both themes',
+      'Instead of a header: vertical tabs tight to the left edge, six treatments in both themes',
+    icon: Bookmark,
+  },
+  {
+    name: 'Blades — other geometries',
+    path: '/design-sandbox/blades',
+    description: 'The shapes the notebook rail was chosen out of',
     icon: Layers,
   },
   {

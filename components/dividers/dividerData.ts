@@ -1,12 +1,12 @@
-import type { Blade } from './types';
+import type { Divider } from './types';
 
 /**
- * The site's navigation expressed as blades. Mirrors `data/headerNavLinks`,
- * but a blade carries more than a link does — a hint and the destinations
- * inside the section — because a blade has room the header bar never had.
+ * The site's navigation expressed as dividers. Mirrors `data/headerNavLinks`,
+ * but a divider carries more than a link does — a hint and the destinations
+ * inside the section — because a divider has room the header bar never had.
  * That extra room is the whole argument for the pattern.
  */
-export const SITE_BLADES: Blade[] = [
+export const SITE_DIVIDERS: Divider[] = [
   {
     id: 'blog',
     label: 'BLOG',

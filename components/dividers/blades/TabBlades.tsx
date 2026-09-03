@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
-import BladeBody from './BladeBody';
-import { accentOf } from './bladeAccents';
-import type { BladesProps } from './types';
+import DividerBody from '../DividerBody';
+import { accentOf } from '../dividerAccents';
+import type { DividerSetProps } from '../types';
 
 /**
  * **Tabs** — dividers seen from above: a stepped row of tabs sitting on one
@@ -12,24 +12,24 @@ import type { BladesProps } from './types';
  * viewport: the tab strip scrolls sideways rather than reflowing.
  */
 export default function TabBlades({
-  blades,
+  dividers,
   initialIndex = 0,
   openOnHover = false,
-}: BladesProps) {
+}: DividerSetProps) {
   const [active, setActive] = useState(initialIndex);
   const id = useId();
-  const current = blades[active];
+  const current = dividers[active];
 
   return (
     <div className="flex h-full w-full flex-col">
       <div className="relative z-10 flex items-end overflow-x-auto">
-        {blades.map((blade, index) => {
+        {dividers.map((divider, index) => {
           const open = index === active;
-          const accent = accentOf(blade.accent);
+          const accent = accentOf(divider.accent);
 
           return (
             <button
-              key={blade.id}
+              key={divider.id}
               type="button"
               role="tab"
               aria-selected={open}
@@ -43,13 +43,13 @@ export default function TabBlades({
                   : 'border-white bg-black py-2 text-zinc-400 hover:text-white'
               }`}
             >
-              {/* A tab is a blade seen end-on, so it keeps the accent edge. */}
+              {/* A tab is a divider seen end-on, so it keeps the accent edge. */}
               <span className="flex items-center gap-2">
                 <span
                   aria-hidden
                   className={`inline-block h-2 w-2 ${accent.bar} ${open ? 'opacity-100' : 'opacity-50'}`}
                 />
-                {blade.label}
+                {divider.label}
               </span>
             </button>
           );
@@ -61,7 +61,7 @@ export default function TabBlades({
         role="tabpanel"
         className="-mt-0.5 min-h-0 flex-1 border-2 border-white bg-zinc-900"
       >
-        {current ? <BladeBody blade={current} /> : null}
+        {current ? <DividerBody divider={current} /> : null}
       </div>
     </div>
   );

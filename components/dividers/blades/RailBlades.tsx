@@ -1,11 +1,11 @@
 import { useId, useState } from 'react';
-import BladeBody from './BladeBody';
-import BladeSpine from './BladeSpine';
-import { accentOf } from './bladeAccents';
-import type { BladesProps } from './types';
+import DividerBody from '../DividerBody';
+import DividerSpine from '../DividerSpine';
+import { accentOf } from '../dividerAccents';
+import type { DividerSetProps } from '../types';
 
 /**
- * **Rail** — the literal blades read: full-height columns, each collapsed to
+ * **Rail** — the literal dividers read: full-height columns, each collapsed to
  * its spine until it is opened, at which point it takes the remaining width
  * and the rest compress back into a row of edges.
  *
@@ -14,22 +14,22 @@ import type { BladesProps } from './types';
  * costs no overlay, no dropdown and no layout shift for the content below.
  */
 export default function RailBlades({
-  blades,
+  dividers,
   initialIndex = 0,
   openOnHover = true,
-}: BladesProps) {
+}: DividerSetProps) {
   const [active, setActive] = useState(initialIndex);
   const id = useId();
 
   return (
     <div className="flex h-full w-full overflow-hidden border-2 border-white bg-black">
-      {blades.map((blade, index) => {
+      {dividers.map((divider, index) => {
         const open = index === active;
-        const accent = accentOf(blade.accent);
+        const accent = accentOf(divider.accent);
 
         return (
           <div
-            key={blade.id}
+            key={divider.id}
             style={{
               flexGrow: open ? 1 : 0,
               flexShrink: open ? 1 : 0,
@@ -40,7 +40,7 @@ export default function RailBlades({
             }`}
           >
             {/* Leading edge: the accent bar is what turns a plain column into
-                a blade — lit neon on the terminal, a pen rule on paper. */}
+                a divider — lit neon on the terminal, a pen rule on paper. */}
             <span
               aria-hidden
               className={`absolute inset-y-0 left-0 w-1 transition-opacity duration-500 ${accent.bar} ${
@@ -48,22 +48,22 @@ export default function RailBlades({
               }`}
             />
 
-            <BladeSpine
-              blade={blade}
+            <DividerSpine
+              divider={divider}
               open={open}
-              controls={`${id}-${blade.id}`}
+              controls={`${id}-${divider.id}`}
               onOpen={() => setActive(index)}
               onHover={openOnHover ? () => setActive(index) : undefined}
             />
 
             <div
-              id={`${id}-${blade.id}`}
+              id={`${id}-${divider.id}`}
               className={`min-w-0 flex-1 overflow-hidden transition-opacity duration-300 ${
                 open ? 'opacity-100 delay-150' : 'pointer-events-none opacity-0'
               }`}
             >
               <div className="w-[16rem] max-w-full">
-                <BladeBody blade={blade} />
+                <DividerBody divider={divider} />
               </div>
             </div>
           </div>

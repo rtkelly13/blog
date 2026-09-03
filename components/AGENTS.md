@@ -8,7 +8,7 @@ React components: UI primitives, feature modules (diagrams, search, comments), a
 
 ```
 components/
-├── blades/           # Blades foundation — edge-labelled nav panels (experiment)
+├── dividers/         # Navigation foundation — notebook tabs + blades (experiment)
 ├── diagrams/         # Diagram renderers (Mermaid, SVG, ReactFlow)
 ├── hero/             # Shader hero harness + the lab's generative ideas
 ├── search/           # KBar command palette (Cmd+K)
@@ -26,8 +26,10 @@ components/
 
 Use these for imports:
 
-- `blades/index.ts` → RailBlades, FoldBlades, RibbonBlades, TabBlades, StackBlades,
-  LedgerBlades, FanBlades, BladeBody, BladeSpine, SITE_BLADES, `Blade` types
+- `dividers/index.ts` → FlushTabs, SplitTabs, ProtrudeTabs, SliverTabs, NestedTabs,
+  TabbedShell (the notebook rail); RailBlades, FoldBlades, RibbonBlades, TabBlades,
+  StackBlades, LedgerBlades, FanBlades (the geometry exploration); DividerBody,
+  DividerSpine, SITE_DIVIDERS, `Divider` types
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
 - `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
 - `social-icons/index.tsx` → SocialIcon
@@ -74,33 +76,47 @@ mono `subtitle`. Drop it in as the first child of the standard page shell:
 - Detail pages use `PageTitle` (bordered bracket text), not `PageHeader`. Blog
   listing uses `ListLayoutWithTags`, which owns its own centred header.
 
-## BLADES (blades/) — navigation foundation, experimental
+## DIVIDERS (dividers/) — navigation foundation, experimental
 
-A proposal to replace the top header bar: an ordered set of **edge-labelled
-panels**. One model, many geometries — `Blade` (`id`, spine `label`, `hint`,
-`accent`, `items`) is the whole contract, and every variation renders the same
-array, differing only in how the set fans out.
+A proposal to replace the top header bar. The shared model is `Divider`
+(`id`, tab `label`, `hint`, `accent`, `items`) — that is the whole contract,
+and every variation renders the same array, differing only in geometry.
 
-| Variation | Geometry |
+**`tabs/` is the proposal**: a column of vertical tabs pinned tight to the
+left edge, the way index tabs run down the edge of a notebook. A rail costs
+~3rem of width the reading measure was not using, and gives back the whole
+horizontal band a sticky header takes out of every screenful.
+
+| Treatment | Geometry |
 | --------- | -------- |
-| `RibbonBlades` | Full-width segmented bar; the open segment widens and drops a panel |
-| `RailBlades`   | Full-height columns collapsed to spines; one opens and takes the width |
-| `FoldBlades`   | Concertina — shut blades hinge away on their left edge in 3D |
-| `TabBlades`    | Stepped tab strip on a sheet; the open tab lifts and merges |
-| `StackBlades`  | Offset sheaf; each sheet's edge ribbon stays clickable |
-| `LedgerBlades` | One card face with its siblings' tabs staggered down the gutter |
-| `FanBlades`    | A deck that splays about a pivot below the frame |
+| `TabbedShell`   | The page with no header: rail carries wordmark, sections, search + theme; a panel slides out over the page |
+| `FlushTabs`     | Tabs sized to their labels, stacked from the top; the open tab fills and covers the rail's rule |
+| `SplitTabs`     | Tabs share the full height equally; the open tab takes the sheet's surface, accent bar at the screen edge |
+| `ProtrudeTabs`  | Page keeps its own rectangle; tabs tucked off the left edge, the open one pulled proud |
+| `SliverTabs`    | 0.55rem of coloured page edges at rest; the rail widens on hover/focus and overlays rather than reflows |
+| `NestedTabs`    | Two vertical levels — sections outside, that section's destinations inside |
 
-**Nothing in here branches on the theme.** Every variation is built on remapped
-tokens only, so the identical markup reads as an edge-lit dashboard blade on
-`dark`/`dim` and as a paper divider under `sketch` — the dual-mode rule below,
+**`blades/` is the record of what else was tried** — Ribbon, Rail, Fold, Tab,
+Stack, Ledger, Fan. Kept because a rejected option is only convincing while
+you can still see it.
+
+**Nothing in here branches on the theme.** Every variation is built on
+remapped tokens only, so the identical markup reads as a lit side-rail on
+`dark`/`dim` and as paper index tabs under `sketch` — the dual-mode rule below,
 applied to a whole pattern rather than one component. Colour never appears as a
-literal: `bladeAccents.ts` holds the four accent roles as full static class
+literal: `dividerAccents.ts` holds the four accent roles as full static class
 strings so Tailwind's scanner sees them.
 
-All seven render in both themes at once at **`/design-sandbox/blades`**, which
-also carries the shortlist argument and what promoting this to
-`@rtkelly13/design-system` would cost.
+Two mechanics worth knowing before editing:
+
+- **A rail that scrolls must hide its scrollbar.** A classic scrollbar is
+  ~15px, which eats a third of a 3rem rail and pushes the centred vertical
+  labels off their own tabs.
+- **A panel offset from the left needs `calc(-100% - <offset>)` to hide.**
+  A bare `-110%` parks its right edge back on top of the rail.
+
+Both render in both themes at once at **`/design-sandbox/notebook-tabs`** (the
+proposal) and **`/design-sandbox/blades`** (the alternatives).
 
 ## DUAL-MODE THEMING (non-negotiable)
 
