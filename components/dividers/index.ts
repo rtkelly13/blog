@@ -1,3 +1,5 @@
+/** Top-aligned tabs — a content switcher, not navigation. */
+
 /** Blades — the wider geometry exploration the rail was chosen out of. */
 export { default as FanBlades } from './blades/FanBlades';
 export { default as FoldBlades } from './blades/FoldBlades';
@@ -19,6 +21,9 @@ export { default as SliverTabs } from './tabs/SliverTabs';
 export { default as SplitTabs } from './tabs/SplitTabs';
 export { default as TabbedShell } from './tabs/TabbedShell';
 export { default as TabLabel } from './tabs/TabLabel';
+export { default as CodeTab } from './top/CodeTab';
+export type { CodeTabsVariant } from './top/CodeTabs';
+export { default as CodeTabs } from './top/CodeTabs';
 export type {
   Divider,
   DividerAccent,

@@ -27,9 +27,10 @@ components/
 Use these for imports:
 
 - `dividers/index.ts` → FlushTabs, SplitTabs, ProtrudeTabs, SliverTabs, NestedTabs,
-  TabbedShell (the notebook rail); RailBlades, FoldBlades, RibbonBlades, TabBlades,
-  StackBlades, LedgerBlades, FanBlades (the geometry exploration); DividerBody,
-  DividerSpine, SITE_DIVIDERS, `Divider` types
+  TabbedShell (the left rail); CodeTabs + CodeTab (top-aligned code switcher);
+  RailBlades, FoldBlades, RibbonBlades, TabBlades, StackBlades, LedgerBlades,
+  FanBlades (the geometry exploration); DividerBody, DividerSpine,
+  SITE_DIVIDERS, `Divider` types
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
 - `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
 - `social-icons/index.tsx` → SocialIcon
@@ -96,6 +97,38 @@ horizontal band a sticky header takes out of every screenful.
 | `SliverTabs`    | 0.55rem of coloured page edges at rest; the rail widens on hover/focus and overlays rather than reflows |
 | `NestedTabs`    | Two vertical levels — sections outside, that section's destinations inside |
 
+**`top/` is a different mechanism, not the rail rotated.** `CodeTabs` /
+`CodeTab` are the code-block language switcher every developer documentation
+portal has — and they are separate components on purpose, because they are a
+separate contract:
+
+| | `tabs/` (left rail) | `top/` (code tabs) |
+| --- | --- | --- |
+| Role | Navigation | Content switcher |
+| ARIA | Disclosure buttons, `aria-expanded` | Real `tablist` / `tab` / `tabpanel` |
+| Keyboard | Click + focus | Roving focus, arrow keys, Home / End |
+| Contents | Links to elsewhere | The same content in another form |
+
+One component with an `orientation` prop would hide that difference. Three
+looks — `merged` (default), `underline`, `segmented` — and every one pulls
+itself half a border down over the code block's top rule, so the seam is one
+2px line rather than two stacked ones.
+
+**`group` is what earns it.** Blocks sharing a group switch together and the
+choice persists across pages, because a reader picks a package manager once,
+not once per snippet. The selection lives in a module-level store
+(`codeTabsStore.ts`), not a context: MDX mounts these at arbitrary depths and
+there is no component in a post to hang a provider off. The store starts empty
+on both server and client, so the first render matches the HTML and the stored
+choice is applied in an effect — restoring during render is what produces a
+hydration mismatch. A block whose tab set does not include the group's choice
+falls back to its own first tab.
+
+`CodeTabs` and `CodeTab` are registered in `MDXComponents`, so posts use them
+with no import. Blank lines around the fences are load-bearing — MDX only
+parses markdown inside a JSX block when the block opens and closes on its own
+lines.
+
 **`blades/` is the record of what else was tried** — Ribbon, Rail, Fold, Tab,
 Stack, Ledger, Fan. Kept because a rejected option is only convincing while
 you can still see it.
@@ -115,8 +148,9 @@ Two mechanics worth knowing before editing:
 - **A panel offset from the left needs `calc(-100% - <offset>)` to hide.**
   A bare `-110%` parks its right edge back on top of the rail.
 
-Both render in both themes at once at **`/design-sandbox/notebook-tabs`** (the
-proposal) and **`/design-sandbox/blades`** (the alternatives).
+All three render in both themes at once at **`/design-sandbox/notebook-tabs`**
+(the rail), **`/design-sandbox/code-tabs`** (the switcher) and
+**`/design-sandbox/blades`** (the alternatives).
 
 ## DUAL-MODE THEMING (non-negotiable)
 
