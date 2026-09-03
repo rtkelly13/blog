@@ -1,6 +1,7 @@
 import {
   Beaker,
   Boxes,
+  Layers,
   Palette,
   Projector,
   Sparkles,
@@ -20,6 +21,15 @@ const experiments = [
     icon: <Boxes className="w-12 h-12" />,
     status: 'active',
     components: 5,
+  },
+  {
+    name: 'Blades',
+    path: '/design-sandbox/blades',
+    description:
+      'A navigation foundation instead of a header: paper dividers / dashboard blades, seven geometries in both themes',
+    icon: <Layers className="w-12 h-12" />,
+    status: 'active',
+    components: 7,
   },
   {
     name: 'Design Sandbox',
