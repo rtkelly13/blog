@@ -2,60 +2,58 @@ import type { Divider } from './types';
 
 /**
  * The site's navigation expressed as dividers. Mirrors `data/headerNavLinks`,
- * but a divider carries more than a link does — a hint and the destinations
- * inside the section — because a divider has room the header bar never had.
- * That extra room is the whole argument for the pattern.
+ * grouped into sections — a rail has the height to show a section's pages
+ * where the header bar only had room for the section.
+ *
+ * Accents follow the per-section rule in `components/AGENTS.md`, so the tab a
+ * reader arrives on is the colour of the `PageHeader` they arrive at: cyan is
+ * the default, talks are pink, ideas are yellow.
  */
 export const SITE_DIVIDERS: Divider[] = [
   {
     id: 'blog',
     label: 'BLOG',
-    hint: 'Long-form writing on agents, architecture and the toolchain.',
     accent: 'cyan',
     items: [
-      { href: '/blog', label: 'All posts', note: 'latest first' },
-      { href: '/series', label: 'Series', note: 'multi-part' },
-      { href: '/tags', label: 'Tags', note: 'by topic' },
+      { href: '/blog', label: 'Posts' },
+      { href: '/series', label: 'Series' },
+      { href: '/tags', label: 'Tags' },
     ],
   },
   {
     id: 'talks',
     label: 'TALKS',
-    hint: 'Decks, recordings and the live audience platform.',
     accent: 'pink',
     items: [
-      { href: '/talks', label: 'All talks' },
-      { href: '/live', label: 'Live session', note: 'realtime' },
+      { href: '/talks', label: 'Talks' },
+      { href: '/live', label: 'Live' },
     ],
   },
   {
     id: 'projects',
     label: 'PROJECTS',
-    hint: 'Things that ship — packages, tools and open source.',
-    accent: 'yellow',
+    accent: 'cyan',
     items: [
-      { href: '/projects', label: 'Project index' },
-      { href: '/experiments', label: 'Experiments', note: 'prototypes' },
+      { href: '/projects', label: 'Projects' },
+      { href: '/experiments', label: 'Experiments' },
     ],
   },
   {
     id: 'ideas',
     label: 'IDEAS',
-    hint: 'The workbench: sparks and drafts before they become posts.',
-    accent: 'cyan',
+    accent: 'yellow',
     items: [
-      { href: '/ideas', label: 'Idea workbench' },
-      { href: '/design-sandbox', label: 'Design sandbox' },
+      { href: '/ideas', label: 'Workbench' },
+      { href: '/design-sandbox', label: 'Sandbox' },
     ],
   },
   {
     id: 'about',
     label: 'ABOUT',
-    hint: 'Who is writing this, and how to get hold of them.',
-    accent: 'white',
+    accent: 'cyan',
     items: [
       { href: '/about', label: 'About' },
-      { href: '/cv', label: 'CV', note: 'printable' },
+      { href: '/cv', label: 'CV' },
     ],
   },
 ];

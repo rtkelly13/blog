@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic';
 import type React from 'react';
 import { useMemo } from 'react';
 import Diagram from './diagrams/Diagram';
-import { CodeTab, CodeTabs } from './dividers';
 import Image from './Image';
 import IdeaSlide from './interactive/IdeaSlide';
 import CustomLink from './Link';
@@ -89,8 +88,6 @@ const DepResolve = dynamic(() => import('./interactive/DepResolve'), {
 export const MDXComponents: MDXComponentsType = {
   Image: Image as any,
   TOCInline,
-  CodeTabs,
-  CodeTab,
   Diagram,
   NoteBlock,
   References,

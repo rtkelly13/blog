@@ -1,56 +1,60 @@
+import type { ReactNode } from 'react';
+
 /**
- * Dividers — the shared vocabulary.
+ * Dividers — the shared vocabulary for the site rail.
  *
- * A **divider** is one edge-labelled panel in an ordered set: shut it costs a
- * sliver, open it holds a whole section. Every variation under
- * `components/dividers/` renders the same model with a different geometry, so
- * the site can change the navigation's shape without touching its content.
- *
- * Two families sit on top of it:
- *
- * - `tabs/` — **notebook tabs**: a column of vertical tabs pinned tight to the
- *   left edge. The proposal that replaces the header.
- * - `blades/` — the wider geometry exploration (stacks, fans, folds), kept as
- *   the record of what else was tried.
+ * A **divider** is one section of the site: a short tab label and the pages
+ * inside it. `SiteRail` renders an ordered set of them as a column of vertical
+ * tabs tight to the left edge, with the open section's pages on a second rail
+ * beside it — the way index tabs run down the edge of a notebook.
  *
  * The two design languages come out of the token remap, not out of a branch:
- * on the terminal themes a divider reads as an edge-lit rail; under `sketch`
- * the identical markup reads as an index tab in a notebook, because
- * `--color-black`, `--color-white` and the `--brutalist-*` accents have
- * already flipped to paper / graphite / pen. Build on the remapped tokens only
- * and both languages come for free.
+ * on the terminal themes the rail reads as an edge-lit strip; under `sketch`
+ * the identical markup reads as paper index tabs, because `--color-black`,
+ * `--color-white` and the `--brutalist-*` accents have already flipped to
+ * paper / graphite / pen. Build on the remapped tokens only and both languages
+ * come for free.
  */
 
-/** Accent roles a divider may carry. Maps onto the `--brutalist-*` tokens. */
-export type DividerAccent = 'cyan' | 'pink' | 'yellow' | 'white';
+/**
+ * Accent roles a divider may carry. Maps onto the `--brutalist-*` tokens, and
+ * deliberately the same three `PageHeader` accepts, because the rail and the
+ * page header must agree on a section's colour — the per-section rule lives in
+ * `components/AGENTS.md` (cyan default, pink talks, yellow ideas). When this
+ * is promoted to the package's `--ds-*` roles these become `Emphasis` tokens.
+ */
+export type DividerAccent = 'cyan' | 'pink' | 'yellow';
 
-/** One link inside an opened divider. */
+/** One page inside a section. */
 export interface DividerItem {
   label: string;
   href: string;
-  /** Short mono annotation shown after the label. */
-  note?: string;
 }
 
-/** One divider: a tab label, a one-line hint, and the links it opens onto. */
+/** One section of the site: a tab label, an accent, and the pages inside it. */
 export interface Divider {
   id: string;
   /** Tab text — short, uppercase reads best on a 3rem vertical tab. */
   label: string;
-  /** One line of `>`-prompt copy shown when the divider is open. */
-  hint: string;
   accent: DividerAccent;
+  /** The first item is the section's landing page. */
   items: DividerItem[];
 }
 
-/** Props every variation accepts, so they are interchangeable. */
-export interface DividerSetProps {
+export interface SiteRailProps {
   dividers: Divider[];
-  /** Index opened on first render. */
-  initialIndex?: number;
   /**
-   * Open on pointer-over as well as on click. Hover-to-open suits a permanent
-   * navigation rail; click-only suits anything a reader has to aim at.
+   * The path the rail marks as the reader's location. Defaults to the
+   * router's current path; the sandbox passes it explicitly so two rails can
+   * show two locations side by side.
    */
-  openOnHover?: boolean;
+  currentPath?: string;
+  /**
+   * Controls pinned to the foot of the rail — where search and the theme
+   * switch go when there is no header to hold them.
+   */
+  controls?: ReactNode;
+  /** The page, rendered to the right of both rails. */
+  children?: ReactNode;
+  className?: string;
 }

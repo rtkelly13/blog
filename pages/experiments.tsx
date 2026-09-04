@@ -2,11 +2,9 @@ import {
   Beaker,
   Bookmark,
   Boxes,
-  Layers,
   Palette,
   Projector,
   Sparkles,
-  SquareCode,
   Terminal,
   Type,
 } from 'lucide-react';
@@ -25,31 +23,13 @@ const experiments = [
     components: 5,
   },
   {
-    name: 'Notebook Tabs',
-    path: '/design-sandbox/notebook-tabs',
+    name: 'Site Rail',
+    path: '/design-sandbox/site-rail',
     description:
-      'A navigation foundation instead of a header: vertical tabs tight to the left edge, six treatments in both themes',
+      'A navigation foundation instead of a header: a route-aware rail of vertical tabs with the section pages always beside it',
     icon: <Bookmark className="w-12 h-12" />,
     status: 'active',
-    components: 6,
-  },
-  {
-    name: 'Code Tabs',
-    path: '/design-sandbox/code-tabs',
-    description:
-      'Top-aligned tabs: a code block language switcher with page-wide group sync, the way dev docs portals do it',
-    icon: <SquareCode className="w-12 h-12" />,
-    status: 'active',
-    components: 3,
-  },
-  {
-    name: 'Blades',
-    path: '/design-sandbox/blades',
-    description:
-      'The other geometries the notebook rail was chosen out of — stacks, fans, folds, a top ribbon',
-    icon: <Layers className="w-12 h-12" />,
-    status: 'active',
-    components: 7,
+    components: 1,
   },
   {
     name: 'Design Sandbox',

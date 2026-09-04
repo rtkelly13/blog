@@ -2,10 +2,9 @@ import type { DividerAccent } from './types';
 
 /**
  * Accent classes per divider, written out in full so Tailwind's scanner sees
- * every one of them. All four entries resolve through the `--brutalist-*`
- * tokens (or `--color-white`), so they re-point themselves under `dim` and
- * `sketch` — neon cyan/pink/yellow on the terminal, blue/red/green pen on
- * paper.
+ * every one of them. All three resolve through the `--brutalist-*` tokens, so
+ * they re-point themselves under `dim` and `sketch` — neon cyan/pink/yellow on
+ * the terminal, blue/red/green pen on paper.
  *
  * ## The state rule (learned the hard way)
  *
@@ -18,30 +17,29 @@ import type { DividerAccent } from './types';
  * the entire job of telling a reader which tab they are on.
  *
  * Both devices below survive the remap at full contrast, because both are
- * built on the accents, which stay saturated in every theme:
+ * built on the accents, which stay saturated in every theme. The design-system
+ * package now asserts this as arithmetic (`pnpm check:contrast` there audits
+ * fill and edge against every surface on every rung); this file is the blog's
+ * copy of the rule until the rail is promoted.
  *
- * - `fill` — solid accent, inverted text. The loud one. Use it wherever the
- *   selection is the point of the widget.
- * - `edge` — a 4px accent rule on one side. The quiet one, for a tab strip
- *   that should not shout.
+ * - `fill` — solid accent, inverted text. Where the reader **is**.
+ * - `edge` — a 4px accent rule down the left. Where the reader is **looking**
+ *   but has not gone.
  *
  * Surface tokens are still the right tool for *layering* (a strip behind its
- * tabs, a panel over a page). They are only wrong for state. Pair either
- * device with a text-weight change and the widget reads at a glance in both
- * languages.
+ * tabs, a panel over a page). They are only wrong for state. Pair either device
+ * with a text-weight change and the rail reads at a glance in both languages.
  */
 export interface DividerAccentClasses {
-  /** Label + prompt glyph when the divider is open. */
+  /** Label + prompt glyph. */
   text: string;
   /** A leading edge bar, as a background block. */
   bar: string;
-  /** Border on all sides. */
-  border: string;
-  /** A 4px bottom rule — the quiet selected-state device. */
+  /** A 4px left rule — the quiet device, for "open but not here". */
   edge: string;
-  /** Link hover inside an open divider. */
+  /** Link hover. */
   hover: string;
-  /** Solid accent with inverted text — the loud selected-state device. */
+  /** Solid accent with inverted text — the loud device, for "you are here". */
   fill: string;
 }
 
@@ -49,34 +47,23 @@ export const DIVIDER_ACCENTS: Record<DividerAccent, DividerAccentClasses> = {
   cyan: {
     text: 'text-brutalist-cyan',
     bar: 'bg-brutalist-cyan',
-    border: 'border-brutalist-cyan',
-    edge: 'border-b-brutalist-cyan',
+    edge: 'border-l-brutalist-cyan',
     hover: 'hover:text-brutalist-cyan',
     fill: 'bg-brutalist-cyan text-black',
   },
   pink: {
     text: 'text-brutalist-pink',
     bar: 'bg-brutalist-pink',
-    border: 'border-brutalist-pink',
-    edge: 'border-b-brutalist-pink',
+    edge: 'border-l-brutalist-pink',
     hover: 'hover:text-brutalist-pink',
     fill: 'bg-brutalist-pink text-black',
   },
   yellow: {
     text: 'text-brutalist-yellow',
     bar: 'bg-brutalist-yellow',
-    border: 'border-brutalist-yellow',
-    edge: 'border-b-brutalist-yellow',
+    edge: 'border-l-brutalist-yellow',
     hover: 'hover:text-brutalist-yellow',
     fill: 'bg-brutalist-yellow text-black',
-  },
-  white: {
-    text: 'text-white',
-    bar: 'bg-white',
-    border: 'border-white',
-    edge: 'border-b-white',
-    hover: 'hover:text-white',
-    fill: 'bg-white text-black',
   },
 };
 
