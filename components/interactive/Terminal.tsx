@@ -8,12 +8,11 @@ import {
   useState,
 } from 'react';
 import {
-  highlightIndex,
   materialize,
-  outLines,
   parseSpans,
   plainText,
   type SpanColor,
+  schedule,
   type TerminalEvent,
 } from './terminalEngine';
 
@@ -94,6 +93,11 @@ export default function Terminal({
   const bodyRef = useRef<HTMLDivElement>(null);
   const followRef = useRef(true);
 
+  const steps = useMemo(
+    () => schedule(script, typingSpeed),
+    [script, typingSpeed],
+  );
+
   const { lines, typing } = useMemo(
     () => materialize(script, finished ? script.length : eventIdx, progress),
     [script, eventIdx, progress, finished],
@@ -142,63 +146,36 @@ export default function Terminal({
     }
   }, [reduceMotion, skip]);
 
-  // The clock: one timeout per tick, derived state only.
+  // The clock: dwell on the current step, then move to the next.
+  //
+  // The durations used to be literals in the branches of this effect, which
+  // meant they could only be observed by letting real time pass. They live in
+  // `schedule()` now, so this effect knows how to *wait* and nothing about how
+  // long — and the same table drives a frame-based renderer, which cannot
+  // disagree with this one because there is only one table.
   useEffect(() => {
     if (!started || finished || reduceMotion) return;
-    const ev = script[eventIdx];
-    if (!ev) {
+    const i = steps.findIndex(
+      (s) => s.eventIdx === eventIdx && s.progress === progress,
+    );
+    if (i === -1) {
       setFinished(true);
       return;
     }
-    const advance = () => {
-      setEventIdx((i) => i + 1);
-      setProgress(0);
-    };
-
-    let t: ReturnType<typeof setTimeout>;
-    if ('cmd' in ev) {
-      t =
-        progress < ev.cmd.length
-          ? setTimeout(() => setProgress((p) => p + 1), typingSpeed)
-          : setTimeout(advance, 300);
-    } else if ('out' in ev) {
-      const ls = outLines(ev);
-      const perLine = ev.speed === 'instant' ? 0 : (ev.speed ?? 70);
-      const hasFocus = highlightIndex(ev, ls) >= 0;
-      if (progress < ls.length) {
-        t = setTimeout(
-          () => setProgress(ev.speed === 'instant' ? ls.length : (p) => p + 1),
-          progress === 0 ? 120 : perLine,
-        );
-      } else if (hasFocus && progress === ls.length) {
-        // focus step: apply highlight + centre it
-        t = setTimeout(() => setProgress((p) => p + 1), 350);
-      } else {
-        t = setTimeout(
-          () => {
-            // The focus scroll paused tail-following to hold the highlight in
-            // view; resume it so the rest of the session stays on screen.
-            if (hasFocus) followRef.current = true;
-            advance();
-          },
-          hasFocus ? 750 : 350,
-        );
+    const next = steps[i + 1];
+    const t = setTimeout(() => {
+      if (!next) {
+        setFinished(true);
+        return;
       }
-    } else if ('pause' in ev) {
-      t = setTimeout(advance, ev.pause);
-    } else {
-      t = setTimeout(advance, 60); // clear
-    }
+      // Leaving an event resumes tail-following: a focus scroll paused it to
+      // hold the highlight in view, and nothing else ever turns it off.
+      if (next.eventIdx !== eventIdx) followRef.current = true;
+      setEventIdx(next.eventIdx);
+      setProgress(next.progress);
+    }, steps[i].duration);
     return () => clearTimeout(t);
-  }, [
-    started,
-    finished,
-    eventIdx,
-    progress,
-    script,
-    typingSpeed,
-    reduceMotion,
-  ]);
+  }, [started, finished, eventIdx, progress, steps, reduceMotion]);
 
   // Loop.
   useEffect(() => {
