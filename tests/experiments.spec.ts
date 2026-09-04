@@ -51,136 +51,83 @@ test.describe('Mermaid Diagrams', () => {
   });
 });
 
-test.describe('Notebook tabs foundation', () => {
-  test('every treatment renders in both first-class themes', async ({
+test.describe('Site rail foundation', () => {
+  test('renders in both first-class themes, at two locations', async ({
     page,
   }) => {
-    await page.goto('/design-sandbox/notebook-tabs', {
+    await page.goto('/design-sandbox/site-rail', {
       waitUntil: 'domcontentloaded',
     });
 
-    await expect(page.locator('h1')).toContainText('NOTEBOOK_TABS');
+    await expect(page.locator('h1')).toContainText('SITE_RAIL');
 
-    // Six treatments, each rendered once per theme. The pairing is the point
-    // of the page: a treatment that only works on one side is not a
-    // foundation. Scoped to <main> because <html> carries the reader's own
-    // theme class and would otherwise be counted.
-    await expect(page.locator('main .dark')).toHaveCount(6);
-    await expect(page.locator('main .sketch')).toHaveCount(6);
+    // One rail per theme. Scoped to <main> because <html> carries the
+    // reader's own theme class and would otherwise be counted.
+    await expect(page.locator('main .dark')).toHaveCount(1);
+    await expect(page.locator('main .sketch')).toHaveCount(1);
   });
 
-  test('opening a tab closes the one it replaced', async ({ page }) => {
-    await page.goto('/design-sandbox/notebook-tabs', {
-      waitUntil: 'domcontentloaded',
-    });
-
-    const rail = page.locator('#flush .dark');
-    const blog = rail.getByRole('button', { name: 'BLOG' });
-    const talks = rail.getByRole('button', { name: 'TALKS' });
-
-    await expect(blog).toHaveAttribute('aria-expanded', 'true');
-
-    await talks.click();
-
-    await expect(talks).toHaveAttribute('aria-expanded', 'true');
-    await expect(blog).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  test('the shell rail toggles its panel shut', async ({ page }) => {
-    await page.goto('/design-sandbox/notebook-tabs', {
-      waitUntil: 'domcontentloaded',
-    });
-
-    const shell = page.locator('#shell .dark');
-    const blog = shell.getByRole('button', { name: 'BLOG' });
-
-    await expect(blog).toHaveAttribute('aria-expanded', 'true');
-
-    // Clicking the open tab shuts the panel, so the rail can sit at rest with
-    // nothing selected — the state a header bar has no equivalent of.
-    await blog.click();
-    await expect(blog).toHaveAttribute('aria-expanded', 'false');
-  });
-});
-
-test.describe('Blades — other geometries', () => {
-  test('every geometry renders in both first-class themes', async ({
+  test('marks where the reader is, independently of which tab is open', async ({
     page,
   }) => {
-    await page.goto('/design-sandbox/blades', {
+    await page.goto('/design-sandbox/site-rail', {
       waitUntil: 'domcontentloaded',
     });
 
-    await expect(page.locator('h1')).toContainText('BLADES');
+    const rail = page.locator('main .dark');
+    const talks = rail.getByRole('tab', { name: 'TALKS' });
+    const blog = rail.getByRole('tab', { name: 'BLOG' });
 
-    await expect(page.locator('main .dark')).toHaveCount(7);
-    await expect(page.locator('main .sketch')).toHaveCount(7);
-  });
-
-  test('opening a rail blade closes the one it replaced', async ({ page }) => {
-    await page.goto('/design-sandbox/blades', {
-      waitUntil: 'domcontentloaded',
-    });
-
-    const rail = page.locator('#rail .dark');
-    const blog = rail.getByRole('button', { name: 'BLOG' });
-    const talks = rail.getByRole('button', { name: 'TALKS' });
-
-    await expect(blog).toHaveAttribute('aria-expanded', 'true');
-
-    await talks.click();
-
-    await expect(talks).toHaveAttribute('aria-expanded', 'true');
-    await expect(blog).toHaveAttribute('aria-expanded', 'false');
-  });
-});
-
-test.describe('Code tabs — top-aligned switcher', () => {
-  test('renders every variant in both first-class themes', async ({ page }) => {
-    await page.goto('/design-sandbox/code-tabs', {
-      waitUntil: 'domcontentloaded',
-    });
-
-    await expect(page.locator('h1')).toContainText('CODE_TABS');
-
-    // Five sections, each rendered once per theme. Scoped to <main> because
-    // <html> carries the reader's own theme class.
-    await expect(page.locator('main .dark')).toHaveCount(5);
-    await expect(page.locator('main .sketch')).toHaveCount(5);
-  });
-
-  test('a grouped block switches every block in its group', async ({
-    page,
-  }) => {
-    await page.goto('/design-sandbox/code-tabs', {
-      waitUntil: 'domcontentloaded',
-    });
-
-    const selected = page.locator('[role="tab"][aria-selected="true"]');
-    const grouped = page.locator(
-      '#group-sync [role="tab"][aria-selected="true"]',
+    // The dark panel is a reader on /talks: TALKS is both open and here, and
+    // the page itself is marked on the inner rail.
+    await expect(talks).toHaveAttribute('aria-selected', 'true');
+    await expect(talks).toHaveAttribute('aria-current', 'location');
+    await expect(rail.getByRole('link', { name: 'Talks' })).toHaveAttribute(
+      'aria-current',
+      'page',
     );
 
-    // Every block on the page except the ungrouped one shares group "pkg", so
-    // one click has to move all of them — that is the whole argument for the
-    // component over a plain tab widget.
-    await expect(grouped).toHaveText(['pnpm', 'pnpm', 'pnpm', 'pnpm']);
+    // Opening BLOG shows its pages without moving the reader: the location
+    // stays on TALKS, the selection moves to BLOG.
+    await blog.click();
+    await expect(blog).toHaveAttribute('aria-selected', 'true');
+    await expect(talks).toHaveAttribute('aria-selected', 'false');
+    await expect(talks).toHaveAttribute('aria-current', 'location');
+    await expect(blog).not.toHaveAttribute('aria-current', 'location');
+    await expect(rail.getByRole('link', { name: 'Posts' })).toBeVisible();
+    await expect(rail.getByRole('link', { name: 'Talks' })).toHaveCount(0);
+  });
 
-    await page
-      .locator('#merged .dark [role="tab"]', { hasText: 'yarn' })
-      .first()
-      .click();
+  test('the section tabs are a vertical tablist with roving focus', async ({
+    page,
+  }) => {
+    await page.goto('/design-sandbox/site-rail', {
+      waitUntil: 'domcontentloaded',
+    });
 
-    await expect(grouped).toHaveText(['yarn', 'yarn', 'yarn', 'yarn']);
+    const rail = page.locator('main .sketch');
+    const tablist = rail.getByRole('tablist', { name: 'Site sections' });
+    await expect(tablist).toHaveAttribute('aria-orientation', 'vertical');
 
-    // The ungrouped block keeps its own state while the group moves.
-    await expect(
-      page.locator('#ungrouped .dark [role="tab"][aria-selected="true"]'),
-    ).toHaveText('TypeScript');
+    // The sketch panel is a reader on /ideas.
+    const ideas = rail.getByRole('tab', { name: 'IDEAS' });
+    const about = rail.getByRole('tab', { name: 'ABOUT' });
+    const blog = rail.getByRole('tab', { name: 'BLOG' });
 
-    // It is a real tablist, so arrow keys traverse it.
-    await selected.first().focus();
-    await page.keyboard.press('ArrowLeft');
-    await expect(grouped).toHaveText(['npm', 'npm', 'npm', 'npm']);
+    await ideas.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(about).toBeFocused();
+    await expect(about).toHaveAttribute('aria-selected', 'true');
+
+    // Wraps at the end.
+    await page.keyboard.press('ArrowDown');
+    await expect(blog).toBeFocused();
+
+    await page.keyboard.press('End');
+    await expect(about).toBeFocused();
+
+    // Only the selected tab is in the tab order.
+    await expect(about).toHaveAttribute('tabindex', '0');
+    await expect(ideas).toHaveAttribute('tabindex', '-1');
   });
 });

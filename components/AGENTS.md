@@ -8,7 +8,7 @@ React components: UI primitives, feature modules (diagrams, search, comments), a
 
 ```
 components/
-├── dividers/         # Navigation foundation — notebook tabs + blades (experiment)
+├── dividers/         # Navigation foundation — the site rail (experiment)
 ├── diagrams/         # Diagram renderers (Mermaid, SVG, ReactFlow)
 ├── hero/             # Shader hero harness + the lab's generative ideas
 ├── search/           # KBar command palette (Cmd+K)
@@ -26,11 +26,8 @@ components/
 
 Use these for imports:
 
-- `dividers/index.ts` → FlushTabs, SplitTabs, ProtrudeTabs, SliverTabs, NestedTabs,
-  TabbedShell (the left rail); CodeTabs + CodeTab (top-aligned code switcher);
-  RailBlades, FoldBlades, RibbonBlades, TabBlades, StackBlades, LedgerBlades,
-  FanBlades (the geometry exploration); DividerBody, DividerSpine,
-  SITE_DIVIDERS, `Divider` types
+- `dividers/index.ts` → SiteRail, locateDivider, TabLabel, SITE_DIVIDERS,
+  accentOf / DIVIDER_ACCENTS, `Divider` types
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
 - `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
 - `social-icons/index.tsx` → SocialIcon
@@ -79,99 +76,82 @@ mono `subtitle`. Drop it in as the first child of the standard page shell:
 
 ## DIVIDERS (dividers/) — navigation foundation, experimental
 
-A proposal to replace the top header bar. The shared model is `Divider`
-(`id`, tab `label`, `hint`, `accent`, `items`) — that is the whole contract,
-and every variation renders the same array, differing only in geometry.
+A proposal to replace the top header bar with a **site rail**: a column of
+vertical section tabs tight to the left edge, and beside it a narrower rail
+that always shows the open section's pages. The shared model is `Divider`
+(`id`, tab `label`, `accent`, `items`); `SITE_DIVIDERS` is the site expressed
+in it, grouped from `data/headerNavLinks`.
 
-**`tabs/` is the proposal**: a column of vertical tabs pinned tight to the
-left edge, the way index tabs run down the edge of a notebook. A rail costs
-~3rem of width the reading measure was not using, and gives back the whole
-horizontal band a sticky header takes out of every screenful.
+`SiteRail` is one component, the merge of two earlier treatments — a *shell*
+that put everything on one rail and slid a panel out (two clicks and a scrim
+for every navigation), and a *nested* rail that kept the second level visible
+but had no idea where the reader was. Every destination is now one click, and
+the rail is route-aware.
 
-| Treatment | Geometry |
-| --------- | -------- |
-| `TabbedShell`   | The page with no header: rail carries wordmark, sections, search + theme; a panel slides out over the page |
-| `FlushTabs`     | Tabs sized to their labels, stacked from the top; the open tab fills and covers the rail's rule |
-| `SplitTabs`     | Tabs share the full height equally; the open tab takes the sheet's surface, accent bar at the screen edge |
-| `ProtrudeTabs`  | Page keeps its own rectangle; tabs tucked off the left edge, the open one pulled proud |
-| `SliverTabs`    | 0.55rem of coloured page edges at rest; the rail widens on hover/focus and overlays rather than reflows |
-| `NestedTabs`    | Two vertical levels — sections outside, that section's destinations inside |
+**Two states, two devices.** A rail can be open on a section the reader is
+only looking at, so *open* and *here* never share a device:
 
-**`top/` is a different mechanism, not the rail rotated.** `CodeTabs` /
-`CodeTab` are the code-block language switcher every developer documentation
-portal has — and they are separate components on purpose, because they are a
-separate contract:
+| State | Device | Where |
+| ----- | ------ | ----- |
+| Here — the section containing the current path, and the page itself | accent `fill` | section tab + inner-rail link, one colour |
+| Open but elsewhere — whose pages the inner rail shows | 4px accent `edge` + full-strength text | section tab only |
 
-| | `tabs/` (left rail) | `top/` (code tabs) |
-| --- | --- | --- |
-| Role | Navigation | Content switcher |
-| ARIA | Disclosure buttons, `aria-expanded` | Real `tablist` / `tab` / `tabpanel` |
-| Keyboard | Click + focus | Roving focus, arrow keys, Home / End |
-| Contents | Links to elsewhere | The same content in another form |
+Choosing a tab never navigates; the links do. Semantics: the section tabs are a
+vertical `tablist` with roving focus (up/down, Home/End); the inner rail is its
+`tabpanel` holding a `<nav>` of real links; `aria-current="location"` marks the
+section and `aria-current="page"` the page, independently of `aria-selected`.
+`locateDivider(dividers, path)` is the resolution (longest matching href wins).
 
-One component with an `orientation` prop would hide that difference. Three
-looks — `merged` (default), `underline`, `segmented` — and every one pulls
-itself half a border down over the code block's top rule, so the seam is one
-2px line rather than two stacked ones.
+**Accents follow the per-section rule above.** `DividerAccent` is the same
+three values `PageHeader` takes, so the tab a reader arrives on is the colour of
+the header they arrive at. There is no fourth "white" accent.
 
-**`group` is what earns it.** Blocks sharing a group switch together and the
-choice persists across pages, because a reader picks a package manager once,
-not once per snippet. The selection lives in a module-level store
-(`codeTabsStore.ts`), not a context: MDX mounts these at arbitrary depths and
-there is no component in a post to hang a provider off. The store starts empty
-on both server and client, so the first render matches the HTML and the stored
-choice is applied in an effect — restoring during render is what produces a
-hydration mismatch. A block whose tab set does not include the group's choice
-falls back to its own first tab.
-
-`CodeTabs` and `CodeTab` are registered in `MDXComponents`, so posts use them
-with no import. Blank lines around the fences are load-bearing — MDX only
-parses markdown inside a JSX block when the block opens and closes on its own
-lines.
-
-**`blades/` is the record of what else was tried** — Ribbon, Rail, Fold, Tab,
-Stack, Ledger, Fan. Kept because a rejected option is only convincing while
-you can still see it.
+**What was cut, and where it went.** Flush, Split, Protrude, Sliver and the seven
+Blades geometries are gone (the reasons are on the sandbox page). The code-block
+language switcher was never navigation; it now lives in the design-system
+package as `CodeTabs` / `CodeTab`, in `--ds-*` roles, and its rule is gated
+there.
 
 ### The state rule (non-negotiable, learned the hard way)
 
-**Selected state is carried by an accent `fill` or a 4px `edge`. Never by a
-surface pair.**
+**Selected state is carried by an accent `fill` or a 4px accent `edge`. Never by
+a surface pair.**
 
 The obvious way to mark a chosen tab is `bg-black` for it and `bg-zinc-900`
 for its siblings. That is *acceptable* on the terminal — `#000000` against
 `#18181b` — and **invisible on paper**, where the same two tokens remap to
 `#f5f3ec` and `#efeadf`: a 3% lightness difference doing the entire job of
-telling a reader where they are. Every widget here shipped with that bug once;
-`dividerAccents.ts` now documents the two devices that survive the remap:
+telling a reader where they are. The first version of every rail variant
+shipped with that bug. `dividerAccents.ts` holds the two devices that survive
+the remap; the design-system package asserts the same rule as arithmetic in
+`pnpm check:contrast` (`auditSelectionDevices`), so it is a gate there and a
+convention here until the rail is promoted.
 
-| Device | Class | Use |
-| ------ | ----- | --- |
-| `fill` | `bg-brutalist-* text-black` | The selection is the point of the widget |
-| `edge` | `border-b-brutalist-*` at 4px | A strip that should not shout |
+Surface tokens stay the right tool for *layering* — a strip behind its tabs, a
+panel over a page — they are only wrong for state.
 
-Pair either with a text-weight or text-colour change (`text-zinc-500` →
-`text-white`/inverted). Surface tokens stay the right tool for *layering* — a
-strip behind its tabs, a panel over a page — they are only wrong for state.
+**Nothing in here branches on the theme.** Built on remapped tokens only, so the
+identical markup reads as a lit side-rail on `dark`/`dim` and as paper index
+tabs under `sketch`. Colour never appears as a literal: `dividerAccents.ts`
+holds the accent roles as full static class strings so Tailwind's scanner sees
+them.
 
-**Nothing in here branches on the theme.** Every variation is built on
-remapped tokens only, so the identical markup reads as a lit side-rail on
-`dark`/`dim` and as paper index tabs under `sketch` — the dual-mode rule below,
-applied to a whole pattern rather than one component. Colour never appears as a
-literal: `dividerAccents.ts` holds the four accent roles as full static class
-strings so Tailwind's scanner sees them.
+**Before it replaces the header** (listed on the sandbox page): fixed
+positioning and a re-centred reading column; the `lg` burger drawer stays below
+that breakpoint; rail-width forms of `SearchButton` and `ThemeSwitch`; a pass
+onto the package's `--ds-*` roles and a decision about per-section colour, which
+the ladder has no role for; and a re-baseline of every page snapshot.
 
 Two mechanics worth knowing before editing:
 
 - **A rail that scrolls must hide its scrollbar.** A classic scrollbar is
   ~15px, which eats a third of a 3rem rail and pushes the centred vertical
   labels off their own tabs.
-- **A panel offset from the left needs `calc(-100% - <offset>)` to hide.**
-  A bare `-110%` parks its right edge back on top of the rail.
+- **Rotated text is still text.** `writing-mode` does not change reading order;
+  labels stay real text so the accessible name carries the section.
 
-All three render in both themes at once at **`/design-sandbox/notebook-tabs`**
-(the rail), **`/design-sandbox/code-tabs`** (the switcher) and
-**`/design-sandbox/blades`** (the alternatives).
+Renders in both themes at once, at two locations, at
+**`/design-sandbox/site-rail`**.
 
 ## DUAL-MODE THEMING (non-negotiable)
 

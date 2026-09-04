@@ -7,12 +7,10 @@ import {
   CreditCard,
   FileText,
   Image as ImageIcon,
-  Layers,
   type LucideIcon,
   MousePointerClick,
   Orbit,
   Rows3,
-  SquareCode,
   Tags as TagsIcon,
   Type,
 } from 'lucide-react';
@@ -34,24 +32,11 @@ const components: {
     icon: Boxes,
   },
   {
-    name: 'Notebook Tabs',
-    path: '/design-sandbox/notebook-tabs',
+    name: 'Site Rail',
+    path: '/design-sandbox/site-rail',
     description:
-      'Instead of a header: vertical tabs tight to the left edge, six treatments in both themes',
+      'Instead of a header: a route-aware rail of vertical tabs, in both themes',
     icon: Bookmark,
-  },
-  {
-    name: 'Code Tabs',
-    path: '/design-sandbox/code-tabs',
-    description:
-      'Top-aligned tabs: the code block language switcher, with page-wide group sync',
-    icon: SquareCode,
-  },
-  {
-    name: 'Blades — other geometries',
-    path: '/design-sandbox/blades',
-    description: 'The shapes the notebook rail was chosen out of',
-    icon: Layers,
   },
   {
     name: 'Homepage Heroes',
