@@ -42,7 +42,7 @@ jobs:
   # install-based jobs whose warm pnpm store can mask a bad resolution — it
   # catches the regression that broke main in PR #79.
   lockfile:
-    name: Lockfile protocol guard
+    name: lockfile
     runs-on: ubuntu-latest
     outputs:
       outcome: ${{ steps.lockfile.outcome }}
@@ -59,7 +59,7 @@ jobs:
         run: node scripts/ci/check-lockfile-protocol.mjs
 
   lint:
-    name: Lint (biome)
+    name: lint
     runs-on: ubuntu-latest
     outputs:
       outcome: ${{ steps.lint.outcome }}
@@ -74,7 +74,7 @@ jobs:
         run: pnpm lint
 
   typecheck:
-    name: Type check (tsc)
+    name: typecheck
     runs-on: ubuntu-latest
     outputs:
       outcome: ${{ steps.typecheck.outcome }}
@@ -89,7 +89,7 @@ jobs:
         run: pnpm typecheck
 
   seo:
-    name: SEO audit
+    name: seo
     runs-on: ubuntu-latest
     outputs:
       outcome: ${{ steps.seo.outcome }}
@@ -104,7 +104,7 @@ jobs:
         run: pnpm check:seo
 
   unit:
-    name: Unit tests + coverage
+    name: test
     runs-on: ubuntu-latest
     outputs:
       outcome: ${{ steps.unit.outcome }}
@@ -129,7 +129,7 @@ jobs:
           if-no-files-found: ignore
 
   build:
-    name: Build
+    name: build
     runs-on: ubuntu-latest
     outputs:
       outcome: ${{ steps.build.outcome }}
@@ -154,7 +154,7 @@ jobs:
           include-hidden-files: true
 
   e2e-visual:
-    name: E2E + visual regression
+    name: visual
     runs-on: ubuntu-latest
     needs: build
     # Read-only. This job compares against the committed baselines and never
@@ -218,7 +218,7 @@ jobs:
           if-no-files-found: ignore
 
   conclusion:
-    name: PR checks
+    name: pr-checks
     runs-on: ubuntu-latest
     needs: [lockfile, lint, typecheck, seo, unit, build, e2e-visual]
     if: always()
