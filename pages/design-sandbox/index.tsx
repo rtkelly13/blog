@@ -1,15 +1,18 @@
 import {
   BarChart3,
+  Bookmark,
   Boxes,
   CaseSensitive,
   Compass,
   CreditCard,
   FileText,
   Image as ImageIcon,
+  Layers,
   type LucideIcon,
   MousePointerClick,
   Orbit,
   Rows3,
+  SquareCode,
   Tags as TagsIcon,
   Type,
 } from 'lucide-react';
@@ -29,6 +32,26 @@ const components: {
     path: '/design-sandbox/component-library',
     description: 'Every core component in both themes, side by side',
     icon: Boxes,
+  },
+  {
+    name: 'Notebook Tabs',
+    path: '/design-sandbox/notebook-tabs',
+    description:
+      'Instead of a header: vertical tabs tight to the left edge, six treatments in both themes',
+    icon: Bookmark,
+  },
+  {
+    name: 'Code Tabs',
+    path: '/design-sandbox/code-tabs',
+    description:
+      'Top-aligned tabs: the code block language switcher, with page-wide group sync',
+    icon: SquareCode,
+  },
+  {
+    name: 'Blades — other geometries',
+    path: '/design-sandbox/blades',
+    description: 'The shapes the notebook rail was chosen out of',
+    icon: Layers,
   },
   {
     name: 'Homepage Heroes',
