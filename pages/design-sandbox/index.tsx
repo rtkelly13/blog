@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Bookmark,
   Boxes,
   CaseSensitive,
   Compass,
@@ -29,6 +30,13 @@ const components: {
     path: '/design-sandbox/component-library',
     description: 'Every core component in both themes, side by side',
     icon: Boxes,
+  },
+  {
+    name: 'Site Rail',
+    path: '/design-sandbox/site-rail',
+    description:
+      'Instead of a header: a route-aware rail of vertical tabs, in both themes',
+    icon: Bookmark,
   },
   {
     name: 'Homepage Heroes',
