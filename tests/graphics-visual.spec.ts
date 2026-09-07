@@ -22,10 +22,19 @@ import { expect, test } from '@playwright/test';
  *
  * ## Why the URL carries everything
  *
- * `chrome=0` drops the header, controls and captions, so a diff cannot be
- * triggered by a slider moving a pixel. `playing=0` with an explicit `t` freezes
- * one frame, because screenshotting an animation is otherwise a race that
- * produces failures unrelated to what changed. See `lib/graphicsUrl.ts`.
+ * `chrome=0` drops the headings, controls and captions and pins the tiles over
+ * the viewport as one flat grid, so a diff cannot be triggered by a slider
+ * moving a pixel — or by the site navigation, which an element screenshot
+ * otherwise captures wherever it is painted over the shot. `playing=0` with an
+ * explicit `t` freezes one frame, because screenshotting an animation is
+ * otherwise a race that produces failures unrelated to what changed. See
+ * `lib/graphicsUrl.ts`.
+ *
+ * The first recording of these four caught exactly that: `section:first` had
+ * been a guess at where the grid was, and the baselines went in with the header
+ * and search box across the top and the six generators strewn over five group
+ * sections. They would have failed on the next navigation change and blamed the
+ * generators. The fixture now has a name.
  *
  * Snapshots are Linux-only, like the rest of `visual.spec.ts` — font and
  * antialiasing differences make them platform-specific.
@@ -64,7 +73,8 @@ async function shoot(page: import('@playwright/test').Page, name: string) {
   // The tiles animate off a rAF loop even when paused-on-first-frame, and web
   // fonts shift the layout; a settle beat is cheaper than chasing both.
   await page.waitForTimeout(1500);
-  const grid = page.locator('section').first();
+  const grid = page.getByTestId('graphics-grid');
+  await expect(grid).toBeVisible();
   await expect(grid).toHaveScreenshot(name, { animations: 'disabled' });
 }
 

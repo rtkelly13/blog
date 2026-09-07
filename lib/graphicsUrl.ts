@@ -12,9 +12,11 @@
  * - `t` with `playing=0` freezes a specific frame. Screenshotting an animation
  *   is otherwise a race, and the usual workarounds (wait, then hope) produce
  *   snapshots that fail for reasons unrelated to what changed.
- * - `chrome=0` drops the header and controls, so the snapshot contains the
- *   graphics and nothing else. A diff then cannot be triggered by a slider
- *   moving a pixel.
+ * - `chrome=0` drops the headings and controls and pins the grid over the
+ *   viewport, so the snapshot contains the graphics and nothing else — not the
+ *   site navigation either, which an element screenshot captures wherever it is
+ *   painted over the region being shot. A diff then cannot be triggered by a
+ *   slider moving a pixel, or by a change to the nav.
  *
  * Unknown params are ignored and malformed ones fall back to the default, so a
  * stale link degrades to the default gallery rather than to a blank page.
@@ -26,7 +28,11 @@ export interface GraphicsUrlState {
   theme?: 'dark' | 'dim' | 'sketch';
   /** Force the drawing surface. Omitted follows the theme. */
   paper?: boolean;
-  /** Only these generators, in this order. Empty means all of them. */
+  /**
+   * Only these generators. Empty means all of them. The order is honoured in
+   * bare mode, where the grid is flat; with chrome on, a generator sits in its
+   * family's section and the section decides.
+   */
   only: string[];
   /** Only this family. */
   group?: string;
@@ -45,7 +51,11 @@ export interface GraphicsUrlState {
   /** Frozen loop position. Only meaningful with `playing=0`. */
   t: number;
   playing: boolean;
-  /** Show the header and controls. `chrome=0` for a bare grid. */
+  /**
+   * Show the headings, controls and captions. `chrome=0` is fixture mode: one
+   * flat grid pinned over the viewport, covering the site header so an element
+   * screenshot cannot pick it up.
+   */
   chrome: boolean;
   /** Tiles per row in bare mode. */
   cols: number;
