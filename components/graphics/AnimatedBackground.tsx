@@ -74,7 +74,19 @@ export default function AnimatedBackground({
   // render, and an identity dependency would re-sample the whole generator each
   // time — which is not merely wasteful, it is the per-frame re-sampling the
   // sample/project split exists to prevent.
-  const accentKey = accents?.join(',');
+  //
+  // So the ramp is re-derived from its own serialisation, and *that* is what
+  // the param memo depends on. A content key sitting in a dependency array
+  // beside the array it describes is the shape the exhaustive-deps rule
+  // rightly objects to: the key is not read by the memo body, so the rule sees
+  // a lie. Here `accentKey` is the only input to `stableAccents`, which makes
+  // the dependency both honest and the one that actually matters.
+  const accentKey = accents === undefined ? undefined : JSON.stringify(accents);
+  const stableAccents = useMemo(
+    () =>
+      accentKey === undefined ? undefined : (JSON.parse(accentKey) as string[]),
+    [accentKey],
+  );
 
   // Everything except `t`. Changing any of these re-samples, which is correct:
   // they are the params that define *what* is being drawn.
@@ -83,7 +95,7 @@ export default function AnimatedBackground({
       resolveParams(generator, {
         seed,
         accent: accent ?? theme.accent,
-        accents,
+        accents: stableAccents,
         contrast,
         originX,
         originY,
@@ -100,7 +112,7 @@ export default function AnimatedBackground({
       generator,
       seed,
       accent,
-      accentKey,
+      stableAccents,
       contrast,
       originX,
       originY,
@@ -115,7 +127,6 @@ export default function AnimatedBackground({
       theme.accent,
       theme.background,
       theme.occlusion,
-      accents,
     ],
   );
 

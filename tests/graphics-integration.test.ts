@@ -119,26 +119,32 @@ describe('the colour options are additive', () => {
   // trusted, because `ink()` is called from 42 files and one of them getting it
   // wrong would be invisible until someone noticed a colour had shifted.
 
-  it.each(NAMES)('%s: omitting the new options renders the classic output', (name) => {
-    const classic = renderGraphic(name, { seed: 4 });
-    expect(
-      renderGraphic(name, {
-        seed: 4,
-        accents: undefined,
-        contrast: 1,
-        originX: 0.5,
-        originY: 0.5,
-      }),
-    ).toBe(classic);
-  });
+  it.each(NAMES)(
+    '%s: omitting the new options renders the classic output',
+    (name) => {
+      const classic = renderGraphic(name, { seed: 4 });
+      expect(
+        renderGraphic(name, {
+          seed: 4,
+          accents: undefined,
+          contrast: 1,
+          originX: 0.5,
+          originY: 0.5,
+        }),
+      ).toBe(classic);
+    },
+  );
 
-  it.each(NAMES)('%s: a one-colour ramp equals that colour as the accent', (name) => {
-    // A ramp of one is not a gradient, and must degrade to the plain case
-    // rather than to some interpolated approximation of it.
-    expect(renderGraphic(name, { seed: 4, accents: ['#22d3ee'] })).toBe(
-      renderGraphic(name, { seed: 4, accent: '#22d3ee' }),
-    );
-  });
+  it.each(NAMES)(
+    '%s: a one-colour ramp equals that colour as the accent',
+    (name) => {
+      // A ramp of one is not a gradient, and must degrade to the plain case
+      // rather than to some interpolated approximation of it.
+      expect(renderGraphic(name, { seed: 4, accents: ['#22d3ee'] })).toBe(
+        renderGraphic(name, { seed: 4, accent: '#22d3ee' }),
+      );
+    },
+  );
 
   it.each(NAMES)('%s: contrast of 1 is a no-op', (name) => {
     expect(renderGraphic(name, { seed: 4, contrast: 1 })).toBe(
@@ -155,11 +161,14 @@ describe('the colour options are additive', () => {
     ).not.toBe(renderGraphic(name, { seed: 4 }));
   });
 
-  it.each(NAMES)('%s: contrast away from 1 actually changes something', (name) => {
-    expect(renderGraphic(name, { seed: 4, contrast: 0.4 })).not.toBe(
-      renderGraphic(name, { seed: 4 }),
-    );
-  });
+  it.each(NAMES)(
+    '%s: contrast away from 1 actually changes something',
+    (name) => {
+      expect(renderGraphic(name, { seed: 4, contrast: 0.4 })).not.toBe(
+        renderGraphic(name, { seed: 4 }),
+      );
+    },
+  );
 
   it('a moved origin shifts every centred generator', () => {
     // And is inert for the rest, which is why this is not `it.each` over all of
