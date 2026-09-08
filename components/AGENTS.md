@@ -8,6 +8,7 @@ React components: UI primitives, feature modules (diagrams, search, comments), a
 
 ```
 components/
+├── dividers/         # Navigation foundation — the site rail (experiment)
 ├── diagrams/         # Diagram renderers (Mermaid, SVG, ReactFlow)
 ├── hero/             # Shader hero harness + the lab's generative ideas
 ├── search/           # KBar command palette (Cmd+K)
@@ -25,6 +26,8 @@ components/
 
 Use these for imports:
 
+- `dividers/index.ts` → SiteRail, locateDivider, TabLabel, SITE_DIVIDERS,
+  accentOf / DIVIDER_ACCENTS, `Divider` types
 - `diagrams/index.ts` → Diagram, MermaidDiagram, SvgDiagram, ReactFlowDiagram
 - `hero/index.ts` → ShaderStage, HERO_IDEAS, readColor, SHADER_PRELUDE/POSTLUDE
 - `social-icons/index.tsx` → SocialIcon
@@ -70,6 +73,85 @@ mono `subtitle`. Drop it in as the first child of the standard page shell:
   aesthetic (they render as full-colour OS glyphs).
 - Detail pages use `PageTitle` (bordered bracket text), not `PageHeader`. Blog
   listing uses `ListLayoutWithTags`, which owns its own centred header.
+
+## DIVIDERS (dividers/) — navigation foundation, experimental
+
+A proposal to replace the top header bar with a **site rail**: a column of
+vertical section tabs tight to the left edge, and beside it a narrower rail
+that always shows the open section's pages. The shared model is `Divider`
+(`id`, tab `label`, `accent`, `items`); `SITE_DIVIDERS` is the site expressed
+in it, grouped from `data/headerNavLinks`.
+
+`SiteRail` is one component, the merge of two earlier treatments — a *shell*
+that put everything on one rail and slid a panel out (two clicks and a scrim
+for every navigation), and a *nested* rail that kept the second level visible
+but had no idea where the reader was. Every destination is now one click, and
+the rail is route-aware.
+
+**Two states, two devices.** A rail can be open on a section the reader is
+only looking at, so *open* and *here* never share a device:
+
+| State | Device | Where |
+| ----- | ------ | ----- |
+| Here — the section containing the current path, and the page itself | accent `fill` | section tab + inner-rail link, one colour |
+| Open but elsewhere — whose pages the inner rail shows | 4px accent `edge` + full-strength text | section tab only |
+
+Choosing a tab never navigates; the links do. Semantics: the section tabs are a
+vertical `tablist` with roving focus (up/down, Home/End); the inner rail is its
+`tabpanel` holding a `<nav>` of real links; `aria-current="location"` marks the
+section and `aria-current="page"` the page, independently of `aria-selected`.
+`locateDivider(dividers, path)` is the resolution (longest matching href wins).
+
+**Accents follow the per-section rule above.** `DividerAccent` is the same
+three values `PageHeader` takes, so the tab a reader arrives on is the colour of
+the header they arrive at. There is no fourth "white" accent.
+
+**What was cut, and where it went.** Flush, Split, Protrude, Sliver and the seven
+Blades geometries are gone (the reasons are on the sandbox page). The code-block
+language switcher was never navigation; it now lives in the design-system
+package as `CodeTabs` / `CodeTab`, in `--ds-*` roles, and its rule is gated
+there.
+
+### The state rule (non-negotiable, learned the hard way)
+
+**Selected state is carried by an accent `fill` or a 4px accent `edge`. Never by
+a surface pair.**
+
+The obvious way to mark a chosen tab is `bg-black` for it and `bg-zinc-900`
+for its siblings. That is *acceptable* on the terminal — `#000000` against
+`#18181b` — and **invisible on paper**, where the same two tokens remap to
+`#f5f3ec` and `#efeadf`: a 3% lightness difference doing the entire job of
+telling a reader where they are. The first version of every rail variant
+shipped with that bug. `dividerAccents.ts` holds the two devices that survive
+the remap; the design-system package asserts the same rule as arithmetic in
+`pnpm check:contrast` (`auditSelectionDevices`), so it is a gate there and a
+convention here until the rail is promoted.
+
+Surface tokens stay the right tool for *layering* — a strip behind its tabs, a
+panel over a page — they are only wrong for state.
+
+**Nothing in here branches on the theme.** Built on remapped tokens only, so the
+identical markup reads as a lit side-rail on `dark`/`dim` and as paper index
+tabs under `sketch`. Colour never appears as a literal: `dividerAccents.ts`
+holds the accent roles as full static class strings so Tailwind's scanner sees
+them.
+
+**Before it replaces the header** (listed on the sandbox page): fixed
+positioning and a re-centred reading column; the `lg` burger drawer stays below
+that breakpoint; rail-width forms of `SearchButton` and `ThemeSwitch`; a pass
+onto the package's `--ds-*` roles and a decision about per-section colour, which
+the ladder has no role for; and a re-baseline of every page snapshot.
+
+Two mechanics worth knowing before editing:
+
+- **A rail that scrolls must hide its scrollbar.** A classic scrollbar is
+  ~15px, which eats a third of a 3rem rail and pushes the centred vertical
+  labels off their own tabs.
+- **Rotated text is still text.** `writing-mode` does not change reading order;
+  labels stay real text so the accessible name carries the section.
+
+Renders in both themes at once, at two locations, at
+**`/design-sandbox/site-rail`**.
 
 ## DUAL-MODE THEMING (non-negotiable)
 

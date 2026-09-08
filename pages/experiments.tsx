@@ -1,5 +1,6 @@
 import {
   Beaker,
+  Bookmark,
   Boxes,
   Palette,
   Projector,
@@ -20,6 +21,15 @@ const experiments = [
     icon: <Boxes className="w-12 h-12" />,
     status: 'active',
     components: 5,
+  },
+  {
+    name: 'Site Rail',
+    path: '/design-sandbox/site-rail',
+    description:
+      'A navigation foundation instead of a header: a route-aware rail of vertical tabs with the section pages always beside it',
+    icon: <Bookmark className="w-12 h-12" />,
+    status: 'active',
+    components: 1,
   },
   {
     name: 'Design Sandbox',
