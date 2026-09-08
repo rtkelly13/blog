@@ -32,6 +32,7 @@ const NO_SEO_REQUIRED = new Set([
   // Distinct from the client-side redirects above, which do render and so can
   // (and must) emit their own `noindex`.
   'pages/experiments/graphics.tsx',
+  'pages/experiments/backgrounds.tsx',
 ]);
 
 /**

@@ -13,49 +13,53 @@ count. See the note at the top of the test.
 
 Budget: **900 elements**, **240KB** raw SVG.
 
-| Generator | Elements | KB | project() ms |
-| --- | ---: | ---: | ---: |
-| `iso-cubes` | 900 | 89 | 1.04 |
-| `iso-terrain` | 900 | 89 | 0.62 |
-| `void-field` | 898 | 57 | 0.75 |
-| `radial-dashes` | 846 | 106 | 1.19 |
-| `iso-grid` | 840 | 110 | 1.55 |
-| `flow-field` | 836 | 107 | 1.14 |
-| `ripple` | 836 | 60 | 0.86 |
-| `dot-grid` | 798 | 57 | 0.87 |
-| `spiral-dots` | 760 | 99 | 1.38 |
-| `iso-blocks` | 740 | 81 | 0.44 |
-| `triangle-grid` | 736 | 99 | 3.61 |
-| `ribbon-grid` | 736 | 113 | 1.05 |
-| `swept-polygons` | 727 | 77 | 0.52 |
-| `flow-lines` | 721 | 131 | 2.86 |
-| `cell-mask` | 672 | 108 | 1.22 |
-| `spiral-warp` | 646 | 81 | 0.53 |
-| `weave` | 617 | 167 | 2.08 |
-| `truchet-arcs` | 493 | 177 | 1.69 |
-| `hex-grid` | 486 | 87 | 1.96 |
-| `orbit-rings` | 335 | 25 | 0.65 |
-| `broken-ring` | 270 | 35 | 0.64 |
-| `truchet-single` | 240 | 45 | 0.26 |
-| `truchet-mirror` | 209 | 78 | 0.96 |
-| `kaleidoscope` | 201 | 21 | 0.68 |
-| `line-circles` | 172 | 22 | 0.17 |
-| `cube-helix` | 131 | 19 | 0.22 |
-| `radial-spokes` | 129 | 13 | 0.39 |
-| `node-network` | 125 | 11 | 0.16 |
-| `diagonal-hatch` | 100 | 10 | 0.14 |
-| `scatter-blocks` | 76 | 11 | 0.27 |
-| `polar-mesh` | 71 | 33 | 0.75 |
-| `interference` | 60 | 121 | 4.49 |
-| `terrain-mesh` | 59 | 67 | 1.21 |
-| `spiral-mesh` | 52 | 25 | 0.88 |
-| `signal-decay` | 46 | 73 | 2.79 |
-| `resonance` | 45 | 80 | 5.78 |
-| `contour` | 26 | 19 | 0.4 |
-| `brockmann-arcs` | 17 | 3 | 0.06 |
-| `rose-curve` | 8 | 34 | 0.87 |
-| `ridgeline` | 7 | 27 | 6.37 |
-| `phyllotaxis` | 5 | 82 | 2.13 |
+The last column is the highest global `opacity` at which the generator stays
+safe to put text over — see `docs/graphics-legibility.md`. At full weight
+these are artwork; as backdrops they are used dimmed, and this says how far.
 
-Median elements: **270**. Total `project()` if every generator drew at once: **56ms**.
+| Generator | Elements | KB | project() ms | text-safe opacity |
+| --- | ---: | ---: | ---: | ---: |
+| `iso-cubes` | 900 | 89 | 0.42 | 0.90 |
+| `iso-terrain` | 900 | 89 | 0.59 | 0.90 |
+| `void-field` | 898 | 57 | 0.8 | 0.70 |
+| `radial-dashes` | 846 | 106 | 0.81 | 1.00 |
+| `iso-grid` | 840 | 110 | 2.25 | 1.00 |
+| `flow-field` | 836 | 107 | 1.11 | 1.00 |
+| `ripple` | 836 | 60 | 0.68 | 0.80 |
+| `dot-grid` | 798 | 57 | 0.97 | 1.00 |
+| `spiral-dots` | 760 | 99 | 0.75 | 0.75 |
+| `iso-blocks` | 740 | 81 | 0.47 | 0.90 |
+| `triangle-grid` | 736 | 99 | 1.08 | 1.00 |
+| `ribbon-grid` | 736 | 113 | 1.22 | 1.00 |
+| `swept-polygons` | 727 | 77 | 0.55 | 1.00 |
+| `flow-lines` | 721 | 131 | 1.8 | 0.85 |
+| `cell-mask` | 672 | 108 | 1.41 | 1.00 |
+| `spiral-warp` | 646 | 81 | 0.56 | 0.75 |
+| `weave` | 617 | 167 | 1.19 | 1.00 |
+| `truchet-arcs` | 493 | 177 | 1.5 | 0.80 |
+| `hex-grid` | 486 | 87 | 2.21 | 1.00 |
+| `orbit-rings` | 335 | 25 | 0.29 | 0.70 |
+| `broken-ring` | 270 | 35 | 0.38 | 1.00 |
+| `truchet-single` | 240 | 45 | 0.28 | 0.90 |
+| `truchet-mirror` | 209 | 78 | 0.69 | 1.00 |
+| `kaleidoscope` | 201 | 21 | 0.2 | 1.00 |
+| `line-circles` | 172 | 22 | 0.18 | 1.00 |
+| `cube-helix` | 131 | 19 | 0.18 | 0.80 |
+| `radial-spokes` | 129 | 13 | 0.16 | 1.00 |
+| `node-network` | 125 | 11 | 0.2 | 0.50 |
+| `diagonal-hatch` | 100 | 10 | 0.15 | 1.00 |
+| `scatter-blocks` | 76 | 11 | 0.28 | 1.00 |
+| `polar-mesh` | 71 | 33 | 0.76 | 1.00 |
+| `interference` | 60 | 121 | 6.09 | 1.00 |
+| `terrain-mesh` | 59 | 67 | 1.3 | 0.80 |
+| `spiral-mesh` | 52 | 25 | 0.7 | 0.90 |
+| `signal-decay` | 46 | 73 | 1.67 | 1.00 |
+| `resonance` | 45 | 80 | 6.05 | 0.90 |
+| `contour` | 26 | 19 | 1.04 | 1.00 |
+| `brockmann-arcs` | 17 | 3 | 0.02 | 0.50 |
+| `rose-curve` | 8 | 34 | 1.72 | 0.50 |
+| `ridgeline` | 7 | 27 | 2.13 | 0.65 |
+| `phyllotaxis` | 5 | 82 | 2.22 | 0.80 |
+
+Median elements: **270**. Total `project()` if every generator drew at once: **47ms**.
 
