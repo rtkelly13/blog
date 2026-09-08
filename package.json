@@ -27,6 +27,7 @@
     "post:wizard": "node scripts/compose.mjs",
     "check:seo": "node scripts/audit-seo.mjs",
     "check:ds": "node scripts/check-design-system.mjs",
+    "ds:try": "node scripts/try-design-system.mjs",
     "archive-links": "node scripts/archive-links.mjs",
     "check:deploy": "node scripts/verify-deployment.mjs",
     "check:lockfile": "node scripts/ci/check-lockfile-protocol.mjs",
