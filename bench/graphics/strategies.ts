@@ -24,8 +24,6 @@ export interface Strategy {
   setup(host: HTMLElement, frames: string[]): Promise<Renderer> | Renderer;
 }
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
 function elementsOf(root: Element): Element[] {
   const all: Element[] = [root];
   const kids = root.querySelectorAll('*');

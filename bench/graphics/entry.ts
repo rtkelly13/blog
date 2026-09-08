@@ -10,7 +10,6 @@ import {
 import { gallery, run, show, useInstancingMicro } from './driver';
 import { STRATEGIES } from './strategies';
 
-// biome-ignore lint/suspicious/noExplicitAny: benchmark glue
 (globalThis as any).BENCH = {
   run,
   gallery,

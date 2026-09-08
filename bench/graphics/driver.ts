@@ -114,8 +114,8 @@ export async function run(spec: RunSpec): Promise<RunResult> {
   const w = stats(work);
 
   // rAF mode.
+  // `gaps.length` is the frame count; a separate counter said the same thing.
   const gaps: number[] = [];
-  let drawn = 0;
   await new Promise<void>((resolve) => {
     let last = performance.now();
     const start = last;
@@ -125,7 +125,6 @@ export async function run(spec: RunSpec): Promise<RunResult> {
       gaps.push(now - last);
       last = now;
       renderer.draw(f++ % frames.length);
-      drawn++;
       if (now - start < spec.loopMs) requestAnimationFrame(tick);
       else resolve();
     };

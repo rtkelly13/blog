@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFile } from 'node:fs/promises';
 /**
  * Repeatable benchmark for the SVG background renderers.
  *
@@ -12,11 +13,10 @@
  * sequence, same host element for all strategies.
  */
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import esbuild from 'esbuild';
+import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
+import esbuild from 'esbuild';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -41,15 +41,13 @@ const LOOP_MS = Number(arg('loop-ms', 2000));
 const WIDTH = Number(arg('width', 1280));
 const HEIGHT = Number(arg('height', 720));
 /** Override the generator's default density — the level-of-detail lever. */
-const DENSITY = arg('density', null) === null ? undefined : Number(arg('density'));
+const DENSITY =
+  arg('density', null) === null ? undefined : Number(arg('density'));
 const JSON_OUT = arg('json', null);
 /** Directory to write correctness screenshots into. `--verify <dir>`. */
 const VERIFY = arg('verify', null);
 /** Tile counts for the gallery scenario. `--tiles 1,2,4,8`, or empty to skip. */
-const TILES = arg('tiles', '')
-  .split(',')
-  .filter(Boolean)
-  .map(Number);
+const TILES = arg('tiles', '').split(',').filter(Boolean).map(Number);
 
 const bundle = await esbuild.build({
   entryPoints: [path.join(here, 'entry.ts')],
@@ -101,19 +99,16 @@ for (const generator of GENERATORS) {
   for (const strategy of STRATEGIES) {
     process.stderr.write(`  ${generator} / ${strategy} ... `);
     try {
-      const r = await page.evaluate(
-        (spec) => window.BENCH.run(spec),
-        {
-          generator,
-          strategy,
-          frames: FRAMES,
-          reps: REPS,
-          loopMs: LOOP_MS,
-          width: WIDTH,
-          height: HEIGHT,
-          density: DENSITY,
-        },
-      );
+      const r = await page.evaluate((spec) => window.BENCH.run(spec), {
+        generator,
+        strategy,
+        frames: FRAMES,
+        reps: REPS,
+        loopMs: LOOP_MS,
+        width: WIDTH,
+        height: HEIGHT,
+        density: DENSITY,
+      });
       results.push(r);
       process.stderr.write(
         `${r.workAvgMs.toFixed(2)}ms avg, ${r.loopFps.toFixed(0)}fps\n`,
@@ -140,19 +135,16 @@ if (TILES.length) {
       await page.goto(`http://127.0.0.1:${port}/`);
       await page.waitForFunction(() => !!window.BENCH);
       try {
-        const g = await page.evaluate(
-          (spec) => window.BENCH.gallery(spec),
-          {
-            generator: GENERATORS[0],
-            strategy,
-            tiles,
-            frames: FRAMES,
-            fps: 24,
-            ms: 2500,
-            width: WIDTH,
-            height: HEIGHT,
-          },
-        );
+        const g = await page.evaluate((spec) => window.BENCH.gallery(spec), {
+          generator: GENERATORS[0],
+          strategy,
+          tiles,
+          frames: FRAMES,
+          fps: 24,
+          ms: 2500,
+          width: WIDTH,
+          height: HEIGHT,
+        });
         gallery.push({ strategy, ...g });
         process.stderr.write(
           `${g.avgTickMs.toFixed(2)}ms/tick, ${g.overBudgetPct.toFixed(0)}% over budget\n`,
@@ -182,19 +174,16 @@ if (VERIFY) {
   for (const generator of GENERATORS) {
     let base = null;
     for (const strategy of STRATEGIES) {
-      await page.evaluate(
-        (spec) => window.BENCH.show(spec),
-        {
-          generator,
-          strategy,
-          frames: FRAMES,
-          reps: 1,
-          loopMs: 0,
-          width: WIDTH,
-          height: HEIGHT,
-          frame: Math.floor(FRAMES / 3),
-        },
-      );
+      await page.evaluate((spec) => window.BENCH.show(spec), {
+        generator,
+        strategy,
+        frames: FRAMES,
+        reps: 1,
+        loopMs: 0,
+        width: WIDTH,
+        height: HEIGHT,
+        frame: Math.floor(FRAMES / 3),
+      });
       const buf = await host.screenshot();
       await writeFile(path.join(VERIFY, `${generator}--${strategy}.png`), buf);
       const png = PNG.sync.read(buf);
@@ -290,7 +279,9 @@ if (gallery.length) {
 }
 
 if (verify.length) {
-  console.log('\ncorrectness vs the innerHTML baseline (same frame, pixel diff):');
+  console.log(
+    '\ncorrectness vs the innerHTML baseline (same frame, pixel diff):',
+  );
   for (const v of verify) {
     console.log(
       `  ${v.generator.padEnd(14)}${v.strategy.padEnd(16)}${v.diffPct.toFixed(2)}% of pixels differ`,
