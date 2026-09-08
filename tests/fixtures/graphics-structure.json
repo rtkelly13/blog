@@ -174,16 +174,6 @@
     "colours": 2,
     "bounds": [0, 0, 0, 0]
   },
-  "lissajous": {
-    "elements": {
-      "g": 1,
-      "path": 9
-    },
-    "marks": 10,
-    "viewBox": "0 0 1280 720",
-    "colours": 2,
-    "bounds": [-366, -99, 1519, 835]
-  },
   "node-network": {
     "elements": {
       "g": 1,
@@ -410,12 +400,12 @@
   "void-field": {
     "elements": {
       "g": 4,
-      "path": 432
+      "path": 636
     },
-    "marks": 436,
+    "marks": 640,
     "viewBox": "0 0 1280 720",
-    "colours": 43,
-    "bounds": [9, -166, 1291, 765]
+    "colours": 37,
+    "bounds": [8, -132, 1284, 757]
   },
   "weave": {
     "elements": {

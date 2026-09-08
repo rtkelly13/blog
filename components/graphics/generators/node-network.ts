@@ -35,6 +35,7 @@ export default defineGenerator<Network>({
   label: 'Node Network',
   description: 'Constellation of nodes wired to their nearest neighbours.',
   group: 'field',
+  sketch: true,
   defaults: { density: 0.5 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

@@ -51,6 +51,10 @@ export default defineGenerator<RibbonGrid>({
   description:
     'Parallelogram cells on a triangular lattice, tilting like ribbon segments.',
   group: 'isometric',
+  sketch: true,
+  // Filled cells cover most of the frame, and on paper that is a grey wash
+  // rather than the recessive tone it reads as on black.
+  sketchWeight: 0.5,
   defaults: { density: 0.5, strokeWidth: 1 },
 
   sample: (p) => {

@@ -27,6 +27,11 @@ const NO_SEO_REQUIRED = new Set([
   // Renders `AuthorLayout` through MDXLayoutRenderer, and the layout carries
   // the PageSEO — the check below only reads the page file itself.
   'pages/about.tsx',
+  // Server-side permanent redirect: `getServerSideProps` answers 308 and the
+  // component never renders, so there is no HTML for a robots tag to live in.
+  // Distinct from the client-side redirects above, which do render and so can
+  // (and must) emit their own `noindex`.
+  'pages/experiments/graphics.tsx',
 ]);
 
 /**

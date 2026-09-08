@@ -149,6 +149,7 @@ export default defineGenerator<Ridge[]>({
   description:
     'Layered angular mountains, parallaxing — depth by contrast, not perspective.',
   group: 'terrain',
+  sketch: true,
   defaults: { density: 0.55, strokeWidth: 2 },
   sample: (p) => {
     const rng: Rng = mulberry32(p.seed);

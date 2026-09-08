@@ -186,6 +186,7 @@ export default defineGenerator<Tile[]>({
   description:
     'Quarter-arc tiles that turn — long curves form and break across the frame.',
   group: 'lattice',
+  sketch: true,
   defaults: { density: 0.5, strokeWidth: 2 },
   sample: (p) => truchetTiles(p, lerp(120, 46, p.density)),
   project: (tiles, p, t) => {

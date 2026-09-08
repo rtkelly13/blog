@@ -59,6 +59,7 @@ export default defineGenerator<Ring[]>({
   description:
     'Concentric polygons joined by swept parallels; the moire between them is the effect.',
   group: 'radial',
+  sketch: true,
   // Slower than the lattice generators, and the reason is geometric: a turn
   // at full reach covers the whole circumference, so what reads as a stately
   // rotation on a small form is a blur on a frame-filling one. See
