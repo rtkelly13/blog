@@ -33,6 +33,7 @@
     "REFERENCE_TempLayout.tsx",
     ".claude",
     "infra",
-    "temp"
+    "temp",
+    "video"
   ]
 }
