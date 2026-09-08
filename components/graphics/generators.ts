@@ -50,6 +50,7 @@
  * and re-roll the composition — the exact failure the split exists to prevent,
  * reintroduced by the code adding the animation.
  */
+import { type LatticeCell, lattice, scaledPath } from './lattice';
 import { withAlpha } from './palette';
 import { chance, intRange, mulberry32, type Rng, range } from './rng';
 import type { GraphicParams, SampledGenerator } from './types';
@@ -451,6 +452,235 @@ const scatterBlocks: SampledGenerator<Block[]> = {
   },
 };
 
+/* ── hex-grid ─────────────────────────────────────────────────────────────── */
+
+interface Tiled {
+  cells: LatticeCell[];
+  /** Per-cell roll, so a generator can vary a tiling without re-drawing it. */
+  rolls: number[];
+}
+
+/**
+ * A wave sweeping across a tiling.
+ *
+ * Grid generators wobble each mark independently, which reads as texture rather
+ * than motion. A tiling can do better: drive every cell from one field that
+ * depends on where the cell is, and the whole surface moves together.
+ *
+ * `k` is cycles across the frame and `m` whole cycles per loop, so this closes
+ * at `t = 1` for the same reason `contour` does. Returns 0..1.
+ */
+const wave = (u: number, t: number, k: number, m: number): number =>
+  (Math.sin(u * TAU * k + t * TAU * m) + 1) / 2;
+
+/** Honeycomb, lit by a wave crossing it. */
+const hexGrid: SampledGenerator<Tiled> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const cells = lattice('hex', {
+      width: p.width,
+      height: p.height,
+      size: lerp(78, 30, p.density),
+    });
+    // One draw per cell, in lattice order — the rng decides which cells are
+    // interesting, the lattice decides where they are, and the two stay
+    // independent so a density change moves cells without re-rolling them all.
+    return { cells, rolls: cells.map(() => rng()) };
+  },
+  project: ({ cells, rolls }, p, t) => {
+    const line = withAlpha(p.accent, 0.3);
+    let out = '';
+    for (let i = 0; i < cells.length; i++) {
+      const c = cells[i];
+      // Two waves at coprime rates, one horizontal and one diagonal, so the
+      // pattern never settles into an obvious stripe.
+      const a = wave(c.cx / p.width, t, 2, 1);
+      const b = wave((c.cx + c.cy) / (p.width + p.height), t, 3, 2);
+      const energy = (a + b) / 2;
+      // Every cell always carries a fill, and only its alpha moves.
+      //
+      // Thresholding this field into lit/unlit was the obvious way to write it
+      // and is wrong: `fill="none"` and `fill="rgba(…)"` are different shapes,
+      // so a cell crossing the threshold pops rather than fades. `iso-grid` gets
+      // away with the same ternary because what it switches on is *sampled* and
+      // therefore never changes mid-loop; this field varies with `t`, so it
+      // cannot be. The coherence suite catches it as a change in mark count.
+      const weight = 1 - rolls[i];
+      const d = scaledPath(c, 0.72 + energy * 0.26, r2);
+      out += `<path d="${d}" fill="${withAlpha(p.accent, r2(0.02 + weight * energy * 0.6))}" stroke="${line}" stroke-width="${p.strokeWidth}"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── triangle-grid ────────────────────────────────────────────────────────── */
+
+/**
+ * Alternating triangles, the two orientations driven in antiphase.
+ *
+ * The up- and down-pointing cells are offset by half a cycle, so the surface
+ * shimmers between two interlocking states rather than pulsing as one — which
+ * is the thing a triangular tiling can do that a square one cannot.
+ */
+const triangleGrid: SampledGenerator<Tiled> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const cells = lattice('triangle', {
+      width: p.width,
+      height: p.height,
+      size: lerp(150, 62, p.density),
+    });
+    return { cells, rolls: cells.map(() => rng()) };
+  },
+  project: ({ cells, rolls }, p, t) => {
+    const line = withAlpha(p.accent, 0.26);
+    let out = '';
+    for (let i = 0; i < cells.length; i++) {
+      const c = cells[i];
+      const u = (c.cx / p.width + c.cy / p.height) / 2;
+      // The half-turn offset is the whole idea: the two orientations are never
+      // bright at once.
+      const energy = wave(u + (c.flipped ? 0.5 : 0), t, 2, 1);
+      // Continuous alpha, for the reason spelled out in `hex-grid`.
+      const weight = 1 - rolls[i];
+      const d = scaledPath(c, 0.62 + energy * 0.34, r2);
+      out += `<path d="${d}" fill="${withAlpha(p.accent, r2(0.02 + weight * energy * 0.62))}" stroke="${line}" stroke-width="${p.strokeWidth}"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
+/* ── ridgeline ────────────────────────────────────────────────────────────── */
+
+interface Harmonic {
+  /** Whole cycles across the frame — integer, so the ridge is periodic. */
+  freq: number;
+  amp: number;
+  phase: number;
+}
+
+interface Ridge {
+  /** Horizon height for this layer, as a fraction of the frame. */
+  base: number;
+  harmonics: Harmonic[];
+  /**
+   * Frame-widths per loop — `1/f0`, a fraction rather than a whole width.
+   * Back ranges drift slower; that is the parallax.
+   */
+  speed: number;
+}
+
+/**
+ * Layered mountains, angular rather than rolling.
+ *
+ * ## How the loop closes, and why that used to make it too fast
+ *
+ * A ridge slides by adding to the coordinate before the frequency multiplies
+ * it: `u = x/W + t·speed`. At `t = 1` every harmonic has advanced by
+ * `freq · speed` cycles, so the range lands exactly where it started **provided
+ * that product is a whole number**.
+ *
+ * With arbitrary integer frequencies that forces `speed` itself to be an
+ * integer — and one whole frame-width per loop is already a brisk drift, so the
+ * slowest range this could draw was too fast and the fastest crossed three
+ * widths and blurred.
+ *
+ * Deriving every harmonic in a layer from one base `f0` removes the constraint.
+ * The frequencies are `f0, 2·f0, 3·f0`, so `speed = 1/f0` still gives a whole
+ * number of cycles on each, and a range can now creep at an eighth of a width.
+ *
+ * ## One parameter, two cues, and they agree
+ *
+ * `f0` is also what sets a range's detail — more peaks for higher `f0`. Distant
+ * mountains read as many small peaks *and* barely move; near ones as few large
+ * peaks that travel. Both fall out of the same number in the same direction, so
+ * the parallax and the aerial perspective cannot drift apart: they are the same
+ * parameter.
+ *
+ * Far ranges take `f0 ≈ 8` and drift 0.125 frame-widths per loop; near ones
+ * `f0 ≈ 3` and 0.333. A 2.7x spread, and nothing crosses the frame.
+ *
+ * ## Peaks, not hills
+ *
+ * `1 - |sin θ|` rather than `sin θ`: the absolute value puts a corner at every
+ * zero crossing, and harmonics with decaying amplitude give a self-similar
+ * profile with no noise function anywhere.
+ *
+ * Three harmonics sampled 192 times, not four sampled 96. `1 - |sin|` peaks
+ * twice per period, so a far range's top harmonic of 24 puts 48 peaks across
+ * the frame; below about four samples per peak the corners alias into noise,
+ * which is the opposite of a crisp silhouette.
+ */
+const ridgeline: SampledGenerator<Ridge[]> = {
+  sample: (p) => {
+    const rng: Rng = mulberry32(p.seed);
+    const layers = Math.round(lerp(3, 7, p.density));
+    const ridges: Ridge[] = [];
+    for (let i = 0; i < layers; i++) {
+      const depth = i / Math.max(1, layers - 1); // 0 = furthest, 1 = nearest
+      // The one number deciding both how fine this range is and how slowly it
+      // drifts. Jittered upward by at most one, so seeds differ without the
+      // far-to-near ordering inverting.
+      const f0 = Math.round(lerp(8, 3, depth)) + intRange(rng, 0, 1);
+      const harmonics: Harmonic[] = [];
+      for (let h = 0; h < 3; h++) {
+        harmonics.push({
+          // Every harmonic a multiple of f0 — that is what lets `speed` be a
+          // fraction and still land the loop.
+          freq: f0 * (h + 1),
+          amp: range(rng, 0.8, 1.2) / (h + 1),
+          phase: range(rng, 0, TAU),
+        });
+      }
+      ridges.push({
+        base: lerp(0.42, 0.96, depth),
+        harmonics,
+        // Frame-widths per loop. `1/f0` is a whole number of cycles on every
+        // harmonic, so the range closes; and because f0 falls as the range
+        // nears, this rises — the parallax comes free.
+        speed: 1 / f0,
+      });
+    }
+    return ridges;
+  },
+  project: (ridges, p, t) => {
+    const step = p.width / 192;
+    let out = '';
+    for (let i = 0; i < ridges.length; i++) {
+      const r = ridges[i];
+      const depth = ridges.length === 1 ? 1 : i / (ridges.length - 1);
+      // Depth is carried by contrast, not perspective: far ranges are faint and
+      // thin, near ranges bright and heavy.
+      const stroke = withAlpha(p.accent, 0.22 + depth * 0.68);
+      const fillA = withAlpha(p.accent, 0.04 + depth * 0.07);
+      const relief = lerp(0.3, 0.12, depth) * p.height;
+
+      let d = `M0 ${p.height} `;
+      for (let x = 0; x <= p.width; x += step) {
+        let sum = 0;
+        let norm = 0;
+        // The drift is added to `x` before the frequency multiplies it, not to
+        // the phase afterwards. That distinction is the whole difference between
+        // a range that *translates* and one that *morphs*: a flat phase offset
+        // advances every harmonic by the same angle, so the fast ones slide
+        // further than the slow ones and the silhouette boils. Shifting the
+        // coordinate moves them together.
+        const u = x / p.width + t * r.speed;
+        for (const h of r.harmonics) {
+          const th = u * TAU * h.freq + h.phase;
+          sum += h.amp * (1 - Math.abs(Math.sin(th)));
+          norm += h.amp;
+        }
+        const y = r.base * p.height - (sum / norm) * relief;
+        d += `L${r2(x)} ${r2(y)} `;
+      }
+      d += `L${p.width} ${p.height} Z`;
+      out += `<path d="${d.trim()}" fill="${fillA}" stroke="${stroke}" stroke-width="${r2(p.strokeWidth * (0.6 + depth * 1.2))}" stroke-linejoin="miter"/>`;
+    }
+    return frame(p, out);
+  },
+};
+
 /* ── registry ─────────────────────────────────────────────────────────────── */
 
 /** The split form, for renderers that want to sample once and project per frame. */
@@ -461,6 +691,9 @@ export const SAMPLED_GENERATORS = {
   contour: contourLines,
   'iso-grid': isoGrid,
   'scatter-blocks': scatterBlocks,
+  'hex-grid': hexGrid,
+  'triangle-grid': triangleGrid,
+  ridgeline: ridgeline,
 };
 
 export type GeneratorName = keyof typeof SAMPLED_GENERATORS;
