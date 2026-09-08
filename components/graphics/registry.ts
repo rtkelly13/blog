@@ -1,85 +1,41 @@
-import { SAMPLED_GENERATORS } from './generators';
+import { GENERATOR_MODULES } from './generators';
 import {
   BASE_PARAMS,
   type Generator,
+  type GeneratorGroup,
   type GraphicParams,
-  type SampledGenerator,
 } from './types';
 
-/** Per-generator metadata + default params (merged over BASE_PARAMS). */
-const META: Record<
-  string,
-  { label: string; description: string; defaults?: Partial<GraphicParams> }
-> = {
-  'dot-grid': {
-    label: 'Dot Grid',
-    description: 'Regular grid of dots with a scatter flaring to full accent.',
-    defaults: { density: 0.5 },
-  },
-  'diagonal-hatch': {
-    label: 'Diagonal Hatch',
-    description: 'Parallel 45° rules — a few pop, the rest stay ghostly.',
-    defaults: { density: 0.55, strokeWidth: 2 },
-  },
-  'node-network': {
-    label: 'Node Network',
-    description: 'Constellation of nodes wired to their nearest neighbours.',
-    defaults: { density: 0.5 },
-  },
-  contour: {
-    label: 'Contour',
-    description: 'Stacked topographic waves with occasional bright bands.',
-    defaults: { density: 0.6, strokeWidth: 2 },
-  },
-  'iso-grid': {
-    label: 'Iso Grid',
-    description: 'Isometric lattice of diamonds; some cells fill with accent.',
-    defaults: { density: 0.5 },
-  },
-  'scatter-blocks': {
-    label: 'Scatter Blocks',
-    description: 'Brutalist confetti of rotated squares — outlined to solid.',
-    defaults: { density: 0.5 },
-  },
-  'hex-grid': {
-    label: 'Hex Grid',
-    description:
-      'Honeycomb lit by a wave crossing it; cells breathe with the field.',
-    defaults: { density: 0.5 },
-  },
-  'triangle-grid': {
-    label: 'Triangle Grid',
-    description:
-      'Interlocking triangles, the two orientations driven in antiphase.',
-    defaults: { density: 0.5 },
-  },
-  ridgeline: {
-    label: 'Ridgeline',
-    description:
-      'Layered angular mountains, parallaxing — depth by contrast, not perspective.',
-    defaults: { density: 0.55, strokeWidth: 2 },
-  },
-};
-
-export const GENERATOR_LIST: Generator[] = Object.entries(
-  SAMPLED_GENERATORS,
-).map(([name, generator]) => {
-  const g = generator as SampledGenerator<unknown>;
-  return {
-    name,
-    label: META[name]?.label ?? name,
-    description: META[name]?.description ?? '',
-    defaults: { ...BASE_PARAMS, ...META[name]?.defaults },
-    render: (p: GraphicParams) => g.project(g.sample(p), p, p.t ?? 0),
-    sample: g.sample,
-    project: g.project,
-  };
-});
+/**
+ * The public face of the generator modules.
+ *
+ * Everything here is *derived*. There used to be a `META` table in this file
+ * holding labels, descriptions and defaults for generators implemented
+ * somewhere else, which meant adding one required edits in three places and
+ * missing the third was silent. Metadata now lives in the module, so this file
+ * only adapts and indexes.
+ */
+export const GENERATOR_LIST: Generator[] = GENERATOR_MODULES.map((m) => ({
+  name: m.name,
+  label: m.label,
+  description: m.description,
+  group: m.group,
+  speed: m.speed ?? 1,
+  defaults: { ...BASE_PARAMS, ...m.defaults },
+  render: (p: GraphicParams) => m.project(m.sample(p), p, p.t ?? 0),
+  sample: m.sample,
+  project: m.project,
+}));
 
 const BY_NAME = new Map(GENERATOR_LIST.map((g) => [g.name, g]));
 
 export function getGenerator(name: string): Generator | undefined {
   return BY_NAME.get(name);
+}
+
+/** Generators in one family, in registry order. For grouped galleries. */
+export function generatorsInGroup(group: GeneratorGroup): Generator[] {
+  return GENERATOR_LIST.filter((g) => g.group === group);
 }
 
 /** Merge caller params over a generator's defaults into a full param set.

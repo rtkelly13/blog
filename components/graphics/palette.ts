@@ -17,6 +17,19 @@ export const BRUTALIST_ACCENTS = {
 export type AccentName = keyof typeof BRUTALIST_ACCENTS;
 
 /**
+ * Surface colours — what a graphic sits *on*, as opposed to what it draws with.
+ *
+ * Deliberately not part of `BRUTALIST_ACCENTS`: that object is the gallery's
+ * swatch list, and a backdrop offered as an ink choice is a picker full of
+ * invisible options. These exist for `occlusion`, which must be opaque and
+ * must match the surface.
+ */
+export const SURFACES = {
+  darkBg: '#0a0a1a',
+  paper: '#f5f3ec',
+} as const;
+
+/**
  * The light "sketch" (paper & ink) palette — graphite ink plus the sketch
  * accents, matching the `.sketch` theme in css/tailwind.css. Feeding these to a
  * generator turns the neon-on-black look into ink-on-paper (graph paper, pencil
@@ -39,10 +52,23 @@ export const PAPER_ACCENTS = {
 export function graphicThemeDefaults(theme?: string): {
   accent: string;
   background: string;
+  occlusion: string;
 } {
+  // `occlusion` is the one that cannot be transparent — it is what stacked
+  // geometry paints its faces with to hide what is behind them, so it has to be
+  // the opaque surface the graphic is sitting on. Paper under `sketch`, the
+  // brutalist near-black otherwise.
   return theme === 'sketch'
-    ? { accent: PAPER_ACCENTS.ink, background: 'transparent' }
-    : { accent: BRUTALIST_ACCENTS.cyan, background: 'transparent' };
+    ? {
+        accent: PAPER_ACCENTS.ink,
+        background: 'transparent',
+        occlusion: SURFACES.paper,
+      }
+    : {
+        accent: BRUTALIST_ACCENTS.cyan,
+        background: 'transparent',
+        occlusion: SURFACES.darkBg,
+      };
 }
 
 /** Ordered swatch list for the gallery's colour picker. */
@@ -61,4 +87,25 @@ export function withAlpha(hex: string, alpha: number): string {
   const g = Number.parseInt(m[2], 16);
   const b = Number.parseInt(m[3], 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/**
+ * Blend two `#rrggbb` colours, returning an opaque `#rrggbb`.
+ *
+ * The opaque counterpart to {@link withAlpha}, and it exists for the same
+ * reason `occlusion` does: a layer that has to *hide* what is behind it cannot
+ * be expressed as an alpha over the accent, however faint. Tinting the surface
+ * colour towards the accent gives the same visual weight while staying solid.
+ */
+export function mix(hexA: string, hexB: string, amount: number): string {
+  const parse = (hex: string) => {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+    return m ? [1, 2, 3].map((i) => Number.parseInt(m[i], 16)) : null;
+  };
+  const a = parse(hexA);
+  const b = parse(hexB);
+  if (!a || !b) return hexA;
+  const k = Math.min(1, Math.max(0, amount));
+  const to2 = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+  return `#${a.map((v, i) => to2(v + (b[i] - v) * k)).join('')}`;
 }
