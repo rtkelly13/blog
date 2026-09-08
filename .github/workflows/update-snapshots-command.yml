@@ -39,10 +39,6 @@ on:
   issue_comment:
     types: [created]
 
-concurrency:
-  group: update-snapshots-${{ github.event.issue.number }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -56,6 +52,16 @@ jobs:
       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # Job-level, deliberately. At workflow level GitHub evaluates concurrency
+    # *before* the `if:` above, so every comment on the PR joins the group —
+    # including bot comments, which then skip. A skipping run still cancels the
+    # one in progress, so a regeneration could be killed several minutes in by
+    # Vercel posting a preview link, and the only trace was a `cancelled` run
+    # with no explanation. Here the group is only ever entered by a real
+    # invocation.
+    concurrency:
+      group: update-snapshots-${{ github.event.issue.number }}
+      cancel-in-progress: true
     permissions:
       contents: write
       pull-requests: write
