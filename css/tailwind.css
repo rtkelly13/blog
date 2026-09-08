@@ -6,15 +6,6 @@
    variant, per-mode variable blocks, and @source for the DS components. */
 @import "@rtkelly13/design-system/theme.css";
 
-/* One token the design system declares as a raw variable but never exposes as a
-   Tailwind colour, so `text-brutalist-neonGreen` would not exist without this.
-   Aliased rather than hard-coded: the value stays the design system's to change,
-   and follows the theme with it. Delete this when the package exports the
-   colour itself. */
-@theme {
-  --color-brutalist-neonGreen: var(--brutalist-neonGreen);
-}
-
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
