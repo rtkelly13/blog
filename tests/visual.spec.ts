@@ -87,7 +87,10 @@ test.describe('Visual Regression - Dark Mode', () => {
     await page.goto('/');
     await waitForPageReady(page);
     // Verify dark mode is active
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
     await expect(page).toHaveScreenshot('homepage-dark.png', {
       fullPage: true,
     });
@@ -96,14 +99,20 @@ test.describe('Visual Regression - Dark Mode', () => {
   test('blog listing', async ({ page }) => {
     await page.goto('/blog');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
     await expect(page).toHaveScreenshot('blog-dark.png', { fullPage: true });
   });
 
   test('blog post', async ({ page }) => {
     await page.goto('/blog/aws-batch/cookbook');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
     await expect(page).toHaveScreenshot('blog-post-dark.png', {
       fullPage: true,
     });
@@ -112,28 +121,40 @@ test.describe('Visual Regression - Dark Mode', () => {
   test('about page', async ({ page }) => {
     await page.goto('/about');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
     await expect(page).toHaveScreenshot('about-dark.png', { fullPage: true });
   });
 
   test('tags page', async ({ page }) => {
     await page.goto('/tags');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
     await expect(page).toHaveScreenshot('tags-dark.png', { fullPage: true });
   });
 
   test('talks page', async ({ page }) => {
     await page.goto('/talks');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
     await expect(page).toHaveScreenshot('talks-dark.png', { fullPage: true });
   });
 
   test('404 page', async ({ page }) => {
     await page.goto('/this-page-does-not-exist');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
     await expect(page).toHaveScreenshot('404-dark.png', { fullPage: true });
   });
 });
@@ -168,7 +189,7 @@ test.describe('Visual Regression - Dim Mode', () => {
     test(name, async ({ page }) => {
       await page.goto(path);
       await waitForPageReady(page);
-      await expect(page.locator('html')).toHaveClass(/dim/);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
       await expect(page).toHaveScreenshot(`${name}-dim.png`, {
         fullPage: true,
       });
@@ -185,7 +206,10 @@ test.describe('Visual Regression - Sketch Mode', () => {
     test(name, async ({ page }) => {
       await page.goto(path);
       await waitForPageReady(page);
-      await expect(page.locator('html')).toHaveClass(/sketch/);
+      await expect(page.locator('html')).toHaveAttribute(
+        'data-theme',
+        'bright',
+      );
       await expect(page).toHaveScreenshot(`${name}-sketch.png`, {
         fullPage: true,
       });

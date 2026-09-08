@@ -168,11 +168,17 @@ html {
   --color-white: #d8d8d2;
 
   /* The design-system's theme.css softens the accents under dim; this blog
-     keeps them identical to dark (dim only re-points black/white/zinc) — see
-     tests/theme-toggle.spec.ts. Pin them back explicitly. */
-  --brutalist-cyan: #22d3ee;
-  --brutalist-pink: #ec4899;
-  --brutalist-yellow: #facc15;
+     keeps them identical to midnight (dim only re-points black/white/zinc) —
+     see tests/theme-toggle.spec.ts. Pin them back explicitly.
+
+     Pinned at the *role* tokens since 0.3.0. The brutalist names used to be
+     the override point — `--color-brutalist-cyan: var(--brutalist-cyan, …)` —
+     and are now aliases onto roles: `var(--ds-accent-primary)`. Setting
+     `--brutalist-cyan` here still parses, still looks deliberate, and does
+     nothing at all, because no utility reads it any more. */
+  --ds-accent-primary: #22d3ee; /* cyan  — brutalist-cyan */
+  --ds-accent-tertiary: #ec4899; /* pink  — brutalist-pink */
+  --ds-accent-secondary: #facc15; /* yellow — brutalist-yellow */
 
   /* Lift the near-black zinc surfaces one notch so panels stay legible
      against the lighter charcoal background. */
