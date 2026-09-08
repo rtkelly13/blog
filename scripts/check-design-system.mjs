@@ -22,10 +22,21 @@
  *
  *   1. Every design-system-owned token the blog references is actually defined
  *      by the *installed* version — as a Tailwind utility or as a `var()`.
- *   2. How far behind the published `latest` the pinned version is.
+ *   2. The theme **selectors** the blog switches on still exist in the
+ *      stylesheet, so those tokens are reachable at all.
+ *   3. How far behind the published `latest` the pinned version is.
  *
- * (1) is a hard failure: it is a real breakage against the version we ship.
- * (2) is a report, because a release ten minutes ago should never redden a PR
+ * (2) is here because (1) alone was not enough, and the way it failed is worth
+ * recording. Between 0.1.3 and 0.3.0 the design system moved its theme blocks
+ * from class selectors (`.dark`, `.dim`, `.sketch`) to attribute selectors
+ * (`[data-theme="midnight"]`, …) and renamed the levels. Every token still
+ * existed, so a token-existence check passed happily — while `next-themes`
+ * drives this blog with `attribute="class"`, meaning none of those blocks would
+ * ever match and theme switching would silently stop working. A token you
+ * cannot reach is not a token you have.
+ *
+ * (1) and (2) are hard failures: real breakage against the version we ship.
+ * (3) is a report, because a release ten minutes ago should never redden a PR
  * that has nothing to do with it. `--max-lag` turns it into a failure for the
  * scheduled canary, where being behind *is* the thing being measured.
  *
@@ -207,6 +218,73 @@ for (const dir of SOURCE_DIRS) {
 }
 
 // ---------------------------------------------------------------------------
+// Theme selectors
+// ---------------------------------------------------------------------------
+
+/**
+ * The themes `next-themes` is configured with in `pages/_app.tsx`, and the
+ * attribute it uses to apply them. Read from the source rather than duplicated,
+ * so switching the app to `attribute="data-theme"` changes what is checked here
+ * without anyone having to remember this file exists.
+ */
+function themeContract() {
+  const appPath = path.join(ROOT, 'pages', '_app.tsx');
+  if (!existsSync(appPath)) return null;
+  const src = readFileSync(appPath, 'utf8');
+  const attr = src.match(/attribute=["']([^"']+)["']/)?.[1];
+  const list = src.match(/themes=\{\[([^\]]+)\]\}/)?.[1];
+  if (!attr || !list) return null;
+  const themes = [...list.matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]);
+  return { attr, themes };
+}
+
+const contract = themeContract();
+const themeProblems = [];
+
+if (contract) {
+  const themeCss = readFileSync(themePath, 'utf8');
+
+  // Which mechanism does the design system itself use for its theme blocks?
+  // Ask the stylesheet rather than assuming, because this is precisely the
+  // thing that changed underneath us once already.
+  const dsUsesClasses = /^\s*[^{@\n]*\.(dark|dim|sketch|light)\b[^{]*\{/m.test(
+    themeCss,
+  );
+  const dsAttr = themeCss.match(/\[\s*(data-[a-z-]+)\s*=/)?.[1] ?? null;
+  const blogUsesClasses = contract.attr === 'class';
+
+  if (blogUsesClasses && !dsUsesClasses && dsAttr) {
+    themeProblems.push(
+      `the design system selects themes with [${dsAttr}="…"], but this blog applies them with attribute="class" — none of its theme blocks can match, so every level falls back to :root`,
+    );
+  } else if (!blogUsesClasses && dsUsesClasses) {
+    themeProblems.push(
+      `the design system selects themes with classes, but this blog applies them with attribute="${contract.attr}" — none of its theme blocks can match`,
+    );
+  } else {
+    // Same mechanism: check the level *names* line up. A renamed level is the
+    // quieter version of the same failure — the block exists, just not for a
+    // level this blog ever sets.
+    for (const theme of contract.themes) {
+      const selector = blogUsesClasses
+        ? new RegExp(`\\.${theme}\\b`)
+        : new RegExp(
+            `\\[\\s*${contract.attr}\\s*=\\s*["']?${theme}["']?\\s*\\]`,
+          );
+      if (selector.test(themeCss)) continue;
+      // The blog is allowed to own a level outright — `sketch` largely is —
+      // but say so, because it means the design system is not theming it.
+      const local =
+        existsSync(localCss) && selector.test(readFileSync(localCss, 'utf8'));
+      if (!local)
+        themeProblems.push(
+          `no block for "${theme}" in the design system or in css/tailwind.css — that level has no tokens at all`,
+        );
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Version lag
 // ---------------------------------------------------------------------------
 
@@ -248,6 +326,9 @@ const report = {
   releasesBehind: lag,
   tokensDefined: dsTokens.size,
   referencesChecked: found.size,
+  themeAttribute: contract?.attr ?? null,
+  themes: contract?.themes ?? [],
+  themeProblems,
   problems,
 };
 
@@ -264,9 +345,21 @@ if (asJson) {
   console.log(
     `  tokens     ${report.tokensDefined} declared, ${report.referencesChecked} references checked`,
   );
-  if (problems.length === 0) {
+  if (contract) {
+    console.log(
+      `  themes     ${contract.themes.join(', ')} via attribute="${contract.attr}"`,
+    );
+  }
+  if (themeProblems.length > 0) {
+    console.log(`\n${themeProblems.length} theme contract problem(s):`);
+    for (const t of themeProblems) console.log(`  ✖ ${t}`);
+    console.log(
+      '\nEvery token can still exist and none of them apply: a selector that never\nmatches takes the whole theme with it.',
+    );
+  }
+  if (problems.length === 0 && themeProblems.length === 0) {
     console.log('\nNo token drift.');
-  } else {
+  } else if (problems.length > 0) {
     console.log(`\n${problems.length} broken token reference(s):`);
     for (const p of problems) {
       console.log(`  ✖ ${p.detail}`);
@@ -278,7 +371,7 @@ if (asJson) {
   }
 }
 
-if (problems.length > 0) process.exit(1);
+if (problems.length > 0 || themeProblems.length > 0) process.exit(1);
 if (maxLag !== null && lag !== null && lag > maxLag) {
   console.error(
     `\n${lag} releases behind ${report.latest}, limit is ${maxLag}.`,
