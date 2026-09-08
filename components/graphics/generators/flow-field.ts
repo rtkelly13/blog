@@ -3,6 +3,7 @@ import type { Rng } from './shared';
 import {
   chance,
   frame,
+  ink,
   intRange,
   lerp,
   mulberry32,
@@ -10,7 +11,6 @@ import {
   range,
   TAU,
   valueNoise,
-  withAlpha,
 } from './shared';
 
 /* ── flow-field ───────────────────────────────────────────────────────────── */
@@ -104,8 +104,6 @@ export default defineGenerator<Flow>({
     };
   },
   project: (f, p, t) => {
-    const _faint = withAlpha(p.accent, 0.3);
-    const bright = withAlpha(p.accent, 0.95);
     // The field walks a circle through noise space.
     //
     // It used to be two crossed sines, and that is *separable* — a function of
@@ -138,8 +136,15 @@ export default defineGenerator<Flow>({
       const len = q.len * (0.45 + 1.15 * weight);
       const dx = (Math.cos(angle) * len) / 2;
       const dy = (Math.sin(angle) * len) / 2;
-      const alpha = q.hot ? 0.95 : 0.16 + 0.42 * weight;
-      out += `<line x1="${r2(q.x - dx)}" y1="${r2(q.y - dy)}" x2="${r2(q.x + dx)}" y2="${r2(q.y + dy)}" stroke="${q.hot ? bright : withAlpha(p.accent, r2(alpha))}" stroke-width="${r2(p.strokeWidth * (q.hot ? 1.8 : 0.85))}" stroke-linecap="round"/>`;
+      const alpha = q.hot ? 0.95 : r2(0.16 + 0.42 * weight);
+      // Position on the ramp is `weight` — the second, slower field this
+      // generator already samples to decide where the frame is quiet and where
+      // it is busy. Colour therefore rides the same large-scale structure as
+      // length and alpha already do, rather than cutting across it: a calm
+      // stretch is one hue throughout, a busy one another, and the boundary
+      // between them is the field's own, not a stripe painted over it.
+      const stroke = ink(p, weight, alpha);
+      out += `<line x1="${r2(q.x - dx)}" y1="${r2(q.y - dy)}" x2="${r2(q.x + dx)}" y2="${r2(q.y + dy)}" stroke="${stroke}" stroke-width="${r2(p.strokeWidth * (q.hot ? 1.8 : 0.85))}" stroke-linecap="round"/>`;
     }
     return frame(p, out);
   },

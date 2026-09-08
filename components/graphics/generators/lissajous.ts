@@ -4,13 +4,13 @@ import {
   chance,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   pick,
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── lissajous ────────────────────────────────────────────────────────────── */
@@ -142,10 +142,20 @@ export default defineGenerator<Figure[]>({
     return figures;
   },
   project: (figures, p, t) => {
-    const faint = withAlpha(p.accent, 0.34);
-    const bright = withAlpha(p.accent, 0.92);
+    // The same reach the figures were sized against, so a figure's half-axes
+    // can be turned back into the scale that produced them.
+    const reach = Math.min(p.width, p.height);
     let out = '';
     for (const f of figures) {
+      // Position on the ramp is the figure's size, which is the axis this
+      // generator is already about: the field is a few large subjects among
+      // many small ones, and that is the distinction worth carrying in hue.
+      // The bounds are the extremes `sample` can produce — 0.1 and 0.52 for
+      // the scale, times the 0.85..1.35 axis jitter — so the ramp is spent
+      // across the whole spread rather than bunched at one end. `ink` clamps,
+      // so the ends need no guarding.
+      const size = (f.ax + f.ay) / 2 / reach;
+      const pos = (size - 0.085) / 0.617;
       // A travelling phase, not a wobble. `wobble` would swing δ out and back
       // along the same path, so the figure would fold one way and unfold
       // through the identical frames in reverse — visibly a palindrome. A whole
@@ -162,7 +172,7 @@ export default defineGenerator<Figure[]>({
         const y = f.cy + f.ay * Math.sin(f.b * u);
         d += `${i === 0 ? 'M' : 'L'}${r2(x)} ${r2(y)} `;
       }
-      out += `<path d="${d.trim()}Z" fill="none" stroke="${f.hot ? bright : faint}" stroke-width="${r2(p.strokeWidth * (f.hot ? 1.6 : 1))}"/>`;
+      out += `<path d="${d.trim()}Z" fill="none" stroke="${ink(p, pos, f.hot ? 0.92 : 0.34)}" stroke-width="${r2(p.strokeWidth * (f.hot ? 1.6 : 1))}"/>`;
     }
     return frame(p, out);
   },

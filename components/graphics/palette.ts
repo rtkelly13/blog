@@ -109,3 +109,85 @@ export function mix(hexA: string, hexB: string, amount: number): string {
   const to2 = (n: number) => Math.round(n).toString(16).padStart(2, '0');
   return `#${a.map((v, i) => to2(v + (b[i] - v) * k)).join('')}`;
 }
+
+/* ── the ramp ─────────────────────────────────────────────────────────────── */
+
+type Rgb = [number, number, number];
+
+function parseHex(hex: string): Rgb | null {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+  return m
+    ? [
+        Number.parseInt(m[1], 16),
+        Number.parseInt(m[2], 16),
+        Number.parseInt(m[3], 16),
+      ]
+    : null;
+}
+
+/** sRGB channel to linear light. */
+const toLinear = (c: number): number => {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+};
+
+const fromLinear = (v: number): number => {
+  const c = v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
+  return Math.min(255, Math.max(0, Math.round(c * 255)));
+};
+
+/**
+ * Blend two colours through Oklab, returning `#rrggbb`.
+ *
+ * Not through sRGB, which is the obvious implementation and produces a muddy
+ * grey halfway between any two saturated hues — cyan to pink via sRGB passes
+ * through something that looks like a mistake. Oklab is perceptually uniform
+ * enough that the midpoint of a ramp reads as a colour someone chose.
+ */
+export function blendOklab(a: string, b: string, k: number): string {
+  const ca = parseHex(a);
+  const cb = parseHex(b);
+  if (!ca || !cb) return a;
+  const t = Math.min(1, Math.max(0, k));
+  const lab = (c: Rgb): Rgb => {
+    const [r, g, bl] = c.map(toLinear) as Rgb;
+    const l = Math.cbrt(
+      0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * bl,
+    );
+    const m = Math.cbrt(
+      0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * bl,
+    );
+    const s = Math.cbrt(
+      0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * bl,
+    );
+    return [
+      0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+    ];
+  };
+  const [l1, a1, b1] = lab(ca);
+  const [l2, a2, b2] = lab(cb);
+  const L = l1 + (l2 - l1) * t;
+  const A = a1 + (a2 - a1) * t;
+  const B = b1 + (b2 - b1) * t;
+  const l_ = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3;
+  const m_ = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3;
+  const s_ = (L - 0.0894841775 * A - 1.291485548 * B) ** 3;
+  return `#${[
+    fromLinear(4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_),
+    fromLinear(-1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_),
+    fromLinear(-0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_),
+  ]
+    .map((n) => n.toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+/** Sample an ordered ramp at `pos` in 0..1. One entry returns that entry. */
+export function sampleRamp(colours: readonly string[], pos: number): string {
+  if (colours.length === 0) return '#000000';
+  if (colours.length === 1) return colours[0];
+  const t = Math.min(1, Math.max(0, pos)) * (colours.length - 1);
+  const i = Math.min(colours.length - 2, Math.floor(t));
+  return blendOklab(colours[i], colours[i + 1], t - i);
+}

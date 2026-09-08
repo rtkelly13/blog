@@ -46,6 +46,9 @@ function params(over: Partial<GraphicParams> = {}): GraphicParams {
     t: 0,
     occlusion: '#0a0a1a',
     disorder: 0,
+    contrast: 1,
+    originX: 0.5,
+    originY: 0.5,
     ...over,
   };
 }

@@ -1,15 +1,16 @@
 import { defineGenerator } from '../types';
 import type { Rng } from './shared';
 import {
+  centre,
   chance,
   cycles,
   frame,
+  ink,
   lerp,
   mulberry32,
   r2,
   range,
   TAU,
-  withAlpha,
 } from './shared';
 
 /* ── broken-ring ──────────────────────────────────────────────────────────── */
@@ -38,6 +39,17 @@ interface RingBand {
  * middle for the eye to hold while everything around it shears past.
  */
 
+/**
+ * Innermost radius, and the span the bands are laid out across, as fractions of
+ * reach.
+ *
+ * Named because they are also what the ramp position is normalised against: a
+ * band's mid-radius alone would only ever reach 0.94 and never start below
+ * 0.16, so handing it to `ink()` raw would leave both ends of the ramp unspent.
+ */
+const RING_INNER = 0.16;
+const RING_SPAN = 0.78;
+
 export default defineGenerator<RingBand[]>({
   name: 'broken-ring',
   label: 'Broken Ring',
@@ -56,8 +68,8 @@ export default defineGenerator<RingBand[]>({
     const perBand = Math.round(lerp(14, 30, p.density));
     const out: RingBand[] = [];
     for (let i = 0; i < bands; i++) {
-      const r0 = 0.16 + (i / bands) * 0.78;
-      const r1 = r0 + (0.78 / bands) * 0.78;
+      const r0 = RING_INNER + (i / bands) * RING_SPAN;
+      const r1 = r0 + (RING_SPAN / bands) * 0.78;
       const cells = Array.from({ length: perBand }, () => ({
         fill: chance(rng, 0.34),
         hot: chance(rng, 0.08),
@@ -80,12 +92,26 @@ export default defineGenerator<RingBand[]>({
     return out;
   },
   project: (bands, p, t) => {
-    const cx = p.width / 2;
-    const cy = p.height / 2;
+    // `centre()` rather than the frame centre: the radial family exists so a
+    // background can sit *behind* a title, which needs the hole in the middle
+    // to be movable. The default origin is (0.5, 0.5), so nothing shifts.
+    const [cx, cy] = centre(p);
     const reach = Math.min(p.width, p.height) * 0.62;
-    const edge = withAlpha(p.accent, 0.34);
     let out = '';
     for (const band of bands) {
+      // Position on the ramp is **normalised radius** — the axis the form is
+      // already about. The innermost band takes one end of the ramp and the
+      // outermost the other, so the annulus reads as a gradient outward rather
+      // than as a flat colour cut into cells; a per-cell position would instead
+      // spin colour around the ring and fight the rotation.
+      //
+      // A whole band shares one position, since a band *is* one radius: the
+      // cells within it differ in weight, not in distance.
+      //
+      // With a single accent this is `withAlpha(p.accent, a)` byte for byte,
+      // which is what let it be adopted under the goldens.
+      const pos = ((band.r0 + band.r1) / 2 - RING_INNER) / RING_SPAN;
+      const edge = ink(p, pos, 0.34);
       const n = band.cells.length;
       const step = TAU / n;
       // Rotation consumed by cos/sin rather than printed as a `rotate()`:
@@ -104,9 +130,9 @@ export default defineGenerator<RingBand[]>({
         // would change the emitted-number count with the sample, which is what
         // the confetti test watches for.
         const fill = cell.hot
-          ? withAlpha(p.accent, 0.9)
+          ? ink(p, pos, 0.9)
           : cell.fill
-            ? withAlpha(p.accent, 0.22)
+            ? ink(p, pos, 0.22)
             : 'none';
         out += `<polygon points="${pt(a0, inner)} ${pt(a1, inner)} ${pt(a1, outer)} ${pt(a0, outer)}" fill="${fill}" stroke="${cell.fill || cell.hot ? edge : 'none'}" stroke-width="${p.strokeWidth}"/>`;
       }
