@@ -73,6 +73,25 @@ jobs:
         working-directory: blog
         run: pnpm lint
 
+  # Token drift against the *pinned* design system. Separate from `lint`
+  # because it answers a different question: not "is this code well formed"
+  # but "does the design system still define what this code references".
+  # See scripts/check-design-system.mjs for why tsc cannot cover it.
+  design-system:
+    name: design-system
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.ds.outcome }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+      - id: ds
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm check:ds
+
   typecheck:
     name: typecheck
     runs-on: ubuntu-latest
@@ -220,7 +239,7 @@ jobs:
   conclusion:
     name: pr-checks
     runs-on: ubuntu-latest
-    needs: [lockfile, lint, typecheck, seo, unit, build, e2e-visual]
+    needs: [lockfile, lint, typecheck, seo, unit, build, e2e-visual, design-system]
     if: always()
     permissions:
       contents: read
@@ -360,15 +379,39 @@ jobs:
           UNIT: ${{ needs.unit.outputs.outcome }}
           BUILD: ${{ needs.build.outputs.outcome }}
           E2E: ${{ needs.e2e-visual.outputs.outcome }}
+          DS: ${{ needs['design-system'].outputs.outcome }}
+          LOCKFILE_R: ${{ needs.lockfile.result }}
+          LINT_R: ${{ needs.lint.result }}
+          TYPECHECK_R: ${{ needs.typecheck.result }}
+          SEO_R: ${{ needs.seo.result }}
+          UNIT_R: ${{ needs.unit.result }}
+          BUILD_R: ${{ needs.build.result }}
+          E2E_R: ${{ needs.e2e-visual.result }}
+          DS_R: ${{ needs['design-system'].result }}
         shell: bash
         run: |
           failed=false
           # E2E (incl. visual regression) is blocking. When build fails it is
           # skipped (empty outcome), not a failure here — the build failure
           # already blocks.
-          for check in LOCKFILE LINT TYPECHECK SEO UNIT BUILD E2E; do
+          for check in LOCKFILE LINT TYPECHECK SEO UNIT BUILD E2E DS; do
             if [ "${!check}" = "failure" ]; then
               echo "::error::${check} failed — blocking merge"
+              failed=true
+            fi
+          done
+          # The step outcome above is only set if the step *ran*. A job that
+          # dies in `setup-blog` — a bad lockfile, an unreachable registry —
+          # never reaches its step, leaves the outcome empty, and used to be
+          # read as "skipped" and waved through. Since `pr-checks` is the only
+          # required check, that handed `main` a green light over a run whose
+          # own conclusion was failure. So the job *result* is checked too, and
+          # only a genuine `skipped` is forgiven.
+          for check in LOCKFILE LINT TYPECHECK SEO UNIT BUILD E2E DS; do
+            r_var="${check}_R"
+            r="${!r_var}"
+            if [ "$r" = "failure" ] || [ "$r" = "cancelled" ]; then
+              echo "::error::${check} job ${r} before reporting an outcome — blocking merge"
               failed=true
             fi
           done
