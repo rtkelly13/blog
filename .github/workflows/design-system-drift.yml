@@ -1,0 +1,192 @@
+name: Design system drift
+
+# Answers one question on a schedule: **if we bumped @rtkelly13/design-system
+# to the latest release today, what would break?**
+#
+# The two repos are developed in parallel, so they drift by construction. The
+# PR gate can only ever check the *pinned* version — which is exactly the
+# version that is not moving. Nothing in normal CI ever tries the new one, so
+# the answer to "can we upgrade" is unknown until someone attempts it by hand
+# and discovers the answer is no.
+#
+# This runs the real gates against `latest` instead:
+#
+#   typecheck  — renamed exports, changed prop types
+#   check:ds   — token drift, which typecheck cannot see (see the script)
+#   unit       — behaviour of the components the blog re-exports
+#   build      — the Tailwind/CSS contract actually compiling
+#
+# It never commits the bump. It reports, into a single issue kept up to date,
+# so the answer is waiting when you want to upgrade rather than being
+# discovered halfway through one.
+#
+# Deliberately not a PR gate: a design-system release ten minutes ago must not
+# redden an unrelated blog PR. Drift is a fact to know about, not a reason to
+# block someone's work.
+
+on:
+  schedule:
+    # Mondays, early. A week is about the granularity at which this is useful:
+    # often enough that a breaking change is still fresh, rare enough that the
+    # issue is not noise.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version or dist-tag to test against (default: latest)'
+        required: false
+        default: 'latest'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: design-system-drift
+  cancel-in-progress: true
+
+jobs:
+  drift:
+    name: Try the latest design system
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: blog
+      - uses: ./blog/.github/actions/setup-blog
+
+      - name: Record the pinned version
+        id: before
+        working-directory: blog
+        run: |
+          v=$(node -p "require('./node_modules/@rtkelly13/design-system/package.json').version")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Upgrade to the candidate
+        id: upgrade
+        continue-on-error: true
+        working-directory: blog
+        env:
+          TARGET: ${{ inputs.version || 'latest' }}
+        run: |
+          pnpm add "@rtkelly13/design-system@${TARGET}"
+          v=$(node -p "require('./node_modules/@rtkelly13/design-system/package.json').version")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Token contract
+        id: ds
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm check:ds
+
+      - name: Typecheck
+        id: typecheck
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm typecheck
+
+      - name: Unit tests
+        id: unit
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm test:unit
+
+      - name: Build
+        id: build
+        continue-on-error: true
+        working-directory: blog
+        run: pnpm build
+
+      - name: Report
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          FROM: ${{ steps.before.outputs.version }}
+          TO: ${{ steps.upgrade.outputs.version }}
+          UPGRADE: ${{ steps.upgrade.outcome }}
+          DS: ${{ steps.ds.outcome }}
+          TYPECHECK: ${{ steps.typecheck.outcome }}
+          UNIT: ${{ steps.unit.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        with:
+          script: |
+            const { FROM, TO, UPGRADE, DS, TYPECHECK, UNIT, BUILD } = process.env;
+            const marker = '<!-- design-system-drift -->';
+            const mark = (v) => (v === 'success' ? '✅' : v === 'failure' ? '❌' : '⏭️');
+
+            if (UPGRADE !== 'success') {
+              core.setFailed(`Could not install the candidate design system.`);
+            }
+
+            const rows = [
+              ['Token contract (`check:ds`)', DS],
+              ['Typecheck', TYPECHECK],
+              ['Unit tests', UNIT],
+              ['Build', BUILD],
+            ];
+            const broken = rows.filter(([, v]) => v === 'failure');
+            const aligned = FROM === TO;
+
+            const title = aligned
+              ? `Design system: aligned on ${TO}`
+              : broken.length === 0
+                ? `Design system: ${TO} is a safe upgrade (pinned ${FROM})`
+                : `Design system: ${TO} breaks the blog (pinned ${FROM})`;
+
+            const body = [
+              marker,
+              `## ${title}`,
+              '',
+              `Pinned **${FROM}** · candidate **${TO}**`,
+              '',
+              '| Check | Result |',
+              '| --- | --- |',
+              ...rows.map(([n, v]) => `| ${n} | ${mark(v)} |`),
+              '',
+              aligned
+                ? 'The blog is on the latest release. Nothing to do.'
+                : broken.length === 0
+                  ? `Nothing broke. \`pnpm add @rtkelly13/design-system@${TO}\` whenever convenient.`
+                  : `**${broken.length} check(s) fail on ${TO}.** The logs name what changed — see the run below.`,
+              '',
+              broken.length > 0 && DS === 'failure'
+                ? 'A `check:ds` failure means a **token** was renamed or removed. Those never surface as build errors — the utility silently stops being generated. Worth reading the log directly.'
+                : '',
+              '',
+              `_Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}_`,
+            ]
+              .filter(Boolean)
+              .join('\n');
+
+            // One issue, kept current — a new issue every Monday is how a useful
+            // signal becomes something people filter out.
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const found = existing.data.find(
+              (i) => i.body && i.body.includes(marker),
+            );
+
+            if (aligned && !found) return; // Nothing to say and nothing open.
+
+            if (found) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: found.number,
+                title,
+                body,
+                state: aligned ? 'closed' : 'open',
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+              });
+            }

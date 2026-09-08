@@ -43,8 +43,8 @@ importers:
         specifier: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58
         version: https://codeload.github.com/rtkelly13/mermaid-toolkit/tar.gz/a91c9d35128550180b59a3d576d6e34a61875c58(mermaid@11.16.0)
       '@rtkelly13/design-system':
-        specifier: ^0.1.3
-        version: 0.1.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^0.3.0
+        version: 0.3.0(@tailwindcss/typography@0.5.20(tailwindcss@4.3.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       '@tailwindcss/forms':
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.3.3)
@@ -881,6 +881,12 @@ packages:
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2':
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
+
+  '@fontsource-variable/inter@5.3.0':
+    resolution: {integrity: sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==}
+
+  '@fontsource-variable/space-grotesk@5.3.0':
+    resolution: {integrity: sha512-2IxmvfB08i9vnGB3Ym/AXvhRE+8XOjWMXIyDum03c+tPwH0FUoMNQfGpU8NXPxjbws0Vvss3AH0Zqt4oJBBAdw==}
 
   '@fontsource/ibm-plex-mono@5.3.0':
     resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
@@ -2215,11 +2221,18 @@ packages:
     peerDependencies:
       mermaid: ^11.0.0
 
-  '@rtkelly13/design-system@0.1.3':
-    resolution: {integrity: sha512-aMIhBQIdYLWQ68BZydRO6suwbYuMOnMiBRq3RpcgESuCNsuVtyLySP01TOhdA023KUACJ/LPFBXHLLa4UKsmqA==}
+  '@rtkelly13/design-system@0.3.0':
+    resolution: {integrity: sha512-MqtCxABBW/BdHwSYgSrpVJvid8VDiKx7Exbo40lna+tYZbiLkqK+lyGaXjPW6NLmMx7yWD8385GFnf3IlVvE5A==}
     peerDependencies:
+      '@tailwindcss/typography': ^0.5.16
       react: 19.2.8
       react-dom: 19.2.8
+      tailwindcss: ^4.0.0
+    peerDependenciesMeta:
+      '@tailwindcss/typography':
+        optional: true
+      tailwindcss:
+        optional: true
 
   '@sinclair/typebox@0.27.10':
     resolution: {integrity: sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA==}
@@ -5792,6 +5805,18 @@ packages:
     resolution: {integrity: sha512-esiWJ7ixSKGpd9DJPBTC4ckChqdOjIwJfYhVHkcQ2Gnm41323p1TRmEI+esTQ9ppD+b5opps2OTEGTCGX5kF+g==}
     engines: {node: '>=14'}
 
+  tailwind-variants@3.3.1:
+    resolution: {integrity: sha512-4pAvwUtM4HKBiRZftncAbpn6V9Hhwoa5Fl7O2u5zbp7Z5Cvu+/o/6+176WY3WCEES209543quG8zFIcXCsc5Jw==}
+    engines: {node: '>=16.9.x', pnpm: '>=7.x'}
+    peerDependencies:
+      tailwind-merge: '>=3.0.0'
+      tailwindcss: '*'
+    peerDependenciesMeta:
+      tailwind-merge:
+        optional: true
+      tailwindcss:
+        optional: true
+
   tailwindcss@4.3.3:
     resolution: {integrity: sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==}
 
@@ -6809,6 +6834,10 @@ snapshots:
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2': {}
 
+  '@fontsource-variable/inter@5.3.0': {}
+
+  '@fontsource-variable/space-grotesk@5.3.0': {}
+
   '@fontsource/ibm-plex-mono@5.3.0': {}
 
   '@fontsource/inter@5.3.0': {}
@@ -7814,11 +7843,21 @@ snapshots:
     dependencies:
       mermaid: 11.16.0
 
-  '@rtkelly13/design-system@0.1.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@rtkelly13/design-system@0.3.0(@tailwindcss/typography@0.5.20(tailwindcss@4.3.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
     dependencies:
+      '@fontsource-variable/inter': 5.3.0
+      '@fontsource-variable/space-grotesk': 5.3.0
+      '@fontsource/ibm-plex-mono': 5.3.0
+      '@fontsource/vt323': 5.3.0
       lucide-react: 1.28.0(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
+      tailwind-variants: 3.3.1(tailwindcss@4.3.3)
+    optionalDependencies:
+      '@tailwindcss/typography': 0.5.20(tailwindcss@4.3.3)
+      tailwindcss: 4.3.3
+    transitivePeerDependencies:
+      - tailwind-merge
 
   '@sinclair/typebox@0.27.10': {}
 
@@ -12324,6 +12363,10 @@ snapshots:
       node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
+
+  tailwind-variants@3.3.1(tailwindcss@4.3.3):
+    optionalDependencies:
+      tailwindcss: 4.3.3
 
   tailwindcss@4.3.3: {}
 
