@@ -108,9 +108,10 @@ test.describe('Dark Mode', () => {
     await page.goto('/');
 
     const html = page.locator('html');
-    const htmlClass = await html.getAttribute('class');
 
-    expect(htmlClass).toContain('dark');
+    // The design system selects themes on `data-theme`, not a class — see
+    // pages/_app.tsx. `midnight` is the default level.
+    await expect(html).toHaveAttribute('data-theme', 'midnight');
   });
 });
 

@@ -36,17 +36,26 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const tree = (
     <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
+      attribute="data-theme"
+      defaultTheme="midnight"
       enableSystem={false}
       disableTransitionOnChange
-      themes={['dark', 'dim', 'sketch']}
-      // Each theme maps to a single class on <html> (`dark`, `dim`, `sketch`) —
-      // a value with a space would break next-themes' classList calls. `dark`
-      // and `dim` are dark; the `dark:` Tailwind variant is taught to match
-      // `.dim` too (see the `@custom-variant dark` rule in css/tailwind.css).
-      // `sketch` is light, so it is deliberately excluded — `dark:` utilities
-      // fall back to their light base styles under it.
+      themes={['midnight', 'dim', 'bright']}
+      // The names and the attribute are the design system's, not ours.
+      //
+      // Its theme blocks select on `[data-theme="…"]`, so the value written
+      // here has to be a level it publishes — `THEME_LEVELS` is
+      // `midnight | dim | bright | white`. A class, or a name of our own, and
+      // not one of its blocks can ever match: every token silently falls back
+      // to `:root` and the whole theme layer stops existing without any error.
+      //
+      // `white` is deliberately not offered. It is a fourth level the design
+      // system supports and this blog has no design for, and a theme nobody
+      // has styled is worse than one that is missing.
+      //
+      // `dark:` and `light:` still work as before — the package ships them as
+      // aggregate variants over (midnight, dim) and (bright, white), so
+      // existing utilities need no change.
     >
       <SearchProvider>
         <Head>

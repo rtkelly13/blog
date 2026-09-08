@@ -2,7 +2,7 @@
 
 @import "tailwindcss";
 
-/* Design-system token contract: brutalist @theme tokens, the .dark/.dim dark
+/* Design-system token contract: brutalist @theme tokens, the dark/light
    variant, per-mode variable blocks, and @source for the DS components. */
 @import "@rtkelly13/design-system/theme.css";
 
@@ -133,10 +133,10 @@ html {
   --diagram-text-light: #a1a1aa;
 }
 
-.dark {
-  /* Nested theme panels: a `.dark` panel inside a `.sketch` root (e.g. the
+[data-theme="midnight"] {
+  /* Nested theme panels: a midnight panel inside a bright root (e.g. the
      design-sandbox component library) must not inherit sketch's inverted zinc
-     scale, so reset it to Tailwind's defaults here. Redundant when `.dark` is
+     scale, so reset it to Tailwind's defaults here. Redundant when midnight is
      on <html> (these ARE the defaults), load-bearing when nested. */
   --color-zinc-950: #09090b;
   --color-zinc-900: #18181b;
@@ -162,7 +162,7 @@ html {
 
 /* ── DIM THEME ───────────────────────────────────────────────────────────
    A softened dark theme that keeps the brutalist look but takes the edge off
-   the pure-black / pure-white contrast. It layers on top of `.dark` (the html
+   the pure-black / pure-white contrast. It layers on top of midnight (the html
    element carries both classes — see pages/_app.tsx), so every `dark:` variant
    still fires; we only re-point the palette tokens.
 
@@ -171,12 +171,12 @@ html {
    ~200 `border-white` utilities across the site in one place. Bright accent
    tokens (brutalist cyan/pink/yellow) are inlined literals and stay put, so
    dark-text-on-accent buttons keep their contrast. */
-.dim {
+[data-theme="dim"] {
   /* Charcoal instead of true black; warm off-white instead of #fff. */
   --color-black: #17171b;
   --color-white: #d8d8d2;
 
-  /* The design-system's theme.css softens the accents under `.dim`; this blog
+  /* The design-system's theme.css softens the accents under dim; this blog
      keeps them identical to dark (dim only re-points black/white/zinc) — see
      tests/theme-toggle.spec.ts. Pin them back explicitly. */
   --brutalist-cyan: #22d3ee;
@@ -209,14 +209,16 @@ html {
 /* Prose headings, emphasis, blockquotes, table headers and rules hardcode
    `#fff` via the typography config; re-point them to the dim off-white so the
    reading surface doesn't reintroduce the harsh white the dim theme removes. */
-.dim
+[data-theme="dim"]
   .prose
   :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
     :where([class~="not-prose"] *)
   ) {
   color: #eaeae4;
 }
-.dim .prose :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
+[data-theme="dim"]
+  .prose
+  :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
   border-color: #d8d8d2;
 }
 
@@ -232,7 +234,7 @@ html {
    the `bg-black` / `text-white` / `border-white` surface flips, override the
    `zinc-*` scale (inverted for light surfaces), and re-point the now
    variable-driven `--brutalist-*` accents. */
-.sketch {
+[data-theme="bright"] {
   /* Paper background, graphite ink text/border (a full light inversion). */
   --color-black: #f5f3ec;
   --color-white: #23262e;
@@ -303,29 +305,35 @@ html {
    bg = #000, border = #fff) need explicit ink-on-paper values under sketch.
    Accent-driven prose colours (links, code text, list markers, blockquote
    border) already follow the `--brutalist-*` variables. */
-.sketch
+[data-theme="bright"]
   .prose
   :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
     :where([class~="not-prose"] *)
   ) {
   color: #1c1f27;
 }
-.sketch .prose :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
+[data-theme="bright"]
+  .prose
+  :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
   border-color: #23262e;
 }
 /* Inline code (excluding code inside a <pre> block, which the code-block rule
    below owns). The prose invert pre-bg token is redefined locally on `.prose`,
    so the code block is styled directly here rather than via that token. */
-.sketch .prose :where(code):not(:where(pre *, [class~="not-prose"] *)) {
+[data-theme="bright"]
+  .prose
+  :where(code):not(:where(pre *, [class~="not-prose"] *)) {
   background-color: #efeadf;
   border-color: #23262e;
 }
-.sketch .prose :where(pre):not(:where([class~="not-prose"] *)) {
+[data-theme="bright"] .prose :where(pre):not(:where([class~="not-prose"] *)) {
   background-color: #efeadf;
   color: #23262e;
   border: 1px solid #d8d3c4;
 }
-.sketch .prose :where(details):not(:where([class~="not-prose"] *)) {
+[data-theme="bright"]
+  .prose
+  :where(details):not(:where([class~="not-prose"] *)) {
   background-color: #efeadf;
   border-color: #23262e;
 }
@@ -333,7 +341,7 @@ html {
 /* The typography config sets a literal light-grey body colour on `.prose`
    (theme('colors.gray.200')), which overrides the themeable prose token and is
    invisible on paper — restore a dark ink body colour under sketch. */
-.sketch .prose {
+[data-theme="bright"] .prose {
   color: #33373f;
 }
 
@@ -342,24 +350,24 @@ html {
    ink drop shadow the rest of the brutalist UI uses, so cards read like the
    TalkCard on paper. (Listing layouts use the named `shadow-glow-*` utilities
    so they're all covered here.) */
-.sketch .shadow-glow-cyan,
-.sketch .shadow-glow-pink,
-.sketch .shadow-glow-orange {
+[data-theme="bright"] .shadow-glow-cyan,
+[data-theme="bright"] .shadow-glow-pink,
+[data-theme="bright"] .shadow-glow-orange {
   box-shadow: 4px 4px 0px 0px var(--brutalist-shadow-color) !important;
 }
-.sketch .hover\:shadow-glow-cyan:hover,
-.sketch .hover\:shadow-glow-pink:hover,
-.sketch .hover\:shadow-glow-orange:hover {
+[data-theme="bright"] .hover\:shadow-glow-cyan:hover,
+[data-theme="bright"] .hover\:shadow-glow-pink:hover,
+[data-theme="bright"] .hover\:shadow-glow-orange:hover {
   box-shadow: 6px 6px 0px 0px var(--brutalist-shadow-color) !important;
 }
 
 /* Light-grey text utilities (used as primary text on the dark themes) are
    inlined literals, so re-point the light end of the grey scale to ink under
-   sketch so it stays legible on paper. Excludes nested `.dark`/`.dim` theme
+   sketch so it stays legible on paper. Excludes nested midnight/dim theme
    panels (design-sandbox component library), where light grey is correct. */
-.sketch
+[data-theme="bright"]
 :is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400):not(
-  .sketch :is(.dark, .dim) *
+  [data-theme="bright"] :is([data-theme="midnight"], [data-theme="dim"]) *
 ) {
   color: #33373f;
 }
@@ -373,20 +381,20 @@ html {
    below read as pencil work.) */
 
 /* The ASCII terminal divider becomes a hand-ruled pencil dash line. */
-.sketch .ascii-divider::after {
+[data-theme="bright"] .ascii-divider::after {
   content: "· \2500  \2500  \2500  \2500  \2500  \2500  \2500  \2500  \2500  \2500  \2500  \2500  \2500  \2500  ·";
   letter-spacing: 0.1em;
   color: #6a6252;
 }
 
 /* Text selection reads as a highlighter-marker swipe on paper. */
-.sketch ::selection {
+[data-theme="bright"] ::selection {
   background-color: rgba(250, 204, 21, 0.55);
   color: #1c1f27;
 }
 
 /* Horizontal rules turn into pencil-dashed lines instead of solid ink. */
-.sketch .prose :where(hr):not(:where([class~="not-prose"] *)) {
+[data-theme="bright"] .prose :where(hr):not(:where([class~="not-prose"] *)) {
   border-style: dashed;
   border-top-width: 2px;
 }

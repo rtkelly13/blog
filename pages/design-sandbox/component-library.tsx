@@ -23,12 +23,12 @@ function ThemePanel({
   label,
   children,
 }: {
-  theme: 'dark' | 'sketch';
+  theme: 'midnight' | 'bright';
   label: string;
   children: ReactNode;
 }) {
   return (
-    <div className={`${theme} border-2 border-white bg-black`}>
+    <div data-theme={theme} className="border-2 border-white bg-black">
       <div className="border-b-2 border-white bg-zinc-900 px-3 py-1.5">
         <span className="font-mono text-xs font-bold uppercase text-zinc-400">
           {label}
@@ -47,10 +47,10 @@ function Specimen({ name, children }: { name: string; children: ReactNode }) {
         [ {name} ]
       </h2>
       <div className="grid gap-4 lg:grid-cols-2">
-        <ThemePanel theme="dark" label="dark · neon terminal">
+        <ThemePanel theme="midnight" label="midnight · neon terminal">
           {children}
         </ThemePanel>
-        <ThemePanel theme="sketch" label="sketch · paper & ink">
+        <ThemePanel theme="bright" label="bright · paper &amp; ink">
           {children}
         </ThemePanel>
       </div>

@@ -496,7 +496,7 @@ export default function ShaderStage({
       />
       <div
         ref={paperProbe}
-        className="sketch"
+        data-theme="bright"
         aria-hidden
         style={{
           position: 'absolute',

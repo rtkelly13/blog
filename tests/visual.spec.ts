@@ -26,7 +26,7 @@ async function waitForPageReady(page: import('@playwright/test').Page) {
 // Helper to set dark mode before navigation
 async function setDarkMode(page: import('@playwright/test').Page) {
   await page.addInitScript(() => {
-    localStorage.setItem('theme', 'dark');
+    localStorage.setItem('theme', 'midnight');
   });
 }
 
@@ -142,7 +142,7 @@ test.describe('Visual Regression - Dark Mode', () => {
 // first navigation, so the page renders in that theme from the initial paint.
 async function setTheme(
   page: import('@playwright/test').Page,
-  theme: 'dark' | 'dim' | 'sketch',
+  theme: 'midnight' | 'dim' | 'bright',
 ) {
   await page.addInitScript((t) => {
     localStorage.setItem('theme', t);
@@ -178,7 +178,7 @@ test.describe('Visual Regression - Dim Mode', () => {
 
 test.describe('Visual Regression - Sketch Mode', () => {
   test.beforeEach(async ({ page }) => {
-    await setTheme(page, 'sketch');
+    await setTheme(page, 'bright');
   });
 
   for (const { name, path } of THEMED_PATHWAYS) {
