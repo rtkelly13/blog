@@ -332,7 +332,7 @@ export default function DiagramsPage() {
               <h3 className="mb-3 font-display text-sm font-bold uppercase text-brutalist-yellow">
                 $ CODE
               </h3>
-              <pre className="overflow-x-auto border-2 border-zinc-800 bg-black p-4 font-mono text-xs text-brutalist-green">
+              <pre className="overflow-x-auto border-2 border-zinc-800 bg-black p-4 font-mono text-xs text-brutalist-neonGreen">
                 {variants[activeVariant].code}
               </pre>
             </div>

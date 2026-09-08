@@ -92,7 +92,7 @@ const CodePreview = ({ code }: { code: string }) => {
       >
         {copied ? '✓ COPIED' : 'COPY'}
       </button>
-      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-brutalist-green">
+      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-brutalist-neonGreen">
         {code}
       </pre>
     </div>

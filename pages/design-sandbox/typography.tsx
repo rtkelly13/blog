@@ -20,7 +20,7 @@ const CodePreview = ({ code }: { code: string }) => {
       >
         {copied ? '✓ COPIED' : 'COPY'}
       </button>
-      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-brutalist-green">
+      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-brutalist-neonGreen">
         {code}
       </pre>
     </div>
@@ -159,7 +159,7 @@ export default function Typography() {
                 </span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-brutalist-green">{'*'}</span>
+                <span className="text-brutalist-neonGreen">{'*'}</span>
                 <span className="text-white ml-2">
                   Asterisk for list items or bullets
                 </span>
@@ -200,7 +200,7 @@ export default function Typography() {
                 <div className="absolute top-0 right-0 bg-brutalist-yellow text-black px-2 py-1 text-xs font-mono font-bold">
                   TYPESCRIPT
                 </div>
-                <pre className="font-mono text-sm text-brutalist-green">
+                <pre className="font-mono text-sm text-brutalist-neonGreen">
                   {`function greet(name: string): void {
   console.log(\`> Hello, \${name}!\`);
 }
@@ -221,7 +221,7 @@ greet('WORLD');`}
   <div className="absolute top-0 right-0 bg-brutalist-yellow text-black px-2 py-1 text-xs font-mono font-bold">
     TYPESCRIPT
   </div>
-  <pre className="font-mono text-sm text-brutalist-green">
+  <pre className="font-mono text-sm text-brutalist-neonGreen">
     {codeContent}
   </pre>
 </div>
@@ -301,7 +301,7 @@ greet('WORLD');`}
                 <span className="bg-brutalist-pink text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
                   NEW
                 </span>
-                <span className="bg-black text-brutalist-green font-mono text-xs font-bold px-3 py-1 border-2 border-brutalist-green uppercase">
+                <span className="bg-black text-brutalist-neonGreen font-mono text-xs font-bold px-3 py-1 border-2 border-brutalist-neonGreen uppercase">
                   [ACTIVE]
                 </span>
                 <span className="bg-zinc-900 text-white font-mono text-xs font-bold px-3 py-1 border border-white uppercase">
@@ -315,7 +315,7 @@ greet('WORLD');`}
   TAG_NAME
 </span>
 
-<span className="bg-black text-brutalist-green font-mono text-xs font-bold px-3 py-1 border-2 border-brutalist-green uppercase">
+<span className="bg-black text-brutalist-neonGreen font-mono text-xs font-bold px-3 py-1 border-2 border-brutalist-neonGreen uppercase">
   [ACTIVE]
 </span>`}
             />

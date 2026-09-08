@@ -94,7 +94,7 @@ export default function About({
           </div>
 
           <div className="lg:col-span-2 space-y-6 flex flex-col justify-center bg-zinc-950/60 border-2 border-zinc-800 p-6 rounded-md">
-            <div className="flex items-center gap-2 text-brutalist-green uppercase text-xs font-bold tracking-wider">
+            <div className="flex items-center gap-2 text-brutalist-neonGreen uppercase text-xs font-bold tracking-wider">
               <Terminal className="w-4 h-4" />
               <span>Bio & Overview</span>
             </div>
@@ -207,7 +207,7 @@ export default function About({
                 <ul className="mt-4 space-y-2 text-sm text-zinc-300">
                   {job.highlights.map((h, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-brutalist-green font-bold select-none">
+                      <span className="text-brutalist-neonGreen font-bold select-none">
                         &gt;
                       </span>
                       <span>{h}</span>
