@@ -40,7 +40,7 @@ export function graphicThemeDefaults(theme?: string): {
   accent: string;
   background: string;
 } {
-  return theme === 'sketch'
+  return theme === 'bright'
     ? { accent: PAPER_ACCENTS.ink, background: 'transparent' }
     : { accent: BRUTALIST_ACCENTS.cyan, background: 'transparent' };
 }

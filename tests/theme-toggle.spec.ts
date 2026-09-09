@@ -18,7 +18,9 @@ import { expect, type Page, test } from '@playwright/test';
  */
 
 // Dark (default) + dim (softened dark) tokens.
-const DARK_BG = 'rgb(0, 0, 0)'; // --color-black default
+// `midnight` under 0.3.0 — the design system moved --color-black off pure
+// black to the same near-black the graphics layer already used as its surface.
+const DARK_BG = 'rgb(10, 10, 26)'; // #0a0a1a
 const DARK_FG = 'rgb(255, 255, 255)'; // --color-white default
 const DIM_BG = 'rgb(23, 23, 27)'; // #17171b
 const DIM_FG = 'rgb(216, 216, 210)'; // #d8d8d2
@@ -58,8 +60,11 @@ test.describe('Theme toggle — homepage', () => {
   test('defaults to the high-contrast dark theme', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.locator('html')).toHaveClass(/dark/);
-    await expect(page.locator('html')).not.toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dim');
     expect(await bodyStyle(page, 'background-color')).toBe(DARK_BG);
     expect(await bodyStyle(page, 'color')).toBe(DARK_FG);
   });
@@ -85,8 +90,11 @@ test.describe('Theme toggle — homepage', () => {
 
     // Single `dim` class on <html> (not `dark`); the `dark:` variant is taught
     // to also match `.dim`, so every `dark:` utility keeps applying.
-    await expect(page.locator('html')).toHaveClass(/dim/);
-    await expect(page.locator('html')).not.toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
+    await expect(page.locator('html')).not.toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
 
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
     expect(await bodyStyle(page, 'color')).toBe(DIM_FG);
@@ -116,9 +124,12 @@ test.describe('Theme toggle — homepage', () => {
     await toggle(page).click();
     await toggle(page).click();
 
-    await expect(page.locator('html')).toHaveClass(/sketch/);
-    await expect(page.locator('html')).not.toHaveClass(/dark/);
-    await expect(page.locator('html')).not.toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'bright');
+    await expect(page.locator('html')).not.toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dim');
 
     // Light paper background, dark ink text.
     expect(await bodyStyle(page, 'background-color')).toBe(SKETCH_BG);
@@ -133,17 +144,23 @@ test.describe('Theme toggle — homepage', () => {
     );
   });
 
-  test('cycles all the way back to dark', async ({ page }) => {
+  test('cycles all the way back to midnight', async ({ page }) => {
     await page.goto('/');
 
-    // dark → dim → sketch → dark
+    // midnight → dim → bright → midnight
     await toggle(page).click();
     await toggle(page).click();
     await toggle(page).click();
 
-    await expect(page.locator('html')).toHaveClass(/dark/);
-    await expect(page.locator('html')).not.toHaveClass(/dim/);
-    await expect(page.locator('html')).not.toHaveClass(/sketch/);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dim');
+    await expect(page.locator('html')).not.toHaveAttribute(
+      'data-theme',
+      'bright',
+    );
     expect(await bodyStyle(page, 'background-color')).toBe(DARK_BG);
     expect(await bodyStyle(page, 'color')).toBe(DARK_FG);
   });
@@ -152,11 +169,11 @@ test.describe('Theme toggle — homepage', () => {
     await page.goto('/');
 
     await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
 
     await page.reload();
 
-    await expect(page.locator('html')).toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
     expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe(
       'dim',
@@ -169,7 +186,7 @@ test.describe('Theme toggle — homepage', () => {
     expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_CYAN);
 
     await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
 
     // dim only re-points the black/white/zinc tokens, not the accents.
     expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_CYAN);
@@ -200,7 +217,7 @@ test.describe('Theme toggle — blog post', () => {
     );
 
     await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
 
     // Reading surface softens: charcoal background, off-white headings.
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
@@ -218,7 +235,7 @@ test.describe('Theme toggle — blog post', () => {
     // dark → dim → sketch
     await toggle(page).click();
     await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/sketch/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'bright');
 
     expect(await bodyStyle(page, 'background-color')).toBe(SKETCH_BG);
     expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(
@@ -229,11 +246,11 @@ test.describe('Theme toggle — blog post', () => {
   test('the chosen theme persists onto a blog post', async ({ page }) => {
     await page.goto('/');
     await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
 
     // Navigate to the post; the preference should carry over.
     await page.goto(POST);
-    await expect(page.locator('html')).toHaveClass(/dim/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dim');
     expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
   });
 });

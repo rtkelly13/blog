@@ -1,23 +1,45 @@
+import type { ThemeLevel } from '@rtkelly13/design-system';
 import { CloudMoon, type LucideIcon, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
-// Three themes cycled in order. `dark` is the original high-contrast brutalist
-// look (white on black); `dim` softens it toward charcoal / off-white; `sketch`
-// is a light paper-and-ink theme with blue / red / green accents.
-const THEMES = ['dark', 'dim', 'sketch'] as const;
-const LABELS: Record<string, string> = {
-  dark: 'HIGH',
+/**
+ * Three of the design system's four levels, cycled in order.
+ *
+ * Typed as `ThemeLevel[]`, which is the point: these strings are written into
+ * `data-theme`, and the design system's blocks select on exactly those values.
+ * A level renamed upstream is otherwise invisible — no build error, no failing
+ * test, just a theme that quietly stops applying. Typed, it is a compile error.
+ *
+ * `white` is the fourth and is deliberately absent: a level this blog has no
+ * design for is worse offered than withheld.
+ */
+const THEMES = [
+  'midnight',
+  'dim',
+  'bright',
+] as const satisfies readonly ThemeLevel[];
+
+/**
+ * What the reader is told, which is *not* the level name.
+ *
+ * The design system names levels by luminance; this blog names them by what
+ * they are for. Its light theme is paper-and-ink with pencil rules, so SKETCH
+ * describes it and "bright" does not. Presentation is allowed to differ from
+ * the contract — only the values above have to match.
+ */
+const LABELS: Record<(typeof THEMES)[number], string> = {
+  midnight: 'HIGH',
   dim: 'DIM',
-  sketch: 'SKETCH',
+  bright: 'SKETCH',
 };
 // A distinct glyph per theme so the current mode is legible at a glance
-// (moon = dark, cloud-moon = dim, sun = sketch) — the icon-only button used
-// the same half-disc for all three.
-const ICONS: Record<string, LucideIcon> = {
-  dark: Moon,
+// (moon = high contrast, cloud-moon = dim, sun = sketch) — the icon-only button
+// used the same half-disc for all three.
+const ICONS: Record<(typeof THEMES)[number], LucideIcon> = {
+  midnight: Moon,
   dim: CloudMoon,
-  sketch: Sun,
+  bright: Sun,
 };
 
 const ThemeSwitch = () => {
@@ -25,13 +47,13 @@ const ThemeSwitch = () => {
   const { theme, setTheme } = useTheme();
 
   // Only trust the resolved theme after mount to avoid a hydration mismatch
-  // (the server always renders the default). Before then, assume `dark`.
+  // (the server always renders the default). Before then, assume `midnight`.
   useEffect(() => setMounted(true), []);
 
   const active =
     mounted && theme && THEMES.includes(theme as (typeof THEMES)[number])
       ? theme
-      : 'dark';
+      : 'midnight';
   const next =
     THEMES[
       (THEMES.indexOf(active as (typeof THEMES)[number]) + 1) % THEMES.length

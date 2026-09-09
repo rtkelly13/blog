@@ -204,10 +204,12 @@ function renderSlides(
   return slides.map((slide, i) => (
     <Slide key={i} backgroundColor={hasBackground ? 'transparent' : solid}>
       <SlideIndexProvider value={i}>
-        {/* A paper deck scopes slide content in `.sketch` so the MDX Tailwind
-            utilities (text-white, bg-black, accents, prose) re-theme to ink on
-            paper via the site's CSS variables — same mechanism as the site. */}
-        <div className={paper ? 'sketch' : undefined}>
+        {/* A paper deck scopes slide content to the `bright` level so the MDX
+            Tailwind utilities (text-white, bg-black, accents, prose) re-theme to
+            ink on paper — same mechanism as the site. An attribute rather than a
+            class since 0.3.0, and the design system's custom variants are
+            written to handle exactly this nesting. */}
+        <div data-theme={paper ? 'bright' : undefined}>
           <SlideBody code={slide.code} />
         </div>
       </SlideIndexProvider>

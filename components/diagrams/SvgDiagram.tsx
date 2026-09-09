@@ -1,5 +1,6 @@
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { isDarkLevel } from '@/lib/themePolarity';
 import type { SvgDiagramProps } from './types';
 
 /**
@@ -25,9 +26,10 @@ export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
 
     const fetchSvg = async () => {
       try {
-        // Choose source based on theme if darkSrc is provided.
-        // `dim` is a softened dark theme, so it uses the dark asset too.
-        const isDark = resolvedTheme !== 'light';
+        // Choose source based on theme if darkSrc is provided. Polarity comes
+        // from the design system, so `dim` counts as dark and a level added
+        // later is classified without editing this.
+        const isDark = isDarkLevel(resolvedTheme);
         const svgSrc = darkSrc && isDark ? darkSrc : src;
 
         const response = await fetch(svgSrc);

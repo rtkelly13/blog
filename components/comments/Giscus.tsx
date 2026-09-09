@@ -2,6 +2,7 @@ import { useTheme } from 'next-themes';
 import { useState } from 'react';
 
 import siteMetadata from '@/data/siteMetadata';
+import { isDarkLevel } from '@/lib/themePolarity';
 
 interface Props {
   mapping: string;
@@ -12,8 +13,9 @@ const Giscus = ({ mapping }: Props) => {
   const { theme, resolvedTheme } = useTheme();
   const commentsTheme =
     siteMetadata.comment.giscusConfig.themeURL === ''
-      ? // `dim` is a softened dark theme, so treat it as dark here.
-        theme !== 'light' && resolvedTheme !== 'light'
+      ? // Asked of the design system, so a new level lands on the right side
+        // of this on its own. See lib/themePolarity.ts for what this replaced.
+        isDarkLevel(resolvedTheme ?? theme)
         ? siteMetadata.comment.giscusConfig.darkTheme
         : siteMetadata.comment.giscusConfig.theme
       : siteMetadata.comment.giscusConfig.themeURL;
