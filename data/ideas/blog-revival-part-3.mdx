@@ -140,7 +140,7 @@ font-family:
 **Code:**
 
 ```tsx
-<button className="bg-brutalist-cyan text-black px-4 py-2 border-2 border-white font-mono font-bold uppercase tracking-wide shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[6px_6px_0px_0px_#ffffff] hover:bg-brutalist-pink transition-all duration-150">
+<button className="bg-accent-primary text-black px-4 py-2 border-2 border-white font-mono font-bold uppercase tracking-wide shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[6px_6px_0px_0px_#ffffff] hover:bg-accent-tertiary transition-all duration-150">
   Click Me
 </button>
 ```
@@ -164,13 +164,13 @@ font-family:
 
 ```tsx
 <div className="bg-zinc-900 border-2 border-white p-6 hover:shadow-[3px_3px_0px_0px_#ffffff] transition-shadow duration-150">
-  <h2 className="text-brutalist-yellow text-2xl font-bold uppercase tracking-wide mb-2">
+  <h2 className="text-accent-secondary text-2xl font-bold uppercase tracking-wide mb-2">
     {title}
   </h2>
   <p className="text-gray-400 text-sm mb-4">{summary}</p>
   <div className="flex gap-2">
     {tags.map((tag) => (
-      <span className="bg-brutalist-yellow text-black px-2 py-1 text-xs font-bold uppercase">
+      <span className="bg-accent-secondary text-black px-2 py-1 text-xs font-bold uppercase">
         {tag}
       </span>
     ))}
@@ -197,7 +197,7 @@ font-family:
     <li>
       <a
         href="/"
-        className="text-brutalist-cyan hover:text-brutalist-pink font-mono font-bold uppercase tracking-widest transition-colors"
+        className="text-accent-primary hover:text-accent-tertiary font-mono font-bold uppercase tracking-widest transition-colors"
       >
         Home
       </a>
@@ -205,7 +205,7 @@ font-family:
     <li>
       <a
         href="/blog"
-        className="text-brutalist-cyan hover:text-brutalist-pink font-mono font-bold uppercase tracking-widest transition-colors"
+        className="text-accent-primary hover:text-accent-tertiary font-mono font-bold uppercase tracking-widest transition-colors"
       >
         Blog
       </a>
@@ -266,7 +266,7 @@ Instead of image logos, I used ASCII art generated with tools like `jp2a` and `f
 **Implementation:**
 
 ```tsx
-<pre className="text-brutalist-cyan font-mono text-xs leading-tight">
+<pre className="text-accent-primary font-mono text-xs leading-tight">
   {asciiArt}
 </pre>
 ```

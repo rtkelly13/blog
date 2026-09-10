@@ -26,7 +26,7 @@ export const InHeading: Story = {
 export const InlineAccent: Story = {
   args: { children: 'STATUS' },
   render: (args) => (
-    <p className="font-mono text-sm text-brutalist-cyan">
+    <p className="font-mono text-sm text-accent-primary">
       <BracketText {...args} />
     </p>
   ),

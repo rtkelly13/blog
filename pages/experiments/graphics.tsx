@@ -64,18 +64,18 @@ export default function GraphicsGallery() {
         {/* Header */}
         <div className="border-b-2 border-white bg-zinc-900 px-6 pt-8 pb-8">
           <div className="mb-4 flex items-center gap-4">
-            <Sparkles className="h-9 w-9 text-brutalist-cyan" />
+            <Sparkles className="h-9 w-9 text-accent-primary" />
             <h1 className="font-display text-4xl font-bold uppercase text-white md:text-5xl">
               [ GRAPHICS_GENERATORS ]
             </h1>
           </div>
           <p className="font-mono text-sm text-zinc-400">
-            <span className="text-brutalist-yellow">&gt;</span> Deterministic,
+            <span className="text-accent-secondary">&gt;</span> Deterministic,
             seed-driven SVG generators. Same seed + params ⇒ identical output —
             usable as talk backgrounds, hero art, or exported assets.
           </p>
           <p className="mt-2 font-mono text-xs text-zinc-500">
-            <span className="text-brutalist-cyan">&gt;</span> Tune the controls,
+            <span className="text-accent-primary">&gt;</span> Tune the controls,
             then copy a generator's config straight into a talk's frontmatter.
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function GraphicsGallery() {
             <button
               type="button"
               onClick={shuffle}
-              className="flex items-center gap-2 border-2 border-white bg-zinc-900 px-3 py-1.5 font-mono text-xs uppercase text-white transition-colors hover:border-brutalist-cyan hover:text-brutalist-cyan"
+              className="flex items-center gap-2 border-2 border-white bg-zinc-900 px-3 py-1.5 font-mono text-xs uppercase text-white transition-colors hover:border-accent-primary hover:text-accent-primary"
             >
               <Dice5 className="h-4 w-4" /> Shuffle
             </button>
@@ -128,7 +128,7 @@ export default function GraphicsGallery() {
               step={0.05}
               value={density}
               onChange={(e) => setDensity(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
+              className="w-full accent-accent-primary"
             />
           </div>
 
@@ -143,7 +143,7 @@ export default function GraphicsGallery() {
               step={0.05}
               value={opacity}
               onChange={(e) => setOpacity(Number(e.target.value))}
-              className="w-full accent-brutalist-cyan"
+              className="w-full accent-accent-primary"
             />
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function GraphicsGallery() {
             <div
               key={gen.name}
               className={`border-2 bg-black transition-colors ${
-                selected === gen.name ? 'border-brutalist-cyan' : 'border-white'
+                selected === gen.name ? 'border-accent-primary' : 'border-white'
               }`}
             >
               <div className="relative aspect-video w-full overflow-hidden bg-black">
@@ -181,14 +181,14 @@ export default function GraphicsGallery() {
                   <p className="mt-1 font-mono text-xs text-zinc-400">
                     {gen.description}
                   </p>
-                  <code className="mt-2 inline-block font-mono text-xs text-brutalist-yellow">
+                  <code className="mt-2 inline-block font-mono text-xs text-accent-secondary">
                     {gen.name}
                   </code>
                 </div>
                 <button
                   type="button"
                   onClick={() => copy(gen.name)}
-                  className="flex shrink-0 items-center gap-1.5 border-2 border-white bg-zinc-900 px-2.5 py-1.5 font-mono text-xs uppercase text-white transition-colors hover:border-brutalist-cyan hover:text-brutalist-cyan"
+                  className="flex shrink-0 items-center gap-1.5 border-2 border-white bg-zinc-900 px-2.5 py-1.5 font-mono text-xs uppercase text-white transition-colors hover:border-accent-primary hover:text-accent-primary"
                 >
                   {copied && selected === gen.name ? (
                     <>
@@ -206,18 +206,18 @@ export default function GraphicsGallery() {
         </div>
 
         {/* Usage */}
-        <div className="border-t-2 border-brutalist-yellow bg-zinc-900 p-6">
-          <h2 className="mb-3 font-display text-lg font-bold uppercase text-brutalist-yellow">
+        <div className="border-t-2 border-accent-secondary bg-zinc-900 p-6">
+          <h2 className="mb-3 font-display text-lg font-bold uppercase text-accent-secondary">
             [ HOW_TO_USE ]
           </h2>
           <div className="space-y-3 font-mono text-xs text-white">
             <p>
-              <span className="text-brutalist-cyan">&gt;</span> In a talk's MDX
+              <span className="text-accent-primary">&gt;</span> In a talk's MDX
               frontmatter, define one or more named{' '}
-              <code className="text-brutalist-yellow">backgrounds</code> and
+              <code className="text-accent-secondary">backgrounds</code> and
               pick a deck-wide default (copy it from any card above):
             </p>
-            <pre className="overflow-x-auto border-2 border-white bg-black p-3 text-brutalist-cyan">
+            <pre className="overflow-x-auto border-2 border-white bg-black p-3 text-accent-primary">
               {frontmatterSnippet(
                 'node-network',
                 seed,
@@ -227,22 +227,22 @@ export default function GraphicsGallery() {
               )}
             </pre>
             <p className="text-zinc-400">
-              <span className="text-brutalist-cyan">&gt;</span> Any slide can
+              <span className="text-accent-primary">&gt;</span> Any slide can
               switch background by name with a directive — the backdrop only
               transitions when the name changes:{' '}
-              <code className="text-brutalist-yellow">
+              <code className="text-accent-secondary">
                 {'{/* bg: intense */}'}
               </code>
             </p>
             <p className="text-zinc-400">
-              <span className="text-brutalist-cyan">&gt;</span> Or render inline
+              <span className="text-accent-primary">&gt;</span> Or render inline
               anywhere:{' '}
-              <code className="text-brutalist-yellow">
+              <code className="text-accent-secondary">
                 {'<GeneratedBackground generator="contour" accent="#39ff14" />'}
               </code>
             </p>
             <p className="text-zinc-500">
-              <span className="text-brutalist-cyan">&gt;</span> Generators live
+              <span className="text-accent-primary">&gt;</span> Generators live
               in <code>components/graphics/</code> as pure{' '}
               <code>(params) =&gt; svgString</code> functions.
             </p>
@@ -250,7 +250,7 @@ export default function GraphicsGallery() {
           <div className="mt-6">
             <Link
               href="/experiments"
-              className="font-mono text-xs uppercase text-brutalist-cyan hover:text-brutalist-pink"
+              className="font-mono text-xs uppercase text-accent-primary hover:text-accent-tertiary"
             >
               ← Back to experiments
             </Link>

@@ -18,7 +18,7 @@ export const Internal: Story = {
   args: {
     href: '/blog',
     children: '> internal_link',
-    className: 'font-mono text-brutalist-cyan hover:text-brutalist-pink',
+    className: 'font-mono text-accent-primary hover:text-accent-tertiary',
   },
 };
 
@@ -26,7 +26,7 @@ export const External: Story = {
   args: {
     href: 'https://example.com',
     children: '> external_link (new tab)',
-    className: 'font-mono text-brutalist-cyan hover:text-brutalist-pink',
+    className: 'font-mono text-accent-primary hover:text-accent-tertiary',
   },
 };
 
@@ -34,6 +34,6 @@ export const Anchor: Story = {
   args: {
     href: '#section',
     children: '> anchor_link',
-    className: 'font-mono text-brutalist-yellow',
+    className: 'font-mono text-accent-secondary',
   },
 };

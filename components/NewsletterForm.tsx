@@ -50,12 +50,12 @@ const NewsletterForm = ({
         <div>
           <label htmlFor="email-input" className="relative block">
             <span className="sr-only">Email address</span>
-            <span className="absolute left-3 top-2 font-mono text-brutalist-cyan font-bold">
+            <span className="absolute left-3 top-2 font-mono text-accent-primary font-bold">
               &gt;
             </span>
             <input
               autoComplete="email"
-              className="w-72 rounded-sm px-8 py-2 font-mono focus:border-brutalist-cyan focus:outline-hidden focus:ring-2 focus:ring-brutalist-cyan bg-black border-2 border-zinc-700 placeholder-zinc-500 text-white"
+              className="w-72 rounded-sm px-8 py-2 font-mono focus:border-accent-primary focus:outline-hidden focus:ring-2 focus:ring-accent-primary bg-black border-2 border-zinc-700 placeholder-zinc-500 text-white"
               id="email-input"
               name="email"
               placeholder={
@@ -75,7 +75,7 @@ const NewsletterForm = ({
             className={`w-full rounded-sm px-6 py-2 font-mono font-bold text-black border-2 transition-all uppercase ${
               subscribed
                 ? 'cursor-default bg-zinc-500 border-zinc-500 text-white'
-                : 'bg-brutalist-cyan border-brutalist-cyan hover:bg-black hover:text-brutalist-cyan'
+                : 'bg-accent-primary border-accent-primary hover:bg-black hover:text-accent-primary'
             }`}
             type="submit"
             disabled={subscribed}
@@ -87,7 +87,7 @@ const NewsletterForm = ({
       {(message || error) && (
         <div
           className={`pt-2 text-sm uppercase ${
-            error ? 'text-brutalist-pink' : 'text-brutalist-neonGreen'
+            error ? 'text-accent-tertiary' : 'text-intent-success'
           }`}
         >
           {error ? `[ERROR]: ${message}` : `[SUCCESS]: ${message}`}

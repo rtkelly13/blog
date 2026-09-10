@@ -35,23 +35,23 @@ export default function ActivityEvalGrid({
             key={s._id}
             className={`flex flex-col border-2 bg-black p-2 ${
               s.marked
-                ? 'border-brutalist-yellow shadow-hard-yellow'
+                ? 'border-accent-secondary shadow-hard-accent-secondary'
                 : s.hidden
                   ? 'border-zinc-800 opacity-60'
                   : 'border-zinc-700'
             }`}
           >
             <div className="mb-1 flex items-center justify-between gap-2">
-              <span className="truncate font-mono text-xs text-brutalist-pink">
+              <span className="truncate font-mono text-xs text-accent-tertiary">
                 {s.nickname ?? 'anon'}
               </span>
               <span className="flex shrink-0 gap-1.5 font-mono text-[10px] uppercase">
                 {s.marked && (
-                  <span className="text-brutalist-yellow">★ marked</span>
+                  <span className="text-accent-secondary">★ marked</span>
                 )}
                 {/* ADR-0002: auto-masked ≠ presenter-hidden — tag them apart. */}
                 {s.flagged && (
-                  <span className="text-brutalist-cyan">⚠ masked</span>
+                  <span className="text-accent-primary">⚠ masked</span>
                 )}
                 {s.hidden && <span className="text-zinc-500">hidden</span>}
               </span>
@@ -69,7 +69,7 @@ export default function ActivityEvalGrid({
             {/* Pre-mask original (ADR-0002): presenter-only, so a false-positive
                 mask ("Scunthorpe") is judgeable at a glance. */}
             {(s.originalSteps || s.originalNickname) && (
-              <p className="mb-2 border-l-2 border-brutalist-cyan pl-1.5 font-mono text-[10px] text-zinc-400">
+              <p className="mb-2 border-l-2 border-accent-primary pl-1.5 font-mono text-[10px] text-zinc-400">
                 original: {s.originalNickname && <>“{s.originalNickname}” · </>}
                 {s.originalSteps?.join(' → ')}
               </p>
@@ -77,7 +77,7 @@ export default function ActivityEvalGrid({
             <div className="mt-auto flex gap-3 font-mono text-[10px] uppercase">
               <button
                 type="button"
-                className="text-brutalist-yellow underline"
+                className="text-accent-secondary underline"
                 onClick={() =>
                   run(() => setMarked({ id: s._id, marked: !s.marked }))
                 }
@@ -86,7 +86,7 @@ export default function ActivityEvalGrid({
               </button>
               <button
                 type="button"
-                className="text-brutalist-pink underline"
+                className="text-accent-tertiary underline"
                 onClick={() =>
                   run(() => setHidden({ id: s._id, hidden: !s.hidden }))
                 }
@@ -98,7 +98,7 @@ export default function ActivityEvalGrid({
         ))}
       </div>
       {error && (
-        <p className="font-mono text-xs text-brutalist-pink">{error}</p>
+        <p className="font-mono text-xs text-accent-tertiary">{error}</p>
       )}
     </div>
   );

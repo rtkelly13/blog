@@ -19,7 +19,7 @@ export default function RecordingEmbed({
 
   return (
     <section className="mt-10 border-t-2 border-white pt-8">
-      <h2 className="mb-4 font-mono text-xs uppercase text-brutalist-cyan">
+      <h2 className="mb-4 font-mono text-xs uppercase text-accent-primary">
         Recording
       </h2>
       <div className="relative aspect-video border-2 border-white shadow-hard-md">

@@ -25,7 +25,7 @@ function Room() {
           No talk is live right now
         </p>
         <p className="mt-3 font-mono text-sm text-zinc-400">
-          <span className="text-brutalist-yellow">&gt;</span> This page joins
+          <span className="text-accent-secondary">&gt;</span> This page joins
           whatever talk is running — check back when one starts.
         </p>
       </div>
@@ -37,7 +37,7 @@ function Room() {
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-8">
-      <p className="font-mono text-sm uppercase text-brutalist-pink">
+      <p className="font-mono text-sm uppercase text-accent-tertiary">
         ● Live now
       </p>
       <h2 className="mt-2 font-display text-3xl font-bold uppercase text-white">
@@ -54,7 +54,7 @@ function Room() {
         <p className="mt-6 font-mono text-sm">
           <a
             href={`/talks/${talk.slug}/present?mode=attendee`}
-            className="border-2 border-white bg-brutalist-yellow px-4 py-2 font-bold uppercase text-black shadow-hard-md"
+            className="border-2 border-white bg-accent-secondary px-4 py-2 font-bold uppercase text-black shadow-hard-md"
           >
             Watch along →
           </a>
@@ -90,11 +90,11 @@ function Room() {
 
       {!anyInteractive && !config.closingChart && (
         <p className="mt-6 font-mono text-sm text-zinc-400">
-          <span className="text-brutalist-yellow">&gt;</span> This talk is
+          <span className="text-accent-secondary">&gt;</span> This talk is
           running.{' '}
           <a
             href={`/talks/${talk.slug}`}
-            className="text-brutalist-cyan underline"
+            className="text-accent-primary underline"
           >
             View the slides →
           </a>
@@ -103,7 +103,7 @@ function Room() {
 
       {anyInteractive && (
         <p className="mt-6 font-mono text-sm text-zinc-400">
-          <span className="text-brutalist-yellow">&gt;</span> You're in. Keep
+          <span className="text-accent-secondary">&gt;</span> You're in. Keep
           this tab open to stay counted.
         </p>
       )}
@@ -113,7 +113,7 @@ function Room() {
 
 function NotConfigured() {
   return (
-    <div className="border-2 border-brutalist-pink bg-zinc-900 p-8 font-mono text-sm text-gray-300">
+    <div className="border-2 border-accent-tertiary bg-zinc-900 p-8 font-mono text-sm text-gray-300">
       Live talks aren't configured here (no Convex deployment).
     </div>
   );

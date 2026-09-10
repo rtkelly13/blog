@@ -21,7 +21,7 @@ export default function LivePage() {
           [ Live ]
         </h1>
         <p className="mb-8 font-mono text-sm text-zinc-400">
-          <span className="text-brutalist-yellow">&gt;</span> Auto-joins the
+          <span className="text-accent-secondary">&gt;</span> Auto-joins the
           current talk — no code or link needed.
         </p>
         <LiveRoom />

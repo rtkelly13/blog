@@ -29,7 +29,7 @@ const PANEL =
 export function AttendeeSidebar({ room }: { room: string }) {
   return (
     <aside className={PANEL}>
-      <p className="font-mono text-xs uppercase tracking-wider text-brutalist-cyan">
+      <p className="font-mono text-xs uppercase tracking-wider text-accent-primary">
         React
       </p>
       <Reactions room={room} />
@@ -84,7 +84,7 @@ function ConsoleQuestionsPanel({ room }: { room: string }) {
           </span>
         </p>
         {fresh > 0 && (
-          <span className="animate-pulse border-2 border-brutalist-yellow bg-brutalist-yellow px-2 py-0.5 font-mono text-xs font-bold uppercase text-black">
+          <span className="animate-pulse border-2 border-accent-secondary bg-accent-secondary px-2 py-0.5 font-mono text-xs font-bold uppercase text-black">
             +{fresh} new
           </span>
         )}
@@ -188,7 +188,7 @@ export function ConsoleSidebar({
 
   return (
     <aside className={PANEL}>
-      <p className="font-mono text-xs uppercase tracking-wider text-brutalist-pink">
+      <p className="font-mono text-xs uppercase tracking-wider text-accent-tertiary">
         Console
       </p>
 
@@ -229,7 +229,7 @@ export function ConsoleSidebar({
             type="button"
             onClick={onNext}
             disabled={idx >= last}
-            className={`${btn} bg-brutalist-cyan`}
+            className={`${btn} bg-accent-primary`}
           >
             Next ▶
           </button>
@@ -263,7 +263,7 @@ export function ConsoleSidebar({
           (mark the one being discussed, hide/restore) without leaving the deck. */}
       {activityFeed?.authorized && activityFeed.activity && (
         <div>
-          <p className="mb-1 font-mono text-xs uppercase tracking-wider text-brutalist-yellow">
+          <p className="mb-1 font-mono text-xs uppercase tracking-wider text-accent-secondary">
             Activity · {activityFeed.submissions.length}{' '}
             {activityFeed.submissions.length === 1
               ? 'submission'
@@ -287,10 +287,10 @@ export function ConsoleSidebar({
         <p
           className={
             clash
-              ? 'text-brutalist-pink'
+              ? 'text-accent-tertiary'
               : noPresenter
-                ? 'text-brutalist-yellow'
-                : 'text-brutalist-cyan'
+                ? 'text-accent-secondary'
+                : 'text-accent-primary'
           }
         >
           {presenters === undefined
@@ -323,7 +323,7 @@ export function ConsoleSidebar({
         <button
           type="button"
           onClick={() => runEnd(() => end({}))}
-          className="w-full border-2 border-white bg-brutalist-pink px-4 py-2 font-mono text-sm font-bold uppercase text-black shadow-hard-md"
+          className="w-full border-2 border-white bg-accent-tertiary px-4 py-2 font-mono text-sm font-bold uppercase text-black shadow-hard-md"
         >
           End talk
         </button>

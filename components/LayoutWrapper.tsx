@@ -55,7 +55,7 @@ const LayoutWrapper = ({ children }: Props) => {
         >
           <div>
             <Link href="/" aria-label="Ryan Kelly Blog">
-              <span className="block font-bold font-mono text-lg sm:text-xl tracking-widest text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">
+              <span className="block font-bold font-mono text-lg sm:text-xl tracking-widest text-white hover:text-intent-success transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">
                 RYAN_KELLY.DEV
               </span>
             </Link>
@@ -66,7 +66,7 @@ const LayoutWrapper = ({ children }: Props) => {
                 <Link
                   key={link.title}
                   href={link.href}
-                  className="p-1 font-mono font-bold sm:px-3 whitespace-nowrap text-white hover:text-brutalist-cyan transition-colors uppercase"
+                  className="p-1 font-mono font-bold sm:px-3 whitespace-nowrap text-white hover:text-accent-primary transition-colors uppercase"
                 >
                   [ {link.title} ]
                 </Link>

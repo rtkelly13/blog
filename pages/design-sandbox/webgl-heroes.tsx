@@ -32,7 +32,7 @@ function HeroBackdrop({ flat }: { flat: boolean }) {
       aria-hidden
       className="absolute inset-0"
       style={{
-        background: 'var(--brutalist-darkBg, #0a0a0a)',
+        background: 'var(--ds-surface-base)',
         backgroundImage: flat
           ? `linear-gradient(to right, var(--hero-grid, rgba(57,255,20,0.1)) 1px, transparent 1px),
              linear-gradient(to bottom, var(--hero-grid, rgba(57,255,20,0.1)) 1px, transparent 1px)`
@@ -66,7 +66,7 @@ function ShaderHero() {
         <h2 className="font-display text-4xl font-bold uppercase text-white md:text-6xl">
           RYAN KELLY
         </h2>
-        <p className="mt-3 font-mono text-sm text-brutalist-cyan md:text-base">
+        <p className="mt-3 font-mono text-sm text-accent-primary md:text-base">
           FULL_STACK_ENGINEER.exe
         </p>
       </div>
@@ -121,8 +121,8 @@ export default function WebglHeroes() {
         <div className="container py-12">
           <ShaderHero />
 
-          <div className="mt-8 border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h3 className="mb-4 font-display text-xl font-bold uppercase text-brutalist-yellow">
+          <div className="mt-8 border-2 border-accent-secondary bg-zinc-900 p-6">
+            <h3 className="mb-4 font-display text-xl font-bold uppercase text-accent-secondary">
               [ WHAT_IT_COSTS ]
             </h3>
             <div className="overflow-x-auto">
@@ -141,7 +141,7 @@ export default function WebglHeroes() {
                       className="border-t border-zinc-700 align-top"
                     >
                       <td className="py-2 pr-4 text-white">{row.approach}</td>
-                      <td className="py-2 pr-4 text-brutalist-cyan">
+                      <td className="py-2 pr-4 text-accent-primary">
                         {row.gzip}
                       </td>
                       <td className="py-2 text-zinc-400">{row.note}</td>
@@ -158,7 +158,7 @@ export default function WebglHeroes() {
               three.js anyway live in{' '}
               <Link
                 href="https://github.com/rtkelly13/blog/blob/main/docs/hero-webgl-research.md"
-                className="text-brutalist-cyan"
+                className="text-accent-primary"
               >
                 docs/hero-webgl-research.md
               </Link>
@@ -185,7 +185,7 @@ export default function WebglHeroes() {
               the{' '}
               <Link
                 href="/design-sandbox/hero-lab"
-                className="text-brutalist-cyan"
+                className="text-accent-primary"
               >
                 hero lab
               </Link>

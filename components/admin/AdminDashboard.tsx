@@ -17,7 +17,7 @@ const CONVEX_DASHBOARD = 'https://dashboard.convex.dev';
 function Card({
   title,
   children,
-  accent = 'text-brutalist-cyan',
+  accent = 'text-accent-primary',
 }: {
   title: string;
   children: ReactNode;
@@ -60,7 +60,7 @@ function ConfigBadges({
       {on.map((label) => (
         <span
           key={label}
-          className="border border-brutalist-cyan px-2 py-0.5 text-xs text-brutalist-cyan"
+          className="border border-accent-primary px-2 py-0.5 text-xs text-accent-primary"
         >
           {label}
         </span>
@@ -91,7 +91,7 @@ function Dashboard({
           {viewer?.githubLogin ? (
             <>
               Signed in as{' '}
-              <span className="text-brutalist-cyan">@{viewer.githubLogin}</span>
+              <span className="text-accent-primary">@{viewer.githubLogin}</span>
             </>
           ) : (
             'Signed in'
@@ -107,11 +107,11 @@ function Dashboard({
       </div>
 
       {/* Live status */}
-      <Card title="Status" accent="text-brutalist-pink">
+      <Card title="Status" accent="text-accent-tertiary">
         {current ? (
           <div className="space-y-2 font-mono">
             <p className="font-display text-xl font-bold uppercase text-white">
-              <span className="text-brutalist-pink">● Live</span> —{' '}
+              <span className="text-accent-tertiary">● Live</span> —{' '}
               {current.title}
             </p>
             <ConfigBadges config={current.config} />
@@ -137,7 +137,7 @@ function Dashboard({
         </Card>
 
         {/* Broadcast launcher */}
-        <Card title="Broadcast" accent="text-brutalist-yellow">
+        <Card title="Broadcast" accent="text-accent-secondary">
           <div className="space-y-3 font-mono text-sm text-zinc-300">
             <p>
               Open the deck, then flip <b className="text-white">Broadcast</b>{' '}
@@ -147,7 +147,7 @@ function Dashboard({
               href={`/talks/${slug}/present?mode=presenter`}
               target="_blank"
               rel="noreferrer"
-              className="block border-2 border-white bg-brutalist-yellow px-4 py-2 text-center font-bold uppercase text-black shadow-hard-md"
+              className="block border-2 border-white bg-accent-secondary px-4 py-2 text-center font-bold uppercase text-black shadow-hard-md"
             >
               Open deck to broadcast →
             </a>
@@ -155,7 +155,7 @@ function Dashboard({
               href={`/talks/${slug}/present?mode=console`}
               target="_blank"
               rel="noreferrer"
-              className="block border-2 border-white bg-black px-4 py-2 text-center font-bold uppercase text-brutalist-pink shadow-hard-md"
+              className="block border-2 border-white bg-black px-4 py-2 text-center font-bold uppercase text-accent-tertiary shadow-hard-md"
             >
               Open presenter console (2nd screen) →
             </a>
@@ -172,13 +172,13 @@ function Dashboard({
         <Card title="Links & tools">
           <ul className="space-y-2 font-mono text-sm">
             <li>
-              <a className="text-brutalist-cyan underline" href="/live">
+              <a className="text-accent-primary underline" href="/live">
                 Audience view (/live)
               </a>
             </li>
             <li>
               <a
-                className="text-brutalist-cyan underline"
+                className="text-accent-primary underline"
                 href={`/talks/${slug}/present?mode=attendee`}
                 target="_blank"
                 rel="noreferrer"
@@ -188,7 +188,7 @@ function Dashboard({
             </li>
             <li>
               <a
-                className="text-brutalist-cyan underline"
+                className="text-accent-primary underline"
                 href={`/talks/${slug}`}
               >
                 Talk landing page
@@ -196,7 +196,7 @@ function Dashboard({
             </li>
             <li>
               <a
-                className="text-brutalist-cyan underline"
+                className="text-accent-primary underline"
                 href={CONVEX_DASHBOARD}
                 target="_blank"
                 rel="noreferrer"
@@ -221,13 +221,13 @@ function Dashboard({
 
       {/* Audience participation — poll, ordered-actions, Q&A + moderation */}
       {isLive && current?.room && (
-        <Card title="Audience participation" accent="text-brutalist-yellow">
+        <Card title="Audience participation" accent="text-accent-secondary">
           <AudienceControls room={current.room} />
         </Card>
       )}
 
       {/* Sessions — the log of every run, with per-session clear-down */}
-      <Card title="Sessions" accent="text-brutalist-pink">
+      <Card title="Sessions" accent="text-accent-tertiary">
         <SessionManager />
       </Card>
     </div>

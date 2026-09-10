@@ -40,9 +40,9 @@ interface TerminalProps {
 }
 
 const SPAN_CLASS: Record<SpanColor, string> = {
-  cyan: 'text-brutalist-cyan',
-  pink: 'text-brutalist-pink',
-  yellow: 'text-brutalist-yellow',
+  cyan: 'text-accent-primary',
+  pink: 'text-accent-tertiary',
+  yellow: 'text-accent-secondary',
   white: 'font-bold text-white',
   dim: 'text-zinc-500',
 };
@@ -245,7 +245,7 @@ export default function Terminal({
       aria-label={title ?? 'Terminal session'}
     >
       <div className="flex items-center justify-between gap-4 border-b-2 border-white bg-zinc-900 px-4 py-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-brutalist-yellow">
+        <p className="text-xs font-bold uppercase tracking-widest text-accent-secondary">
           [ {title ?? 'terminal'} ]
         </p>
         <div className="flex items-center gap-3">
@@ -281,7 +281,7 @@ export default function Terminal({
           <button
             type="button"
             onClick={() => setStarted(true)}
-            className="border-2 border-brutalist-cyan px-3 py-1 font-bold uppercase text-brutalist-cyan transition-colors hover:bg-brutalist-cyan hover:text-black"
+            className="border-2 border-accent-primary px-3 py-1 font-bold uppercase text-accent-primary transition-colors hover:bg-accent-primary hover:text-black"
           >
             ▶ run
           </button>
@@ -290,7 +290,7 @@ export default function Terminal({
         {lines.map((line) =>
           line.kind === 'cmd' ? (
             <p key={line.key} data-k={line.key} className="whitespace-pre-wrap">
-              <span className="font-bold text-brutalist-cyan">{prompt}</span>{' '}
+              <span className="font-bold text-accent-primary">{prompt}</span>{' '}
               <span className="text-white">{line.text}</span>
             </p>
           ) : (
@@ -299,7 +299,7 @@ export default function Terminal({
               data-k={line.key}
               className={`truncate whitespace-pre transition-colors duration-300 ${
                 line.highlight
-                  ? '-mx-1 bg-brutalist-cyan px-1 font-bold text-black'
+                  ? '-mx-1 bg-accent-primary px-1 font-bold text-black'
                   : line.dim
                     ? 'text-zinc-600'
                     : 'text-zinc-300'
@@ -314,16 +314,16 @@ export default function Terminal({
 
         {typing !== null && (
           <p className="whitespace-pre-wrap">
-            <span className="font-bold text-brutalist-cyan">{prompt}</span>{' '}
+            <span className="font-bold text-accent-primary">{prompt}</span>{' '}
             <span className="text-white">{typing}</span>
-            <span className="animate-pulse text-brutalist-cyan">▌</span>
+            <span className="animate-pulse text-accent-primary">▌</span>
           </p>
         )}
 
         {started && finished && (
           <p>
-            <span className="font-bold text-brutalist-cyan">{prompt}</span>{' '}
-            <span className="animate-pulse text-brutalist-cyan">▌</span>
+            <span className="font-bold text-accent-primary">{prompt}</span>{' '}
+            <span className="animate-pulse text-accent-primary">▌</span>
           </p>
         )}
       </div>

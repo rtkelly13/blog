@@ -47,7 +47,7 @@ const ThemeSwitch = () => {
       title={`Theme: ${LABELS[active]} — switch to ${LABELS[next]}`}
       onClick={() => setTheme(next)}
       suppressHydrationWarning
-      className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center p-1 text-white transition-colors hover:text-brutalist-cyan sm:ml-4"
+      className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center p-1 text-white transition-colors hover:text-accent-primary sm:ml-4"
     >
       <Icon className="h-5 w-5" aria-hidden="true" />
     </button>

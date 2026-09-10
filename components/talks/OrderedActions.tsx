@@ -46,12 +46,12 @@ function SubmissionCard({
     >
       <div className="mb-1 flex items-center justify-between">
         {nickname ? (
-          <p className="font-mono text-xs text-brutalist-pink">{nickname}</p>
+          <p className="font-mono text-xs text-accent-tertiary">{nickname}</p>
         ) : (
           <span />
         )}
         <span className="flex gap-1.5 font-mono text-xs uppercase">
-          {flagged && <span className="text-brutalist-cyan">⚠ masked</span>}
+          {flagged && <span className="text-accent-primary">⚠ masked</span>}
           {hidden && <span className="text-zinc-500">🚫 hidden</span>}
         </span>
       </div>
@@ -129,8 +129,8 @@ function Activity({
     const canLaunch = isAdmin && !!prompt && (defaultOptions?.length ?? 0) > 0;
     if (!canLaunch) return null;
     return (
-      <div className="border-2 border-dashed border-brutalist-yellow bg-zinc-900 p-5">
-        <p className="mb-1 font-mono text-sm uppercase text-brutalist-yellow">
+      <div className="border-2 border-dashed border-accent-secondary bg-zinc-900 p-5">
+        <p className="mb-1 font-mono text-sm uppercase text-accent-secondary">
           ● {title ?? 'Put it in order'}
         </p>
         <p className="mb-3 font-mono text-sm text-zinc-300">{prompt}</p>
@@ -146,7 +146,7 @@ function Activity({
               }),
             )
           }
-          className="border-2 border-white bg-brutalist-yellow px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
+          className="border-2 border-white bg-accent-secondary px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
         >
           ▶ Open activity
         </button>
@@ -217,7 +217,7 @@ function Activity({
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
-      <p className="mb-1 font-mono text-sm uppercase text-brutalist-yellow">
+      <p className="mb-1 font-mono text-sm uppercase text-accent-secondary">
         ● {title ?? 'Put it in order'}
       </p>
       <h3 className="mb-1 font-display text-2xl font-bold uppercase text-white">
@@ -228,7 +228,7 @@ function Activity({
 
       {showForm &&
         (submitted ? (
-          <p className="border-2 border-brutalist-cyan bg-black p-3 font-mono text-sm text-brutalist-cyan">
+          <p className="border-2 border-accent-primary bg-black p-3 font-mono text-sm text-accent-primary">
             ✓ Submitted! Watch the wall below.{' '}
             <button
               type="button"
@@ -251,13 +251,13 @@ function Activity({
                   onChange={(e) => setStep(i, e.target.value)}
                   maxLength={140}
                   placeholder={`Step ${i + 1}…`}
-                  className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-2.5 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-yellow focus:outline-none"
+                  className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-2.5 font-mono text-base text-white placeholder:text-zinc-600 focus:border-accent-secondary focus:outline-none"
                 />
                 {steps.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeStep(i)}
-                    className="w-9 shrink-0 border-2 border-white py-2 font-mono font-bold text-white hover:bg-brutalist-pink hover:text-black"
+                    className="w-9 shrink-0 border-2 border-white py-2 font-mono font-bold text-white hover:bg-accent-tertiary hover:text-black"
                     aria-label="Remove step"
                   >
                     ✕
@@ -267,7 +267,7 @@ function Activity({
             ))}
             <RateLimitNotice secondsLeft={secondsLeft} />
             {sendError && (
-              <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
+              <p className="border-2 border-accent-tertiary bg-black p-3 font-mono text-sm text-accent-tertiary">
                 {sendError}
               </p>
             )}
@@ -283,7 +283,7 @@ function Activity({
               <button
                 type="submit"
                 disabled={sending || !steps.some((s) => s.trim())}
-                className="border-2 border-white bg-brutalist-yellow px-5 py-2.5 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40 sm:ml-auto"
+                className="border-2 border-white bg-accent-secondary px-5 py-2.5 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40 sm:ml-auto"
               >
                 Submit my order
               </button>
@@ -294,8 +294,8 @@ function Activity({
       {/* Answer: always shown on the console (with room-reveal status), otherwise
           only once revealed. A countdown runs while the room can't see it yet. */}
       {answerVisible && (
-        <div className="mt-5 border-2 border-brutalist-cyan bg-black p-4">
-          <p className="mb-2 font-mono text-xs uppercase text-brutalist-cyan">
+        <div className="mt-5 border-2 border-accent-primary bg-black p-4">
+          <p className="mb-2 font-mono text-xs uppercase text-accent-primary">
             One good order
             {isConsole &&
               (activity.revealed
@@ -307,7 +307,7 @@ function Activity({
           <ol className="space-y-1">
             {options.map((opt, i) => (
               <li key={opt} className="font-mono text-sm text-white">
-                <span className="text-brutalist-cyan">{i + 1}.</span> {opt}
+                <span className="text-accent-primary">{i + 1}.</span> {opt}
               </li>
             ))}
           </ol>
@@ -322,7 +322,7 @@ function Activity({
                   onClick={() =>
                     runControl(() => revealNow({ id: activity._id }))
                   }
-                  className="border-2 border-white bg-brutalist-cyan px-4 py-2 font-mono text-xs font-bold uppercase text-black shadow-hard-md"
+                  className="border-2 border-white bg-accent-primary px-4 py-2 font-mono text-xs font-bold uppercase text-black shadow-hard-md"
                 >
                   Reveal to room now
                 </button>

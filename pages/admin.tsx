@@ -50,7 +50,7 @@ export default function AdminPage({
           </h1>
           <Link
             href="/ideas"
-            className="font-mono text-sm font-bold uppercase text-brutalist-yellow transition-colors hover:text-white"
+            className="font-mono text-sm font-bold uppercase text-accent-secondary transition-colors hover:text-white"
           >
             [ Ideas workbench &gt; ]
           </Link>

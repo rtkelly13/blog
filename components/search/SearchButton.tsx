@@ -15,7 +15,7 @@ export default function SearchButton() {
       aria-label="Search the site"
       aria-keyshortcuts="Meta+K Control+K"
       onClick={() => query.toggle()}
-      className="group ml-1 flex items-center gap-2 border-2 border-brutalist-cyan bg-black px-2 py-1.5 font-mono text-sm text-zinc-400 transition-all hover:text-white hover:shadow-glow-cyan sm:ml-4 sm:gap-3 sm:px-3"
+      className="group ml-1 flex items-center gap-2 border-2 border-accent-primary bg-black px-2 py-1.5 font-mono text-sm text-zinc-400 transition-all hover:text-white hover:shadow-glow-accent-primary sm:ml-4 sm:gap-3 sm:px-3"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -23,7 +23,7 @@ export default function SearchButton() {
         viewBox="0 0 24 24"
         strokeWidth={2}
         stroke="currentColor"
-        className="h-5 w-5 shrink-0 text-brutalist-cyan"
+        className="h-5 w-5 shrink-0 text-accent-primary"
         aria-hidden="true"
       >
         <path
@@ -33,7 +33,7 @@ export default function SearchButton() {
         />
       </svg>
       <span className="hidden whitespace-nowrap xl:inline">search_system…</span>
-      <kbd className="ml-2 hidden whitespace-nowrap border-2 border-brutalist-pink bg-black px-1.5 py-0.5 text-xs font-bold uppercase leading-none tracking-wide text-brutalist-pink xl:inline-block">
+      <kbd className="ml-2 hidden whitespace-nowrap border-2 border-accent-tertiary bg-black px-1.5 py-0.5 text-xs font-bold uppercase leading-none tracking-wide text-accent-tertiary xl:inline-block">
         ⌘K
       </kbd>
     </button>

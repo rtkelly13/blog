@@ -59,8 +59,8 @@ export function railFrameAt(t: number, cfg: RailConfig): RailFrame {
 }
 
 const C = {
-  cyan: 'var(--brutalist-cyan, #22d3ee)',
-  pink: 'var(--brutalist-pink, #ec4899)',
+  cyan: 'var(--ds-accent-primary)',
+  pink: 'var(--ds-accent-tertiary)',
   ink: 'var(--color-white, #ffffff)',
   muted: 'var(--color-zinc-600, #52525b)',
   dim: 'var(--color-zinc-800, #27272a)',
@@ -190,7 +190,7 @@ export default function RailwayTrack({
                 aria-label={`Fail at ${s.label}`}
                 className={`border-2 border-white px-2 py-1 font-mono text-[10px] transition-colors ${
                   failIdx === i
-                    ? 'bg-brutalist-pink text-black'
+                    ? 'bg-accent-tertiary text-black'
                     : 'bg-black text-white hover:bg-zinc-900'
                 }`}
               >
@@ -203,7 +203,7 @@ export default function RailwayTrack({
               aria-label="All steps succeed"
               className={`border-2 border-white px-2 py-1 font-mono text-[10px] transition-colors ${
                 failIdx === -1
-                  ? 'bg-brutalist-cyan text-black'
+                  ? 'bg-accent-primary text-black'
                   : 'bg-black text-white hover:bg-zinc-900'
               }`}
             >

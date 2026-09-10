@@ -10,7 +10,7 @@ export default function RateLimitNotice({
 }) {
   if (secondsLeft === null) return null;
   return (
-    <p className="border-2 border-brutalist-yellow bg-black p-3 font-mono text-sm text-brutalist-yellow">
+    <p className="border-2 border-accent-secondary bg-black p-3 font-mono text-sm text-accent-secondary">
       ⚠ Easy there — you've hit the send limit. Try again in {secondsLeft}s.
     </p>
   );

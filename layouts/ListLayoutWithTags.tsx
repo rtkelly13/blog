@@ -35,16 +35,16 @@ export default function ListLayoutWithTags(props: Props) {
         <aside className="hidden xl:block w-64 shrink-0 pt-28">
           <nav
             aria-label="Browse by tag"
-            className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-auto rounded-md border-2 border-brutalist-cyan bg-black/80 p-5 shadow-glow-cyan"
+            className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-auto rounded-md border-2 border-accent-primary bg-black/80 p-5 shadow-glow-accent-primary"
           >
             {onAllPosts ? (
-              <h3 className="font-mono text-sm font-bold uppercase text-brutalist-yellow">
+              <h3 className="font-mono text-sm font-bold uppercase text-accent-secondary">
                 &gt; ALL_POSTS
               </h3>
             ) : (
               <Link
                 href="/blog"
-                className="font-mono text-sm font-bold uppercase text-white transition-colors hover:text-brutalist-cyan"
+                className="font-mono text-sm font-bold uppercase text-white transition-colors hover:text-accent-primary"
               >
                 &gt; ALL_POSTS
               </Link>
@@ -55,7 +55,7 @@ export default function ListLayoutWithTags(props: Props) {
                   {currentTag === tag ? (
                     <span
                       aria-current="page"
-                      className="font-mono text-sm font-bold uppercase text-brutalist-yellow"
+                      className="font-mono text-sm font-bold uppercase text-accent-secondary"
                     >
                       #{tag} ({tagCounts[tag]})
                     </span>
@@ -63,7 +63,7 @@ export default function ListLayoutWithTags(props: Props) {
                     <Link
                       href={`/tags/${tag}`}
                       aria-label={`View posts tagged ${tag}`}
-                      className="font-mono text-sm text-gray-300 uppercase transition-colors hover:text-brutalist-cyan"
+                      className="font-mono text-sm text-gray-300 uppercase transition-colors hover:text-accent-primary"
                     >
                       #{tag} ({tagCounts[tag]})
                     </Link>

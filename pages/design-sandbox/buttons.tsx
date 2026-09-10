@@ -7,33 +7,33 @@ const buttonVariations = [
   {
     name: 'Primary Cyan',
     component: (
-      <button className="bg-brutalist-cyan text-black px-6 py-3 font-mono font-bold border-2 border-brutalist-cyan hover:bg-black hover:text-brutalist-cyan transition-colors active:translate-x-1 active:translate-y-1">
+      <button className="bg-accent-primary text-black px-6 py-3 font-mono font-bold border-2 border-accent-primary hover:bg-black hover:text-accent-primary transition-colors active:translate-x-1 active:translate-y-1">
         CLICK_ME
       </button>
     ),
-    code: `bg-brutalist-cyan text-black border-2 border-brutalist-cyan
-hover:bg-black hover:text-brutalist-cyan
+    code: `bg-accent-primary text-black border-2 border-accent-primary
+hover:bg-black hover:text-accent-primary
 active:translate-x-1 active:translate-y-1`,
   },
   {
     name: 'Primary Pink',
     component: (
-      <button className="bg-brutalist-pink text-black px-6 py-3 font-mono font-bold border-2 border-brutalist-pink hover:bg-black hover:text-brutalist-pink transition-colors active:translate-x-1 active:translate-y-1">
+      <button className="bg-accent-tertiary text-black px-6 py-3 font-mono font-bold border-2 border-accent-tertiary hover:bg-black hover:text-accent-tertiary transition-colors active:translate-x-1 active:translate-y-1">
         EXECUTE
       </button>
     ),
-    code: `bg-brutalist-pink text-black border-2 border-brutalist-pink
-hover:bg-black hover:text-brutalist-pink`,
+    code: `bg-accent-tertiary text-black border-2 border-accent-tertiary
+hover:bg-black hover:text-accent-tertiary`,
   },
   {
     name: 'Primary Yellow',
     component: (
-      <button className="bg-brutalist-yellow text-black px-6 py-3 font-mono font-bold border-2 border-brutalist-yellow hover:bg-black hover:text-brutalist-yellow transition-colors active:translate-x-1 active:translate-y-1">
+      <button className="bg-accent-secondary text-black px-6 py-3 font-mono font-bold border-2 border-accent-secondary hover:bg-black hover:text-accent-secondary transition-colors active:translate-x-1 active:translate-y-1">
         SUBMIT
       </button>
     ),
-    code: `bg-brutalist-yellow text-black border-2 border-brutalist-yellow
-hover:bg-black hover:text-brutalist-yellow`,
+    code: `bg-accent-secondary text-black border-2 border-accent-secondary
+hover:bg-black hover:text-accent-secondary`,
   },
   {
     name: 'Outline White',
@@ -48,7 +48,7 @@ hover:bg-white hover:text-black`,
   {
     name: 'Shadow Cyan',
     component: (
-      <button className="bg-black text-brutalist-cyan px-6 py-3 font-mono font-bold border-2 border-brutalist-cyan shadow-[4px_4px_0px_0px_rgba(34,211,238,1)] hover:shadow-[8px_8px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(34,211,238,1)] transition-all">
+      <button className="bg-black text-accent-primary px-6 py-3 font-mono font-bold border-2 border-accent-primary shadow-[4px_4px_0px_0px_rgba(34,211,238,1)] hover:shadow-[8px_8px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(34,211,238,1)] transition-all">
         SHADOW_BTN
       </button>
     ),
@@ -59,7 +59,7 @@ active:shadow-[2px_2px_0px_0px_rgba(34,211,238,1)]`,
   {
     name: 'Shadow Pink',
     component: (
-      <button className="bg-black text-brutalist-pink px-6 py-3 font-mono font-bold border-2 border-brutalist-pink shadow-[4px_4px_0px_0px_rgba(236,72,153,1)] hover:shadow-[8px_8px_0px_0px_rgba(236,72,153,1)] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(236,72,153,1)] transition-all">
+      <button className="bg-black text-accent-tertiary px-6 py-3 font-mono font-bold border-2 border-accent-tertiary shadow-[4px_4px_0px_0px_rgba(236,72,153,1)] hover:shadow-[8px_8px_0px_0px_rgba(236,72,153,1)] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(236,72,153,1)] transition-all">
         SHADOW_PINK
       </button>
     ),
@@ -69,7 +69,7 @@ hover:shadow-[8px_8px_0px_0px_rgba(236,72,153,1)]`,
   {
     name: 'Small',
     component: (
-      <button className="bg-brutalist-cyan text-black px-3 py-1 font-mono text-sm font-bold border border-brutalist-cyan hover:bg-black hover:text-brutalist-cyan transition-colors">
+      <button className="bg-accent-primary text-black px-3 py-1 font-mono text-sm font-bold border border-accent-primary hover:bg-black hover:text-accent-primary transition-colors">
         SMALL_BTN
       </button>
     ),
@@ -78,7 +78,7 @@ hover:shadow-[8px_8px_0px_0px_rgba(236,72,153,1)]`,
   {
     name: 'Large',
     component: (
-      <button className="bg-brutalist-pink text-black px-8 py-4 font-mono text-lg font-bold border-2 border-brutalist-pink hover:bg-black hover:text-brutalist-pink transition-colors active:translate-x-1 active:translate-y-1">
+      <button className="bg-accent-tertiary text-black px-8 py-4 font-mono text-lg font-bold border-2 border-accent-tertiary hover:bg-black hover:text-accent-tertiary transition-colors active:translate-x-1 active:translate-y-1">
         LARGE_BUTTON
       </button>
     ),
@@ -96,7 +96,7 @@ hover:shadow-[8px_8px_0px_0px_rgba(236,72,153,1)]`,
   {
     name: 'Icon Right',
     component: (
-      <button className="bg-brutalist-cyan text-black px-6 py-3 font-mono font-bold border-2 border-brutalist-cyan hover:bg-black hover:text-brutalist-cyan transition-colors active:translate-x-1 active:translate-y-1 flex items-center gap-2">
+      <button className="bg-accent-primary text-black px-6 py-3 font-mono font-bold border-2 border-accent-primary hover:bg-black hover:text-accent-primary transition-colors active:translate-x-1 active:translate-y-1 flex items-center gap-2">
         DOWNLOAD <span>↓</span>
       </button>
     ),
@@ -105,7 +105,7 @@ hover:shadow-[8px_8px_0px_0px_rgba(236,72,153,1)]`,
   {
     name: 'Full Width',
     component: (
-      <button className="w-full bg-black text-brutalist-yellow px-6 py-3 font-mono font-bold border-2 border-brutalist-yellow hover:bg-brutalist-yellow hover:text-black transition-colors active:translate-x-1 active:translate-y-1">
+      <button className="w-full bg-black text-accent-secondary px-6 py-3 font-mono font-bold border-2 border-accent-secondary hover:bg-accent-secondary hover:text-black transition-colors active:translate-x-1 active:translate-y-1">
         FULL_WIDTH_BUTTON
       </button>
     ),
@@ -145,7 +145,7 @@ export default function Buttons() {
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <Link
             href="/design-sandbox"
-            className="text-brutalist-cyan hover:text-brutalist-pink font-mono text-sm mb-4 inline-block"
+            className="text-accent-primary hover:text-accent-tertiary font-mono text-sm mb-4 inline-block"
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
@@ -170,7 +170,7 @@ export default function Buttons() {
                   </h3>
                   <button
                     onClick={() => copyCode(variant.code, index)}
-                    className="bg-black text-brutalist-cyan px-3 py-1 font-mono text-xs border border-brutalist-cyan hover:bg-brutalist-cyan hover:text-black transition-colors"
+                    className="bg-black text-accent-primary px-3 py-1 font-mono text-xs border border-accent-primary hover:bg-accent-primary hover:text-black transition-colors"
                   >
                     {copiedIndex === index ? '✓ COPIED' : 'COPY'}
                   </button>
@@ -189,8 +189,8 @@ export default function Buttons() {
             ))}
           </div>
 
-          <div className="mt-12 border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+          <div className="mt-12 border-2 border-accent-secondary bg-zinc-900 p-6">
+            <h2 className="font-display font-bold text-xl text-accent-secondary mb-4 uppercase">
               [ USAGE_NOTES ]
             </h2>
             <ul className="text-white font-mono text-sm space-y-2">
@@ -203,7 +203,7 @@ export default function Buttons() {
               <li>
                 {'>'} Border width: `border-2` for emphasis, `border` for subtle
               </li>
-              <li className="text-brutalist-cyan">
+              <li className="text-accent-primary">
                 {'>'} Hard shadows create brutalist aesthetic
               </li>
             </ul>

@@ -45,25 +45,25 @@ export interface DividerAccentClasses {
 
 export const DIVIDER_ACCENTS: Record<DividerAccent, DividerAccentClasses> = {
   cyan: {
-    text: 'text-brutalist-cyan',
-    bar: 'bg-brutalist-cyan',
-    edge: 'border-l-brutalist-cyan',
-    hover: 'hover:text-brutalist-cyan',
-    fill: 'bg-brutalist-cyan text-black',
+    text: 'text-accent-primary',
+    bar: 'bg-accent-primary',
+    edge: 'border-l-accent-primary',
+    hover: 'hover:text-accent-primary',
+    fill: 'bg-accent-primary text-black',
   },
   pink: {
-    text: 'text-brutalist-pink',
-    bar: 'bg-brutalist-pink',
-    edge: 'border-l-brutalist-pink',
-    hover: 'hover:text-brutalist-pink',
-    fill: 'bg-brutalist-pink text-black',
+    text: 'text-accent-tertiary',
+    bar: 'bg-accent-tertiary',
+    edge: 'border-l-accent-tertiary',
+    hover: 'hover:text-accent-tertiary',
+    fill: 'bg-accent-tertiary text-black',
   },
   yellow: {
-    text: 'text-brutalist-yellow',
-    bar: 'bg-brutalist-yellow',
-    edge: 'border-l-brutalist-yellow',
-    hover: 'hover:text-brutalist-yellow',
-    fill: 'bg-brutalist-yellow text-black',
+    text: 'text-accent-secondary',
+    bar: 'bg-accent-secondary',
+    edge: 'border-l-accent-secondary',
+    hover: 'hover:text-accent-secondary',
+    fill: 'bg-accent-secondary text-black',
   },
 };
 

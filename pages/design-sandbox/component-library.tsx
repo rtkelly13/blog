@@ -79,18 +79,18 @@ export default function ComponentLibrary() {
         />
         <div className="space-y-12 px-6 py-10">
           <p className="max-w-2xl font-mono text-sm text-zinc-400">
-            <span className="text-brutalist-cyan">&gt;</span> The design system
+            <span className="text-accent-primary">&gt;</span> The design system
             ships two first-class looks from one token set. Each row proves a
             component reads as intentional in the neon-terminal dark mode{' '}
-            <span className="text-brutalist-cyan">and</span> the paper-and-ink
+            <span className="text-accent-primary">and</span> the paper-and-ink
             sketch mode.
           </p>
 
           <Specimen name="BUTTONS">
-            <Button variant="cyan">CLICK_ME</Button>
-            <Button variant="pink">EXECUTE</Button>
-            <Button variant="yellow">SUBMIT</Button>
-            <Button variant="white">OUTLINE</Button>
+            <Button variant="primary">CLICK_ME</Button>
+            <Button variant="tertiary">EXECUTE</Button>
+            <Button variant="secondary">SUBMIT</Button>
+            <Button variant="inverse">OUTLINE</Button>
           </Specimen>
 
           <Specimen name="TAGS">
@@ -113,7 +113,7 @@ export default function ComponentLibrary() {
           <Specimen name="LINKS">
             <Link
               href="#"
-              className="font-mono font-bold text-brutalist-cyan underline hover:text-brutalist-pink"
+              className="font-mono font-bold text-accent-primary underline hover:text-accent-tertiary"
             >
               an inline link
             </Link>

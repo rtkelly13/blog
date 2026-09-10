@@ -35,9 +35,9 @@ function LivePresence({ room }: { room: string }) {
 
   return (
     <>
-      <span className="inline-flex items-center gap-2 font-mono text-sm uppercase text-brutalist-cyan">
+      <span className="inline-flex items-center gap-2 font-mono text-sm uppercase text-accent-primary">
         <span
-          className="inline-block h-2 w-2 animate-pulse bg-brutalist-cyan"
+          className="inline-block h-2 w-2 animate-pulse bg-accent-primary"
           aria-hidden
         />
         👥 {count ?? '—'} {label} here
@@ -49,7 +49,7 @@ function LivePresence({ room }: { room: string }) {
             <div
               key={id}
               aria-live="polite"
-              className="border-2 border-white bg-brutalist-cyan px-4 py-2 font-mono text-sm font-bold uppercase text-black shadow-hard-md"
+              className="border-2 border-white bg-accent-primary px-4 py-2 font-mono text-sm font-bold uppercase text-black shadow-hard-md"
             >
               👋 Someone joined{count ? ` · ${count} here` : ''}
             </div>

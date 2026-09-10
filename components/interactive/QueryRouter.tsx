@@ -214,7 +214,7 @@ function TerminalBlock({
       className="border-2 border-zinc-700"
     >
       <p className="border-b-2 border-zinc-700 bg-zinc-900 px-3 py-1 text-xs text-zinc-400">
-        <span className="text-brutalist-cyan">$</span>{' '}
+        <span className="text-accent-primary">$</span>{' '}
         <span className="uppercase">{block.source}</span>
       </p>
       <div
@@ -242,7 +242,7 @@ function TerminalBlock({
               style={{ height: LINE_H, lineHeight: `${LINE_H}px` }}
               className={`truncate whitespace-pre text-xs transition-colors duration-300 ${
                 highlighted && i === highlightIdx
-                  ? '-mx-1 bg-brutalist-cyan px-1 font-bold text-black'
+                  ? '-mx-1 bg-accent-primary px-1 font-bold text-black'
                   : highlighted && highlightIdx >= 0
                     ? 'text-zinc-600'
                     : 'text-zinc-300'
@@ -342,7 +342,7 @@ export default function QueryRouter({ title, scenarios }: QueryRouterProps) {
       aria-label={title ?? 'Query router'}
     >
       <div className="flex items-baseline justify-between gap-4 border-b-2 border-white bg-zinc-900 px-4 py-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-brutalist-yellow">
+        <p className="text-xs font-bold uppercase tracking-widest text-accent-secondary">
           [ {title ?? 'query router'} ]
         </p>
         <output className="text-xs text-zinc-400">{PHASE_LABEL[phase]}</output>
@@ -357,7 +357,7 @@ export default function QueryRouter({ title, scenarios }: QueryRouterProps) {
               onClick={() => run(i)}
               className={`border-2 px-2 py-1 text-xs font-bold uppercase transition-colors ${
                 i === scenarioIndex
-                  ? 'border-brutalist-cyan bg-brutalist-cyan text-black'
+                  ? 'border-accent-primary bg-accent-primary text-black'
                   : 'border-zinc-600 text-zinc-300 hover:border-white hover:text-white'
               }`}
             >
@@ -369,20 +369,20 @@ export default function QueryRouter({ title, scenarios }: QueryRouterProps) {
 
       <div className="space-y-4 px-4 py-4">
         {/* Prompt */}
-        <p className="text-brutalist-cyan">
+        <p className="text-accent-primary">
           <span className="font-bold">&gt;</span>{' '}
           <span className="text-white">
             {scenario.query.slice(0, typedChars)}
           </span>
           {phase !== 'done' && (
-            <span className="animate-pulse text-brutalist-cyan">▌</span>
+            <span className="animate-pulse text-accent-primary">▌</span>
           )}
         </p>
 
         {/* AGENTS.md router table */}
         {at(phase) >= at('scanning') && (
           <motion.div {...fade(true)} className="border-2 border-zinc-700">
-            <p className="border-b-2 border-zinc-700 bg-zinc-900 px-3 py-1 text-xs uppercase text-brutalist-yellow">
+            <p className="border-b-2 border-zinc-700 bg-zinc-900 px-3 py-1 text-xs uppercase text-accent-secondary">
               AGENTS.md :: where to look
             </p>
             <div className="space-y-1 px-3 py-2">
@@ -403,7 +403,7 @@ export default function QueryRouter({ title, scenarios }: QueryRouterProps) {
                     }}
                     className={`flex flex-wrap justify-between gap-x-4 px-1 text-xs ${
                       row.match
-                        ? 'bg-brutalist-cyan font-bold text-black'
+                        ? 'bg-accent-primary font-bold text-black'
                         : 'text-zinc-500'
                     }`}
                   >
@@ -419,7 +419,7 @@ export default function QueryRouter({ title, scenarios }: QueryRouterProps) {
         {/* Route breadcrumb */}
         {at(phase) >= at('routing') && (
           <motion.p {...fade(true)} className="text-xs">
-            <span className="uppercase text-brutalist-yellow">route:</span>{' '}
+            <span className="uppercase text-accent-secondary">route:</span>{' '}
             {scenario.route.map((hop, i) => (
               <motion.span
                 key={hop}
@@ -431,7 +431,7 @@ export default function QueryRouter({ title, scenarios }: QueryRouterProps) {
                 }}
                 className="text-white"
               >
-                {i > 0 && <span className="text-brutalist-pink"> → </span>}
+                {i > 0 && <span className="text-accent-tertiary"> → </span>}
                 {hop}
               </motion.span>
             ))}
@@ -464,9 +464,9 @@ export default function QueryRouter({ title, scenarios }: QueryRouterProps) {
               initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.3 }}
-              className="border-2 border-brutalist-cyan bg-zinc-900 px-3 py-2"
+              className="border-2 border-accent-primary bg-zinc-900 px-3 py-2"
             >
-              <p className="text-xs font-bold uppercase text-brutalist-cyan">
+              <p className="text-xs font-bold uppercase text-accent-primary">
                 [ resolved ]
               </p>
               <p className="mt-1 text-sm text-white">{scenario.answer}</p>

@@ -13,9 +13,9 @@ interface FileTreeProps {
 }
 
 const TRUST_DOT: Record<Trust, string> = {
-  brain: 'bg-brutalist-cyan',
-  trusted: 'bg-brutalist-pink',
-  untrusted: 'bg-brutalist-cyberOrange',
+  brain: 'bg-accent-primary',
+  trusted: 'bg-accent-tertiary',
+  untrusted: 'bg-accent-secondary',
 };
 
 function Row({
@@ -29,11 +29,11 @@ function Row({
   const isSymlink = node.kind === 'symlink';
 
   const labelClass = node.lit
-    ? 'bg-brutalist-cyan px-1 font-bold text-black'
+    ? 'bg-accent-primary px-1 font-bold text-black'
     : node.dimmed
       ? 'text-zinc-600'
       : isSymlink
-        ? 'text-brutalist-yellow'
+        ? 'text-accent-secondary'
         : node.kind === 'dir'
           ? 'text-white'
           : 'text-zinc-300';
@@ -63,7 +63,7 @@ function Row({
         <span
           className={`ml-1 border px-1 text-[10px] uppercase ${
             node.tag.startsWith('!')
-              ? 'border-brutalist-cyan text-brutalist-cyan'
+              ? 'border-accent-primary text-accent-primary'
               : 'border-zinc-600 text-zinc-500'
           }`}
         >
@@ -96,7 +96,7 @@ export default function FileTree({ title }: FileTreeProps) {
       aria-label={title ?? 'Virtual monorepo file tree'}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-white bg-zinc-900 px-4 py-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-brutalist-yellow">
+        <p className="text-xs font-bold uppercase tracking-widest text-accent-secondary">
           [ {title ?? 'the trick, on disk'} ]
         </p>
         <div className="flex items-center gap-2">
@@ -110,7 +110,7 @@ export default function FileTree({ title }: FileTreeProps) {
                   aria-pressed={view === v}
                   className={`px-2 py-0.5 text-xs font-bold uppercase transition-colors ${
                     view === v
-                      ? 'bg-brutalist-cyan text-black'
+                      ? 'bg-accent-primary text-black'
                       : 'text-zinc-300 hover:text-white'
                   }`}
                 >
@@ -142,17 +142,17 @@ export default function FileTree({ title }: FileTreeProps) {
           <p className="text-zinc-400">
             Two roots, no link yet. <span className="text-white">company/</span>{' '}
             is the body (real git repos);{' '}
-            <span className="text-brutalist-cyan">workspace/</span> is the
+            <span className="text-accent-primary">workspace/</span> is the
             brain. Wire the symlink to bring the body into the brain’s tree.
           </p>
         ) : (
           <p className="flex flex-wrap items-center gap-x-2 text-zinc-300">
-            <span className="uppercase text-brutalist-yellow">
+            <span className="uppercase text-accent-secondary">
               {rule.file}:
             </span>
             <span
               className={
-                rule.sense === 'allow' ? 'text-brutalist-cyan' : 'text-zinc-500'
+                rule.sense === 'allow' ? 'text-accent-primary' : 'text-zinc-500'
               }
             >
               {rule.rule}

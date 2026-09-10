@@ -35,7 +35,7 @@ export default function Tags({
         <div className="flex flex-wrap px-6 py-12">
           {Object.keys(tags).length === 0 && (
             <p className="font-mono text-zinc-400">
-              <span className="text-brutalist-pink">&gt;</span> No tags found.
+              <span className="text-accent-tertiary">&gt;</span> No tags found.
             </p>
           )}
           {sortedTags.map((t) => {

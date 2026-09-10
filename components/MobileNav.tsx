@@ -116,7 +116,7 @@ const MobileNav = () => {
           <div key={link.title} className="px-12 py-4 border-b border-gray-800">
             <Link
               href={link.href}
-              className="text-2xl font-mono font-bold tracking-widest text-white hover:text-brutalist-neonGreen transition-colors uppercase"
+              className="text-2xl font-mono font-bold tracking-widest text-white hover:text-intent-success transition-colors uppercase"
               onClick={onToggleNav}
             >
               &gt; {link.title}
@@ -132,7 +132,7 @@ const MobileNav = () => {
       <button
         type="button"
         ref={toggleRef}
-        className="w-8 h-8 ml-1 mr-1 text-white hover:text-brutalist-neonGreen transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]"
+        className="w-8 h-8 ml-1 mr-1 text-white hover:text-intent-success transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]"
         aria-label="Toggle Menu"
         aria-expanded={navShow}
         aria-controls="mobile-nav-panel"

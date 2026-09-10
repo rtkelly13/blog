@@ -10,9 +10,9 @@ import RateLimitNotice from './RateLimitNotice';
 import { ResolvedRoom } from './ResolvedRoom';
 
 const CLOUD_COLORS = [
-  'text-brutalist-cyan',
-  'text-brutalist-yellow',
-  'text-brutalist-pink',
+  'text-accent-primary',
+  'text-accent-secondary',
+  'text-accent-tertiary',
   'text-white',
 ];
 
@@ -55,15 +55,15 @@ function Poll({
   if (!poll) {
     if (!isAdmin || !prompt) return null;
     return (
-      <div className="border-2 border-dashed border-brutalist-pink bg-zinc-900 p-5">
-        <p className="mb-1 font-mono text-sm uppercase text-brutalist-pink">
+      <div className="border-2 border-dashed border-accent-tertiary bg-zinc-900 p-5">
+        <p className="mb-1 font-mono text-sm uppercase text-accent-tertiary">
           ● {title ?? 'Live poll'}
         </p>
         <p className="mb-3 font-mono text-sm text-zinc-300">{prompt}</p>
         <button
           type="button"
           onClick={() => runStart(() => start({ room, prompt }))}
-          className="border-2 border-white bg-brutalist-pink px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
+          className="border-2 border-white bg-accent-tertiary px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
         >
           ▶ Start poll
         </button>
@@ -111,7 +111,7 @@ function Poll({
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
-      <p className="mb-1 font-mono text-sm uppercase text-brutalist-pink">
+      <p className="mb-1 font-mono text-sm uppercase text-accent-tertiary">
         ● {title ?? 'Live poll'}
       </p>
       <h3 className="mb-1 font-display text-2xl font-bold uppercase text-white">
@@ -126,7 +126,7 @@ function Poll({
           once they're used up we confirm instead of re-offering the form. */}
       {showForm &&
         (done ? (
-          <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
+          <p className="border-2 border-accent-tertiary bg-black p-3 font-mono text-sm text-accent-tertiary">
             {poll.maxAnswers > 1
               ? '✓ Your answers are in — watch the cloud below.'
               : "✓ Your answer's in — watch the cloud below."}
@@ -139,12 +139,12 @@ function Poll({
                 onChange={(e) => setWord(e.target.value)}
                 maxLength={32}
                 placeholder="One word…"
-                className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-pink focus:outline-none"
+                className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-accent-tertiary focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={sending || !word.trim()}
-                className="border-2 border-white bg-brutalist-pink px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
+                className="border-2 border-white bg-accent-tertiary px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
               >
                 Send
               </button>

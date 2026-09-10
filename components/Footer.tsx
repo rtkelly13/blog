@@ -29,7 +29,7 @@ export default function Footer() {
         <div className="flex mb-4 space-x-4 text-sm font-mono font-bold uppercase">
           <Link
             href="/projects"
-            className="text-white hover:text-brutalist-cyan transition-colors"
+            className="text-white hover:text-accent-primary transition-colors"
           >
             [ Projects ]
           </Link>
@@ -41,7 +41,7 @@ export default function Footer() {
           <div>{` • `}</div>
           <Link
             href="/"
-            className="hover:text-brutalist-cyan transition-colors"
+            className="hover:text-accent-primary transition-colors"
           >
             {siteMetadata.title}
           </Link>
@@ -50,7 +50,7 @@ export default function Footer() {
           <div className="mt-2 font-mono text-xs text-zinc-400">
             <Link
               href={`${siteMetadata.siteRepo}/commit/${commitSha}`}
-              className="hover:text-brutalist-cyan transition-colors"
+              className="hover:text-accent-primary transition-colors"
               title="The commit this deployment was built from"
             >
               [ {commitSha.slice(0, 7)} ]

@@ -4,9 +4,9 @@ import { ResolvedRoom } from './ResolvedRoom';
 
 const MEDALS = ['🥇', '🥈', '🥉', '4', '5'];
 const BAR_COLORS = [
-  'bg-brutalist-yellow',
-  'bg-brutalist-cyan',
-  'bg-brutalist-pink',
+  'bg-accent-secondary',
+  'bg-accent-primary',
+  'bg-accent-tertiary',
   'bg-white',
   'bg-white',
 ];

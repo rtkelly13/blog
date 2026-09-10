@@ -56,7 +56,7 @@ function PollControls({ room }: { room: string }) {
   const [maxAnswers, setMaxAnswers] = useState(1);
 
   return (
-    <Section title="Live poll / word cloud" accent="text-brutalist-pink">
+    <Section title="Live poll / word cloud" accent="text-accent-tertiary">
       {poll ? (
         <div className="space-y-3">
           <p className="font-mono text-sm text-white">
@@ -82,7 +82,7 @@ function PollControls({ room }: { room: string }) {
                   </span>
                   <button
                     type="button"
-                    className="shrink-0 text-xs uppercase text-brutalist-pink underline"
+                    className="shrink-0 text-xs uppercase text-accent-tertiary underline"
                     onClick={() =>
                       run(() =>
                         hideWord({
@@ -99,7 +99,7 @@ function PollControls({ room }: { room: string }) {
           </div>
           <button
             type="button"
-            className={`${btnCls} bg-black text-brutalist-pink`}
+            className={`${btnCls} bg-black text-accent-tertiary`}
             onClick={() => run(() => close({ id: poll._id as Id<'polls'> }))}
           >
             Close poll
@@ -140,7 +140,7 @@ function PollControls({ room }: { room: string }) {
                 onClick={() => setMaxAnswers(n)}
                 className={`border-2 px-2 py-1 font-mono text-xs ${
                   maxAnswers === n
-                    ? 'border-brutalist-pink bg-brutalist-pink text-black'
+                    ? 'border-accent-tertiary bg-accent-tertiary text-black'
                     : 'border-white text-white'
                 }`}
               >
@@ -150,7 +150,7 @@ function PollControls({ room }: { room: string }) {
             <button
               type="submit"
               disabled={!prompt.trim()}
-              className={`${btnCls} ml-auto bg-brutalist-pink text-black`}
+              className={`${btnCls} ml-auto bg-accent-tertiary text-black`}
             >
               Start
             </button>
@@ -182,7 +182,7 @@ function ActivityControls({ room }: { room: string }) {
   );
 
   return (
-    <Section title="Put-it-in-order activity" accent="text-brutalist-yellow">
+    <Section title="Put-it-in-order activity" accent="text-accent-secondary">
       {activity ? (
         <div className="space-y-3">
           <p className="font-mono text-sm text-white">
@@ -206,7 +206,7 @@ function ActivityControls({ room }: { room: string }) {
             {!activity.revealed && (
               <button
                 type="button"
-                className={`${btnCls} bg-brutalist-cyan text-black`}
+                className={`${btnCls} bg-accent-primary text-black`}
                 onClick={() =>
                   run(() => revealNow({ id: activity._id as Id<'activities'> }))
                 }
@@ -229,7 +229,7 @@ function ActivityControls({ room }: { room: string }) {
             )}
             <button
               type="button"
-              className={`${btnCls} bg-black text-brutalist-yellow`}
+              className={`${btnCls} bg-black text-accent-secondary`}
               onClick={() =>
                 run(() => close({ id: activity._id as Id<'activities'> }))
               }
@@ -286,7 +286,7 @@ function ActivityControls({ room }: { room: string }) {
                 onClick={() => setDelayMs(p.ms)}
                 className={`border-2 px-2 py-1 font-mono text-xs ${
                   delayMs === p.ms
-                    ? 'border-brutalist-yellow bg-brutalist-yellow text-black'
+                    ? 'border-accent-secondary bg-accent-secondary text-black'
                     : 'border-white text-white'
                 }`}
               >
@@ -296,7 +296,7 @@ function ActivityControls({ room }: { room: string }) {
             <button
               type="submit"
               disabled={!prompt.trim()}
-              className={`${btnCls} ml-auto bg-brutalist-yellow text-black`}
+              className={`${btnCls} ml-auto bg-accent-secondary text-black`}
             >
               Open activity
             </button>
@@ -324,7 +324,7 @@ function QAControls({ room }: { room: string }) {
   return (
     <Section
       title={`Q&A moderation — ${count} question${count === 1 ? '' : 's'}`}
-      accent="text-brutalist-cyan"
+      accent="text-accent-primary"
     >
       {feed.questions.length === 0 ? (
         <p className="font-mono text-sm text-zinc-500">No questions yet.</p>
@@ -339,7 +339,7 @@ function QAControls({ room }: { room: string }) {
                   : 'border-zinc-700 text-white'
               }`}
             >
-              <span className="w-8 shrink-0 text-center font-bold text-brutalist-yellow">
+              <span className="w-8 shrink-0 text-center font-bold text-accent-secondary">
                 {q.votes}
               </span>
               <span className="min-w-0 flex-1">
@@ -352,12 +352,12 @@ function QAControls({ room }: { room: string }) {
                 {/* ADR-0002: the Mask fired — tag it (auto-hidden ≠ presenter-
                     hidden) and show the pre-mask original, presenter-only. */}
                 {q.flagged && (
-                  <span className="ml-2 text-xs uppercase text-brutalist-cyan">
+                  <span className="ml-2 text-xs uppercase text-accent-primary">
                     ⚠ masked
                   </span>
                 )}
                 {(q.original || q.originalNickname) && (
-                  <span className="mt-0.5 block border-l-2 border-brutalist-cyan pl-1.5 text-xs text-zinc-400">
+                  <span className="mt-0.5 block border-l-2 border-accent-primary pl-1.5 text-xs text-zinc-400">
                     original: {q.original}
                     {q.originalNickname && (
                       <span> — “{q.originalNickname}”</span>
@@ -368,7 +368,7 @@ function QAControls({ room }: { room: string }) {
               <div className="flex shrink-0 flex-col gap-1 text-xs uppercase">
                 <button
                   type="button"
-                  className="text-brutalist-cyan underline"
+                  className="text-accent-primary underline"
                   onClick={() =>
                     run(() =>
                       setAnswered({
@@ -382,7 +382,7 @@ function QAControls({ room }: { room: string }) {
                 </button>
                 <button
                   type="button"
-                  className="text-brutalist-pink underline"
+                  className="text-accent-tertiary underline"
                   onClick={() =>
                     run(() =>
                       setHidden({

@@ -96,7 +96,7 @@ function Queue({
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-5">
-      <p className="mb-1 font-mono text-sm uppercase text-brutalist-cyan">
+      <p className="mb-1 font-mono text-sm uppercase text-accent-primary">
         {title ?? (readOnly ? 'Top questions' : 'Ask a question')}
       </p>
       {info && <p className="mb-3 font-mono text-xs text-zinc-500">{info}</p>}
@@ -109,12 +109,12 @@ function Queue({
             onChange={(e) => setText(e.target.value)}
             maxLength={280}
             placeholder={placeholder ?? 'Type your question…'}
-            className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-brutalist-cyan focus:outline-none"
+            className="min-w-0 flex-1 border-2 border-white bg-black px-3 py-3 font-mono text-base text-white placeholder:text-zinc-600 focus:border-accent-primary focus:outline-none"
           />
           <button
             type="submit"
             disabled={sending || !text.trim()}
-            className="border-2 border-white bg-brutalist-cyan px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
+            className="border-2 border-white bg-accent-primary px-5 py-3 font-mono font-bold uppercase text-black shadow-hard-md disabled:opacity-40"
           >
             Ask
           </button>
@@ -125,7 +125,7 @@ function Queue({
         <div className="mt-3 empty:hidden">
           <RateLimitNotice secondsLeft={secondsLeft} />
           {refused && (
-            <p className="border-2 border-brutalist-pink bg-black p-3 font-mono text-sm text-brutalist-pink">
+            <p className="border-2 border-accent-tertiary bg-black p-3 font-mono text-sm text-accent-tertiary">
               {refused}
             </p>
           )}
@@ -160,7 +160,7 @@ function Queue({
                 }`}
               >
                 {readOnly ? (
-                  <div className="flex w-12 shrink-0 flex-col items-center border-2 border-brutalist-yellow py-1 font-mono font-bold text-brutalist-yellow">
+                  <div className="flex w-12 shrink-0 flex-col items-center border-2 border-accent-secondary py-1 font-mono font-bold text-accent-secondary">
                     <span className="text-sm leading-none">▲</span>
                     <span className="text-lg leading-tight">{q.votes}</span>
                   </div>
@@ -184,7 +184,7 @@ function Queue({
                     }}
                     className={`flex w-12 shrink-0 flex-col items-center border-2 py-1 font-mono font-bold ${
                       hasVoted
-                        ? 'border-brutalist-yellow bg-brutalist-yellow text-black'
+                        ? 'border-accent-secondary bg-accent-secondary text-black'
                         : 'border-white text-white hover:bg-white hover:text-black'
                     } disabled:cursor-default`}
                     aria-label="Upvote question"
@@ -201,7 +201,7 @@ function Queue({
                     </p>
                   )}
                   {q.answered && (
-                    <p className="mt-1 font-mono text-xs uppercase text-brutalist-cyan">
+                    <p className="mt-1 font-mono text-xs uppercase text-accent-primary">
                       ✓ answered
                     </p>
                   )}

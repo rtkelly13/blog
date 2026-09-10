@@ -53,7 +53,7 @@ function ExportButton({ room, slug }: { room: string; slug: string }) {
   return (
     <span className="flex items-center gap-2">
       {error && (
-        <span className="font-mono text-xs uppercase text-brutalist-pink">
+        <span className="font-mono text-xs uppercase text-accent-tertiary">
           {error}
         </span>
       )}
@@ -62,7 +62,7 @@ function ExportButton({ room, slug }: { room: string; slug: string }) {
         disabled={busy}
         onClick={download}
         title="Download this session's data as JSON (to archive before clearing)"
-        className="border-2 border-brutalist-cyan px-3 py-1.5 font-mono text-xs font-bold uppercase text-brutalist-cyan hover:bg-brutalist-cyan hover:text-black disabled:opacity-40"
+        className="border-2 border-accent-primary px-3 py-1.5 font-mono text-xs font-bold uppercase text-accent-primary hover:bg-accent-primary hover:text-black disabled:opacity-40"
       >
         {busy ? '…' : 'Export'}
       </button>
@@ -110,7 +110,7 @@ function ClearDownButton({
       <button
         type="button"
         onClick={() => setArmed(true)}
-        className="border-2 border-brutalist-pink px-3 py-1.5 font-mono text-xs font-bold uppercase text-brutalist-pink hover:bg-brutalist-pink hover:text-black"
+        className="border-2 border-accent-tertiary px-3 py-1.5 font-mono text-xs font-bold uppercase text-accent-tertiary hover:bg-accent-tertiary hover:text-black"
       >
         Clear down
       </button>
@@ -119,14 +119,14 @@ function ClearDownButton({
 
   return (
     <span className="flex items-center gap-2">
-      <span className="font-mono text-xs uppercase text-brutalist-pink">
+      <span className="font-mono text-xs uppercase text-accent-tertiary">
         {error ?? 'Sure?'}
       </span>
       <button
         type="button"
         disabled={busy}
         onClick={wipe}
-        className="border-2 border-brutalist-pink bg-brutalist-pink px-3 py-1.5 font-mono text-xs font-bold uppercase text-black disabled:opacity-40"
+        className="border-2 border-accent-tertiary bg-accent-tertiary px-3 py-1.5 font-mono text-xs font-bold uppercase text-black disabled:opacity-40"
       >
         {busy ? '…' : 'Yes, wipe'}
       </button>
@@ -154,7 +154,7 @@ function DeleteSessionButton({ room, live }: { room: string; live: boolean }) {
       <button
         type="button"
         onClick={() => setArmed(true)}
-        className="border-2 border-zinc-500 px-3 py-1.5 font-mono text-xs font-bold uppercase text-zinc-400 hover:border-brutalist-pink hover:bg-brutalist-pink hover:text-black"
+        className="border-2 border-zinc-500 px-3 py-1.5 font-mono text-xs font-bold uppercase text-zinc-400 hover:border-accent-tertiary hover:bg-accent-tertiary hover:text-black"
       >
         Delete
       </button>
@@ -163,14 +163,14 @@ function DeleteSessionButton({ room, live }: { room: string; live: boolean }) {
 
   return (
     <span className="flex items-center gap-2">
-      <span className="font-mono text-xs uppercase text-brutalist-pink">
+      <span className="font-mono text-xs uppercase text-accent-tertiary">
         {error ?? 'Gone forever?'}
       </span>
       <button
         type="button"
         disabled={busy}
         onClick={() => run(() => deleteSession({ room }))}
-        className="border-2 border-brutalist-pink bg-brutalist-pink px-3 py-1.5 font-mono text-xs font-bold uppercase text-black disabled:opacity-40"
+        className="border-2 border-accent-tertiary bg-accent-tertiary px-3 py-1.5 font-mono text-xs font-bold uppercase text-black disabled:opacity-40"
       >
         {busy ? '…' : 'Yes, delete'}
       </button>
@@ -216,7 +216,7 @@ export default function SessionManager() {
           <div className="min-w-0">
             <p className="flex items-center gap-2 font-mono text-sm text-white">
               {s.status === 'live' ? (
-                <span className="text-brutalist-pink">● LIVE</span>
+                <span className="text-accent-tertiary">● LIVE</span>
               ) : (
                 <span className="text-zinc-500">ended</span>
               )}

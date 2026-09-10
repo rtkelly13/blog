@@ -109,7 +109,7 @@ const PROPOSALS: System[] = [
     name: 'A · Refined Terminal',
     tagline: 'Stay all-mono, but on a face with a real weight axis',
     badge: 'LOWEST RISK',
-    accent: 'text-brutalist-cyan',
+    accent: 'text-accent-primary',
     display: {
       fontFamily: JETBRAINS,
       fontWeight: 800,
@@ -157,7 +157,7 @@ mono: ['"JetBrains Mono"', 'Courier New', ...defaultTheme.fontFamily.mono],
     name: 'B · Grotesk × Mono',
     tagline: 'Geometric display face paired with a mono body — true contrast',
     badge: 'RECOMMENDED',
-    accent: 'text-brutalist-pink',
+    accent: 'text-accent-tertiary',
     display: {
       fontFamily: SPACE_GROTESK,
       fontWeight: 700,
@@ -205,7 +205,7 @@ mono: ['"JetBrains Mono"', 'Courier New', ...defaultTheme.fontFamily.mono], // b
     name: 'C · Editorial Three-Role',
     tagline: 'Display + readable sans body + mono for code only',
     badge: 'MOST READABLE',
-    accent: 'text-brutalist-yellow',
+    accent: 'text-accent-secondary',
     display: {
       fontFamily: SPACE_GROTESK,
       fontWeight: 700,
@@ -313,11 +313,11 @@ const StatusPill = ({ status }: { status: LoadStatus }) => {
     idle: { label: 'FONTS ▸ NOT LOADED', cls: 'border-zinc-600 text-zinc-500' },
     loading: {
       label: 'FONTS ▸ LOADING…',
-      cls: 'border-brutalist-yellow text-brutalist-yellow animate-pulse',
+      cls: 'border-accent-secondary text-accent-secondary animate-pulse',
     },
     ready: {
       label: 'FONTS ▸ READY',
-      cls: 'border-brutalist-neonGreen text-brutalist-neonGreen',
+      cls: 'border-intent-success text-intent-success',
     },
   };
   const { label, cls } = map[status];
@@ -333,7 +333,7 @@ const StatusPill = ({ status }: { status: LoadStatus }) => {
 const Specimen = ({ s }: { s: System }) => (
   <div className="bg-black border-2 border-white p-6 space-y-6">
     {/* meta / eyebrow */}
-    <p className="text-xs text-brutalist-cyan" style={s.meta}>
+    <p className="text-xs text-accent-primary" style={s.meta}>
       [ 2026-06-28 ] · 7 MIN READ · #typography #design-systems
     </p>
 
@@ -356,7 +356,7 @@ const Specimen = ({ s }: { s: System }) => (
       instead of the browser faking it. The quick brown fox jumps over the lazy
       dog — 0123456789 — and the difference between{' '}
       <code
-        className="text-brutalist-neonGreen border border-white px-1"
+        className="text-intent-success border border-white px-1"
         style={s.code}
       >
         font-bold
@@ -376,7 +376,7 @@ const Specimen = ({ s }: { s: System }) => (
 
     {/* code block */}
     <pre
-      className="bg-zinc-900 border-2 border-white p-4 text-sm text-brutalist-neonGreen overflow-x-auto"
+      className="bg-zinc-900 border-2 border-white p-4 text-sm text-intent-success overflow-x-auto"
       style={s.code}
     >{`function greet(name: string) {
   console.log(\`> hello, \${name}\`);
@@ -385,18 +385,18 @@ const Specimen = ({ s }: { s: System }) => (
     {/* link + tags */}
     <div className="flex flex-wrap items-center gap-3">
       <span
-        className="bg-brutalist-cyan text-black text-xs font-bold px-3 py-1 border-2 border-white uppercase"
+        className="bg-accent-primary text-black text-xs font-bold px-3 py-1 border-2 border-white uppercase"
         style={s.meta}
       >
         FEATURED
       </span>
       <span
-        className="bg-brutalist-pink text-black text-xs font-bold px-3 py-1 border-2 border-white uppercase"
+        className="bg-accent-tertiary text-black text-xs font-bold px-3 py-1 border-2 border-white uppercase"
         style={s.meta}
       >
         NEW
       </span>
-      <span className="text-brutalist-cyan underline" style={s.body}>
+      <span className="text-accent-primary underline" style={s.body}>
         {'>'} read more →
       </span>
     </div>
@@ -450,26 +450,26 @@ const SystemSection = ({ s }: { s: System }) => {
       {/* pros / cons */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <p className="font-mono text-xs text-brutalist-cyan uppercase mb-1">
+          <p className="font-mono text-xs text-accent-primary uppercase mb-1">
             + Strengths
           </p>
           <ul className="space-y-1 font-mono text-xs text-zinc-300">
             {s.pros.map((x) => (
               <li key={x}>
-                <span className="text-brutalist-cyan mr-1">{'>'}</span>
+                <span className="text-accent-primary mr-1">{'>'}</span>
                 {x}
               </li>
             ))}
           </ul>
         </div>
         <div>
-          <p className="font-mono text-xs text-brutalist-pink uppercase mb-1">
+          <p className="font-mono text-xs text-accent-tertiary uppercase mb-1">
             - Trade-offs
           </p>
           <ul className="space-y-1 font-mono text-xs text-zinc-300">
             {s.cons.map((x) => (
               <li key={x}>
-                <span className="text-brutalist-pink mr-1">!</span>
+                <span className="text-accent-tertiary mr-1">!</span>
                 {x}
               </li>
             ))}
@@ -482,15 +482,15 @@ const SystemSection = ({ s }: { s: System }) => {
 
       {/* adoption (skip for current) */}
       {s.fontHref && (
-        <div className="border-2 border-brutalist-cyan bg-zinc-900 p-6 space-y-4">
-          <h3 className="font-mono font-bold text-lg text-brutalist-cyan uppercase">
+        <div className="border-2 border-accent-primary bg-zinc-900 p-6 space-y-4">
+          <h3 className="font-mono font-bold text-lg text-accent-primary uppercase">
             [ HOW_TO_ADOPT ]
           </h3>
           <div>
             <p className="font-mono text-xs text-zinc-500 uppercase mb-1">
               1. install
             </p>
-            <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-brutalist-neonGreen overflow-x-auto">
+            <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-intent-success overflow-x-auto">
               {s.install}
             </pre>
           </div>
@@ -498,7 +498,7 @@ const SystemSection = ({ s }: { s: System }) => {
             <p className="font-mono text-xs text-zinc-500 uppercase mb-1">
               2. tailwind.config.js → fontFamily
             </p>
-            <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-brutalist-cyan overflow-x-auto">
+            <pre className="bg-black border-2 border-white p-3 text-xs font-mono text-accent-primary overflow-x-auto">
               {s.tokens}
             </pre>
           </div>
@@ -531,7 +531,7 @@ export default function TypographyProposals() {
         {/* header */}
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <p className="font-mono text-sm text-zinc-500">
-            <Link href="/design-sandbox" className="hover:text-brutalist-cyan">
+            <Link href="/design-sandbox" className="hover:text-accent-primary">
               {'<'} design_sandbox
             </Link>
           </p>
@@ -546,29 +546,28 @@ export default function TypographyProposals() {
 
         {/* diagnosis */}
         <div className="container py-8">
-          <div className="border-2 border-brutalist-pink bg-zinc-900 p-6">
-            <h2 className="font-mono font-bold text-xl text-brutalist-pink mb-4 uppercase">
+          <div className="border-2 border-accent-tertiary bg-zinc-900 p-6">
+            <h2 className="font-mono font-bold text-xl text-accent-tertiary mb-4 uppercase">
               [ DIAGNOSIS ]
             </h2>
             <ul className="space-y-2 font-mono text-sm text-zinc-200">
               <li>
-                <span className="text-brutalist-pink mr-2">!</span>
+                <span className="text-accent-tertiary mr-2">!</span>
                 <strong className="text-white">
                   Share Tech Mono has one weight (400).
                 </strong>{' '}
-                Every{' '}
-                <code className="text-brutalist-neonGreen">font-bold</code>{' '}
+                Every <code className="text-intent-success">font-bold</code>{' '}
                 heading is browser-synthesised faux bold — smeared and
                 low-contrast.
               </li>
               <li>
-                <span className="text-brutalist-pink mr-2">!</span>
+                <span className="text-accent-tertiary mr-2">!</span>
                 <strong className="text-white">No pairing.</strong> `sans` and
                 `mono` both map to Share Tech Mono, so display and body text
                 have zero contrast.
               </li>
               <li>
-                <span className="text-brutalist-pink mr-2">!</span>
+                <span className="text-accent-tertiary mr-2">!</span>
                 <strong className="text-white">No mid-weights.</strong>{' '}
                 Hierarchy relies on size + colour alone; there is no 500/600
                 step for UI.

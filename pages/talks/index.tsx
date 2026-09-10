@@ -28,14 +28,14 @@ function TalksContent({ visible }: { visible: TalkFrontMatter[] }) {
         <PageHeader
           title="TALKS"
           icon={Presentation}
-          accent="pink"
+          accent="tertiary"
           subtitle="Presentations and slide decks, hosted live and exportable to PDF"
         />
 
         <div className="px-6 py-12">
           {visible.length === 0 ? (
             <p className="font-mono text-zinc-400">
-              <span className="text-brutalist-pink">&gt;</span> No talks yet.
+              <span className="text-accent-tertiary">&gt;</span> No talks yet.
               Check back soon.
             </p>
           ) : (

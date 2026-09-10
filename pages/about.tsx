@@ -60,7 +60,7 @@ export default function About({
             <a
               href="/cv.pdf"
               download="Ryan_Kelly_CV.pdf"
-              className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-brutalist-cyan bg-zinc-950 hover:bg-brutalist-cyan hover:text-black transition-colors font-bold uppercase text-xs tracking-wider shadow-glow-cyan text-white"
+              className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-accent-primary bg-zinc-950 hover:bg-accent-primary hover:text-black transition-colors font-bold uppercase text-xs tracking-wider shadow-glow-accent-primary text-white"
             >
               <Download className="w-4 h-4" />
               Download CV (PDF)
@@ -70,7 +70,7 @@ export default function About({
 
         {/* Profile Card & Bio */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="flex flex-col items-center bg-black/80 border-2 border-brutalist-pink shadow-glow-pink p-6 rounded-md text-center">
+          <div className="flex flex-col items-center bg-black/80 border-2 border-accent-tertiary shadow-glow-accent-tertiary p-6 rounded-md text-center">
             <Image
               src="/static/images/myprofile.jpg"
               alt="avatar"
@@ -81,7 +81,7 @@ export default function About({
             <h2 className="pt-4 pb-1 text-2xl font-bold uppercase text-white tracking-wider">
               {profile.name}
             </h2>
-            <div className="text-brutalist-cyberOrange font-bold text-xs mb-1">
+            <div className="text-accent-secondary font-bold text-xs mb-1">
               &gt; {profile.role}
             </div>
             <div className="text-zinc-400 text-xs">{profile.location}</div>
@@ -94,7 +94,7 @@ export default function About({
           </div>
 
           <div className="lg:col-span-2 space-y-6 flex flex-col justify-center bg-zinc-950/60 border-2 border-zinc-800 p-6 rounded-md">
-            <div className="flex items-center gap-2 text-brutalist-neonGreen uppercase text-xs font-bold tracking-wider">
+            <div className="flex items-center gap-2 text-intent-success uppercase text-xs font-bold tracking-wider">
               <Terminal className="w-4 h-4" />
               <span>Bio & Overview</span>
             </div>
@@ -106,7 +106,7 @@ export default function About({
                 <span className="text-white font-bold">Email:</span>{' '}
                 <a
                   href={`mailto:${profile.social.email}`}
-                  className="text-brutalist-cyan hover:underline"
+                  className="text-accent-primary hover:underline"
                 >
                   {profile.social.email}
                 </a>
@@ -117,7 +117,7 @@ export default function About({
                   href={profile.social.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brutalist-cyan hover:underline"
+                  className="text-accent-primary hover:underline"
                 >
                   github.com/rtkelly13
                 </a>
@@ -128,7 +128,7 @@ export default function About({
                   href={profile.social.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brutalist-cyan hover:underline"
+                  className="text-accent-primary hover:underline"
                 >
                   linkedin.com/in/rtkelly94
                 </a>
@@ -140,7 +140,7 @@ export default function About({
         {/* Technical Skills */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b-2 border-zinc-800 pb-2">
-            <Sparkles className="w-5 h-5 text-brutalist-cyan" />
+            <Sparkles className="w-5 h-5 text-accent-primary" />
             <h2 className="text-xl font-bold uppercase text-white tracking-wider">
               Technical Skillset
             </h2>
@@ -151,7 +151,7 @@ export default function About({
                 key={s.category}
                 className="bg-zinc-950 border border-zinc-800 p-4 rounded hover:border-zinc-700 transition-colors"
               >
-                <h3 className="text-xs font-bold uppercase text-brutalist-cyan tracking-wider mb-3">
+                <h3 className="text-xs font-bold uppercase text-accent-primary tracking-wider mb-3">
                   {'//'} {s.category}
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -172,7 +172,7 @@ export default function About({
         {/* Experience Timeline */}
         <div className="space-y-6">
           <div className="flex items-center gap-2 border-b-2 border-zinc-800 pb-2">
-            <Briefcase className="w-5 h-5 text-brutalist-pink" />
+            <Briefcase className="w-5 h-5 text-accent-tertiary" />
             <h2 className="text-xl font-bold uppercase text-white tracking-wider">
               Experience & Career
             </h2>
@@ -193,7 +193,7 @@ export default function About({
                       href={job.companyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-brutalist-pink hover:underline text-sm font-semibold mt-1"
+                      className="inline-flex items-center gap-1 text-accent-tertiary hover:underline text-sm font-semibold mt-1"
                     >
                       {job.company}
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -207,7 +207,7 @@ export default function About({
                 <ul className="mt-4 space-y-2 text-sm text-zinc-300">
                   {job.highlights.map((h, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-brutalist-neonGreen font-bold select-none">
+                      <span className="text-intent-success font-bold select-none">
                         &gt;
                       </span>
                       <span>{h}</span>
@@ -223,14 +223,14 @@ export default function About({
         <div className="space-y-6">
           <div className="flex items-center justify-between border-b-2 border-zinc-800 pb-2">
             <div className="flex items-center gap-2">
-              <FolderGit2 className="w-5 h-5 text-brutalist-cyberOrange" />
+              <FolderGit2 className="w-5 h-5 text-accent-secondary" />
               <h2 className="text-xl font-bold uppercase text-white tracking-wider">
                 Open Source &amp; Projects
               </h2>
             </div>
             <a
               href="/projects"
-              className="text-xs font-bold text-brutalist-cyan hover:underline uppercase tracking-wider flex items-center gap-1"
+              className="text-xs font-bold text-accent-primary hover:underline uppercase tracking-wider flex items-center gap-1"
             >
               View All &gt;
             </a>
@@ -248,7 +248,7 @@ export default function About({
                       {project.title}
                     </h3>
                     {project.asciiArt && (
-                      <span className="font-mono text-xs text-brutalist-cyberOrange select-none">
+                      <span className="font-mono text-xs text-accent-secondary select-none">
                         {project.asciiArt}
                       </span>
                     )}
@@ -276,7 +276,7 @@ export default function About({
                       href={project.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-brutalist-cyan hover:underline font-semibold"
+                      className="inline-flex items-center gap-1 text-xs text-accent-primary hover:underline font-semibold"
                     >
                       <span>Code &amp; Repository</span>
                       <ExternalLink className="w-3 h-3" />
@@ -291,7 +291,7 @@ export default function About({
         {/* Education */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b-2 border-zinc-800 pb-2">
-            <GraduationCap className="w-5 h-5 text-brutalist-yellow" />
+            <GraduationCap className="w-5 h-5 text-accent-secondary" />
             <h2 className="text-xl font-bold uppercase text-white tracking-wider">
               Education
             </h2>
@@ -313,12 +313,12 @@ export default function About({
                   href={edu.institutionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-brutalist-cyan hover:underline inline-flex items-center gap-1"
+                  className="text-xs text-accent-primary hover:underline inline-flex items-center gap-1"
                 >
                   {edu.institution}
                   <ExternalLink className="w-3 h-3" />
                 </a>
-                <div className="text-xs text-brutalist-yellow font-semibold">
+                <div className="text-xs text-accent-secondary font-semibold">
                   {edu.grade}
                 </div>
                 {edu.details && (

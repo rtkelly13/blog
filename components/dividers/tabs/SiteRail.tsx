@@ -112,7 +112,7 @@ export default function SiteRail({
       <div className="flex w-12 shrink-0 flex-col border-r-2 border-white bg-black">
         <div className="flex justify-center border-b-2 border-white py-3">
           <Link href="/" aria-label="Ryan Kelly Blog">
-            <TabLabel className="tracking-[0.2em] text-white transition-colors hover:text-brutalist-cyan">
+            <TabLabel className="tracking-[0.2em] text-white transition-colors hover:text-accent-primary">
               RYAN_KELLY.DEV
             </TabLabel>
           </Link>

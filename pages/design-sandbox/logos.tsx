@@ -136,14 +136,14 @@ export default function Logos() {
             {logos.map((logo) => (
               <div
                 key={logo.id}
-                className="bg-zinc-900 border-2 border-white p-6 hover:border-brutalist-cyan transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1"
+                className="bg-zinc-900 border-2 border-white p-6 hover:border-accent-primary transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1"
               >
                 <div className="border-b-2 border-dashed border-white/20 pb-2 mb-4">
                   <h3 className="font-display font-bold text-lg text-white">
                     {`0${logo.id}`.slice(-2)}. {logo.name.toUpperCase()}
                   </h3>
                 </div>
-                <pre className="text-brutalist-cyan font-mono text-xs sm:text-sm overflow-x-auto whitespace-pre">
+                <pre className="text-accent-primary font-mono text-xs sm:text-sm overflow-x-auto whitespace-pre">
                   {logo.art}
                 </pre>
               </div>

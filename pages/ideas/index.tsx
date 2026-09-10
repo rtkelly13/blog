@@ -35,7 +35,7 @@ export default function Ideas({
         <PageHeader
           title="IDEAS"
           icon={Lightbulb}
-          accent="yellow"
+          accent="secondary"
           subtitle="Post & series workbench — evolve ideas before drafting. Admin only."
         />
 
@@ -44,7 +44,7 @@ export default function Ideas({
             {!ideas.length && (
               <li className="py-8 px-6 font-mono text-zinc-400 text-center">
                 No ideas yet — add an MDX file under{' '}
-                <code className="text-brutalist-cyan">data/ideas/</code>.
+                <code className="text-accent-primary">data/ideas/</code>.
               </li>
             )}
             {ideas.map((idea) => (
@@ -65,7 +65,7 @@ export default function Ideas({
                   <h2 className="text-2xl font-bold leading-8 tracking-tight">
                     <Link
                       href={`/ideas/${idea.slug}`}
-                      className="text-white hover:text-brutalist-cyan transition-colors"
+                      className="text-white hover:text-accent-primary transition-colors"
                     >
                       {idea.title}
                     </Link>

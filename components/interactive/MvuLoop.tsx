@@ -44,9 +44,9 @@ export function mvuFrameAt(t: number): MvuFrame {
 }
 
 const C = {
-  cyan: 'var(--brutalist-cyan, #22d3ee)',
-  pink: 'var(--brutalist-pink, #ec4899)',
-  yellow: 'var(--brutalist-yellow, #facc15)',
+  cyan: 'var(--ds-accent-primary)',
+  pink: 'var(--ds-accent-tertiary)',
+  yellow: 'var(--ds-accent-secondary)',
   ink: 'var(--color-white, #ffffff)',
   dim: 'var(--color-zinc-800, #27272a)',
   muted: 'var(--color-zinc-600, #52525b)',
@@ -150,7 +150,7 @@ export default function MvuLoop({ autoplay = true }: { autoplay?: boolean }) {
             MVU.LOOP
           </span>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[11px] text-brutalist-cyan">
+            <span className="font-mono text-[11px] text-accent-primary">
               model.count = {frame.modelValue}
             </span>
             <button

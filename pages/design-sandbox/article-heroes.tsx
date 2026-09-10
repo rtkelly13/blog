@@ -5,7 +5,7 @@ import siteMetadata from '@/data/siteMetadata';
 const HeroMinimal = () => (
   <div className="relative w-full h-[60vh] bg-black border-2 border-white flex items-center justify-center">
     <div className="text-center">
-      <div className="inline-block bg-brutalist-cyan text-black font-bold px-2 py-1 mb-4 text-xs font-mono">
+      <div className="inline-block bg-accent-primary text-black font-bold px-2 py-1 mb-4 text-xs font-mono">
         STATUS: ONLINE
       </div>
       <h1 className="text-4xl md:text-6xl font-bold font-display mb-6 text-white uppercase">
@@ -30,13 +30,13 @@ const HeroGrid = () => (
     />
     <div className="relative z-10 h-full flex items-center justify-center px-6">
       <div>
-        <div className="inline-block bg-brutalist-cyan text-black font-bold px-2 py-1 mb-4 text-xs font-mono">
+        <div className="inline-block bg-accent-primary text-black font-bold px-2 py-1 mb-4 text-xs font-mono">
           STATUS: ONLINE
         </div>
         <h1 className="text-3xl md:text-5xl font-bold font-display mb-6 leading-tight text-white">
           HELLO_WORLD.
           <br />I BUILD{' '}
-          <span className="text-brutalist-pink bg-brutalist-pink/10 px-1">
+          <span className="text-accent-tertiary bg-accent-tertiary/10 px-1">
             SYSTEMS
           </span>
           .
@@ -52,20 +52,20 @@ const HeroGrid = () => (
 );
 
 const HeroTerminal = () => (
-  <div className="relative w-full h-[60vh] bg-black border-2 border-brutalist-cyan overflow-hidden">
-    <div className="bg-brutalist-cyan text-black px-4 py-2 font-mono text-sm font-bold border-b-2 border-brutalist-cyan">
+  <div className="relative w-full h-[60vh] bg-black border-2 border-accent-primary overflow-hidden">
+    <div className="bg-accent-primary text-black px-4 py-2 font-mono text-sm font-bold border-b-2 border-accent-primary">
       ryan@localhost:~
     </div>
     <div className="p-6 font-mono text-sm">
-      <p className="text-brutalist-cyan mb-2">$ whoami</p>
+      <p className="text-accent-primary mb-2">$ whoami</p>
       <p className="text-white mb-4">Ryan Kelly - Full Stack Engineer</p>
-      <p className="text-brutalist-cyan mb-2">$ cat skills.txt</p>
+      <p className="text-accent-primary mb-2">$ cat skills.txt</p>
       <p className="text-white mb-4">
         React | TypeScript | AWS | Docker | .NET
         <br />
         Cloud Architecture | System Design
       </p>
-      <p className="text-brutalist-cyan mb-2">$ status</p>
+      <p className="text-accent-primary mb-2">$ status</p>
       <p className="text-white">
         {'>'} Ready to build
         <span className="animate-pulse">_</span>
@@ -85,7 +85,7 @@ export default function ArticleHeroes() {
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <Link
             href="/design-sandbox"
-            className="text-brutalist-cyan hover:text-brutalist-pink font-mono text-sm mb-4 inline-block"
+            className="text-accent-primary hover:text-accent-tertiary font-mono text-sm mb-4 inline-block"
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
@@ -129,7 +129,7 @@ export default function ArticleHeroes() {
             <p className="text-zinc-400 font-mono text-sm mb-6">
               Command-line aesthetic with interactive prompt
             </p>
-            <div className="border-2 border-brutalist-cyan">
+            <div className="border-2 border-accent-primary">
               <HeroTerminal />
             </div>
           </div>

@@ -129,8 +129,8 @@ function IdeaCard({
                 aria-pressed={active}
                 className={`border-2 px-3 py-1 font-mono text-xs uppercase tracking-widest transition-colors ${
                   active
-                    ? 'border-brutalist-cyan bg-brutalist-cyan text-black'
-                    : 'border-zinc-700 text-zinc-400 hover:border-brutalist-cyan hover:text-white'
+                    ? 'border-accent-primary bg-accent-primary text-black'
+                    : 'border-zinc-700 text-zinc-400 hover:border-accent-primary hover:text-white'
                 }`}
               >
                 {v.name}
@@ -151,14 +151,14 @@ function IdeaCard({
         <div
           className="dark absolute inset-0"
           style={{
-            background: 'var(--brutalist-darkBg, #0a0a1a)',
+            background: 'var(--ds-surface-base)',
             clipPath: `inset(0 ${100 - split * 100}% 0 0)`,
           }}
         />
         <div
           className="sketch absolute inset-0"
           style={{
-            background: 'var(--brutalist-darkBg, #eceadf)',
+            background: 'var(--ds-surface-base)',
             clipPath: `inset(0 0 0 ${pct})`,
           }}
         />
@@ -216,7 +216,7 @@ function IdeaCard({
         </div>
 
         {status === 'unsupported' && (
-          <p className="absolute bottom-3 left-3 font-mono text-xs text-brutalist-yellow">
+          <p className="absolute bottom-3 left-3 font-mono text-xs text-accent-secondary">
             {'>'} no webgl2 — a shipped hero falls back to CSS here
           </p>
         )}
@@ -243,7 +243,7 @@ function Reading({
   return (
     <div>
       <dt
-        className={`text-xs uppercase tracking-widest ${accent ? 'text-brutalist-yellow' : 'text-brutalist-cyan'}`}
+        className={`text-xs uppercase tracking-widest ${accent ? 'text-accent-secondary' : 'text-accent-primary'}`}
       >
         {term}
       </dt>
@@ -258,7 +258,7 @@ function HeroLockup() {
       <p className="font-display text-3xl font-bold uppercase text-white md:text-5xl">
         RYAN KELLY
       </p>
-      <p className="mt-2 font-mono text-xs text-brutalist-cyan md:text-sm">
+      <p className="mt-2 font-mono text-xs text-accent-primary md:text-sm">
         FULL_STACK_ENGINEER.exe
       </p>
     </div>
@@ -281,7 +281,7 @@ export default function HeroLab() {
         />
 
         <div className="container space-y-10 py-12">
-          <div className="border-2 border-brutalist-cyan bg-zinc-900 p-6">
+          <div className="border-2 border-accent-primary bg-zinc-900 p-6">
             <p className="font-mono text-sm leading-relaxed text-white">
               {'>'} Every frame below is <strong>one</strong> canvas. The shader
               picks its palette and its shading model per pixel, from which side
@@ -303,14 +303,14 @@ export default function HeroLab() {
               {'>'} Weights and the case against a 3D engine live in{' '}
               <Link
                 href="https://github.com/rtkelly13/blog/blob/main/docs/hero-webgl-research.md"
-                className="text-brutalist-cyan"
+                className="text-accent-primary"
               >
                 docs/hero-webgl-research.md
               </Link>
               ; the single-hero prototype is at{' '}
               <Link
                 href="/design-sandbox/webgl-heroes"
-                className="text-brutalist-cyan"
+                className="text-accent-primary"
               >
                 webgl-heroes
               </Link>
@@ -325,8 +325,8 @@ export default function HeroLab() {
               aria-pressed={safe}
               className={`border-2 px-3 py-1 font-mono text-xs uppercase tracking-widest transition-colors ${
                 safe
-                  ? 'border-brutalist-yellow bg-brutalist-yellow text-black'
-                  : 'border-zinc-700 text-zinc-400 hover:border-brutalist-yellow hover:text-white'
+                  ? 'border-accent-secondary bg-accent-secondary text-black'
+                  : 'border-zinc-700 text-zinc-400 hover:border-accent-secondary hover:text-white'
               }`}
             >
               type safe area: {safe ? 'on' : 'off'}
@@ -342,8 +342,8 @@ export default function HeroLab() {
             <IdeaCard key={idea.id} idea={idea} index={index} safe={safe} />
           ))}
 
-          <div className="border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="mb-4 font-display text-xl font-bold uppercase text-brutalist-yellow">
+          <div className="border-2 border-accent-secondary bg-zinc-900 p-6">
+            <h2 className="mb-4 font-display text-xl font-bold uppercase text-accent-secondary">
               [ THE_RULE_THESE_TEST ]
             </h2>
             <p className="font-mono text-sm leading-relaxed text-zinc-400">

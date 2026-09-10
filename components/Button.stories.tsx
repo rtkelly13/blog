@@ -102,27 +102,27 @@ export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-4 items-center">
       <div className="flex gap-4 flex-wrap justify-center">
-        <Button variant="cyan" size="md">
+        <Button variant="primary" size="md">
           CYAN
         </Button>
-        <Button variant="pink" size="md">
+        <Button variant="tertiary" size="md">
           PINK
         </Button>
-        <Button variant="yellow" size="md">
+        <Button variant="secondary" size="md">
           YELLOW
         </Button>
-        <Button variant="white" size="md">
+        <Button variant="inverse" size="md">
           WHITE
         </Button>
       </div>
       <div className="flex gap-4 flex-wrap justify-center">
-        <Button variant="cyan" size="sm">
+        <Button variant="primary" size="sm">
           SMALL
         </Button>
-        <Button variant="pink" size="md">
+        <Button variant="tertiary" size="md">
           MEDIUM
         </Button>
-        <Button variant="yellow" size="lg">
+        <Button variant="secondary" size="lg">
           LARGE
         </Button>
       </div>

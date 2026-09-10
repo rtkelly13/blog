@@ -33,20 +33,20 @@ const PHASE_LABEL: Record<Phase, string> = {
 
 /** Colour code per job type — the legend of the whole diagram. */
 const KIND_BAR: Record<JobKind, string> = {
-  prepare: 'bg-brutalist-cyan',
-  map: 'bg-brutalist-pink',
-  reduce: 'bg-brutalist-yellow',
+  prepare: 'bg-accent-primary',
+  map: 'bg-accent-tertiary',
+  reduce: 'bg-accent-secondary',
 };
 const KIND_BORDER: Record<JobKind, string> = {
-  prepare: 'border-brutalist-cyan',
-  map: 'border-brutalist-pink',
-  reduce: 'border-brutalist-yellow',
+  prepare: 'border-accent-primary',
+  map: 'border-accent-tertiary',
+  reduce: 'border-accent-secondary',
 };
 /** The active-phase highlight follows the job-type colour code. */
 const PHASE_ACTIVE: Record<Exclude<Phase, 'idle'>, string> = {
-  prepare: 'bg-brutalist-cyan',
-  map: 'bg-brutalist-pink',
-  reduce: 'bg-brutalist-yellow',
+  prepare: 'bg-accent-primary',
+  map: 'bg-accent-tertiary',
+  reduce: 'bg-accent-secondary',
   done: 'bg-white',
 };
 
@@ -72,14 +72,14 @@ function JobChip({ job, note }: { job: JobFrame; note?: string }) {
       <span
         aria-hidden
         className={`inline-block h-2.5 w-2.5 shrink-0 ${
-          requeued ? 'bg-brutalist-cyberOrange' : KIND_BAR[job.kind]
+          requeued ? 'bg-accent-secondary' : KIND_BAR[job.kind]
         }`}
       />
       <span className="font-mono text-[11px] text-white">{jobLabel(job)}</span>
       {(note ?? (requeued ? 'RETRY' : undefined)) && (
         <span
           className={`ml-auto font-mono text-[10px] ${
-            requeued ? 'text-brutalist-cyberOrange' : 'text-zinc-500'
+            requeued ? 'text-accent-secondary' : 'text-zinc-500'
           }`}
         >
           {note ?? 'RETRY'}
@@ -114,7 +114,7 @@ function SlotRow({
           </div>
           <span
             className={`w-16 shrink-0 text-right text-[10px] ${
-              job.hasReclaim ? 'text-brutalist-cyberOrange' : 'text-zinc-500'
+              job.hasReclaim ? 'text-accent-secondary' : 'text-zinc-500'
             }`}
           >
             {job.hasReclaim ? 'SPOT' : 'RUNNING'}
@@ -145,7 +145,7 @@ function ControlButton({
       aria-label={label}
       className={`border-2 border-white px-2 py-1 font-mono text-xs transition-colors ${
         active
-          ? 'bg-brutalist-cyan text-black'
+          ? 'bg-accent-primary text-black'
           : 'bg-black text-white hover:bg-zinc-900'
       }`}
     >
@@ -331,17 +331,17 @@ export default function MapReduceViz({
         >
           <span>JOB_TYPES:</span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2 w-2 bg-brutalist-cyan" /> PREPARE
+            <span className="inline-block h-2 w-2 bg-accent-primary" /> PREPARE
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2 w-2 bg-brutalist-pink" /> MAP
+            <span className="inline-block h-2 w-2 bg-accent-tertiary" /> MAP
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2 w-2 bg-brutalist-yellow" /> REDUCE
+            <span className="inline-block h-2 w-2 bg-accent-secondary" /> REDUCE
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2 w-2 bg-brutalist-cyberOrange" />{' '}
-            SPOT RECLAIM
+            <span className="inline-block h-2 w-2 bg-accent-secondary" /> SPOT
+            RECLAIM
           </span>
         </div>
 
@@ -437,14 +437,14 @@ export default function MapReduceViz({
               </div>
               <div className="mt-2 h-2 border border-white bg-zinc-800">
                 <div
-                  className="h-full bg-brutalist-yellow"
+                  className="h-full bg-accent-secondary"
                   style={{ width: `${reducePct}%` }}
                 />
               </div>
               <div className="mt-2 font-mono text-[10px] text-zinc-500">
                 {frame.completedMaps}/{mapperCount} map results ·{' '}
                 {frame.phase === 'done' ? (
-                  <span className="bg-brutalist-yellow px-1 font-bold text-black">
+                  <span className="bg-accent-secondary px-1 font-bold text-black">
                     result written
                   </span>
                 ) : frame.phase === 'reduce' ? (

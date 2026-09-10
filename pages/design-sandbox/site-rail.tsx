@@ -56,7 +56,7 @@ function RailControls() {
       <button
         type="button"
         aria-label="Search the site"
-        className="text-brutalist-cyan transition-colors hover:text-white"
+        className="text-accent-primary transition-colors hover:text-white"
       >
         <Search className="h-4 w-4" aria-hidden="true" />
       </button>
@@ -94,7 +94,7 @@ function FakePost({ title, meta }: { title: string; meta: string }) {
 
 const Prompt = ({ children }: { children: ReactNode }) => (
   <p className="max-w-3xl font-mono text-sm leading-relaxed text-zinc-400">
-    <span className="text-brutalist-cyan">&gt;</span> {children}
+    <span className="text-accent-primary">&gt;</span> {children}
   </p>
 );
 
@@ -137,14 +137,14 @@ export default function SiteRailSandbox() {
               5.25rem of width the reading measure was not using.
             </Prompt>
 
-            <div className="border-2 border-brutalist-yellow bg-zinc-900 p-5">
-              <h2 className="mb-3 font-display text-lg font-bold uppercase text-brutalist-yellow">
+            <div className="border-2 border-accent-secondary bg-zinc-900 p-5">
+              <h2 className="mb-3 font-display text-lg font-bold uppercase text-accent-secondary">
                 [ TWO STATES, TWO DEVICES ]
               </h2>
               <p className="max-w-3xl font-mono text-sm leading-relaxed text-white">
                 A rail can be open on a section the reader is only looking at,
-                so <span className="text-brutalist-cyan">open</span> and{' '}
-                <span className="text-brutalist-cyan">here</span> are different
+                so <span className="text-accent-primary">open</span> and{' '}
+                <span className="text-accent-primary">here</span> are different
                 states and never share a device. <em>Here</em> is the solid
                 accent fill — on the section tab and on the page, so section and
                 page share one colour. <em>Open but elsewhere</em> is a 4px
@@ -224,10 +224,10 @@ export default function SiteRailSandbox() {
               <table className="w-full min-w-[42rem] font-mono text-xs">
                 <thead>
                   <tr className="border-b-2 border-white text-left">
-                    <th className="p-3 font-bold uppercase text-brutalist-cyan">
+                    <th className="p-3 font-bold uppercase text-accent-primary">
                       Treatment
                     </th>
-                    <th className="p-3 font-bold uppercase text-brutalist-cyan">
+                    <th className="p-3 font-bold uppercase text-accent-primary">
                       Why it did not survive
                     </th>
                   </tr>
@@ -280,7 +280,7 @@ export default function SiteRailSandbox() {
             </h2>
             <ul className="space-y-2 font-mono text-xs leading-relaxed text-zinc-400">
               <li>
-                <span className="text-brutalist-cyan">&gt;</span> Fixed to the
+                <span className="text-accent-primary">&gt;</span> Fixed to the
                 viewport. This is a box in a sandbox; the real rail is{' '}
                 <span className="text-white">position: fixed</span> down the
                 left, the page scrolls independently, and the reading column is
@@ -288,14 +288,14 @@ export default function SiteRailSandbox() {
                 — at 1280px the tags page&rsquo;s 7xl measure meets the rail.
               </li>
               <li>
-                <span className="text-brutalist-cyan">&gt;</span> Small
+                <span className="text-accent-primary">&gt;</span> Small
                 viewports. A vertical rail needs height. Below{' '}
                 <span className="text-white">lg</span> the existing burger
                 drawer stays — the rail is the desktop shape, not the only shape
                 — which means two navigation systems until one is retired.
               </li>
               <li>
-                <span className="text-brutalist-cyan">&gt;</span> The controls.{' '}
+                <span className="text-accent-primary">&gt;</span> The controls.{' '}
                 <span className="text-white">SearchButton</span> is a bordered
                 field with a ⌘K key cap and{' '}
                 <span className="text-white">ThemeSwitch</span> has three
@@ -305,7 +305,7 @@ export default function SiteRailSandbox() {
                 slides out again.
               </li>
               <li>
-                <span className="text-brutalist-cyan">&gt;</span> Semantic
+                <span className="text-accent-primary">&gt;</span> Semantic
                 roles. This speaks the blog&rsquo;s vocabulary (
                 <span className="text-white">brutalist-*</span>,{' '}
                 <span className="text-white">zinc-*</span>) and its two themes;
@@ -315,7 +315,7 @@ export default function SiteRailSandbox() {
                 ladder has hierarchy roles, not identity roles.
               </li>
               <li>
-                <span className="text-brutalist-cyan">&gt;</span> Visual
+                <span className="text-accent-primary">&gt;</span> Visual
                 baselines. Replacing the chrome re-baselines every page snapshot
                 in <span className="text-white">tests/visual.spec.ts</span>.
               </li>

@@ -2,18 +2,10 @@
 
 @import "tailwindcss";
 
-/* Design-system token contract: brutalist @theme tokens, the .midnight dark
-   variant, per-mode variable blocks, and @source for the DS components. */
+/* Design-system token contract: role-named @theme tokens, the .midnight and
+   .sketch variable blocks, and @source for the DS components. 0.6.0 removed the
+   `--brutalist-*` aliases, so everything here addresses a role. */
 @import "@rtkelly13/design-system/theme.css";
-
-/* One token the design system declares as a raw variable but never exposes as a
-   Tailwind colour, so `text-brutalist-neonGreen` would not exist without this.
-   Aliased rather than hard-coded: the value stays the design system's to change,
-   and follows the theme with it. Delete this when the package exports the
-   colour itself. */
-@theme {
-  --color-brutalist-neonGreen: var(--brutalist-neonGreen);
-}
 
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
@@ -99,13 +91,13 @@
 /* LaTeX-style [n] citation markers inserted after external links by
    lib/remark-references.ts; they anchor to the References section. */
 .prose a.citation-ref {
-  @apply ml-0.5 font-mono text-xs font-bold text-brutalist-yellow no-underline transition-colors;
+  @apply ml-0.5 font-mono text-xs font-bold text-accent-secondary no-underline transition-colors;
   vertical-align: super;
   line-height: 1;
 }
 
 .prose a.citation-ref:hover {
-  @apply text-brutalist-pink;
+  @apply text-accent-tertiary;
 }
 
 .code-line {
@@ -113,7 +105,7 @@
 }
 
 .highlight-line {
-  @apply -mx-4 bg-brutalist-cyan/20 border-l-4 border-brutalist-cyan;
+  @apply -mx-4 bg-accent-primary/20 border-l-4 border-accent-primary;
 }
 
 .line-number::before {
@@ -243,15 +235,12 @@ html {
    * #1450d7 at 5.54:1, #bd0010 at 5.52:1, #006b2e at 5.57:1. The package is now
    * the only place these are written. */
 
-  /* Hard offset shadows in ink so they read on the light background. */
-  --brutalist-shadow-color: rgba(35, 38, 46, 0.9);
-
   /* Faint ink grid instead of the green scanline (see LayoutWrapper). */
   --scanline-color: rgba(35, 38, 46, 0.04);
 
   /* Hero (CyberHero): light panel with a faint ink grid instead of the dark
-     cyberpunk band + neon-green grid. */
-  --brutalist-darkBg: #eceadf;
+     cyberpunk band + neon-green grid. The panel colour is `--ds-surface-base`
+     now; design-system 0.6.0 removed the `--brutalist-*` aliases. */
   --hero-grid: rgba(35, 38, 46, 0.08);
   --hero-grid-strong: rgba(35, 38, 46, 0.14);
   /* Slightly deeper pastel green + gentler glow so the ring reads on paper. */
@@ -328,15 +317,15 @@ html {
    ink drop shadow the rest of the brutalist UI uses, so cards read like the
    TalkCard on paper. (Listing layouts use the named `shadow-glow-*` utilities
    so they're all covered here.) */
-.sketch .shadow-glow-cyan,
-.sketch .shadow-glow-pink,
-.sketch .shadow-glow-orange {
-  box-shadow: 4px 4px 0px 0px var(--brutalist-shadow-color) !important;
+.sketch .shadow-glow-accent-primary,
+.sketch .shadow-glow-accent-tertiary,
+.sketch .shadow-glow-accent-secondary {
+  box-shadow: 4px 4px 0px 0px var(--ds-shadow-color) !important;
 }
-.sketch .hover\:shadow-glow-cyan:hover,
-.sketch .hover\:shadow-glow-pink:hover,
-.sketch .hover\:shadow-glow-orange:hover {
-  box-shadow: 6px 6px 0px 0px var(--brutalist-shadow-color) !important;
+.sketch .hover\:shadow-glow-accent-primary:hover,
+.sketch .hover\:shadow-glow-accent-tertiary:hover,
+.sketch .hover\:shadow-glow-accent-secondary:hover {
+  box-shadow: 6px 6px 0px 0px var(--ds-shadow-color) !important;
 }
 
 /* Light-grey text utilities (used as primary text on the dark themes) are
@@ -467,30 +456,27 @@ html {
   }
 
   .brutalist-shadow {
-    box-shadow: 4px 4px 0px 0px
-      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
+    box-shadow: 4px 4px 0px 0px var(--ds-shadow-color);
   }
 
   .brutalist-shadow-sm {
-    box-shadow: 2px 2px 0px 0px
-      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
+    box-shadow: 2px 2px 0px 0px var(--ds-shadow-color);
   }
 
   .brutalist-shadow-lg {
-    box-shadow: 6px 6px 0px 0px
-      var(--brutalist-shadow-color, rgba(255, 255, 255, 1));
+    box-shadow: 6px 6px 0px 0px var(--ds-shadow-color);
   }
 
   .brutalist-shadow-cyan {
-    box-shadow: 4px 4px 0px 0px var(--brutalist-cyan, rgba(34, 211, 238, 1));
+    box-shadow: 4px 4px 0px 0px var(--ds-accent-primary);
   }
 
   .brutalist-shadow-pink {
-    box-shadow: 4px 4px 0px 0px var(--brutalist-pink, rgba(236, 72, 153, 1));
+    box-shadow: 4px 4px 0px 0px var(--ds-accent-tertiary);
   }
 
   .brutalist-shadow-yellow {
-    box-shadow: 4px 4px 0px 0px var(--brutalist-yellow, rgba(250, 204, 21, 1));
+    box-shadow: 4px 4px 0px 0px var(--ds-accent-secondary);
   }
 
   .brutalist-btn-press {
@@ -512,13 +498,13 @@ html {
 
   .terminal-prompt::before {
     content: "> ";
-    color: var(--brutalist-cyan, #22d3ee);
+    color: var(--ds-accent-primary);
     font-weight: bold;
   }
 
   .file-extension::after {
     content: ".md";
-    color: var(--brutalist-yellow, #facc15);
+    color: var(--ds-accent-secondary);
     font-weight: normal;
   }
 

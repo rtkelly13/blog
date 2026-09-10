@@ -14,11 +14,11 @@ export default function FourZeroFour() {
           [ PAGE_NOT_FOUND ]
         </p>
         <p className="mb-8 font-mono text-zinc-400">
-          <span className="text-brutalist-yellow">&gt;</span> Don't worry —
+          <span className="text-accent-secondary">&gt;</span> Don't worry —
           plenty of other things live on the homepage.
         </p>
         <Link href="/">
-          <Button variant="cyan">Back to homepage</Button>
+          <Button variant="primary">Back to homepage</Button>
         </Link>
       </div>
     </div>

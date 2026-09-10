@@ -1,7 +1,7 @@
 /**
  * The brutalist accent palette. These are the *dark-theme* accent values — they
  * match the fallbacks of the Tailwind `brutalist` colours, which are now
- * CSS-variable-driven (`var(--brutalist-cyan, #22d3ee)` …) so the site can
+ * CSS-variable-driven (`var(--ds-accent-primary)` …) so the site can
  * re-theme them. Generators receive an explicit `accent`, so they aren't bound
  * to these — see `graphicThemeDefaults` for the per-theme defaults.
  */

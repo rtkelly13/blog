@@ -35,14 +35,14 @@ function BreakButtons({ room }: { room: string }) {
         <button
           type="button"
           onClick={() => run(() => extendBreak({ room, byMs: EXTEND_MS }))}
-          className={`${CONTROL_BTN} bg-brutalist-yellow`}
+          className={`${CONTROL_BTN} bg-accent-secondary`}
         >
           +1 min
         </button>
         <button
           type="button"
           onClick={() => run(() => endBreak({ room }))}
-          className={`${CONTROL_BTN} bg-brutalist-pink`}
+          className={`${CONTROL_BTN} bg-accent-tertiary`}
         >
           ✕ End break
         </button>
@@ -78,8 +78,8 @@ function Countdown({
     // sees nothing.
     if (!canControl) return null;
     return (
-      <div className="border-2 border-dashed border-brutalist-pink bg-zinc-900 p-5">
-        <p className="mb-3 font-mono text-sm uppercase text-brutalist-pink">
+      <div className="border-2 border-dashed border-accent-tertiary bg-zinc-900 p-5">
+        <p className="mb-3 font-mono text-sm uppercase text-accent-tertiary">
           ● {title ?? 'Break'}
         </p>
         <button
@@ -87,7 +87,7 @@ function Countdown({
           onClick={() =>
             run(() => startBreak({ room, durationMs: minutes * 60_000 }))
           }
-          className="border-2 border-white bg-brutalist-pink px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
+          className="border-2 border-white bg-accent-tertiary px-5 py-2 font-mono font-bold uppercase text-black shadow-hard-md"
         >
           ▶ Start {minutes} min break
         </button>
@@ -98,12 +98,12 @@ function Countdown({
 
   return (
     <div className="border-2 border-white bg-zinc-900 p-5 text-center">
-      <p className="mb-2 font-mono text-sm uppercase text-brutalist-pink">
+      <p className="mb-2 font-mono text-sm uppercase text-accent-tertiary">
         ☕ {title ?? 'Break'}
       </p>
       {view.phase === 'over' ? (
         <p
-          className="font-display font-bold uppercase text-brutalist-pink"
+          className="font-display font-bold uppercase text-accent-tertiary"
           style={{ fontSize: 'clamp(2rem, 7vw, 4.5rem)', lineHeight: 1.05 }}
         >
           Time's up — we're back
@@ -181,7 +181,7 @@ export function BreakControl({ room }: { room: string }) {
             max={60}
             value={mins}
             onChange={(e) => setMins(Number(e.target.value))}
-            className="w-14 border-2 border-white bg-black px-2 py-1 text-sm text-white focus:border-brutalist-pink focus:outline-none"
+            className="w-14 border-2 border-white bg-black px-2 py-1 text-sm text-white focus:border-accent-tertiary focus:outline-none"
             aria-label="Break length in minutes"
           />
           <span className="text-zinc-400">min</span>
@@ -195,7 +195,7 @@ export function BreakControl({ room }: { room: string }) {
                 }),
               )
             }
-            className={`${CONTROL_BTN} bg-brutalist-cyan`}
+            className={`${CONTROL_BTN} bg-accent-primary`}
           >
             ▶ Start break
           </button>
