@@ -25,7 +25,7 @@ function ThemePanel({
   label,
   children,
 }: {
-  theme: 'dark' | 'sketch';
+  theme: 'midnight' | 'sketch';
   label: string;
   children: ReactNode;
 }) {
@@ -170,7 +170,7 @@ export default function SiteRailSandbox() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <ThemePanel theme="dark" label="midnight — neon terminal">
+              <ThemePanel theme="midnight" label="midnight — neon terminal">
                 <SiteRail
                   dividers={SITE_DIVIDERS}
                   currentPath="/talks"

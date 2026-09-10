@@ -23,7 +23,7 @@ function ThemePanel({
   label,
   children,
 }: {
-  theme: 'dark' | 'sketch';
+  theme: 'midnight' | 'sketch';
   label: string;
   children: ReactNode;
 }) {
@@ -47,7 +47,7 @@ function Specimen({ name, children }: { name: string; children: ReactNode }) {
         [ {name} ]
       </h2>
       <div className="grid gap-4 lg:grid-cols-2">
-        <ThemePanel theme="dark" label="dark · neon terminal">
+        <ThemePanel theme="midnight" label="midnight · neon terminal">
           {children}
         </ThemePanel>
         <ThemePanel theme="sketch" label="sketch · paper & ink">

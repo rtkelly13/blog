@@ -1,5 +1,6 @@
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { isDarkTheme } from '@/lib/themePolarity';
 import type { SvgDiagramProps } from './types';
 
 /**
@@ -10,7 +11,7 @@ import type { SvgDiagramProps } from './types';
  * 2. Dual source with darkSrc for different light/dark versions
  */
 export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
-  const { resolvedTheme } = useTheme();
+  const { theme, resolvedTheme } = useTheme();
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -25,9 +26,11 @@ export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
 
     const fetchSvg = async () => {
       try {
-        // Choose source based on theme if darkSrc is provided.
-        // `dim` is a softened dark theme, so it uses the dark asset too.
-        const isDark = resolvedTheme !== 'light';
+        // Choose source based on theme if darkSrc is provided. Polarity comes
+        // from the design system rather than a theme name — see
+        // `lib/themePolarity.ts` for why the previous `!== 'light'` was always
+        // true and served dark assets on paper.
+        const isDark = isDarkTheme(theme, resolvedTheme);
         const svgSrc = darkSrc && isDark ? darkSrc : src;
 
         const response = await fetch(svgSrc);
@@ -50,7 +53,7 @@ export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
     };
 
     fetchSvg();
-  }, [src, darkSrc, resolvedTheme, mounted]);
+  }, [src, darkSrc, theme, resolvedTheme, mounted]);
 
   if (!mounted) {
     return (

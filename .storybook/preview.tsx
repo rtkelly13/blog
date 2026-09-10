@@ -5,7 +5,7 @@ import '../css/tailwind.css';
 
 // Mirrors ThemeSwitch.tsx: next-themes puts one of these classes on <html>,
 // and css/tailwind.css remaps the colour tokens under `.dim` / `.sketch`.
-const THEMES = ['dark', 'dim', 'sketch'] as const;
+const THEMES = ['midnight', 'sketch'] as const;
 
 const ThemeDecorator = ({
   theme,
@@ -32,8 +32,7 @@ const preview: Preview = {
         title: 'Theme',
         icon: 'paintbrush',
         items: [
-          { value: 'dark', title: 'HIGH (dark)' },
-          { value: 'dim', title: 'DIM' },
+          { value: 'midnight', title: 'MIDNIGHT' },
           { value: 'sketch', title: 'SKETCH (paper & ink)' },
         ],
         dynamicTitle: true,
@@ -41,11 +40,11 @@ const preview: Preview = {
     },
   },
   initialGlobals: {
-    theme: 'dark',
+    theme: 'midnight',
   },
   decorators: [
     (Story, context) => (
-      <ThemeDecorator theme={context.globals.theme ?? 'dark'}>
+      <ThemeDecorator theme={context.globals.theme ?? 'midnight'}>
         <Story />
       </ThemeDecorator>
     ),

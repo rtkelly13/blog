@@ -40,7 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
       defaultTheme="dark"
       enableSystem={false}
       disableTransitionOnChange
-      themes={['dark', 'dim', 'sketch']}
+      themes={['midnight', 'sketch']}
       // Each theme maps to a single class on <html> (`dark`, `dim`, `sketch`) —
       // a value with a space would break next-themes' classList calls. `dark`
       // and `dim` are dark; the `dark:` Tailwind variant is taught to match

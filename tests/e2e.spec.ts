@@ -110,7 +110,7 @@ test.describe('Dark Mode', () => {
     const html = page.locator('html');
     const htmlClass = await html.getAttribute('class');
 
-    expect(htmlClass).toContain('dark');
+    expect(htmlClass).toContain('midnight');
   });
 });
 

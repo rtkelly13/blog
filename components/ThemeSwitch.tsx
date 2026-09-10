@@ -1,22 +1,20 @@
-import { CloudMoon, type LucideIcon, Moon, Sun } from 'lucide-react';
+import { type LucideIcon, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
 // Three themes cycled in order. `dark` is the original high-contrast brutalist
 // look (white on black); `dim` softens it toward charcoal / off-white; `sketch`
 // is a light paper-and-ink theme with blue / red / green accents.
-const THEMES = ['dark', 'dim', 'sketch'] as const;
+const THEMES = ['midnight', 'sketch'] as const;
 const LABELS: Record<string, string> = {
-  dark: 'HIGH',
-  dim: 'DIM',
+  midnight: 'MIDNIGHT',
   sketch: 'SKETCH',
 };
 // A distinct glyph per theme so the current mode is legible at a glance
-// (moon = dark, cloud-moon = dim, sun = sketch) — the icon-only button used
-// the same half-disc for all three.
+// (moon = midnight, sun = sketch) — the icon-only button used the same
+// half-disc for both. `CloudMoon` went with `dim` in design-system 0.5.0.
 const ICONS: Record<string, LucideIcon> = {
-  dark: Moon,
-  dim: CloudMoon,
+  midnight: Moon,
   sketch: Sun,
 };
 
@@ -31,7 +29,7 @@ const ThemeSwitch = () => {
   const active =
     mounted && theme && THEMES.includes(theme as (typeof THEMES)[number])
       ? theme
-      : 'dark';
+      : 'midnight';
   const next =
     THEMES[
       (THEMES.indexOf(active as (typeof THEMES)[number]) + 1) % THEMES.length

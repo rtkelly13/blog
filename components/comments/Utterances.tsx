@@ -1,7 +1,7 @@
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
-
 import siteMetadata from '@/data/siteMetadata';
+import { isDarkTheme } from '@/lib/themePolarity';
 
 interface Props {
   issueTerm: string;
@@ -10,11 +10,9 @@ interface Props {
 const Utterances = ({ issueTerm }: Props) => {
   const [enableLoadComments, setEnabledLoadComments] = useState(true);
   const { theme, resolvedTheme } = useTheme();
-  const commentsTheme =
-    // `dim` is a softened dark theme, so treat it as dark here.
-    theme !== 'light' && resolvedTheme !== 'light'
-      ? siteMetadata.comment.utterancesConfig.darkTheme
-      : siteMetadata.comment.utterancesConfig.theme;
+  const commentsTheme = isDarkTheme(theme, resolvedTheme)
+    ? siteMetadata.comment.utterancesConfig.darkTheme
+    : siteMetadata.comment.utterancesConfig.theme;
 
   const COMMENTS_ID = 'comments-container';
 
