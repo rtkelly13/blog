@@ -196,7 +196,7 @@ function readPalette(el: Element) {
   return {
     grid: readColor(styles.getPropertyValue('--hero-grid-strong'), NEON_GRID),
     ring: readColor(styles.getPropertyValue('--hero-ring'), NEON_RING),
-    bg: readColor(styles.getPropertyValue('--brutalist-darkBg'), NEON_BG),
+    bg: readColor(styles.getPropertyValue('--ds-surface-base'), NEON_BG),
   };
 }
 
