@@ -48,7 +48,7 @@ test.describe('Visual Regression - Midnight', () => {
     await page.goto('/');
     await waitForPageReady(page);
     // Verify midnight is active
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
     await expect(page).toHaveScreenshot('homepage-midnight.png', {
       fullPage: true,
     });
@@ -57,7 +57,7 @@ test.describe('Visual Regression - Midnight', () => {
   test('blog listing', async ({ page }) => {
     await page.goto('/blog');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
     await expect(page).toHaveScreenshot('blog-midnight.png', {
       fullPage: true,
     });
@@ -66,7 +66,7 @@ test.describe('Visual Regression - Midnight', () => {
   test('blog post', async ({ page }) => {
     await page.goto('/blog/aws-batch/cookbook');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
     await expect(page).toHaveScreenshot('blog-post-midnight.png', {
       fullPage: true,
     });
@@ -75,7 +75,7 @@ test.describe('Visual Regression - Midnight', () => {
   test('about page', async ({ page }) => {
     await page.goto('/about');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
     await expect(page).toHaveScreenshot('about-midnight.png', {
       fullPage: true,
     });
@@ -84,7 +84,7 @@ test.describe('Visual Regression - Midnight', () => {
   test('tags page', async ({ page }) => {
     await page.goto('/tags');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
     await expect(page).toHaveScreenshot('tags-midnight.png', {
       fullPage: true,
     });
@@ -93,7 +93,7 @@ test.describe('Visual Regression - Midnight', () => {
   test('talks page', async ({ page }) => {
     await page.goto('/talks');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
     await expect(page).toHaveScreenshot('talks-midnight.png', {
       fullPage: true,
     });
@@ -102,7 +102,7 @@ test.describe('Visual Regression - Midnight', () => {
   test('404 page', async ({ page }) => {
     await page.goto('/this-page-does-not-exist');
     await waitForPageReady(page);
-    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
     await expect(page).toHaveScreenshot('404-midnight.png', { fullPage: true });
   });
 });
