@@ -18,6 +18,10 @@ const ThemeDecorator = ({
     const root = document.documentElement;
     root.classList.remove(...THEMES);
     root.classList.add(theme);
+    // The design system selects on `[data-theme]`, so Storybook has to set it
+    // too or a story renders the root level's tokens whatever the toolbar says
+    // — the same break `pages/_app.tsx` had.
+    root.setAttribute('data-theme', theme);
   }, [theme]);
   // Paint the canvas with remapped tokens so the story sits on the theme's
   // surface (paper in SKETCH, black terminal in HIGH/DIM).
