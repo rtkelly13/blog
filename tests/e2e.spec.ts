@@ -103,14 +103,14 @@ test.describe('404 Page', () => {
   });
 });
 
-test.describe('Dark Mode', () => {
-  test('defaults to dark mode', async ({ page }) => {
+test.describe('Default theme', () => {
+  test('defaults to midnight', async ({ page }) => {
     await page.goto('/');
 
     const html = page.locator('html');
     const htmlClass = await html.getAttribute('class');
 
-    expect(htmlClass).toContain('dark');
+    expect(htmlClass).toContain('midnight');
   });
 });
 

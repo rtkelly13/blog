@@ -1,7 +1,7 @@
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
-
 import siteMetadata from '@/data/siteMetadata';
+import { isDarkTheme } from '@/lib/themePolarity';
 
 interface Props {
   mapping: string;
@@ -12,8 +12,7 @@ const Giscus = ({ mapping }: Props) => {
   const { theme, resolvedTheme } = useTheme();
   const commentsTheme =
     siteMetadata.comment.giscusConfig.themeURL === ''
-      ? // `dim` is a softened dark theme, so treat it as dark here.
-        theme !== 'light' && resolvedTheme !== 'light'
+      ? isDarkTheme(theme, resolvedTheme)
         ? siteMetadata.comment.giscusConfig.darkTheme
         : siteMetadata.comment.giscusConfig.theme
       : siteMetadata.comment.giscusConfig.themeURL;

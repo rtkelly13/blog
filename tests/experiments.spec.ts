@@ -62,8 +62,9 @@ test.describe('Site rail foundation', () => {
     await expect(page.locator('h1')).toContainText('SITE_RAIL');
 
     // One rail per theme. Scoped to <main> because <html> carries the
-    // reader's own theme class and would otherwise be counted.
-    await expect(page.locator('main .dark')).toHaveCount(1);
+    // reader's own theme class and would otherwise be counted. `.dark` became
+    // `.midnight` with design-system 0.5.0.
+    await expect(page.locator('main .midnight')).toHaveCount(1);
     await expect(page.locator('main .sketch')).toHaveCount(1);
   });
 
@@ -74,7 +75,7 @@ test.describe('Site rail foundation', () => {
       waitUntil: 'domcontentloaded',
     });
 
-    const rail = page.locator('main .dark');
+    const rail = page.locator('main .midnight');
     const talks = rail.getByRole('tab', { name: 'TALKS' });
     const blog = rail.getByRole('tab', { name: 'BLOG' });
 

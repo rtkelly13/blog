@@ -2,7 +2,7 @@
 
 @import "tailwindcss";
 
-/* Design-system token contract: brutalist @theme tokens, the .dark/.dim dark
+/* Design-system token contract: brutalist @theme tokens, the .midnight dark
    variant, per-mode variable blocks, and @source for the DS components. */
 @import "@rtkelly13/design-system/theme.css";
 
@@ -56,8 +56,14 @@
        resolve through Tailwind's own color variables so the hundreds of
        `bg-black` / `text-white` / `border-white` utilities re-theme in lockstep
        with the body. */
-    background-color: var(--color-black, #000000);
-    color: var(--color-white, #ffffff);
+    /* The fallbacks were #000000 / #ffffff, and `.dark` never set
+       `--color-black`, so the dark theme painted true black while the hero
+       painted its own ground — a visible seam below the fold. `.midnight` sets
+       both below, and the fallbacks are now the design system's own values
+       rather than absolutes, so a missed scope degrades to the brand rather
+       than to black. */
+    background-color: var(--color-black, #0a0a1a);
+    color: var(--color-white, #e4e4e7);
     overflow-x: clip;
   }
 
@@ -133,11 +139,17 @@ html {
   --diagram-text-light: #a1a1aa;
 }
 
-.dark {
-  /* Nested theme panels: a `.dark` panel inside a `.sketch` root (e.g. the
+.midnight {
+  /* Declared here, not inherited from a fallback. `.dark` used to omit these
+     and rely on `var(--color-black, #000000)`, which is how true black reached
+     the page. */
+  --color-black: #0a0a1a;
+  --color-white: #e4e4e7;
+
+  /* Nested theme panels: a `.midnight` panel inside a `.sketch` root (e.g. the
      design-sandbox component library) must not inherit sketch's inverted zinc
-     scale, so reset it to Tailwind's defaults here. Redundant when `.dark` is
-     on <html> (these ARE the defaults), load-bearing when nested. */
+     scale, so reset it to Tailwind's defaults here. Redundant when `.midnight`
+     is on <html> (these ARE the defaults), load-bearing when nested. */
   --color-zinc-950: #09090b;
   --color-zinc-900: #18181b;
   --color-zinc-800: #27272a;
@@ -162,7 +174,7 @@ html {
 
 /* ── DIM THEME ───────────────────────────────────────────────────────────
    A softened dark theme that keeps the brutalist look but takes the edge off
-   the pure-black / pure-white contrast. It layers on top of `.dark` (the html
+   the pure-black / pure-white contrast. It layers on top of `.midnight` (the html
    element carries both classes — see pages/_app.tsx), so every `dark:` variant
    still fires; we only re-point the palette tokens.
 
@@ -171,52 +183,21 @@ html {
    ~200 `border-white` utilities across the site in one place. Bright accent
    tokens (brutalist cyan/pink/yellow) are inlined literals and stay put, so
    dark-text-on-accent buttons keep their contrast. */
-.dim {
-  /* Charcoal instead of true black; warm off-white instead of #fff. */
-  --color-black: #17171b;
-  --color-white: #d8d8d2;
-
-  /* The design-system's theme.css softens the accents under `.dim`; this blog
-     keeps them identical to dark (dim only re-points black/white/zinc) — see
-     tests/theme-toggle.spec.ts. Pin them back explicitly. */
-  --brutalist-cyan: #22d3ee;
-  --brutalist-pink: #ec4899;
-  --brutalist-yellow: #facc15;
-
-  /* Lift the near-black zinc surfaces one notch so panels stay legible
-     against the lighter charcoal background. */
-  --color-zinc-950: #17171b;
-  --color-zinc-900: #202024;
-  --color-zinc-800: #2a2a2f;
-
-  /* Softer offset shadows to match the reduced contrast. */
-  --brutalist-shadow-color: rgba(216, 216, 210, 0.85);
-
-  /* Reading surface: soften prose headings/emphasis that hardcode #fff, and
-     ease the body text a touch. `prose-invert` reads these variables. */
-  --tw-prose-invert-headings: #eaeae4;
-  --tw-prose-invert-bold: #eaeae4;
-  --tw-prose-invert-body: #c4c4be;
-
-  /* Diagrams follow the softened palette. */
-  --diagram-bg: #17171b;
-  --diagram-bg-secondary: #202024;
-  --diagram-stroke: #d8d8d2;
-  --diagram-fill-quaternary: #d8d8d2;
-  --diagram-text: #d8d8d2;
-}
 
 /* Prose headings, emphasis, blockquotes, table headers and rules hardcode
-   `#fff` via the typography config; re-point them to the dim off-white so the
-   reading surface doesn't reintroduce the harsh white the dim theme removes. */
-.dim
+   `#fff` via the typography config; re-point them to midnight's off-white so
+   the reading surface doesn't reintroduce a harsh white the theme never uses.
+   Was scoped to `.dim`, which collapsed into `midnight` in DS 0.5.0. */
+.midnight
   .prose
   :where(h1, h2, h3, h4, h5, h6, strong, blockquote, thead):not(
     :where([class~="not-prose"] *)
   ) {
   color: #eaeae4;
 }
-.dim .prose :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
+.midnight
+  .prose
+  :where(hr, thead, tbody tr):not(:where([class~="not-prose"] *)) {
   border-color: #d8d8d2;
 }
 
@@ -249,13 +230,18 @@ html {
   --color-zinc-300: #3b362a;
   --color-zinc-200: #2a2620;
 
-  /* Accents: blue / red / green (and the "neon" aliases follow suit). */
-  --brutalist-cyan: #2563eb;
-  --brutalist-pink: #dc2626;
-  --brutalist-yellow: #15803d;
-  --brutalist-neonGreen: #15803d;
-  --brutalist-neonCyan: #2563eb;
-  --brutalist-cyberOrange: #dc2626;
+  /* Accents are NOT overridden here any more.
+   *
+   * This block used to pin `--brutalist-cyan: #2563eb`, `--brutalist-pink:
+   * #dc2626` and `--brutalist-yellow: #15803d` — a second, ungated copy of the
+   * light palette, and the one ADR 0002 in the design system records as the
+   * failure mode of per-surface palettes. All three failed WCAG AA against the
+   * sketch `sunken` ground: 4.31:1, 4.03:1 and 4.18:1.
+   *
+   * design-system 0.5.0 solves the light accents against that ground and emits
+   * the compat aliases itself, so deleting these lets the gated values through:
+   * #1450d7 at 5.54:1, #bd0010 at 5.52:1, #006b2e at 5.57:1. The package is now
+   * the only place these are written. */
 
   /* Hard offset shadows in ink so they read on the light background. */
   --brutalist-shadow-color: rgba(35, 38, 46, 0.9);
@@ -355,11 +341,11 @@ html {
 
 /* Light-grey text utilities (used as primary text on the dark themes) are
    inlined literals, so re-point the light end of the grey scale to ink under
-   sketch so it stays legible on paper. Excludes nested `.dark`/`.dim` theme
+   sketch so it stays legible on paper. Excludes a nested `.midnight` theme
    panels (design-sandbox component library), where light grey is correct. */
 .sketch
 :is(.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400):not(
-  .sketch :is(.dark, .dim) *
+  .sketch .midnight *
 ) {
   color: #33373f;
 }

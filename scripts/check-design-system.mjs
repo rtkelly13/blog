@@ -231,11 +231,26 @@ function themeContract() {
   const appPath = path.join(ROOT, 'pages', '_app.tsx');
   if (!existsSync(appPath)) return null;
   const src = readFileSync(appPath, 'utf8');
-  const attr = src.match(/attribute=["']([^"']+)["']/)?.[1];
+  // `attribute` takes a string OR an array — next-themes 0.4 accepts
+  // `attribute={['class', 'data-theme']}`, which is what this app uses so that
+  // the design system's `[data-theme]` blocks match *and* this repo's own
+  // `.midnight` / `.sketch` rules keep working.
+  //
+  // Reading only the string form was this checker's own blind spot: it reported
+  // the class-only fault correctly, then went on reporting it after the fix,
+  // because an array is not a quoted scalar. A gate that cannot see the
+  // remedy it asks for is a gate nobody can satisfy.
+  const attrs = (() => {
+    const arr = src.match(/attribute=\{\[([^\]]+)\]\}/)?.[1];
+    if (arr) return [...arr.matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]);
+    const one = src.match(/attribute=["']([^"']+)["']/)?.[1];
+    return one ? [one] : [];
+  })();
+  const attr = attrs[0];
   const list = src.match(/themes=\{\[([^\]]+)\]\}/)?.[1];
   if (!attr || !list) return null;
   const themes = [...list.matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]);
-  return { attr, themes };
+  return { attr, attrs, themes };
 }
 
 const contract = themeContract();
@@ -251,13 +266,16 @@ if (contract) {
     themeCss,
   );
   const dsAttr = themeCss.match(/\[\s*(data-[a-z-]+)\s*=/)?.[1] ?? null;
-  const blogUsesClasses = contract.attr === 'class';
+  // Both mechanisms may be in play at once, and that is the correct
+  // configuration here rather than a hedge.
+  const blogUsesClasses = contract.attrs.includes('class');
+  const blogUsesDsAttr = dsAttr !== null && contract.attrs.includes(dsAttr);
 
-  if (blogUsesClasses && !dsUsesClasses && dsAttr) {
+  if (blogUsesClasses && !blogUsesDsAttr && !dsUsesClasses && dsAttr) {
     themeProblems.push(
       `the design system selects themes with [${dsAttr}="…"], but this blog applies them with attribute="class" — none of its theme blocks can match, so every level falls back to :root`,
     );
-  } else if (!blogUsesClasses && dsUsesClasses) {
+  } else if (!blogUsesClasses && !blogUsesDsAttr && dsUsesClasses) {
     themeProblems.push(
       `the design system selects themes with classes, but this blog applies them with attribute="${contract.attr}" — none of its theme blocks can match`,
     );
@@ -347,7 +365,7 @@ if (asJson) {
   );
   if (contract) {
     console.log(
-      `  themes     ${contract.themes.join(', ')} via attribute="${contract.attr}"`,
+      `  themes     ${contract.themes.join(', ')} via attribute=${contract.attrs.map((a) => `"${a}"`).join(' + ')}`,
     );
   }
   if (themeProblems.length > 0) {

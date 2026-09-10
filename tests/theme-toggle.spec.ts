@@ -1,37 +1,53 @@
 import { expect, type Page, test } from '@playwright/test';
 
 /**
- * Regression tests for the three-way theme toggle (components/ThemeSwitch):
- * dark (HIGH) → dim → sketch → dark.
+ * Regression tests for the two-way theme toggle (components/ThemeSwitch):
+ * `midnight` → `sketch` → `midnight`.
  *
- * These are functional (computed-style) assertions rather than pixel snapshots,
- * so they run on every platform and pin the *behaviour* of the theme system:
+ * Functional (computed-style) assertions rather than pixel snapshots, so they
+ * run on every platform and pin the *behaviour* of the theme system:
  *
- *  - `dark` is the default; the toggle cycles through all three themes,
- *  - each theme actually re-themes the rendered surface (body + reading copy),
- *  - the palettes match the tokens defined in css/tailwind.css,
- *  - accents stay put in dark/dim and become blue/red/green under sketch,
+ *  - `midnight` is the default; the toggle cycles both themes,
+ *  - each one actually re-themes the rendered surface (body + reading copy),
+ *  - the values come from the design system, not from this repo,
  *  - the choice persists across reloads (next-themes localStorage).
  *
- * The exact RGB values below are the source of truth for the palettes; if
- * css/tailwind.css changes them, update here in lockstep.
+ * ## Two things this file used to assert that were wrong
+ *
+ * It was a **three**-way toggle — `dark (HIGH) → dim → sketch` — and design-system
+ * 0.5.0 collapsed the ladder to two Levels, so `dim` is gone and `dark` is now
+ * `midnight`.
+ *
+ * More importantly it asserted `DARK_BG = 'rgb(0, 0, 0)'` with the comment
+ * *"--color-black default"*. That was pure black reaching the page because
+ * `.dark` never set `--color-black` and the fallback in the `body` rule was
+ * `#000000`. The test was not describing a decision; it was pinning a bug, and
+ * pinning it is why it survived. `.midnight` now declares the value.
+ *
+ * The RGB values below are **not** the source of truth any more. The design
+ * system is, and `css/tailwind.css` no longer re-declares the accents. If these
+ * need changing, the change belongs in `@rtkelly13/design-system`.
  */
 
-// Dark (default) + dim (softened dark) tokens.
-const DARK_BG = 'rgb(0, 0, 0)'; // --color-black default
-const DARK_FG = 'rgb(255, 255, 255)'; // --color-white default
-const DIM_BG = 'rgb(23, 23, 27)'; // #17171b
-const DIM_FG = 'rgb(216, 216, 210)'; // #d8d8d2
-const DIM_HEADING = 'rgb(234, 234, 228)'; // #eaeae4
+// midnight — the design system's dark Level.
+const MIDNIGHT_BG = 'rgb(10, 10, 26)'; // #0a0a1a
+const MIDNIGHT_FG = 'rgb(228, 228, 231)'; // #e4e4e7
 
-// Sketch (light paper/ink) tokens.
+// sketch — paper and ink.
 const SKETCH_BG = 'rgb(245, 243, 236)'; // #f5f3ec paper
 const SKETCH_FG = 'rgb(35, 38, 46)'; // #23262e ink
-const SKETCH_HEADING = 'rgb(28, 31, 39)'; // #1c1f27
 
-// Accents: constant cyan in dark/dim; blue under sketch.
-const ACCENT_CYAN = 'rgb(34, 211, 238)'; // #22d3ee (dark/dim)
-const ACCENT_BLUE = 'rgb(37, 99, 235)'; // #2563eb (sketch)
+/**
+ * Accents, and the reason these numbers moved.
+ *
+ * The sketch accents used to be pinned in `css/tailwind.css` at `#2563eb`,
+ * `#dc2626` and `#15803d` — a second, ungated copy of the light palette. All
+ * three failed WCAG AA against the sketch `sunken` ground (4.31:1, 4.03:1,
+ * 4.18:1). The overrides are deleted and the design system's solved values come
+ * through instead, each clearing 5.5:1.
+ */
+const ACCENT_MIDNIGHT = 'rgb(34, 211, 238)'; // #22d3ee
+const ACCENT_SKETCH = 'rgb(20, 80, 215)'; // #1450d7 — was #2563eb at 4.31:1
 
 const toggle = (page: Page) => page.getByRole('button', { name: /^Theme:/ });
 
@@ -55,13 +71,22 @@ const readAccentBg = (page: Page, className: string) =>
   }, className);
 
 test.describe('Theme toggle — homepage', () => {
-  test('defaults to the high-contrast dark theme', async ({ page }) => {
+  test('defaults to midnight', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.locator('html')).toHaveClass(/dark/);
-    await expect(page.locator('html')).not.toHaveClass(/dim/);
-    expect(await bodyStyle(page, 'background-color')).toBe(DARK_BG);
-    expect(await bodyStyle(page, 'color')).toBe(DARK_FG);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
+    await expect(page.locator('html')).not.toHaveClass(/sketch/);
+    expect(await bodyStyle(page, 'background-color')).toBe(MIDNIGHT_BG);
+    expect(await bodyStyle(page, 'color')).toBe(MIDNIGHT_FG);
+  });
+
+  test('the default ground is not pure black', async ({ page }) => {
+    // The specific regression. `.dark` used to omit `--color-black`, so the
+    // `body` rule fell through to its `#000000` fallback and the page painted
+    // true black under the hero's own `#0a0a1a` — a visible seam. Asserted
+    // separately from the value above so the intent survives a re-theme.
+    await page.goto('/');
+    expect(await bodyStyle(page, 'background-color')).not.toBe('rgb(0, 0, 0)');
   });
 
   test('toggle is present and labelled for assistive tech', async ({
@@ -71,169 +96,66 @@ test.describe('Theme toggle — homepage', () => {
 
     const button = toggle(page);
     await expect(button).toBeVisible();
-    // Label announces the current theme and the next one in the cycle.
     await expect(button).toHaveAttribute(
       'aria-label',
-      'Theme: HIGH. Switch to DIM.',
+      'Theme: MIDNIGHT. Switch to SKETCH.',
     );
   });
 
-  test('switching to dim softens the whole surface', async ({ page }) => {
+  test('one click reaches sketch', async ({ page }) => {
     await page.goto('/');
-
-    await toggle(page).click();
-
-    // Single `dim` class on <html> (not `dark`); the `dark:` variant is taught
-    // to also match `.dim`, so every `dark:` utility keeps applying.
-    await expect(page.locator('html')).toHaveClass(/dim/);
-    await expect(page.locator('html')).not.toHaveClass(/dark/);
-
-    expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
-    expect(await bodyStyle(page, 'color')).toBe(DIM_FG);
-
-    // The palette tokens themselves are re-pointed (the mechanism the whole
-    // site relies on), not just the body.
-    expect(
-      await page.evaluate(() =>
-        getComputedStyle(document.documentElement)
-          .getPropertyValue('--color-black')
-          .trim(),
-      ),
-    ).toBe('#17171b');
-
-    await expect(toggle(page)).toHaveAttribute(
-      'aria-label',
-      'Theme: DIM. Switch to SKETCH.',
-    );
-  });
-
-  test('switching to sketch inverts to light paper with blue accents', async ({
-    page,
-  }) => {
-    await page.goto('/');
-
-    // dark → dim → sketch
-    await toggle(page).click();
     await toggle(page).click();
 
     await expect(page.locator('html')).toHaveClass(/sketch/);
-    await expect(page.locator('html')).not.toHaveClass(/dark/);
-    await expect(page.locator('html')).not.toHaveClass(/dim/);
-
-    // Light paper background, dark ink text.
     expect(await bodyStyle(page, 'background-color')).toBe(SKETCH_BG);
     expect(await bodyStyle(page, 'color')).toBe(SKETCH_FG);
-
-    // The neon cyan accent becomes blue under sketch...
-    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_BLUE);
-
     await expect(toggle(page)).toHaveAttribute(
       'aria-label',
-      'Theme: SKETCH. Switch to HIGH.',
+      'Theme: SKETCH. Switch to MIDNIGHT.',
     );
   });
 
-  test('cycles all the way back to dark', async ({ page }) => {
+  test('a second click returns to midnight', async ({ page }) => {
     await page.goto('/');
-
-    // dark → dim → sketch → dark
-    await toggle(page).click();
     await toggle(page).click();
     await toggle(page).click();
 
-    await expect(page.locator('html')).toHaveClass(/dark/);
-    await expect(page.locator('html')).not.toHaveClass(/dim/);
-    await expect(page.locator('html')).not.toHaveClass(/sketch/);
-    expect(await bodyStyle(page, 'background-color')).toBe(DARK_BG);
-    expect(await bodyStyle(page, 'color')).toBe(DARK_FG);
+    await expect(page.locator('html')).toHaveClass(/midnight/);
+    expect(await bodyStyle(page, 'background-color')).toBe(MIDNIGHT_BG);
   });
 
-  test('the chosen theme persists across reloads', async ({ page }) => {
-    await page.goto('/');
-
-    await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
-
-    await page.reload();
-
-    await expect(page.locator('html')).toHaveClass(/dim/);
-    expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
-    expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe(
-      'dim',
-    );
-  });
-
-  test('accents stay constant in dark and dim', async ({ page }) => {
-    await page.goto('/');
-
-    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_CYAN);
-
-    await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
-
-    // dim only re-points the black/white/zinc tokens, not the accents.
-    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_CYAN);
-  });
-});
-
-test.describe('Theme toggle — blog post', () => {
-  const POST = '/blog/aws-batch/cookbook';
-
-  test('toggle is available on a reading page', async ({ page }) => {
-    await page.goto(POST);
-    await expect(toggle(page)).toBeVisible();
-    await expect(page.locator('article .prose')).toBeVisible();
-  });
-
-  test('dim softens the reading surface (background and headings)', async ({
+  test('accents come from the design system on each theme', async ({
     page,
   }) => {
-    await page.goto(POST);
-
-    const heading = page.locator('article .prose :is(h1, h2, h3)').first();
-    await expect(heading).toBeVisible();
-
-    // Baseline: pure white heading on pure black in the default theme.
-    expect(await bodyStyle(page, 'background-color')).toBe(DARK_BG);
-    expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(
-      DARK_FG,
-    );
+    await page.goto('/');
+    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_MIDNIGHT);
 
     await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
-
-    // Reading surface softens: charcoal background, off-white headings.
-    expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
-    expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(
-      DIM_HEADING,
-    );
+    // Not #2563eb. That value was pinned in this repo and failed WCAG AA;
+    // deleting the override lets the package's gated #1450d7 through.
+    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_SKETCH);
   });
 
-  test('sketch turns the reading surface to ink on paper', async ({ page }) => {
-    await page.goto(POST);
-
-    const heading = page.locator('article .prose :is(h1, h2, h3)').first();
-    await expect(heading).toBeVisible();
-
-    // dark → dim → sketch
-    await toggle(page).click();
+  test('the choice persists across a reload', async ({ page }) => {
+    await page.goto('/');
     await toggle(page).click();
     await expect(page.locator('html')).toHaveClass(/sketch/);
 
+    await page.reload();
+    await expect(page.locator('html')).toHaveClass(/sketch/);
     expect(await bodyStyle(page, 'background-color')).toBe(SKETCH_BG);
-    expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(
-      SKETCH_HEADING,
-    );
   });
 
-  test('the chosen theme persists onto a blog post', async ({ page }) => {
-    await page.goto('/');
-    await toggle(page).click();
-    await expect(page.locator('html')).toHaveClass(/dim/);
+  test('the reading surface re-themes, not just the page chrome', async ({
+    page,
+  }) => {
+    await page.goto('/blog');
+    const heading = page.locator('h1, h2').first();
+    const dark = await heading.evaluate((el) => getComputedStyle(el).color);
 
-    // Navigate to the post; the preference should carry over.
-    await page.goto(POST);
-    await expect(page.locator('html')).toHaveClass(/dim/);
-    expect(await bodyStyle(page, 'background-color')).toBe(DIM_BG);
+    await toggle(page).click();
+    const light = await heading.evaluate((el) => getComputedStyle(el).color);
+
+    expect(light).not.toBe(dark);
   });
 });

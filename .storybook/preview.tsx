@@ -5,7 +5,7 @@ import '../css/tailwind.css';
 
 // Mirrors ThemeSwitch.tsx: next-themes puts one of these classes on <html>,
 // and css/tailwind.css remaps the colour tokens under `.dim` / `.sketch`.
-const THEMES = ['dark', 'dim', 'sketch'] as const;
+const THEMES = ['midnight', 'sketch'] as const;
 
 const ThemeDecorator = ({
   theme,
@@ -18,6 +18,10 @@ const ThemeDecorator = ({
     const root = document.documentElement;
     root.classList.remove(...THEMES);
     root.classList.add(theme);
+    // The design system selects on `[data-theme]`, so Storybook has to set it
+    // too or a story renders the root level's tokens whatever the toolbar says
+    // — the same break `pages/_app.tsx` had.
+    root.setAttribute('data-theme', theme);
   }, [theme]);
   // Paint the canvas with remapped tokens so the story sits on the theme's
   // surface (paper in SKETCH, black terminal in HIGH/DIM).
@@ -32,8 +36,7 @@ const preview: Preview = {
         title: 'Theme',
         icon: 'paintbrush',
         items: [
-          { value: 'dark', title: 'HIGH (dark)' },
-          { value: 'dim', title: 'DIM' },
+          { value: 'midnight', title: 'MIDNIGHT' },
           { value: 'sketch', title: 'SKETCH (paper & ink)' },
         ],
         dynamicTitle: true,
@@ -41,11 +44,11 @@ const preview: Preview = {
     },
   },
   initialGlobals: {
-    theme: 'dark',
+    theme: 'midnight',
   },
   decorators: [
     (Story, context) => (
-      <ThemeDecorator theme={context.globals.theme ?? 'dark'}>
+      <ThemeDecorator theme={context.globals.theme ?? 'midnight'}>
         <Story />
       </ThemeDecorator>
     ),

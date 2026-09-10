@@ -36,17 +36,28 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const tree = (
     <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
+      // Both, and this is load-bearing rather than belt-and-braces.
+      //
+      // The design system's generated `theme.css` selects on
+      // `[data-theme="..."]` — that is the package's contract, and its
+      // `@custom-variant` rules are built from the same selector. This app set
+      // only `attribute="class"`, so `[data-theme="sketch"]` never matched and
+      // the light level received **no** package tokens at all: only the
+      // `:root` block, which is midnight.
+      //
+      // That is why `css/tailwind.css` used to carry its own light accents. It
+      // was not duplication for its own sake, it was the only thing making
+      // sketch light — and it drifted, ending up three values that failed WCAG
+      // AA. Setting the attribute too lets the package's gated values through
+      // and is what makes deleting those overrides safe.
+      //
+      // The class is kept because this repo's own CSS selects on `.sketch` and
+      // `.midnight`, and because `dark:` utilities resolve through it.
+      attribute={['class', 'data-theme']}
+      defaultTheme="midnight"
       enableSystem={false}
       disableTransitionOnChange
-      themes={['dark', 'dim', 'sketch']}
-      // Each theme maps to a single class on <html> (`dark`, `dim`, `sketch`) —
-      // a value with a space would break next-themes' classList calls. `dark`
-      // and `dim` are dark; the `dark:` Tailwind variant is taught to match
-      // `.dim` too (see the `@custom-variant dark` rule in css/tailwind.css).
-      // `sketch` is light, so it is deliberately excluded — `dark:` utilities
-      // fall back to their light base styles under it.
+      themes={['midnight', 'sketch']}
     >
       <SearchProvider>
         <Head>

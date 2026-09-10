@@ -23,12 +23,18 @@ function ThemePanel({
   label,
   children,
 }: {
-  theme: 'dark' | 'sketch';
+  theme: 'midnight' | 'sketch';
   label: string;
   children: ReactNode;
 }) {
   return (
-    <div className={`${theme} border-2 border-white bg-black`}>
+    // Both the class and `data-theme`: this repo's CSS selects on the class,
+    // the design system's generated theme.css selects on the attribute. A
+    // nested panel that sets only the class gets the root level's tokens.
+    <div
+      className={`${theme} border-2 border-white bg-black`}
+      data-theme={theme}
+    >
       <div className="border-b-2 border-white bg-zinc-900 px-3 py-1.5">
         <span className="font-mono text-xs font-bold uppercase text-zinc-400">
           {label}
@@ -47,7 +53,7 @@ function Specimen({ name, children }: { name: string; children: ReactNode }) {
         [ {name} ]
       </h2>
       <div className="grid gap-4 lg:grid-cols-2">
-        <ThemePanel theme="dark" label="dark · neon terminal">
+        <ThemePanel theme="midnight" label="midnight · neon terminal">
           {children}
         </ThemePanel>
         <ThemePanel theme="sketch" label="sketch · paper & ink">
