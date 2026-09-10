@@ -14,7 +14,7 @@ const CyberHero = () => {
 
   return (
     <div
-      className="relative w-full h-screen -mt-[6rem] overflow-hidden bg-brutalist-darkBg"
+      className="relative w-full h-screen -mt-[6rem] overflow-hidden bg-surface-base"
       style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)' }}
     >
       {/* Background Grid */}
@@ -103,19 +103,19 @@ const CyberHero = () => {
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-display text-white mb-2 tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
           RYAN KELLY
         </h1>
-        <p className="text-lg md:text-2xl font-mono text-brutalist-neonGreen bg-black/50 px-4 py-1 drop-shadow-[0_0_8px_rgba(57,255,20,1)]">
+        <p className="text-lg md:text-2xl font-mono text-intent-success bg-black/50 px-4 py-1 drop-shadow-[0_0_8px_rgba(57,255,20,1)]">
           {'>'} FULL_STACK_ENGINEER.exe
         </p>
       </div>
 
       {/* Scroll indicator */}
       <div
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-brutalist-neonGreen transition-opacity duration-300 drop-shadow-[0_0_8px_rgba(57,255,20,1)]"
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-intent-success transition-opacity duration-300 drop-shadow-[0_0_8px_rgba(57,255,20,1)]"
         style={{
           opacity: scrollY > 100 ? 0 : 1,
         }}
       >
-        <div className="text-xl md:text-2xl font-pixel uppercase tracking-widest animate-pulse flex items-center gap-4 border border-brutalist-neonGreen px-4 py-2 bg-black/40">
+        <div className="text-xl md:text-2xl font-pixel uppercase tracking-widest animate-pulse flex items-center gap-4 border border-intent-success px-4 py-2 bg-black/40">
           <span>↓</span>
           <span>SCROLL</span>
           <span>↓</span>

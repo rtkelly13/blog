@@ -16,11 +16,11 @@ const CodePreview = ({ code }: { code: string }) => {
     <div className="relative">
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 px-3 py-1 bg-brutalist-cyan text-black font-mono text-xs font-bold border-2 border-white hover:bg-brutalist-pink transition-colors"
+        className="absolute top-2 right-2 px-3 py-1 bg-accent-primary text-black font-mono text-xs font-bold border-2 border-white hover:bg-accent-tertiary transition-colors"
       >
         {copied ? '✓ COPIED' : 'COPY'}
       </button>
-      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-brutalist-neonGreen">
+      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-intent-success">
         {code}
       </pre>
     </div>
@@ -47,7 +47,7 @@ export default function Typography() {
 
         <div className="container py-12 space-y-16">
           <section className="space-y-4">
-            <div className="border-l-4 border-brutalist-cyan pl-4">
+            <div className="border-l-4 border-accent-primary pl-4">
               <h2 className="text-2xl font-display font-bold text-white uppercase">
                 01. HEADINGS
               </h2>
@@ -63,13 +63,13 @@ export default function Typography() {
               <h3 className="text-xl md:text-3xl font-display font-bold uppercase text-white border-b-2 border-white/20 pb-2">
                 {'// H3_HEADING'}
               </h3>
-              <h4 className="text-lg md:text-2xl font-display font-bold uppercase text-brutalist-cyan">
+              <h4 className="text-lg md:text-2xl font-display font-bold uppercase text-accent-primary">
                 $ H4_HEADING
               </h4>
-              <h5 className="text-base md:text-xl font-display font-bold uppercase text-brutalist-pink">
+              <h5 className="text-base md:text-xl font-display font-bold uppercase text-accent-tertiary">
                 * H5_HEADING
               </h5>
-              <h6 className="text-sm md:text-lg font-display font-bold uppercase text-brutalist-yellow">
+              <h6 className="text-sm md:text-lg font-display font-bold uppercase text-accent-secondary">
                 # H6_HEADING
               </h6>
             </div>
@@ -87,14 +87,14 @@ export default function Typography() {
   {'// H3_HEADING'}
 </h3>
 
-<h4 className="text-lg md:text-2xl font-display font-bold uppercase text-brutalist-cyan">
+<h4 className="text-lg md:text-2xl font-display font-bold uppercase text-accent-primary">
   $ H4_HEADING
 </h4>`}
             />
           </section>
 
           <section className="space-y-4">
-            <div className="border-l-4 border-brutalist-pink pl-4">
+            <div className="border-l-4 border-accent-tertiary pl-4">
               <h2 className="text-2xl font-display font-bold text-white uppercase">
                 02. BODY_TEXT
               </h2>
@@ -133,7 +133,7 @@ export default function Typography() {
           </section>
 
           <section className="space-y-4">
-            <div className="border-l-4 border-brutalist-yellow pl-4">
+            <div className="border-l-4 border-accent-secondary pl-4">
               <h2 className="text-2xl font-display font-bold text-white uppercase">
                 03. TERMINAL_PROMPTS
               </h2>
@@ -141,32 +141,32 @@ export default function Typography() {
 
             <div className="bg-black border-2 border-white p-8 space-y-4">
               <div className="font-mono text-sm">
-                <span className="text-brutalist-cyan">{'>'}</span>
+                <span className="text-accent-primary">{'>'}</span>
                 <span className="text-white ml-2">
                   Arrow prompt for navigation items
                 </span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-brutalist-pink">{'$'}</span>
+                <span className="text-accent-tertiary">{'$'}</span>
                 <span className="text-white ml-2">
                   Dollar sign for command prompts
                 </span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-brutalist-yellow">{'//'}</span>
+                <span className="text-accent-secondary">{'//'}</span>
                 <span className="text-white ml-2">
                   Double slash for comments or sections
                 </span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-brutalist-neonGreen">{'*'}</span>
+                <span className="text-intent-success">{'*'}</span>
                 <span className="text-white ml-2">
                   Asterisk for list items or bullets
                 </span>
               </div>
               <div className="font-mono text-sm">
                 <span className="text-white">{'['}</span>
-                <span className="text-brutalist-cyan">STATUS</span>
+                <span className="text-accent-primary">STATUS</span>
                 <span className="text-white">{']'}</span>
                 <span className="text-zinc-400 ml-2">
                   Bracketed status indicators
@@ -176,20 +176,20 @@ export default function Typography() {
 
             <CodePreview
               code={`<div className="font-mono text-sm">
-  <span className="text-brutalist-cyan">{'>'}</span>
+  <span className="text-accent-primary">{'>'}</span>
   <span className="text-white ml-2">Arrow prompt</span>
 </div>
 
 <div className="font-mono text-sm">
   <span className="text-white">{'['}</span>
-  <span className="text-brutalist-cyan">STATUS</span>
+  <span className="text-accent-primary">STATUS</span>
   <span className="text-white">{']'}</span>
 </div>`}
             />
           </section>
 
           <section className="space-y-4">
-            <div className="border-l-4 border-brutalist-cyan pl-4">
+            <div className="border-l-4 border-accent-primary pl-4">
               <h2 className="text-2xl font-display font-bold text-white uppercase">
                 04. CODE_BLOCKS
               </h2>
@@ -197,10 +197,10 @@ export default function Typography() {
 
             <div className="bg-black border-2 border-white p-8 space-y-4">
               <div className="bg-zinc-900 border-2 border-white p-4 overflow-x-auto relative">
-                <div className="absolute top-0 right-0 bg-brutalist-yellow text-black px-2 py-1 text-xs font-mono font-bold">
+                <div className="absolute top-0 right-0 bg-accent-secondary text-black px-2 py-1 text-xs font-mono font-bold">
                   TYPESCRIPT
                 </div>
-                <pre className="font-mono text-sm text-brutalist-neonGreen">
+                <pre className="font-mono text-sm text-intent-success">
                   {`function greet(name: string): void {
   console.log(\`> Hello, \${name}!\`);
 }
@@ -210,7 +210,7 @@ greet('WORLD');`}
               </div>
 
               <div className="bg-black border border-white p-3">
-                <code className="font-mono text-xs text-brutalist-cyan">
+                <code className="font-mono text-xs text-accent-primary">
                   npm install @brutalist/ui
                 </code>
               </div>
@@ -218,22 +218,22 @@ greet('WORLD');`}
 
             <CodePreview
               code={`<div className="bg-zinc-900 border-2 border-white p-4 relative">
-  <div className="absolute top-0 right-0 bg-brutalist-yellow text-black px-2 py-1 text-xs font-mono font-bold">
+  <div className="absolute top-0 right-0 bg-accent-secondary text-black px-2 py-1 text-xs font-mono font-bold">
     TYPESCRIPT
   </div>
-  <pre className="font-mono text-sm text-brutalist-neonGreen">
+  <pre className="font-mono text-sm text-intent-success">
     {codeContent}
   </pre>
 </div>
 
-<code className="font-mono text-xs text-brutalist-cyan">
+<code className="font-mono text-xs text-accent-primary">
   npm install @brutalist/ui
 </code>`}
             />
           </section>
 
           <section className="space-y-4">
-            <div className="border-l-4 border-brutalist-pink pl-4">
+            <div className="border-l-4 border-accent-tertiary pl-4">
               <h2 className="text-2xl font-display font-bold text-white uppercase">
                 05. LINKS
               </h2>
@@ -242,7 +242,7 @@ greet('WORLD');`}
             <div className="bg-black border-2 border-white p-8 space-y-4">
               <Link
                 href="#"
-                className="font-mono text-base text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink transition-colors"
+                className="font-mono text-base text-accent-primary hover:text-accent-tertiary border-b-2 border-accent-primary hover:border-accent-tertiary transition-colors"
               >
                 {'>'} STANDARD_LINK
               </Link>
@@ -250,7 +250,7 @@ greet('WORLD');`}
               <div>
                 <Link
                   href="#"
-                  className="font-mono text-sm font-bold text-white bg-brutalist-cyan px-4 py-2 border-2 border-white hover:bg-brutalist-pink transition-colors inline-block"
+                  className="font-mono text-sm font-bold text-white bg-accent-primary px-4 py-2 border-2 border-white hover:bg-accent-tertiary transition-colors inline-block"
                 >
                   [ BUTTON_LINK ]
                 </Link>
@@ -258,7 +258,7 @@ greet('WORLD');`}
 
               <Link
                 href="#"
-                className="font-mono text-sm text-brutalist-yellow hover:text-brutalist-pink transition-colors flex items-center gap-2"
+                className="font-mono text-sm text-accent-secondary hover:text-accent-tertiary transition-colors flex items-center gap-2"
               >
                 <span>{'>'}</span>
                 <span>ARROW_LINK</span>
@@ -269,14 +269,14 @@ greet('WORLD');`}
             <CodePreview
               code={`<Link 
   href="#" 
-  className="font-mono text-base text-brutalist-cyan hover:text-brutalist-pink border-b-2 border-brutalist-cyan hover:border-brutalist-pink transition-colors"
+  className="font-mono text-base text-accent-primary hover:text-accent-tertiary border-b-2 border-accent-primary hover:border-accent-tertiary transition-colors"
 >
   {'>'} STANDARD_LINK
 </Link>
 
 <Link 
   href="#" 
-  className="font-mono text-sm font-bold text-white bg-brutalist-cyan px-4 py-2 border-2 border-white hover:bg-brutalist-pink transition-colors"
+  className="font-mono text-sm font-bold text-white bg-accent-primary px-4 py-2 border-2 border-white hover:bg-accent-tertiary transition-colors"
 >
   [ BUTTON_LINK ]
 </Link>`}
@@ -284,7 +284,7 @@ greet('WORLD');`}
           </section>
 
           <section className="space-y-4">
-            <div className="border-l-4 border-brutalist-yellow pl-4">
+            <div className="border-l-4 border-accent-secondary pl-4">
               <h2 className="text-2xl font-display font-bold text-white uppercase">
                 06. TAGS_AND_BADGES
               </h2>
@@ -292,16 +292,16 @@ greet('WORLD');`}
 
             <div className="bg-black border-2 border-white p-8">
               <div className="flex flex-wrap gap-3">
-                <span className="bg-brutalist-yellow text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
+                <span className="bg-accent-secondary text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
                   TAG_NAME
                 </span>
-                <span className="bg-brutalist-cyan text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
+                <span className="bg-accent-primary text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
                   FEATURED
                 </span>
-                <span className="bg-brutalist-pink text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
+                <span className="bg-accent-tertiary text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
                   NEW
                 </span>
-                <span className="bg-black text-brutalist-neonGreen font-mono text-xs font-bold px-3 py-1 border-2 border-brutalist-neonGreen uppercase">
+                <span className="bg-black text-intent-success font-mono text-xs font-bold px-3 py-1 border-2 border-intent-success uppercase">
                   [ACTIVE]
                 </span>
                 <span className="bg-zinc-900 text-white font-mono text-xs font-bold px-3 py-1 border border-white uppercase">
@@ -311,23 +311,23 @@ greet('WORLD');`}
             </div>
 
             <CodePreview
-              code={`<span className="bg-brutalist-yellow text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
+              code={`<span className="bg-accent-secondary text-black font-mono text-xs font-bold px-3 py-1 border-2 border-white uppercase">
   TAG_NAME
 </span>
 
-<span className="bg-black text-brutalist-neonGreen font-mono text-xs font-bold px-3 py-1 border-2 border-brutalist-neonGreen uppercase">
+<span className="bg-black text-intent-success font-mono text-xs font-bold px-3 py-1 border-2 border-intent-success uppercase">
   [ACTIVE]
 </span>`}
             />
           </section>
 
-          <div className="border-2 border-brutalist-cyan bg-zinc-900 p-6 mt-12">
-            <h3 className="font-display font-bold text-xl text-brutalist-cyan uppercase mb-4">
+          <div className="border-2 border-accent-primary bg-zinc-900 p-6 mt-12">
+            <h3 className="font-display font-bold text-xl text-accent-primary uppercase mb-4">
               [ TYPOGRAPHY_RULES ]
             </h3>
             <ul className="space-y-2 font-mono text-sm text-zinc-300">
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">{'>'}</span>
+                <span className="text-accent-primary mr-2">{'>'}</span>
                 <span>
                   <strong className="text-white">Three roles:</strong> Space
                   Grotesk for display/headings (font-display), Inter for body
@@ -336,36 +336,36 @@ greet('WORLD');`}
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">{'>'}</span>
+                <span className="text-accent-primary mr-2">{'>'}</span>
                 <span>
                   <strong className="text-white">Headings:</strong>{' '}
                   font-display, uppercase, bold (700) — real weight, never faux
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">{'>'}</span>
+                <span className="text-accent-primary mr-2">{'>'}</span>
                 <span>
                   <strong className="text-white">Code:</strong> IBM Plex Mono,
                   neon green (#39ff14) on black background
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">{'>'}</span>
+                <span className="text-accent-primary mr-2">{'>'}</span>
                 <span>
                   <strong className="text-white">Links:</strong> Cyan default,
                   pink on hover, with border-bottom
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-pink mr-2">*</span>
+                <span className="text-accent-tertiary mr-2">*</span>
                 <span>No rounded corners (border-radius: 0px)</span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-pink mr-2">*</span>
+                <span className="text-accent-tertiary mr-2">*</span>
                 <span>Hard borders (2px for emphasis, 1px for subtle)</span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-pink mr-2">*</span>
+                <span className="text-accent-tertiary mr-2">*</span>
                 <span>Terminal prefixes: {`> $ // * [ ]`}</span>
               </li>
             </ul>

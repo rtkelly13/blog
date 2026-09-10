@@ -14,14 +14,14 @@ function Banner({ slug, className }: { slug?: string; className?: string }) {
 
   return (
     <a href="/live" className={className ?? OVERLAY_CLASS}>
-      <span className="flex items-center gap-2 text-sm font-bold uppercase text-brutalist-pink">
-        <span className="inline-block h-2.5 w-2.5 animate-pulse bg-brutalist-pink" />
+      <span className="flex items-center gap-2 text-sm font-bold uppercase text-accent-tertiary">
+        <span className="inline-block h-2.5 w-2.5 animate-pulse bg-accent-tertiary" />
         Live now
       </span>
       <span className="max-w-[14rem] truncate text-sm text-white sm:max-w-xs">
         {talk.title}
       </span>
-      <span className="border-l-2 border-white pl-3 text-sm font-bold uppercase text-brutalist-cyan">
+      <span className="border-l-2 border-white pl-3 text-sm font-bold uppercase text-accent-primary">
         Join →
       </span>
     </a>

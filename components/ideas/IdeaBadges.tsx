@@ -2,10 +2,10 @@ import type { IdeaKind, IdeaStatus } from 'types/IdeaFrontMatter';
 
 const STATUS_CLASSES: Record<IdeaStatus, string> = {
   spark: 'bg-zinc-800 text-white',
-  developing: 'bg-brutalist-yellow text-black',
-  drafting: 'bg-brutalist-cyan text-black',
+  developing: 'bg-accent-secondary text-black',
+  drafting: 'bg-accent-primary text-black',
   published: 'bg-white text-black',
-  parked: 'bg-brutalist-pink text-black',
+  parked: 'bg-accent-tertiary text-black',
 };
 
 export function IdeaStatusBadge({ status }: { status: IdeaStatus }) {

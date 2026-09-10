@@ -6,5 +6,5 @@
  */
 export default function ErrorLine({ error }: { error: string | null }) {
   if (!error) return null;
-  return <p className="font-mono text-xs text-brutalist-pink">{error}</p>;
+  return <p className="font-mono text-xs text-accent-tertiary">{error}</p>;
 }

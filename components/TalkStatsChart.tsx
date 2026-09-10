@@ -30,13 +30,13 @@ function Chart({
       <div className="border-2 border-white bg-zinc-900 p-6">
         <div className="mb-6 flex flex-wrap gap-x-10 gap-y-2 font-mono">
           <div>
-            <div className="font-display text-5xl font-bold text-brutalist-cyan">
+            <div className="font-display text-5xl font-bold text-accent-primary">
               {stats.totalReactions}
             </div>
             <div className="text-xs uppercase text-zinc-400">reactions</div>
           </div>
           <div>
-            <div className="font-display text-5xl font-bold text-brutalist-yellow">
+            <div className="font-display text-5xl font-bold text-accent-secondary">
               {stats.attendees}
             </div>
             <div className="text-xs uppercase text-zinc-400">people joined</div>
@@ -49,7 +49,7 @@ function Chart({
               <span className="w-8 text-2xl">{r.emoji}</span>
               <div className="h-6 flex-1 border-2 border-white bg-black">
                 <div
-                  className="h-full bg-brutalist-cyan transition-all duration-500"
+                  className="h-full bg-accent-primary transition-all duration-500"
                   style={{ width: `${(r.total / max) * 100}%` }}
                 />
               </div>

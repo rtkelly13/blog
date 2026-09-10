@@ -49,7 +49,7 @@ export default function Projects() {
                   onClick={() => setActiveCategory(cat.id)}
                   className={`px-3 py-1 text-xs font-bold uppercase tracking-wider transition-colors border-2 ${
                     isActive
-                      ? 'bg-brutalist-cyan text-black border-brutalist-cyan shadow-glow-cyan'
+                      ? 'bg-accent-primary text-black border-accent-primary shadow-glow-accent-primary'
                       : 'bg-black text-zinc-400 border-zinc-700 hover:border-white hover:text-white'
                   }`}
                 >
@@ -63,7 +63,7 @@ export default function Projects() {
             href={siteMetadata.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-1 border-2 border-brutalist-pink bg-black text-white hover:bg-brutalist-pink hover:text-black transition-colors text-xs font-bold uppercase tracking-wider shadow-glow-pink self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-3 py-1 border-2 border-accent-tertiary bg-black text-white hover:bg-accent-tertiary hover:text-black transition-colors text-xs font-bold uppercase tracking-wider shadow-glow-accent-tertiary self-start sm:self-auto"
           >
             <GithubIcon className="w-3.5 h-3.5 fill-current" />
             <span>GitHub Profile</span>

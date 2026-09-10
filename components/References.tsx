@@ -32,9 +32,9 @@ function Entry({ ref, backlinks }: { ref: Reference; backlinks: boolean }) {
   return (
     <li
       id={ref.id}
-      className="flex gap-3 p-3 text-sm scroll-mt-24 target:bg-brutalist-cyan/10"
+      className="flex gap-3 p-3 text-sm scroll-mt-24 target:bg-accent-primary/10"
     >
-      <span className="shrink-0 font-bold text-brutalist-yellow">
+      <span className="shrink-0 font-bold text-accent-secondary">
         {ref.number == null ? (
           <Star className="h-3.5 w-3.5" aria-hidden="true" />
         ) : (
@@ -51,7 +51,7 @@ function Entry({ ref, backlinks }: { ref: Reference; backlinks: boolean }) {
         <p className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs">
           <Link
             href={ref.url}
-            className="inline-flex max-w-full items-baseline gap-1 text-brutalist-cyan hover:text-brutalist-pink transition-colors"
+            className="inline-flex max-w-full items-baseline gap-1 text-accent-primary hover:text-accent-tertiary transition-colors"
           >
             <ExternalLink
               className="h-3 w-3 shrink-0 self-center"
@@ -61,7 +61,7 @@ function Entry({ ref, backlinks }: { ref: Reference; backlinks: boolean }) {
           </Link>
           <Link
             href={ref.archiveUrl}
-            className="inline-flex items-baseline gap-1 whitespace-nowrap text-zinc-400 hover:text-brutalist-yellow transition-colors"
+            className="inline-flex items-baseline gap-1 whitespace-nowrap text-zinc-400 hover:text-accent-secondary transition-colors"
             title="Archived snapshot on the Wayback Machine"
           >
             <ArchiveRestore
@@ -114,11 +114,11 @@ export default function References({
         <>
           <h2
             id="references-heading"
-            className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-brutalist-yellow"
+            className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-accent-secondary"
           >
             <Star className="h-3.5 w-3.5" aria-hidden="true" /> [ Featured ]
           </h2>
-          <ol className="mb-8 border-2 border-brutalist-yellow bg-zinc-900 divide-y divide-zinc-800 shadow-hard-md">
+          <ol className="mb-8 border-2 border-accent-secondary bg-zinc-900 divide-y divide-zinc-800 shadow-hard-md">
             {featured.map((ref) => (
               <Entry key={ref.id} ref={ref} backlinks={backlinks} />
             ))}
@@ -131,7 +131,7 @@ export default function References({
           <h2
             // The first-rendered heading owns the section's aria label.
             id={featured.length > 0 ? undefined : 'references-heading'}
-            className="text-xs tracking-wide text-brutalist-yellow font-bold uppercase mb-3"
+            className="text-xs tracking-wide text-accent-secondary font-bold uppercase mb-3"
           >
             [ {label} ]
           </h2>

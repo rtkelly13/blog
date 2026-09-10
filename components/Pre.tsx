@@ -37,7 +37,7 @@ const Pre = ({ children }: Props) => {
           type="button"
           className={`absolute right-2 top-2 w-8 h-8 p-1 border-2 bg-black font-mono text-xs uppercase ${
             copied
-              ? 'focus:outline-hidden focus:border-brutalist-neonGreen border-brutalist-neonGreen text-brutalist-neonGreen'
+              ? 'focus:outline-hidden focus:border-intent-success border-intent-success text-intent-success'
               : 'border-white text-white hover:bg-white hover:text-black'
           } transition-colors`}
           onClick={onCopy}
@@ -46,7 +46,7 @@ const Pre = ({ children }: Props) => {
         </button>
       )}
 
-      <pre className="font-mono text-brutalist-neonGreen">{children}</pre>
+      <pre className="font-mono text-intent-success">{children}</pre>
     </div>
   );
 };

@@ -13,16 +13,16 @@ export default function KBarModal() {
     <KBarPortal>
       <KBarPositioner className="z-50 bg-black/80 p-4 backdrop-blur-sm">
         <KBarAnimator className="w-full max-w-xl">
-          <div className="overflow-hidden border-2 border-brutalist-cyan shadow-glow-cyan bg-black font-mono">
-            <div className="flex items-center space-x-4 p-4 border-b-2 border-brutalist-cyan">
-              <span className="block w-5 animate-pulse text-brutalist-cyan font-bold text-xl">
+          <div className="overflow-hidden border-2 border-accent-primary shadow-glow-accent-primary bg-black font-mono">
+            <div className="flex items-center space-x-4 p-4 border-b-2 border-accent-primary">
+              <span className="block w-5 animate-pulse text-accent-primary font-bold text-xl">
                 &gt;
               </span>
               <KBarSearch
                 defaultPlaceholder="search_system...|"
                 className="h-8 w-full bg-transparent text-white placeholder-zinc-500 focus:outline-hidden"
               />
-              <kbd className="inline-block whitespace-nowrap border-2 border-brutalist-pink px-2 py-1 align-middle text-xs font-bold leading-4 tracking-wide text-brutalist-pink bg-black uppercase">
+              <kbd className="inline-block whitespace-nowrap border-2 border-accent-tertiary px-2 py-1 align-middle text-xs font-bold leading-4 tracking-wide text-accent-tertiary bg-black uppercase">
                 ESC
               </kbd>
             </div>
@@ -41,17 +41,17 @@ function badge(section: string): { label: string; className: string } | null {
     case 'Blog Posts':
       return {
         label: 'LOG',
-        className: 'border-brutalist-cyan text-brutalist-cyan',
+        className: 'border-accent-primary text-accent-primary',
       };
     case 'Talks':
       return {
         label: 'TALK',
-        className: 'border-brutalist-pink text-brutalist-pink',
+        className: 'border-accent-tertiary text-accent-tertiary',
       };
     case 'Navigation':
       return {
         label: 'NAV',
-        className: 'border-brutalist-cyberOrange text-brutalist-cyberOrange',
+        className: 'border-accent-secondary text-accent-secondary',
       };
     default:
       return null;
@@ -68,7 +68,7 @@ function Snippet({ text, active }: { text: string; active: boolean }) {
           <mark
             key={i}
             className={`bg-transparent font-bold ${
-              active ? 'text-brutalist-yellow' : 'text-brutalist-neonGreen'
+              active ? 'text-accent-secondary' : 'text-intent-success'
             }`}
           >
             {part}
@@ -86,7 +86,7 @@ function RenderResults() {
 
   if (results.length === 0) {
     return (
-      <div className="block px-4 py-6 text-center text-brutalist-pink">
+      <div className="block px-4 py-6 text-center text-accent-tertiary">
         [ ERROR: NO_RESULTS_FOUND ]
       </div>
     );
@@ -98,7 +98,7 @@ function RenderResults() {
         items={results}
         onRender={({ item, active }) =>
           typeof item === 'string' ? (
-            <div className="block px-4 pb-2 pt-6 text-xs font-bold uppercase text-brutalist-cyberOrange tracking-widest border-t-2 border-zinc-800 mt-2">
+            <div className="block px-4 pb-2 pt-6 text-xs font-bold uppercase text-accent-secondary tracking-widest border-t-2 border-zinc-800 mt-2">
               {'// '}
               {item}
             </div>
@@ -106,7 +106,7 @@ function RenderResults() {
             <div
               className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-3 border-l-4 transition-colors ${
                 active
-                  ? 'bg-brutalist-cyan/20 text-brutalist-cyan border-brutalist-cyan'
+                  ? 'bg-accent-primary/20 text-accent-primary border-accent-primary'
                   : 'bg-transparent text-zinc-300 border-transparent hover:bg-zinc-900'
               }`}
             >
@@ -139,7 +139,7 @@ function RenderResults() {
                       key={sc}
                       className={`flex h-6 w-6 items-center justify-center border-2 text-xs font-bold ${
                         active
-                          ? 'border-brutalist-cyan text-brutalist-cyan'
+                          ? 'border-accent-primary text-accent-primary'
                           : 'border-zinc-500 text-zinc-500'
                       }`}
                     >
@@ -161,10 +161,10 @@ function Footer() {
   return (
     <div className="flex items-center gap-4 border-t-2 border-zinc-800 px-4 py-2 text-[10px] uppercase tracking-widest text-zinc-600">
       <span>
-        <span className="text-brutalist-cyan">↑↓</span> navigate
+        <span className="text-accent-primary">↑↓</span> navigate
       </span>
       <span>
-        <span className="text-brutalist-cyan">↵</span> open
+        <span className="text-accent-primary">↵</span> open
       </span>
       <span className="ml-auto text-zinc-700">full-body search</span>
     </div>

@@ -44,11 +44,11 @@ export function depFrameAt(t: number): DepFrame {
 }
 
 const C = {
-  cyan: 'var(--brutalist-cyan, #22d3ee)',
-  pink: 'var(--brutalist-pink, #ec4899)',
-  yellow: 'var(--brutalist-yellow, #facc15)',
-  green: 'var(--brutalist-neonGreen, #39ff14)',
-  orange: 'var(--brutalist-cyberOrange, #ff8c00)',
+  cyan: 'var(--ds-accent-primary)',
+  pink: 'var(--ds-accent-tertiary)',
+  yellow: 'var(--ds-accent-secondary)',
+  green: 'var(--ds-intent-success)',
+  orange: 'var(--ds-accent-secondary)',
   ink: 'var(--color-white, #ffffff)',
   dim: 'var(--color-zinc-800, #27272a)',
   muted: 'var(--color-zinc-600, #52525b)',
@@ -314,7 +314,7 @@ export default function DepResolve({
         <div className="border-t-2 border-white px-3 py-2 font-mono text-[11px]">
           <span className="text-zinc-500">paket.lock </span>
           {frame.lockWritten ? (
-            <span className="text-brutalist-neonGreen">
+            <span className="text-intent-success">
               NUGET → Lib 2.0 (one version, whole solution)
             </span>
           ) : (

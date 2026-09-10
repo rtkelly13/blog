@@ -29,11 +29,11 @@ export default function AuthorLayout({ children, frontMatter }: Props) {
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <h1 className="text-3xl font-display font-bold leading-tight tracking-widest text-white uppercase sm:text-4xl md:text-6xl drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] pb-4 inline-block relative">
             <BracketText>ABOUT_ME</BracketText>
-            <div className="absolute bottom-0 left-0 w-full h-[4px] bg-brutalist-pink shadow-glow-pink" />
+            <div className="absolute bottom-0 left-0 w-full h-[4px] bg-accent-tertiary shadow-glow-accent-tertiary" />
           </h1>
         </div>
         <div className="items-start space-y-2 xl:grid xl:grid-cols-3 xl:gap-x-8 xl:space-y-0 mt-8 pt-8">
-          <div className="flex flex-col items-center pt-8 bg-black/80 border-2 border-brutalist-pink shadow-glow-pink p-6 rounded-md">
+          <div className="flex flex-col items-center pt-8 bg-black/80 border-2 border-accent-tertiary shadow-glow-accent-tertiary p-6 rounded-md">
             <Image
               src={avatar}
               alt="avatar"
@@ -44,7 +44,7 @@ export default function AuthorLayout({ children, frontMatter }: Props) {
             <h3 className="pt-4 pb-2 text-2xl font-bold leading-8 tracking-tight uppercase text-white mt-4">
               {name}
             </h3>
-            <div className="text-brutalist-cyberOrange mb-1">
+            <div className="text-accent-secondary mb-1">
               {'>'} {occupation}
             </div>
             <div className="text-zinc-400">{company}</div>

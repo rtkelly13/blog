@@ -95,7 +95,7 @@ export default function TalkControls({
                   type="checkbox"
                   checked={liveConfig[key] as boolean}
                   onChange={(e) => setLiveFlag(key, e.target.checked)}
-                  className="h-4 w-4 accent-brutalist-cyan"
+                  className="h-4 w-4 accent-accent-primary"
                 />
                 {label}
               </label>
@@ -105,11 +105,11 @@ export default function TalkControls({
         <button
           type="button"
           onClick={() => run(() => end({}))}
-          className="border-2 border-white bg-brutalist-pink px-5 py-2 font-bold uppercase text-black shadow-hard-md"
+          className="border-2 border-white bg-accent-tertiary px-5 py-2 font-bold uppercase text-black shadow-hard-md"
         >
           End talk
         </button>
-        {error && <p className="text-sm text-brutalist-pink">{error}</p>}
+        {error && <p className="text-sm text-accent-tertiary">{error}</p>}
       </div>
     );
   }
@@ -175,7 +175,7 @@ export default function TalkControls({
                 type="checkbox"
                 checked={config[key] as boolean}
                 onChange={(e) => setFlag(key, e.target.checked)}
-                className="h-4 w-4 accent-brutalist-cyan"
+                className="h-4 w-4 accent-accent-primary"
               />
               {label}
             </label>
@@ -200,12 +200,12 @@ export default function TalkControls({
       <button
         type="button"
         onClick={() => run(() => start({ slug, title, config }))}
-        className="border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md"
+        className="border-2 border-white bg-accent-primary px-5 py-2 font-bold uppercase text-black shadow-hard-md"
       >
         Start talk
       </button>
 
-      {error && <p className="text-sm text-brutalist-pink">{error}</p>}
+      {error && <p className="text-sm text-accent-tertiary">{error}</p>}
     </div>
   );
 }

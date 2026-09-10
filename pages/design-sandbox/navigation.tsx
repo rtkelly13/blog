@@ -14,19 +14,19 @@ const ActionButtons = ({ visible }: { visible: boolean }) => (
     }`}
   >
     <button
-      className="border-2 border-white bg-brutalist-cyan text-black p-3 transition-all hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-1 active:translate-y-1"
+      className="border-2 border-white bg-accent-primary text-black p-3 transition-all hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-1 active:translate-y-1"
       aria-label="Table of Contents"
     >
       <FileText className="w-5 h-5" />
     </button>
     <button
-      className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black active:translate-x-1 active:translate-y-1"
+      className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-accent-primary hover:text-black active:translate-x-1 active:translate-y-1"
       aria-label="Scroll To Comment"
     >
       <MessageSquare className="w-5 h-5" />
     </button>
     <button
-      className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black active:translate-x-1 active:translate-y-1"
+      className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-accent-primary hover:text-black active:translate-x-1 active:translate-y-1"
       aria-label="Scroll To Top"
     >
       <ArrowUp className="w-5 h-5" />
@@ -53,7 +53,7 @@ const MainFab = ({
     onMouseUp={onMouseUp}
     onTouchStart={onTouchStart}
     onTouchEnd={onTouchEnd}
-    className={`border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-1 active:translate-y-1 ${customClass}`}
+    className={`border-2 border-white bg-black p-3 text-white transition-all hover:bg-accent-primary hover:text-black hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-1 active:translate-y-1 ${customClass}`}
     aria-label={isActive ? 'Close actions menu' : 'Open actions menu'}
   >
     {isActive ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -90,7 +90,7 @@ const DemoContainer = ({
         </div>
         <button
           onClick={copyCode}
-          className="bg-black text-brutalist-cyan px-3 py-1 font-mono text-xs border border-brutalist-cyan hover:bg-brutalist-cyan hover:text-black transition-colors shrink-0 ml-4"
+          className="bg-black text-accent-primary px-3 py-1 font-mono text-xs border border-accent-primary hover:bg-accent-primary hover:text-black transition-colors shrink-0 ml-4"
         >
           {copied ? '✓ COPIED' : 'COPY'}
         </button>
@@ -129,7 +129,7 @@ const ProximityReveal = () => {
   return (
     <div className="w-full h-full relative flex flex-col items-end justify-end p-6 gap-3">
       <div
-        className="absolute bottom-0 right-0 w-48 h-48 bg-brutalist-cyan/10"
+        className="absolute bottom-0 right-0 w-48 h-48 bg-accent-primary/10"
         onMouseEnter={() => setIsNearby(true)}
         onMouseLeave={() => setIsNearby(false)}
       />
@@ -168,7 +168,7 @@ const LongPressReveal = () => {
       onMouseLeave={handleMouseLeave}
     >
       {isPressing && !isActive && (
-        <div className="absolute bottom-6 right-6 border-4 border-brutalist-pink p-3 animate-ping z-0" />
+        <div className="absolute bottom-6 right-6 border-4 border-accent-tertiary p-3 animate-ping z-0" />
       )}
       <ActionButtons visible={isActive} />
       <MainFab
@@ -180,7 +180,7 @@ const LongPressReveal = () => {
         customClass="active:scale-95 transition-transform"
       />
       {isActive && (
-        <div className="absolute bottom-20 right-12 text-xs font-mono text-brutalist-pink bg-black px-2 py-1 border border-brutalist-pink">
+        <div className="absolute bottom-20 right-12 text-xs font-mono text-accent-tertiary bg-black px-2 py-1 border border-accent-tertiary">
           RELEASED!
         </div>
       )}
@@ -260,7 +260,7 @@ export default function NavigationSandbox() {
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <Link
             href="/design-sandbox"
-            className="text-brutalist-cyan hover:text-brutalist-pink font-mono text-sm mb-4 inline-block"
+            className="text-accent-primary hover:text-accent-tertiary font-mono text-sm mb-4 inline-block"
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
@@ -346,8 +346,8 @@ export default function NavigationSandbox() {
             </DemoContainer>
           </div>
 
-          <div className="mt-12 border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+          <div className="mt-12 border-2 border-accent-secondary bg-zinc-900 p-6">
+            <h2 className="font-display font-bold text-xl text-accent-secondary mb-4 uppercase">
               [ DESIGN_NOTES ]
             </h2>
             <ul className="text-white font-mono text-sm space-y-2">
@@ -366,7 +366,7 @@ export default function NavigationSandbox() {
                 {'>'} Animation: `transition-all duration-300` for reveals
               </li>
               <li>
-                {'>'} Colors: ToC button uses `bg-brutalist-cyan`, others
+                {'>'} Colors: ToC button uses `bg-accent-primary`, others
                 `bg-black` with cyan hover
               </li>
               <li>

@@ -31,7 +31,7 @@ function SignIn() {
       <button
         type="button"
         onClick={() => void signIn('github', { redirectTo })}
-        className="mt-4 border-2 border-white bg-brutalist-cyan px-5 py-2 font-bold uppercase text-black shadow-hard-md"
+        className="mt-4 border-2 border-white bg-accent-primary px-5 py-2 font-bold uppercase text-black shadow-hard-md"
       >
         Sign in with GitHub
       </button>
@@ -44,7 +44,7 @@ function SignIn() {
               secret: process.env.NEXT_PUBLIC_E2E_BYPASS_SECRET ?? '',
             })
           }
-          className="ml-3 mt-4 border-2 border-brutalist-yellow px-5 py-2 font-bold uppercase text-brutalist-yellow"
+          className="ml-3 mt-4 border-2 border-accent-secondary px-5 py-2 font-bold uppercase text-accent-secondary"
         >
           E2E dev sign-in
         </button>
@@ -56,8 +56,8 @@ function SignIn() {
 function NotAllowed() {
   const { signOut } = useAuthActions();
   return (
-    <div className="border-2 border-brutalist-pink bg-zinc-900 p-6 font-mono">
-      <p className="text-sm text-brutalist-pink">
+    <div className="border-2 border-accent-tertiary bg-zinc-900 p-6 font-mono">
+      <p className="text-sm text-accent-tertiary">
         Signed in, but this GitHub account isn't on the admin allowlist.
       </p>
       <button
@@ -91,7 +91,7 @@ function Gated({ children }: { children: ReactNode }) {
 export default function AdminGate({ children }: { children: ReactNode }) {
   if (!isConvexConfigured) {
     return (
-      <p className="font-mono text-brutalist-pink">Convex not configured.</p>
+      <p className="font-mono text-accent-tertiary">Convex not configured.</p>
     );
   }
   return <Gated>{children}</Gated>;

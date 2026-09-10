@@ -66,7 +66,7 @@ function Prototype({
   return (
     <section className="border-b-2 border-white px-6 py-8">
       <div className="mb-1 flex items-baseline gap-3">
-        <span className="bg-brutalist-cyan px-1.5 font-mono text-[10px] font-bold uppercase text-black">
+        <span className="bg-accent-primary px-1.5 font-mono text-[10px] font-bold uppercase text-black">
           {talk}
         </span>
         <h2 className="font-display text-2xl font-bold uppercase text-white">
@@ -74,7 +74,7 @@ function Prototype({
         </h2>
       </div>
       <p className="mb-3 max-w-3xl font-mono text-xs text-zinc-400">
-        <span className="text-brutalist-yellow">&gt;</span> {note}
+        <span className="text-accent-secondary">&gt;</span> {note}
       </p>
       {children}
     </section>
@@ -91,13 +91,13 @@ export default function TalkAnimationsGallery() {
       <div className="border-2 border-white bg-black">
         <div className="border-b-2 border-white bg-zinc-900 px-6 pt-8 pb-8">
           <div className="mb-4 flex items-center gap-4">
-            <Projector className="h-9 w-9 text-brutalist-cyan" />
+            <Projector className="h-9 w-9 text-accent-primary" />
             <h1 className="font-display text-4xl font-bold uppercase text-white md:text-5xl">
               [ TALK_ANIMATIONS ]
             </h1>
           </div>
           <p className="max-w-3xl font-mono text-sm text-zinc-400">
-            <span className="text-brutalist-yellow">&gt;</span> Prototype
+            <span className="text-accent-secondary">&gt;</span> Prototype
             interactives for the talk decks — each replaces a static diagram
             with a model-first animation (seeded/deterministic, reduced-motion
             aware, dual-theme). Drop into a slide with the same MDX tag.

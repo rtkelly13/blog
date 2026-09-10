@@ -124,9 +124,9 @@ export default function DesignSandbox() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {components.map((component) => (
               <Link key={component.path} href={component.path}>
-                <div className="bg-zinc-900 border-2 border-white p-6 hover:border-brutalist-cyan transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 h-full cursor-pointer group">
-                  <component.icon className="mb-4 h-10 w-10 text-brutalist-cyan" />
-                  <h3 className="font-display font-bold text-xl text-white mb-2 uppercase group-hover:text-brutalist-cyan transition-colors">
+                <div className="bg-zinc-900 border-2 border-white p-6 hover:border-accent-primary transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 h-full cursor-pointer group">
+                  <component.icon className="mb-4 h-10 w-10 text-accent-primary" />
+                  <h3 className="font-display font-bold text-xl text-white mb-2 uppercase group-hover:text-accent-primary transition-colors">
                     {component.name}
                   </h3>
                   <p className="text-zinc-400 font-mono text-sm">
@@ -137,8 +137,8 @@ export default function DesignSandbox() {
             ))}
           </div>
 
-          <div className="mt-12 border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+          <div className="mt-12 border-2 border-accent-secondary bg-zinc-900 p-6">
+            <h2 className="font-display font-bold text-xl text-accent-secondary mb-4 uppercase">
               [ SANDBOX_INFO ]
             </h2>
             <p className="text-white font-mono text-sm leading-relaxed mb-4">

@@ -64,7 +64,7 @@ export default function IdeaDeck({ title, children }: IdeaDeckProps) {
       onKeyDown={onKeyDown}
     >
       <div className="flex items-baseline justify-between gap-4 border-b-2 border-white bg-black px-4 py-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-brutalist-yellow">
+        <p className="text-xs font-bold uppercase tracking-widest text-accent-secondary">
           [ {title ?? 'deck'} ]
         </p>
         <p className="text-xs text-zinc-400 tabular-nums">
@@ -81,7 +81,7 @@ export default function IdeaDeck({ title, children }: IdeaDeckProps) {
             exit={{ opacity: 0, x: direction * -distance }}
             transition={{ duration: reduceMotion ? 0 : 0.22, ease: 'easeOut' }}
           >
-            <h3 className="mb-3 text-sm font-bold uppercase text-brutalist-cyan">
+            <h3 className="mb-3 text-sm font-bold uppercase text-accent-primary">
               {active.props.title}
             </h3>
             <div className="text-sm leading-6 text-zinc-200">{active}</div>
@@ -108,7 +108,7 @@ export default function IdeaDeck({ title, children }: IdeaDeckProps) {
               onClick={() => goTo(i)}
               className={`h-3 w-3 border-2 border-white transition-colors ${
                 i === index
-                  ? 'bg-brutalist-cyan'
+                  ? 'bg-accent-primary'
                   : 'bg-transparent hover:bg-zinc-600'
               }`}
             />

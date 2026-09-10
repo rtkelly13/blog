@@ -60,16 +60,16 @@ export default function Home({
           <Link
             key={href}
             href={href}
-            className="group block border-2 border-white bg-zinc-900 p-6 shadow-hard-md transition-all hover:border-brutalist-cyan hover:shadow-hard-cyan active:translate-x-1 active:translate-y-1 active:shadow-none"
+            className="group block border-2 border-white bg-zinc-900 p-6 shadow-hard-md transition-all hover:border-accent-primary hover:shadow-hard-accent-primary active:translate-x-1 active:translate-y-1 active:shadow-none"
           >
-            <Icon className="mb-4 h-10 w-10 text-brutalist-cyan" />
-            <h2 className="mb-2 font-display text-xl font-bold uppercase text-white transition-colors group-hover:text-brutalist-cyan">
+            <Icon className="mb-4 h-10 w-10 text-accent-primary" />
+            <h2 className="mb-2 font-display text-xl font-bold uppercase text-white transition-colors group-hover:text-accent-primary">
               [ {title} ]
             </h2>
             <p className="mb-4 font-mono text-sm text-zinc-400">
               {description}
             </p>
-            <span className="font-mono text-sm font-bold text-brutalist-cyan">
+            <span className="font-mono text-sm font-bold text-accent-primary">
               &gt; EXPLORE
             </span>
           </Link>

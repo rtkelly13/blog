@@ -78,13 +78,13 @@ export default function ExperimentsPage() {
       <div className="divide-y divide-white border-2 border-white bg-black">
         <div className="pt-8 pb-10 px-6 bg-zinc-900">
           <div className="flex items-center gap-4 mb-4">
-            <Beaker className="w-10 h-10 text-brutalist-cyan" />
+            <Beaker className="w-10 h-10 text-accent-primary" />
             <h1 className="text-4xl font-display font-bold uppercase text-white md:text-6xl">
               [ EXPERIMENTS ]
             </h1>
           </div>
           <p className="text-lg font-mono text-zinc-400 mt-4">
-            <span className="text-brutalist-yellow">&gt;</span> Interactive
+            <span className="text-accent-secondary">&gt;</span> Interactive
             prototypes, design systems, and creative explorations
           </p>
         </div>
@@ -93,20 +93,20 @@ export default function ExperimentsPage() {
           <div className="grid grid-cols-1 gap-8 max-w-4xl mx-auto">
             {experiments.map((experiment) => (
               <Link key={experiment.path} href={experiment.path}>
-                <div className="bg-zinc-900 border-2 border-white p-8 hover:border-brutalist-cyan transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 cursor-pointer group">
+                <div className="bg-zinc-900 border-2 border-white p-8 hover:border-accent-primary transition-all shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[12px_12px_0px_0px_rgba(34,211,238,1)] active:translate-x-1 active:translate-y-1 cursor-pointer group">
                   <div className="flex items-start gap-6">
-                    <div className="text-brutalist-cyan group-hover:text-brutalist-pink transition-colors">
+                    <div className="text-accent-primary group-hover:text-accent-tertiary transition-colors">
                       {experiment.icon}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-display font-bold text-2xl text-white uppercase group-hover:text-brutalist-cyan transition-colors">
+                        <h3 className="font-display font-bold text-2xl text-white uppercase group-hover:text-accent-primary transition-colors">
                           {experiment.name}
                         </h3>
                         <span
                           className={`px-2 py-1 text-xs font-mono uppercase border-2 ${
                             experiment.status === 'active'
-                              ? 'border-brutalist-cyan text-brutalist-cyan'
+                              ? 'border-accent-primary text-accent-primary'
                               : 'border-zinc-600 text-zinc-600'
                           }`}
                         >
@@ -116,7 +116,7 @@ export default function ExperimentsPage() {
                       <p className="text-zinc-400 font-mono text-sm mb-4">
                         {experiment.description}
                       </p>
-                      <div className="flex items-center gap-4 text-xs font-mono text-brutalist-yellow">
+                      <div className="flex items-center gap-4 text-xs font-mono text-accent-secondary">
                         <span>
                           <Terminal className="w-3 h-3 inline mr-1" />
                           {experiment.components} components
@@ -130,8 +130,8 @@ export default function ExperimentsPage() {
             ))}
           </div>
 
-          <div className="mt-12 max-w-4xl mx-auto border-2 border-brutalist-yellow bg-zinc-900 p-6">
-            <h2 className="font-display font-bold text-xl text-brutalist-yellow mb-4 uppercase">
+          <div className="mt-12 max-w-4xl mx-auto border-2 border-accent-secondary bg-zinc-900 p-6">
+            <h2 className="font-display font-bold text-xl text-accent-secondary mb-4 uppercase">
               [ ABOUT_EXPERIMENTS ]
             </h2>
             <div className="space-y-3 text-white font-mono text-sm">
@@ -141,15 +141,15 @@ export default function ExperimentsPage() {
               </p>
               <div className="text-zinc-400 space-y-1 text-xs">
                 <p>
-                  <span className="text-brutalist-cyan">&gt;</span> All
+                  <span className="text-accent-primary">&gt;</span> All
                   experiments follow the retro-brutalist ASCII aesthetic
                 </p>
                 <p>
-                  <span className="text-brutalist-cyan">&gt;</span> Components
+                  <span className="text-accent-primary">&gt;</span> Components
                   are production-ready and thoroughly tested
                 </p>
                 <p>
-                  <span className="text-brutalist-cyan">&gt;</span> Feel free to
+                  <span className="text-accent-primary">&gt;</span> Feel free to
                   explore and use as reference
                 </p>
               </div>

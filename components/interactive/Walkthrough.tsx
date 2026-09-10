@@ -55,21 +55,21 @@ const ACCENTS: Record<
   { border: string; fill: string; text: string; hex: string }
 > = {
   cyan: {
-    border: 'border-brutalist-cyan',
-    fill: 'bg-brutalist-cyan',
-    text: 'text-brutalist-cyan',
+    border: 'border-accent-primary',
+    fill: 'bg-accent-primary',
+    text: 'text-accent-primary',
     hex: '#22d3ee',
   },
   pink: {
-    border: 'border-brutalist-pink',
-    fill: 'bg-brutalist-pink',
-    text: 'text-brutalist-pink',
+    border: 'border-accent-tertiary',
+    fill: 'bg-accent-tertiary',
+    text: 'text-accent-tertiary',
     hex: '#ec4899',
   },
   yellow: {
-    border: 'border-brutalist-yellow',
-    fill: 'bg-brutalist-yellow',
-    text: 'text-brutalist-yellow',
+    border: 'border-accent-secondary',
+    fill: 'bg-accent-secondary',
+    text: 'text-accent-secondary',
     hex: '#facc15',
   },
   white: {
@@ -203,7 +203,7 @@ function WalkthroughCanvas({
       aria-label={title ?? 'Walkthrough'}
     >
       <div className="flex items-baseline justify-between gap-4 border-b-2 border-white bg-zinc-900 px-4 py-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-brutalist-yellow">
+        <p className="text-xs font-bold uppercase tracking-widest text-accent-secondary">
           [ {title ?? 'walkthrough'} ]
         </p>
         <p className="text-xs text-zinc-400 tabular-nums">
@@ -249,7 +249,7 @@ function WalkthroughCanvas({
             transition={{ duration: reduceMotion ? 0 : 0.2 }}
             className="min-h-[3.5rem]"
           >
-            <h3 className="text-sm font-bold uppercase text-brutalist-cyan">
+            <h3 className="text-sm font-bold uppercase text-accent-primary">
               {step.title}
             </h3>
             <p className="mt-1 text-sm leading-6 text-zinc-200">
@@ -277,7 +277,7 @@ function WalkthroughCanvas({
                 onClick={() => setStepIndex(i)}
                 className={`h-3 w-3 border-2 border-white transition-colors ${
                   i === stepIndex
-                    ? 'bg-brutalist-yellow'
+                    ? 'bg-accent-secondary'
                     : 'bg-transparent hover:bg-zinc-600'
                 }`}
               />

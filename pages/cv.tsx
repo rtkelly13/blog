@@ -16,7 +16,7 @@ export default function CVRedirect() {
       </Head>
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center font-mono space-y-4">
         <p className="text-zinc-400">Redirecting to About & CV page...</p>
-        <a href="/about" className="text-brutalist-cyan underline text-sm">
+        <a href="/about" className="text-accent-primary underline text-sm">
           Click here if not redirected
         </a>
       </div>

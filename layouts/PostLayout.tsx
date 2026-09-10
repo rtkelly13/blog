@@ -125,7 +125,7 @@ export default function PostLayout({
               tags={tags}
               date={date}
               variant="banner"
-              className="w-full border-2 border-brutalist-cyan shadow-hard-cyan [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
+              className="w-full border-2 border-accent-primary shadow-hard-accent-primary [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
             />
           </div>
         )}
@@ -135,7 +135,7 @@ export default function PostLayout({
               <dl className="space-y-10">
                 <div>
                   <dt className="sr-only">Published on</dt>
-                  <dd className="text-base font-mono font-medium leading-6 text-brutalist-cyberOrange">
+                  <dd className="text-base font-mono font-medium leading-6 text-accent-secondary">
                     <span className="font-bold">&gt;</span>{' '}
                     <time dateTime={date}>
                       {new Date(date).toLocaleDateString(
@@ -178,7 +178,7 @@ export default function PostLayout({
                           {author.twitter && (
                             <Link
                               href={author.twitter}
-                              className="text-brutalist-cyan hover:text-brutalist-pink transition-colors"
+                              className="text-accent-primary hover:text-accent-tertiary transition-colors"
                             >
                               {author.twitter.replace(
                                 'https://twitter.com/',
@@ -243,7 +243,7 @@ export default function PostLayout({
             <footer className="pt-6 pb-6 font-mono">
               {tags && (
                 <div className="py-4">
-                  <h2 className="text-xs tracking-wide text-brutalist-yellow font-bold uppercase mb-3">
+                  <h2 className="text-xs tracking-wide text-accent-secondary font-bold uppercase mb-3">
                     [ Tags ]
                   </h2>
                   <div className="flex flex-wrap gap-2">
@@ -261,7 +261,7 @@ export default function PostLayout({
                       <h2 className="text-xs tracking-wide text-zinc-400 uppercase mb-2">
                         &lt; Previous Article
                       </h2>
-                      <div className="text-brutalist-cyan hover:text-brutalist-pink font-bold transition-colors">
+                      <div className="text-accent-primary hover:text-accent-tertiary font-bold transition-colors">
                         <Link href={`/blog/${prev.slug}`}>
                           [ {prev.title} ]
                         </Link>
@@ -275,7 +275,7 @@ export default function PostLayout({
                       <h2 className="text-xs tracking-wide text-zinc-400 uppercase mb-2">
                         Next Article &gt;
                       </h2>
-                      <div className="text-brutalist-cyan hover:text-brutalist-pink font-bold transition-colors">
+                      <div className="text-accent-primary hover:text-accent-tertiary font-bold transition-colors">
                         <Link href={`/blog/${next.slug}`}>
                           [ {next.title} ]
                         </Link>
@@ -288,7 +288,7 @@ export default function PostLayout({
               <div className="pt-8">
                 <Link
                   href="/blog"
-                  className="text-brutalist-yellow hover:text-white font-bold transition-colors uppercase border-2 border-brutalist-yellow hover:bg-brutalist-yellow hover:text-black px-4 py-2 inline-block"
+                  className="text-accent-secondary hover:text-white font-bold transition-colors uppercase border-2 border-accent-secondary hover:bg-accent-secondary hover:text-black px-4 py-2 inline-block"
                 >
                   &lt; BACK_TO_BLOG
                 </Link>

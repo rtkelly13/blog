@@ -93,7 +93,7 @@ export default function Diagram(props: DiagramProps) {
       break;
     default:
       content = (
-        <div className="p-4 text-brutalist-pink bg-zinc-900 border-2 border-brutalist-pink font-mono">
+        <div className="p-4 text-accent-tertiary bg-zinc-900 border-2 border-accent-tertiary font-mono">
           ERROR: Unknown diagram type: {(props as any).type}
         </div>
       );

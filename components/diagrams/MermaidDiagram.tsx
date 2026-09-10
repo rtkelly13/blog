@@ -60,7 +60,7 @@ export default function MermaidDiagram({ children }: MermaidDiagramProps) {
 
   if (error) {
     return (
-      <div className="p-4 text-brutalist-pink bg-zinc-900 border-2 border-brutalist-pink font-mono">
+      <div className="p-4 text-accent-tertiary bg-zinc-900 border-2 border-accent-tertiary font-mono">
         <p className="font-bold uppercase">[ DIAGRAM_ERROR ]</p>
         <p className="text-sm mt-1">{error}</p>
         <pre className="mt-2 text-xs bg-black p-2 border border-white overflow-x-auto">

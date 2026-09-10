@@ -65,7 +65,7 @@ export default function SvgDiagram({ src, darkSrc }: SvgDiagramProps) {
 
   if (error) {
     return (
-      <div className="p-4 text-brutalist-pink bg-zinc-900 border-2 border-brutalist-pink font-mono">
+      <div className="p-4 text-accent-tertiary bg-zinc-900 border-2 border-accent-tertiary font-mono">
         <p className="font-bold uppercase">[ DIAGRAM_LOAD_ERROR ]</p>
         <p className="text-sm mt-1">{error}</p>
         <p className="text-xs mt-2 text-zinc-500">Source: {src}</p>

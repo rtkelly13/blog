@@ -65,7 +65,7 @@ export default function TalkLanding({
       />
       <article className="mx-auto max-w-3xl py-10">
         {draft && (
-          <p className="mb-6 border-2 border-brutalist-pink bg-black px-4 py-2 font-mono text-sm font-bold uppercase text-brutalist-pink">
+          <p className="mb-6 border-2 border-accent-tertiary bg-black px-4 py-2 font-mono text-sm font-bold uppercase text-accent-tertiary">
             ● Draft — unlisted; visible to you as an admin
           </p>
         )}
@@ -74,7 +74,7 @@ export default function TalkLanding({
           className="mb-6 flex w-full items-center gap-3 border-2 border-white bg-black px-4 py-3 font-mono shadow-hard-md transition-shadow hover:shadow-hard-lg"
         />
         <header className="border-2 border-white bg-zinc-900 p-6">
-          <p className="mb-3 font-mono text-xs uppercase text-brutalist-cyan">
+          <p className="mb-3 font-mono text-xs uppercase text-accent-primary">
             {event}
           </p>
           <h1 className="font-display text-3xl font-bold uppercase leading-9 tracking-tight text-white md:text-5xl">
@@ -84,19 +84,19 @@ export default function TalkLanding({
           <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 font-mono text-sm text-zinc-300">
             {date && (
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-brutalist-yellow" />
+                <Calendar className="h-4 w-4 text-accent-secondary" />
                 <dd>{formatDate(date)}</dd>
               </div>
             )}
             {location && (
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-brutalist-yellow" />
+                <MapPin className="h-4 w-4 text-accent-secondary" />
                 <dd>{location}</dd>
               </div>
             )}
             {audience && (
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-brutalist-yellow" />
+                <Users className="h-4 w-4 text-accent-secondary" />
                 <dd>{audience}</dd>
               </div>
             )}
@@ -120,7 +120,7 @@ export default function TalkLanding({
         <div className="mt-10 flex flex-wrap items-center gap-4 border-t-2 border-white pt-8">
           <Link
             href={`/talks/${slug}/present`}
-            className="flex items-center gap-2 border-2 border-white bg-brutalist-cyan px-6 py-3 font-mono font-bold uppercase text-black shadow-hard-md transition-all hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none"
+            className="flex items-center gap-2 border-2 border-white bg-accent-primary px-6 py-3 font-mono font-bold uppercase text-black shadow-hard-md transition-all hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none"
           >
             <Play className="h-4 w-4" /> Present
           </Link>
@@ -135,7 +135,7 @@ export default function TalkLanding({
           {videoUrl && !embeddable && (
             <Link
               href={videoUrl}
-              className="border-2 border-white bg-brutalist-pink px-6 py-3 font-mono font-bold uppercase text-black shadow-hard-md transition-all hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none"
+              className="border-2 border-white bg-accent-tertiary px-6 py-3 font-mono font-bold uppercase text-black shadow-hard-md transition-all hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none"
             >
               Watch Recording
             </Link>

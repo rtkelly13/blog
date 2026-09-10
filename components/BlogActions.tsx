@@ -82,7 +82,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
               ref={tocToggleRef}
               type="button"
               onClick={handleTocToggle}
-              className="border-2 border-white bg-brutalist-cyan text-black p-3 transition-all hover:shadow-hard-md active:translate-x-1 active:translate-y-1"
+              className="border-2 border-white bg-accent-primary text-black p-3 transition-all hover:shadow-hard-md active:translate-x-1 active:translate-y-1"
             >
               <FileText className="h-5 w-5" />
             </button>
@@ -95,7 +95,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
                   aria-label="Scroll To Comment"
                   type="button"
                   onClick={handleScrollToComment}
-                  className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black active:translate-x-1 active:translate-y-1"
+                  className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-accent-primary hover:text-black active:translate-x-1 active:translate-y-1"
                 >
                   <svg
                     className="h-5 w-5"
@@ -114,7 +114,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
                 aria-label="Scroll To Top"
                 type="button"
                 onClick={handleScrollTop}
-                className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black active:translate-x-1 active:translate-y-1"
+                className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-accent-primary hover:text-black active:translate-x-1 active:translate-y-1"
               >
                 <svg
                   className="h-5 w-5"
@@ -137,7 +137,7 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
           aria-expanded={isOpen}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-brutalist-cyan hover:text-black hover:shadow-hard-md active:translate-x-1 active:translate-y-1"
+          className="border-2 border-white bg-black p-3 text-white transition-all hover:bg-accent-primary hover:text-black hover:shadow-hard-md active:translate-x-1 active:translate-y-1"
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -167,14 +167,14 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
             >
               <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-white">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-brutalist-cyan" />
-                  <h2 className="font-display text-sm font-bold uppercase text-brutalist-yellow">
+                  <FileText className="w-5 h-5 text-accent-primary" />
+                  <h2 className="font-display text-sm font-bold uppercase text-accent-secondary">
                     [ CONTENTS ]
                   </h2>
                 </div>
                 <button
                   onClick={() => setTocOpen(false)}
-                  className="text-brutalist-cyan hover:text-brutalist-pink transition-colors"
+                  className="text-accent-primary hover:text-accent-tertiary transition-colors"
                   aria-label="Close table of contents"
                 >
                   <X className="w-5 h-5" />
@@ -192,13 +192,13 @@ const BlogActions = ({ toc, activeId }: BlogActionsProps) => {
                       <a
                         href={heading.url}
                         onClick={handleTocLinkClick}
-                        className={`block hover:text-brutalist-pink transition-colors ${
+                        className={`block hover:text-accent-tertiary transition-colors ${
                           activeId === heading.url.slice(1)
-                            ? 'text-brutalist-cyan font-bold'
+                            ? 'text-accent-primary font-bold'
                             : 'text-zinc-400'
                         }`}
                       >
-                        <span className="text-brutalist-yellow">&gt;</span>{' '}
+                        <span className="text-accent-secondary">&gt;</span>{' '}
                         {heading.value}
                       </a>
                     </li>

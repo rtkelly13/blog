@@ -46,7 +46,7 @@ export default function PostBanner({
 
       {/* Full-width banner - breaks out of container */}
       <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
-        <div className="relative aspect-[2/1] w-full border-y-2 border-brutalist-cyan shadow-glow-cyan">
+        <div className="relative aspect-[2/1] w-full border-y-2 border-accent-primary shadow-glow-accent-primary">
           <NextImage
             src={displayImage}
             alt={title}
@@ -64,7 +64,7 @@ export default function PostBanner({
             <div className="space-y-1">
               <dl>
                 <dt className="sr-only">Published on</dt>
-                <dd className="text-base font-mono font-medium leading-6 text-brutalist-cyberOrange">
+                <dd className="text-base font-mono font-medium leading-6 text-accent-secondary">
                   <span className="font-bold">&gt;</span>{' '}
                   <time dateTime={date}>{formatDate(date)}</time>
                 </dd>
@@ -94,7 +94,7 @@ export default function PostBanner({
                 <div className="pt-4 xl:pt-8">
                   <Link
                     href={`/blog/${prev.slug}`}
-                    className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase inline-flex items-center gap-2"
+                    className="text-accent-primary hover:text-accent-tertiary transition-colors font-bold uppercase inline-flex items-center gap-2"
                   >
                     <span>&larr;</span> [ {prev.title} ]
                   </Link>
@@ -104,7 +104,7 @@ export default function PostBanner({
                 <div className="pt-4 xl:pt-8">
                   <Link
                     href={`/blog/${next.slug}`}
-                    className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase inline-flex items-center gap-2"
+                    className="text-accent-primary hover:text-accent-tertiary transition-colors font-bold uppercase inline-flex items-center gap-2"
                   >
                     [ {next.title} ] <span>&rarr;</span>
                   </Link>

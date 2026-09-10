@@ -63,13 +63,13 @@ module.exports = {
             fontFamily: theme('fontFamily.sans'),
             color: theme('colors.gray.200'),
             a: {
-              color: 'var(--brutalist-cyan, #22d3ee)',
+              color: 'var(--ds-accent-primary)',
               textDecoration: 'underline',
               fontWeight: '700',
               '&:hover': {
-                color: 'var(--brutalist-pink, #ec4899)',
+                color: 'var(--ds-accent-tertiary)',
               },
-              code: { color: 'var(--brutalist-cyan, #22d3ee)' },
+              code: { color: 'var(--ds-accent-primary)' },
             },
             h1: {
               fontFamily: theme('fontFamily.display'),
@@ -99,7 +99,7 @@ module.exports = {
             },
             code: {
               fontFamily: theme('fontFamily.mono'),
-              color: 'var(--brutalist-neonGreen, #39ff14)',
+              color: 'var(--ds-intent-success)',
               backgroundColor: theme('colors.black'),
               paddingLeft: '4px',
               paddingRight: '4px',
@@ -132,10 +132,10 @@ module.exports = {
             },
             'ol li:before': {
               fontWeight: '700',
-              color: 'var(--brutalist-cyan, #22d3ee)',
+              color: 'var(--ds-accent-primary)',
             },
             'ul li:before': {
-              backgroundColor: 'var(--brutalist-pink, #ec4899)',
+              backgroundColor: 'var(--ds-accent-tertiary)',
             },
             strong: {
               color: theme('colors.white'),
@@ -143,7 +143,7 @@ module.exports = {
             },
             blockquote: {
               color: theme('colors.white'),
-              borderLeftColor: 'var(--brutalist-pink, #ec4899)',
+              borderLeftColor: 'var(--ds-accent-tertiary)',
               borderLeftWidth: '4px',
               fontStyle: 'normal',
             },
@@ -154,13 +154,13 @@ module.exports = {
             fontFamily: theme('fontFamily.sans'),
             color: theme('colors.gray.200'),
             a: {
-              color: 'var(--brutalist-cyan, #22d3ee)',
+              color: 'var(--ds-accent-primary)',
               textDecoration: 'underline',
               fontWeight: '700',
               '&:hover': {
-                color: 'var(--brutalist-pink, #ec4899)',
+                color: 'var(--ds-accent-tertiary)',
               },
-              code: { color: 'var(--brutalist-cyan, #22d3ee)' },
+              code: { color: 'var(--ds-accent-primary)' },
             },
             h1: {
               fontFamily: theme('fontFamily.display'),
@@ -190,7 +190,7 @@ module.exports = {
             },
             code: {
               fontFamily: theme('fontFamily.mono'),
-              color: 'var(--brutalist-neonGreen, #39ff14)',
+              color: 'var(--ds-intent-success)',
               backgroundColor: theme('colors.black'),
               border: '1px solid',
               borderColor: theme('colors.white'),
@@ -209,10 +209,10 @@ module.exports = {
             },
             'ol li:before': {
               fontWeight: '700',
-              color: 'var(--brutalist-cyan, #22d3ee)',
+              color: 'var(--ds-accent-primary)',
             },
             'ul li:before': {
-              backgroundColor: 'var(--brutalist-pink, #ec4899)',
+              backgroundColor: 'var(--ds-accent-tertiary)',
             },
             strong: {
               color: theme('colors.white'),
@@ -230,7 +230,7 @@ module.exports = {
             },
             blockquote: {
               color: theme('colors.white'),
-              borderLeftColor: 'var(--brutalist-pink, #ec4899)',
+              borderLeftColor: 'var(--ds-accent-tertiary)',
               borderLeftWidth: '4px',
               fontStyle: 'normal',
             },

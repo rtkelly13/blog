@@ -88,11 +88,11 @@ const CodePreview = ({ code }: { code: string }) => {
     <div className="relative">
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 px-3 py-1 bg-brutalist-cyan text-black font-mono text-xs font-bold border-2 border-white hover:bg-brutalist-pink transition-colors"
+        className="absolute top-2 right-2 px-3 py-1 bg-accent-primary text-black font-mono text-xs font-bold border-2 border-white hover:bg-accent-tertiary transition-colors"
       >
         {copied ? '✓ COPIED' : 'COPY'}
       </button>
-      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-brutalist-neonGreen">
+      <pre className="bg-black border-2 border-white p-4 overflow-x-auto text-xs font-mono text-intent-success">
         {code}
       </pre>
     </div>
@@ -120,7 +120,7 @@ export default function Cards() {
           {cardVariations.map((variation) => (
             <div key={variation.id} className="space-y-4">
               {/* Variation Header */}
-              <div className="border-l-4 border-brutalist-cyan pl-4">
+              <div className="border-l-4 border-accent-primary pl-4">
                 <h2 className="text-2xl font-display font-bold text-white uppercase">
                   {String(variation.id).padStart(2, '0')}. {variation.name}
                 </h2>
@@ -144,48 +144,48 @@ export default function Cards() {
           ))}
 
           {/* Usage Notes */}
-          <div className="border-2 border-brutalist-yellow bg-zinc-900 p-6 mt-12">
-            <h3 className="font-display font-bold text-xl text-brutalist-yellow uppercase mb-4">
+          <div className="border-2 border-accent-secondary bg-zinc-900 p-6 mt-12">
+            <h3 className="font-display font-bold text-xl text-accent-secondary uppercase mb-4">
               [ USAGE_NOTES ]
             </h3>
             <ul className="space-y-2 font-mono text-sm text-zinc-300">
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">&gt;</span>
+                <span className="text-accent-primary mr-2">&gt;</span>
                 <span>
                   <strong className="text-white">filename:</strong> Displays in
                   header bar (defaults to title-based slug)
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">&gt;</span>
+                <span className="text-accent-primary mr-2">&gt;</span>
                 <span>
                   <strong className="text-white">asciiArt:</strong> Small ASCII
                   icon in header (e.g., {'"[//]"'}, {'"</>", "[!]"'})
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">&gt;</span>
+                <span className="text-accent-primary mr-2">&gt;</span>
                 <span>
                   <strong className="text-white">imgSrc:</strong> Featured image
                   (auto-cropped to 16:9)
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-cyan mr-2">&gt;</span>
+                <span className="text-accent-primary mr-2">&gt;</span>
                 <span>
                   <strong className="text-white">href:</strong> Makes card
                   clickable, adds "READ_MORE" link
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-pink mr-2">*</span>
+                <span className="text-accent-tertiary mr-2">*</span>
                 <span>
                   Hover state: Border changes from white to cyan with cyan
                   shadow
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-brutalist-pink mr-2">*</span>
+                <span className="text-accent-tertiary mr-2">*</span>
                 <span>
                   Used in project listings, blog homepage, and tag pages
                 </span>

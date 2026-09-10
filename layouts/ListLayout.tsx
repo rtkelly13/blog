@@ -157,7 +157,7 @@ export default function ListLayout({
           <Link
             key={tag}
             href={`/tags/${tag.toLowerCase().replace(/ /g, '-')}`}
-            className="text-xs font-mono font-bold bg-brutalist-yellow text-black px-2 py-1 uppercase"
+            className="text-xs font-mono font-bold bg-accent-secondary text-black px-2 py-1 uppercase"
           >
             #{tag}
           </Link>
@@ -177,14 +177,14 @@ export default function ListLayout({
     return (
       <li
         key={slug}
-        className={`my-6 rounded-md border-2 border-brutalist-cyan bg-black/80 shadow-glow-cyan transition-all hover:shadow-glow-cyan ${
-          isInSeries ? 'ml-6 border-l-4 border-l-brutalist-pink' : ''
+        className={`my-6 rounded-md border-2 border-accent-primary bg-black/80 shadow-glow-accent-primary transition-all hover:shadow-glow-accent-primary ${
+          isInSeries ? 'ml-6 border-l-4 border-l-accent-tertiary' : ''
         }`}
       >
         <article className="space-y-2 p-5">
-          <div className="font-mono text-sm leading-6 text-brutalist-cyberOrange flex items-center gap-2">
+          <div className="font-mono text-sm leading-6 text-accent-secondary flex items-center gap-2">
             <div>
-              <span className="text-brutalist-cyberOrange font-bold">&gt;</span>{' '}
+              <span className="text-accent-secondary font-bold">&gt;</span>{' '}
               <time dateTime={date}>{formatDate(date)}</time>
             </div>
             {readingTime && (
@@ -196,14 +196,14 @@ export default function ListLayout({
           </div>
           <div>
             {isInSeries && frontMatter.series && (
-              <div className="font-mono text-xs text-brutalist-pink mb-1">
+              <div className="font-mono text-xs text-accent-tertiary mb-1">
                 Part {frontMatter.series.order}
               </div>
             )}
             <h3 className="text-2xl font-display font-bold leading-8 tracking-tight uppercase">
               <Link
                 href={`/blog/${slug}`}
-                className="text-white hover:text-brutalist-cyan transition-colors"
+                className="text-white hover:text-accent-primary transition-colors"
               >
                 <BracketText>{title}</BracketText>
               </Link>
@@ -214,7 +214,7 @@ export default function ListLayout({
           <div className="font-mono text-sm pt-2 text-right">
             <Link
               href={`/blog/${slug}`}
-              className="text-brutalist-cyan hover:text-brutalist-pink font-bold inline-flex items-center gap-1"
+              className="text-accent-primary hover:text-accent-tertiary font-bold inline-flex items-center gap-1"
             >
               READ_MORE &gt;&gt;
             </Link>
@@ -231,11 +231,11 @@ export default function ListLayout({
           <div className="text-center mb-10">
             <h1 className="text-4xl font-display font-bold leading-tight tracking-widest text-white uppercase sm:text-5xl md:text-7xl drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] pb-4 inline-block relative">
               <BracketText>{title}</BracketText>
-              <div className="absolute bottom-0 left-0 w-full h-[4px] bg-brutalist-cyan shadow-glow-cyan" />
+              <div className="absolute bottom-0 left-0 w-full h-[4px] bg-accent-primary shadow-glow-accent-primary" />
             </h1>
           </div>
           <div className="relative max-w-full mx-auto">
-            <span className="absolute left-4 top-3.5 font-mono text-brutalist-cyan font-bold">
+            <span className="absolute left-4 top-3.5 font-mono text-accent-primary font-bold">
               &gt;
             </span>
             <input
@@ -243,7 +243,7 @@ export default function ListLayout({
               type="text"
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="search_articles...|"
-              className="block w-full pl-10 pr-12 py-3 rounded-md font-mono text-white bg-black/50 border-2 border-brutalist-cyan focus:ring-2 focus:ring-brutalist-cyan focus:border-brutalist-cyan placeholder-gray-500 shadow-glow-cyan"
+              className="block w-full pl-10 pr-12 py-3 rounded-md font-mono text-white bg-black/50 border-2 border-accent-primary focus:ring-2 focus:ring-accent-primary focus:border-accent-primary placeholder-gray-500 shadow-glow-accent-primary"
             />
             <svg
               className="absolute w-5 h-5 text-gray-400 right-4 top-4"
@@ -263,7 +263,7 @@ export default function ListLayout({
         </div>
         <ul className="space-y-6">
           {!filteredBlogPosts.length && (
-            <li className="py-8 px-6 font-mono text-brutalist-pink text-center border-2 border-brutalist-pink rounded-md bg-black/80 shadow-glow-pink">
+            <li className="py-8 px-6 font-mono text-accent-tertiary text-center border-2 border-accent-tertiary rounded-md bg-black/80 shadow-glow-accent-tertiary">
               &gt; ERROR: No posts found.
             </li>
           )}
@@ -279,12 +279,12 @@ export default function ListLayout({
             return (
               <li
                 key={`series-${seriesGroup.name}-${idx}`}
-                className="my-6 rounded-md border-2 border-brutalist-pink bg-black/80 shadow-glow-pink transition-all"
+                className="my-6 rounded-md border-2 border-accent-tertiary bg-black/80 shadow-glow-accent-tertiary transition-all"
               >
                 <article className="space-y-2 p-5">
-                  <div className="font-mono text-sm leading-6 text-brutalist-cyberOrange flex items-center gap-2">
+                  <div className="font-mono text-sm leading-6 text-accent-secondary flex items-center gap-2">
                     <div>
-                      <span className="text-brutalist-cyberOrange font-bold">
+                      <span className="text-accent-secondary font-bold">
                         &gt;
                       </span>{' '}
                       <time dateTime={seriesGroup.latestDate}>
@@ -301,13 +301,13 @@ export default function ListLayout({
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="inline-block bg-brutalist-pink text-black font-mono font-bold text-xs px-2 py-1 uppercase">
+                      <span className="inline-block bg-accent-tertiary text-black font-mono font-bold text-xs px-2 py-1 uppercase">
                         SERIES
                       </span>
                       <button
                         type="button"
                         onClick={() => toggleSeries(seriesGroup.name)}
-                        className="text-brutalist-pink hover:text-white transition-colors font-mono font-bold text-xs uppercase flex items-center gap-1"
+                        className="text-accent-tertiary hover:text-white transition-colors font-mono font-bold text-xs uppercase flex items-center gap-1"
                         aria-expanded={isExpanded}
                         aria-label={
                           isExpanded ? 'Collapse series' : 'Expand series'
@@ -330,7 +330,7 @@ export default function ListLayout({
                       {seriesGroup.slug ? (
                         <Link
                           href={`/series/${seriesGroup.slug}`}
-                          className="text-white hover:text-brutalist-pink transition-colors"
+                          className="text-white hover:text-accent-tertiary transition-colors"
                         >
                           <BracketText>{seriesGroup.name}</BracketText>
                         </Link>
@@ -351,7 +351,7 @@ export default function ListLayout({
                     <div className="font-mono text-sm pt-2 text-right">
                       <Link
                         href={`/series/${seriesGroup.slug}`}
-                        className="text-brutalist-pink hover:text-white font-bold inline-flex items-center gap-1"
+                        className="text-accent-tertiary hover:text-white font-bold inline-flex items-center gap-1"
                       >
                         VIEW_SERIES &gt;&gt;
                       </Link>
@@ -360,7 +360,7 @@ export default function ListLayout({
                 </article>
 
                 {isExpanded && (
-                  <div className="mt-2 border-t border-brutalist-pink/30 p-5 bg-black/40">
+                  <div className="mt-2 border-t border-accent-tertiary/30 p-5 bg-black/40">
                     <ul className="space-y-4">
                       {seriesGroup.posts.map((post) => renderPost(post, true))}
                     </ul>

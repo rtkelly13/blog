@@ -14,19 +14,19 @@ export default function TalkCard({ talk }: TalkCardProps) {
 
   return (
     <div
-      className={`h-full bg-zinc-900 border-2 transition-all duration-200 hover:shadow-hard-cyan ${
+      className={`h-full bg-zinc-900 border-2 transition-all duration-200 hover:shadow-hard-accent-primary ${
         draft
-          ? 'border-brutalist-pink hover:border-brutalist-pink'
-          : 'border-white hover:border-brutalist-cyan'
+          ? 'border-accent-tertiary hover:border-accent-tertiary'
+          : 'border-white hover:border-accent-primary'
       }`}
     >
       <div className="flex items-center justify-between border-b-2 border-white bg-black px-4 py-2">
-        <span className="font-mono text-sm font-bold uppercase text-brutalist-yellow">
+        <span className="font-mono text-sm font-bold uppercase text-accent-secondary">
           {`${slug}.deck`}
         </span>
         <span className="flex items-center gap-2">
           {draft && (
-            <span className="border border-brutalist-pink px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-brutalist-pink">
+            <span className="border border-accent-tertiary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-accent-tertiary">
               Draft
             </span>
           )}
@@ -40,12 +40,12 @@ export default function TalkCard({ talk }: TalkCardProps) {
 
       <div className="p-6">
         <h2 className="mb-2 font-display text-2xl font-bold uppercase leading-8 tracking-tight text-white">
-          <Link href={href} className="hover:text-brutalist-pink">
+          <Link href={href} className="hover:text-accent-tertiary">
             [ {title} ]
           </Link>
         </h2>
 
-        <p className="mb-4 font-mono text-xs uppercase text-brutalist-cyan">
+        <p className="mb-4 font-mono text-xs uppercase text-accent-primary">
           {event}
           {location ? ` // ${location}` : ''}
           {audience ? ` // ${audience}` : ''}
@@ -66,7 +66,7 @@ export default function TalkCard({ talk }: TalkCardProps) {
         <div className="flex flex-wrap items-center gap-4">
           <Link
             href={`/talks/${slug}/present`}
-            className="border-b-2 border-brutalist-cyan font-mono text-sm font-bold text-brutalist-cyan transition-colors hover:border-brutalist-pink hover:text-brutalist-pink"
+            className="border-b-2 border-accent-primary font-mono text-sm font-bold text-accent-primary transition-colors hover:border-accent-tertiary hover:text-accent-tertiary"
           >
             &gt; PRESENT
           </Link>

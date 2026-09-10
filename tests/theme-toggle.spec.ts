@@ -128,12 +128,17 @@ test.describe('Theme toggle — homepage', () => {
     page,
   }) => {
     await page.goto('/');
-    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_MIDNIGHT);
+    expect(await readAccentBg(page, 'bg-accent-primary')).toBe(ACCENT_MIDNIGHT);
 
     await toggle(page).click();
     // Not #2563eb. That value was pinned in this repo and failed WCAG AA;
     // deleting the override lets the package's gated #1450d7 through.
-    expect(await readAccentBg(page, 'bg-brutalist-cyan')).toBe(ACCENT_SKETCH);
+    //
+    // The class is `bg-accent-primary`, not `bg-brutalist-cyan`: 0.6.0 deleted
+    // the hue-named utilities. This test is the reason to spell the class out
+    // rather than read an incidental element — a utility that stops existing
+    // makes the assertion fail loudly instead of silently measuring nothing.
+    expect(await readAccentBg(page, 'bg-accent-primary')).toBe(ACCENT_SKETCH);
   });
 
   test('the choice persists across a reload', async ({ page }) => {

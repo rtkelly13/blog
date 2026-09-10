@@ -255,7 +255,7 @@ export default function DiagramsPage() {
           <div className="mx-auto max-w-7xl">
             <Link
               href="/design-sandbox"
-              className="inline-flex items-center gap-2 font-mono text-sm uppercase text-brutalist-cyan hover:text-brutalist-pink"
+              className="inline-flex items-center gap-2 font-mono text-sm uppercase text-accent-primary hover:text-accent-tertiary"
             >
               <ChevronLeft className="h-4 w-4" />
               Back to Sandbox
@@ -271,7 +271,7 @@ export default function DiagramsPage() {
 
         <div className="mx-auto max-w-7xl px-4 py-12">
           <div className="mb-8">
-            <h2 className="mb-4 font-display text-xl font-bold uppercase text-brutalist-cyan">
+            <h2 className="mb-4 font-display text-xl font-bold uppercase text-accent-primary">
               &gt; SELECT VARIANT
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -283,8 +283,8 @@ export default function DiagramsPage() {
                     onClick={() => setActiveVariant(idx)}
                     className={`border-2 p-4 text-left font-mono transition-colors ${
                       activeVariant === idx
-                        ? 'border-brutalist-cyan bg-brutalist-cyan/10 text-brutalist-cyan'
-                        : 'border-white bg-black text-white hover:border-brutalist-pink hover:text-brutalist-pink'
+                        ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
+                        : 'border-white bg-black text-white hover:border-accent-tertiary hover:text-accent-tertiary'
                     }`}
                   >
                     <div className="flex items-center gap-2 text-sm font-bold uppercase">
@@ -311,7 +311,7 @@ export default function DiagramsPage() {
                   {variants[activeVariant].description}
                 </p>
               </div>
-              <div className="font-mono text-sm text-brutalist-cyan">
+              <div className="font-mono text-sm text-accent-primary">
                 [{activeVariant + 1}/{variants.length}]
               </div>
             </div>
@@ -329,10 +329,10 @@ export default function DiagramsPage() {
             </div>
 
             <div className="mt-8">
-              <h3 className="mb-3 font-display text-sm font-bold uppercase text-brutalist-yellow">
+              <h3 className="mb-3 font-display text-sm font-bold uppercase text-accent-secondary">
                 $ CODE
               </h3>
-              <pre className="overflow-x-auto border-2 border-zinc-800 bg-black p-4 font-mono text-xs text-brutalist-neonGreen">
+              <pre className="overflow-x-auto border-2 border-zinc-800 bg-black p-4 font-mono text-xs text-intent-success">
                 {variants[activeVariant].code}
               </pre>
             </div>

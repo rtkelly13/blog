@@ -43,7 +43,7 @@ export default function PostLayout({
               <dl>
                 <div>
                   <dt className="sr-only">Published on</dt>
-                  <dd className="text-base font-mono font-medium leading-6 text-brutalist-cyberOrange">
+                  <dd className="text-base font-mono font-medium leading-6 text-accent-secondary">
                     <span className="font-bold">&gt;</span>{' '}
                     <time dateTime={date}>{formatDate(date)}</time>
                   </dd>
@@ -76,7 +76,7 @@ export default function PostLayout({
                   <div className="pt-4 xl:pt-8">
                     <Link
                       href={`/blog/${prev.slug}`}
-                      className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase"
+                      className="text-accent-primary hover:text-accent-tertiary transition-colors font-bold uppercase"
                     >
                       &larr; {prev.title}
                     </Link>
@@ -86,7 +86,7 @@ export default function PostLayout({
                   <div className="pt-4 xl:pt-8">
                     <Link
                       href={`/blog/${next.slug}`}
-                      className="text-brutalist-cyan hover:text-brutalist-pink transition-colors font-bold uppercase"
+                      className="text-accent-primary hover:text-accent-tertiary transition-colors font-bold uppercase"
                     >
                       {next.title} &rarr;
                     </Link>

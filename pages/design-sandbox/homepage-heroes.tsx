@@ -354,7 +354,7 @@ export default function HomepageHeroes() {
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <Link
             href="/design-sandbox"
-            className="text-brutalist-cyan hover:text-brutalist-pink font-mono text-sm mb-4 inline-block"
+            className="text-accent-primary hover:text-accent-tertiary font-mono text-sm mb-4 inline-block"
           >
             {'<'} BACK_TO_SANDBOX
           </Link>
@@ -380,23 +380,23 @@ export default function HomepageHeroes() {
               <div className="flex gap-2">
                 <button
                   onClick={prevVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black hover:border-brutalist-cyan transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black hover:border-accent-primary transition-colors"
                 >
                   {'<'}
                 </button>
                 <button
                   onClick={nextVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black hover:border-brutalist-cyan transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black hover:border-accent-primary transition-colors"
                 >
                   {'>'}
                 </button>
               </div>
             </div>
-            <div className="border-2 border-brutalist-cyan">
+            <div className="border-2 border-accent-primary">
               <Hero80sWaves textVariation={currentVariation} />
             </div>
             <div className="mt-4 bg-zinc-900 border-2 border-white p-4">
-              <p className="text-brutalist-yellow font-mono text-sm mb-2">
+              <p className="text-accent-secondary font-mono text-sm mb-2">
                 [ TEXT_VARIATION_{currentVariation + 1}_OF_
                 {heroTextVariations.length} ]
               </p>
@@ -422,19 +422,19 @@ export default function HomepageHeroes() {
               <div className="flex gap-2">
                 <button
                   onClick={prevVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black hover:border-brutalist-cyan transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black hover:border-accent-primary transition-colors"
                 >
                   {'<'}
                 </button>
                 <button
                   onClick={nextVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black hover:border-brutalist-cyan transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black hover:border-accent-primary transition-colors"
                 >
                   {'>'}
                 </button>
               </div>
             </div>
-            <div className="border-2 border-brutalist-pink">
+            <div className="border-2 border-accent-tertiary">
               <Hero80sCompact textVariation={currentVariation} />
             </div>
           </div>
@@ -452,31 +452,31 @@ export default function HomepageHeroes() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={prevVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black transition-colors"
                 >
                   {'< TEXT'}
                 </button>
                 <button
                   onClick={nextVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black transition-colors"
                 >
                   {'TEXT >'}
                 </button>
                 <button
                   onClick={nextFont}
-                  className="bg-black text-brutalist-pink border-2 border-brutalist-pink px-4 py-2 font-mono hover:bg-brutalist-pink hover:text-black transition-colors"
+                  className="bg-black text-accent-tertiary border-2 border-accent-tertiary px-4 py-2 font-mono hover:bg-accent-tertiary hover:text-black transition-colors"
                 >
                   FONT: {fontOptions[currentFont].name}
                 </button>
                 <button
                   onClick={nextSize}
-                  className="bg-black text-brutalist-yellow border-2 border-brutalist-yellow px-4 py-2 font-mono hover:bg-brutalist-yellow hover:text-black transition-colors"
+                  className="bg-black text-accent-secondary border-2 border-accent-secondary px-4 py-2 font-mono hover:bg-accent-secondary hover:text-black transition-colors"
                 >
                   SIZE: {sizeOptions[currentSize].name}
                 </button>
               </div>
             </div>
-            <div className="border-2 border-brutalist-yellow">
+            <div className="border-2 border-accent-secondary">
               <Hero80sSunset
                 textVariation={currentVariation}
                 fontOption={currentFont}
@@ -485,7 +485,7 @@ export default function HomepageHeroes() {
             </div>
             <div className="mt-4 bg-zinc-900 border-2 border-white p-4 grid md:grid-cols-3 gap-4">
               <div>
-                <p className="text-brutalist-yellow font-mono text-sm mb-1">
+                <p className="text-accent-secondary font-mono text-sm mb-1">
                   TEXT
                 </p>
                 <p className="text-white font-mono text-base">
@@ -496,7 +496,7 @@ export default function HomepageHeroes() {
                 </p>
               </div>
               <div>
-                <p className="text-brutalist-pink font-mono text-sm mb-1">
+                <p className="text-accent-tertiary font-mono text-sm mb-1">
                   FONT
                 </p>
                 <p className="text-white font-mono text-base">
@@ -507,7 +507,7 @@ export default function HomepageHeroes() {
                 </p>
               </div>
               <div>
-                <p className="text-brutalist-cyan font-mono text-sm mb-1">
+                <p className="text-accent-primary font-mono text-sm mb-1">
                   SIZE
                 </p>
                 <p className="text-white font-mono text-base">
@@ -533,13 +533,13 @@ export default function HomepageHeroes() {
               <div className="flex gap-2">
                 <button
                   onClick={prevVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black hover:border-brutalist-cyan transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black hover:border-accent-primary transition-colors"
                 >
                   {'<'}
                 </button>
                 <button
                   onClick={nextVariation}
-                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-brutalist-cyan hover:text-black hover:border-brutalist-cyan transition-colors"
+                  className="bg-black text-white border-2 border-white px-4 py-2 font-mono hover:bg-accent-primary hover:text-black hover:border-accent-primary transition-colors"
                 >
                   {'>'}
                 </button>

@@ -68,7 +68,7 @@ mono `subtitle`. Drop it in as the first child of the standard page shell:
 
 - **`accent` is the per-section colour rule, in one place** — `cyan` (default,
   blog/projects/sandbox), `pink` (talks — matches its card borders), `yellow`
-  (ideas). It themes the icon + prompt glyph through the `--brutalist-*` tokens.
+  (ideas). It themes the icon + prompt glyph through the `--ds-accent-*` role tokens.
 - **Icons are lucide only — no emoji.** Native emoji break the ASCII/brutalist
   aesthetic (they render as full-colour OS glyphs).
 - Detail pages use `PageTitle` (bordered bracket text), not `PageHeader`. Blog
@@ -163,19 +163,18 @@ both.
 
 This works because `.sketch` (and `.dim`) **remap the colour tokens
 themselves** in `css/tailwind.css` — `--color-black`, `--color-white`, the
-`--color-zinc-*` scale, and the `--brutalist-*` accents all flip to paper/ink
+`--color-zinc-*` scale, and the `--ds-accent-*` roles all flip to paper/ink
 values. So the rule for any new component is:
 
 - **Build only on the remapped tokens**: `bg-black` / `bg-zinc-900`,
-  `border-white`, `text-white`, `text-zinc-400`, `text-brutalist-cyan|pink|
-  yellow`, `shadow-hard-*`. These invert automatically — write the dark look
+  `border-white`, `text-white`, `text-zinc-400`, `text-accent-primary|tertiary|secondary`, `shadow-hard-*`. These invert automatically — write the dark look
   and sketch comes for free.
 - **Never hardcode** `text-gray-900`, `dark:*` pairs, or hex literals for
   surfaces/text/borders — the grey scale and literals don't remap, so they
   break sketch mode (this was exactly why the old `/tags` page was unreadable
   on paper).
 - **No emoji as UI** — native emoji render as fixed full-colour OS glyphs that
-  ignore both themes; use lucide icons tinted with a `text-brutalist-*` accent
+  ignore both themes; use lucide icons tinted with a `text-accent-*` role
   so they follow dark ↔ sketch.
 - Verify both: cycle the theme switch (HIGH → DIM → SKETCH) and confirm the
   component reads on paper as well as on black.
