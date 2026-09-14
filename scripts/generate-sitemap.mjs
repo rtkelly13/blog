@@ -32,7 +32,7 @@ const siteUrl = siteMetadata.siteUrl.replace(/\/$/, '');
       'data/talks/**/*.md',
       // Each generated tag feed stands in for its tag page: the `/feed.xml`
       // suffix is stripped below, leaving `/tags/<tag>`. This is why
-      // `generate-tag-rss.mjs` runs before this script in `pnpm build` — on a
+      // `generate-rss.mjs` runs before this script in `pnpm build` — on a
       // clean checkout `public/tags/` does not exist until it has.
       'public/tags/**/*.xml',
       '!pages/_*.tsx',
