@@ -93,6 +93,7 @@ PR → .github/workflows/pr-checks.yml
       └──► conclusion = "PR checks"  (job summary + sticky comment + coverage delta)
 
 push main → ci.yml                # full suite + uploads coverage-main baseline
+cron / dispatch → release-train.yml # evaluates drift & deploy health, advances production pointer
 workflow_dispatch → playwright.yml  # manual: regenerate Linux snapshots
 PR comment /update-snapshots        # regenerate AND commit snapshots to the branch
 ```
@@ -102,7 +103,13 @@ PR comment /update-snapshots        # regenerate AND commit snapshots to the bra
   runner (Linux) so they match what `e2e-visual` compares against — regenerate
   with `pnpm test:snapshots:remote` (triggers `playwright.yml` on your branch,
   downloads and commits the PNGs) or comment `/update-snapshots` on the PR.
-  **Never** commit macOS-rendered snapshots.
+- **Production releases run via Release Train.** Merges to `main` do not
+  trigger Vercel production deployments directly (saving Vercel Hobby tier
+  quota). Instead, `.github/workflows/release-train.yml` runs on schedule
+  (08:00 and 16:00 UTC) or via `workflow_dispatch`. It verifies that `main` has
+  passing CI, inspects the GitHub Deployments API to check whether the live
+  deployment is outdated or failed, and advances the `production` pointer branch
+  to queue the Vercel build. Run locally with `pnpm release:train --dry-run`.
 
 ### Branch workflow
 
