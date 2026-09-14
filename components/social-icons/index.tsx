@@ -1,4 +1,5 @@
 import {
+  BlueskyIcon,
   GithubIcon,
   LinkedinIcon,
   MailIcon,
@@ -7,6 +8,7 @@ import {
 } from './icons';
 
 const components = {
+  bluesky: BlueskyIcon,
   mail: MailIcon,
   github: GithubIcon,
   linkedin: LinkedinIcon,

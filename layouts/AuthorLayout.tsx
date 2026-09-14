@@ -20,6 +20,7 @@ export default function AuthorLayout({ children, frontMatter }: Props) {
     twitter,
     linkedin,
     github,
+    bluesky,
   } = frontMatter;
 
   return (
@@ -53,6 +54,7 @@ export default function AuthorLayout({ children, frontMatter }: Props) {
               <SocialIcon kind="github" href={github} />
               <SocialIcon kind="linkedin" href={linkedin} />
               <SocialIcon kind="twitter" href={twitter} />
+              <SocialIcon kind="bluesky" href={bluesky} />
             </div>
           </div>
           <div className="pt-8 pb-8 prose prose-invert max-w-none xl:col-span-2 text-zinc-300">

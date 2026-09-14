@@ -23,6 +23,9 @@ export default function Footer() {
             href={siteMetadata.x || siteMetadata.twitter}
             size={8}
           />
+          {siteMetadata.bluesky && (
+            <SocialIcon kind="bluesky" href={siteMetadata.bluesky} size={8} />
+          )}
         </div>
         {/* The header nav is at capacity (it already overflows its 1024px
             container with seven links), so secondary destinations live here. */}
