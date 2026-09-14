@@ -59,6 +59,7 @@ storybook-site/dist
 
 # temporary working files
 /temp/
+/.scratch/
 
 # build-generated per-post OG cards (produced by scripts/generate-og-images.mjs)
 /public/static/og/
