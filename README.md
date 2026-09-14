@@ -17,7 +17,7 @@ to react, ask questions, and answer polls during a presentation.
 - **Newsletter:** Buttondown
 - **Hosting:** Vercel
 
-Based on [tailwind-nextjs-starter-blog](https://github.com/timlrx/tailwind-nextjs-starter-blog).
+Originally based on [tailwind-nextjs-starter-blog](https://github.com/timlrx/tailwind-nextjs-starter-blog) (v1.1.0). See [docs/provenance.md](./docs/provenance.md) for full architectural history and decoupling details.
 
 ## Requirements
 

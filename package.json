@@ -1,6 +1,7 @@
 {
-  "name": "tailwind-nextjs-starter-blog",
-  "version": "1.1.0",
+  "name": "@rtkelly13/blog",
+  "version": "1.0.0",
+  "description": "Personal blog and live-talk platform for Ryan Kelly (ryankelly.dev)",
   "private": true,
   "engines": {
     "node": ">=22.0.0",
@@ -30,6 +31,7 @@
     "ds:try": "node scripts/try-design-system.mjs",
     "archive-links": "node scripts/archive-links.mjs",
     "check:deploy": "node scripts/verify-deployment.mjs",
+    "release:train": "node scripts/release-train.mjs",
     "check:lockfile": "node scripts/ci/check-lockfile-protocol.mjs",
     "search:index": "node scripts/build-search-index.mjs",
     "lint": "biome check .",

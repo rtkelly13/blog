@@ -23,6 +23,7 @@ components, diagrams, assets, tooling, tests). Full policy:
 | **Technical guide** | [docs/technical-guide.md](./docs/technical-guide.md) | Stack, commands, build pipeline, CI/CD, branch workflow, browser control, deps |
 | **Posting** | [docs/posting.md](./docs/posting.md) | Authorship policy, MDX frontmatter, citations/OG, the ideas workbench |
 | **Talks** | [docs/talks.md](./docs/talks.md) | Deck MDX, live/present/admin routes, Convex backend, auth, live E2E |
+| **Provenance** | [docs/provenance.md](./docs/provenance.md) | Upstream origin (`tailwind-nextjs-starter-blog` v1.1.0), divergence history, decoupling, and attribution |
 
 Area-scoped `AGENTS.md` files sit next to the code and merge in automatically
 when you work there:

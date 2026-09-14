@@ -28,7 +28,7 @@ const siteMetadata = {
   stickyNav: true, // Set to false to disable sticky navigation
   analytics: {
     // supports plausible, simpleAnalytics or googleAnalytics
-    plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
+    plausibleDataDomain: '', // e.g. ryankelly.dev
     simpleAnalytics: false, // true or false
     googleAnalyticsId: '', // e.g. UA-000000-2 or G-XXXXXXX
   },
