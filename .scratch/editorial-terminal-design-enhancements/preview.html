@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design System & Blog Enhancement Preview // ryankelly.dev</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM CORE TOKENS (Dual-mode: Midnight & Sketch)
+       Zero border-radius invariant strictly enforced across all elements.
+       ========================================================================== */
+    :root, [data-theme="midnight"] {
+      --surface-base: #0a0a1a;
+      --surface-raised: #12122b;
+      --surface-sunken: #060610;
+      --surface-hover: #1c1c3d;
+      --text-primary: #f0f4fc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border-strong: #f0f4fc;
+      --border-default: #334155;
+      --border-subtle: #1e293b;
+      --accent-primary: #22d3ee;      /* Neon Cyan */
+      --accent-secondary: #ec4899;    /* Neon Pink */
+      --accent-tertiary: #facc15;     /* Neon Yellow */
+      --intent-success: #39ff14;      /* Terminal Green */
+      --intent-warning: #ff8c00;      /* Warning Orange */
+      --intent-danger: #ff586e;       /* Alert Red */
+      --shadow-color: rgba(0, 0, 0, 0.95);
+      --shadow-accent: #22d3ee;
+      --diagram-bg: #070714;
+      --diagram-box-bg: #12122b;
+      --diagram-leader-bg: rgba(57, 255, 20, 0.18);
+      --diagram-leader-stroke: #39ff14;
+      --diagram-follower-bg: rgba(255, 88, 110, 0.15);
+      --diagram-follower-stroke: #ff586e;
+      --diagram-log-bg: #facc15;
+      --diagram-wire: #64748b;
+    }
+
+    [data-theme="sketch"] {
+      --surface-base: #f5f3ec;        /* Sketch paper (the desk ground) */
+      --surface-raised: #ffffff;      /* Fresh sheet of paper */
+      --surface-sunken: #efeadf;      /* Binding ground / inset panels */
+      --surface-hover: #e8e3d5;
+      --text-primary: #23262e;        /* Sketch ink */
+      --text-secondary: #33373f;      /* Graphite body */
+      --text-muted: #6a6252;          /* Muted drafting pencil (5.1:1 on base) */
+      --border-strong: #23262e;       /* Heavy drafting pen */
+      --border-default: #8f8672;      /* Medium rule */
+      --border-subtle: #c8c3b4;       /* Fine hairline */
+      --accent-primary: #1450d7;      /* Technical blue pen (palette.blue) */
+      --accent-secondary: #006b2e;    /* Drafting green (palette.green) */
+      --accent-tertiary: #bd0010;     /* Drafting red (palette.red) */
+      --intent-success: #006b2e;      /* Pen green */
+      --intent-warning: #974503;      /* Rust orange */
+      --intent-danger: #bd0010;       /* Crimson red */
+      --shadow-color: #23262e;        /* Letterpress ink offset */
+      --shadow-accent: #1450d7;
+      --diagram-bg: #efeadf;          /* Inset blueprint paper */
+      --diagram-box-bg: #ffffff;      /* Paper sheet nodes */
+      --diagram-leader-bg: #dcfce7;   /* Pale pen-green tint */
+      --diagram-leader-stroke: #006b2e;
+      --diagram-follower-bg: #fee2e2; /* Pale pen-red tint */
+      --diagram-follower-stroke: #bd0010;
+      --diagram-log-bg: #fef08a;      /* Engineering yellow highlighter */
+      --diagram-wire: #23262e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border-radius: 0px !important; /* STRICT INVARIANT: Zero border-radius */
+    }
+
+    body {
+      background-color: var(--surface-base);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Fonts */
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .font-body { font-family: 'Inter', sans-serif; }
+
+    /* Common Brutalist Shadows */
+    .shadow-hard-xs { box-shadow: 2px 2px 0px 0px var(--shadow-color); }
+    .shadow-hard-sm { box-shadow: 3px 3px 0px 0px var(--shadow-color); }
+    .shadow-hard-md { box-shadow: 5px 5px 0px 0px var(--shadow-color); }
+    .shadow-hard-lg { box-shadow: 8px 8px 0px 0px var(--shadow-color); }
+    .shadow-hard-accent { box-shadow: 4px 4px 0px 0px var(--accent-primary); }
+
+    /* Top Evaluation HUD & Mode Bar (Fixed floating dock) */
+    .eval-dock {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--surface-raised);
+      border-bottom: 2px solid var(--border-strong);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 4px 0 0 var(--shadow-color);
+    }
+    .eval-dock .title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .eval-dock .status-chip {
+      background: var(--accent-primary);
+      color: var(--surface-base);
+      padding: 2px 6px;
+      font-weight: 800;
+    }
+    .eval-dock .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-toggle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 6px 14px;
+      border: 2px solid var(--border-strong);
+      background: var(--surface-base);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-toggle:hover {
+      background: var(--text-primary);
+      color: var(--surface-base);
+    }
+    .btn-toggle.active {
+      background: var(--accent-primary);
+      color: var(--surface-base);
+      border-color: var(--accent-primary);
+    }
+
+    /* Container Shell */
+    .shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ==========================================================================
+       COMPONENT 1: TICKER TAPE WITH DOCKED TELEMETRY HUD
+       ========================================================================== */
+    .ticker-shell {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      border-bottom: 2px solid var(--border-strong);
+      background: var(--surface-sunken);
+      overflow: hidden;
+      transition: top 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ticker-shell.is-sticky {
+      position: sticky;
+      top: 48px;
+      z-index: 990;
+      box-shadow: 0 4px 0 0 var(--shadow-color);
+    }
+    .ticker-tape {
+      flex: 1;
+      padding: 8px 0;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      overflow: hidden;
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+    }
+    .ticker-telemetry-hud {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      background: var(--surface-raised);
+      border-left: 2px solid var(--border-strong);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      z-index: 10;
+      flex-shrink: 0;
+      box-shadow: -4px 0 0 0 var(--shadow-color);
+    }
+    .hud-status-badge {
+      padding: 2px 6px;
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      border: 1px solid var(--border-strong);
+      letter-spacing: 0.1em;
+    }
+    .hud-status-cruise { background: var(--intent-success); color: var(--surface-base); }
+    .hud-status-braking { background: var(--intent-warning); color: #000; }
+    .hud-status-halted { background: var(--intent-danger); color: #fff; }
+    .hud-status-spooling { background: var(--accent-primary); color: var(--surface-base); }
+    .hud-val {
+      min-width: 36px;
+      text-align: right;
+      color: var(--text-primary);
+    }
+    .hud-bar {
+      color: var(--accent-primary);
+      font-family: monospace;
+      letter-spacing: -1px;
+    }
+    .ticker-track {
+      display: inline-flex;
+      align-items: center;
+      gap: 32px;
+      will-change: transform;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-secondary);
+    }
+    .ticker-item strong {
+      color: var(--text-primary);
+    }
+    .ticker-item .accent {
+      color: var(--accent-primary);
+    }
+    .ticker-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-primary);
+      display: inline-block;
+    }
+
+    /* ==========================================================================
+       SITE HEADER & LOGO WITH BLINK CURSOR
+       ========================================================================== */
+    .site-header {
+      border-bottom: 4px solid var(--border-strong);
+      padding: 20px 0;
+      background: var(--surface-base);
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-logo {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-badge {
+      background: var(--accent-primary);
+      color: var(--surface-base);
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+    .cursor-blink::after {
+      content: "_";
+      display: inline-block;
+      color: var(--accent-primary);
+      font-weight: 900;
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border: 2px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .nav-link:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+      box-shadow: 3px 3px 0 0 var(--shadow-color);
+    }
+
+    /* ==========================================================================
+       COMPONENT 2: COLOSSAL DISPLAY HEADLINE & BREADCRUMBS
+       ========================================================================== */
+    .article-header {
+      padding: 56px 0 32px;
+      border-bottom: 4px solid var(--border-strong);
+    }
+    .breadcrumbs {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .breadcrumbs span.active {
+      color: var(--accent-primary);
+    }
+    .colossal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+      line-height: 0.88;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      text-wrap: balance;
+      margin-bottom: 32px;
+    }
+
+    /* ==========================================================================
+       COMPONENT 3: 4-COLUMN ARTICLE METADATA GRID
+       ========================================================================== */
+    .meta-grid {
+      border-top: 2px solid var(--border-strong);
+      padding-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .meta-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .meta-cell .k {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .meta-cell .v {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--text-primary);
+    }
+    .tag-chip {
+      display: inline-block;
+      border: 1px solid var(--border-strong);
+      padding: 1px 6px;
+      font-size: 10px;
+      margin-right: 4px;
+      margin-top: 2px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tag-chip:hover {
+      background: var(--text-primary);
+      color: var(--surface-base);
+    }
+
+    /* ==========================================================================
+       ARTICLE BODY & EDITORIAL ACCENT ELEMENTS
+       ========================================================================== */
+    .article-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      padding: 48px 0;
+      gap: 48px;
+    }
+    .prose-content {
+      max-width: 820px;
+      margin: 0 auto;
+      font-size: 1.125rem;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+    .prose-content p {
+      margin-bottom: 24px;
+    }
+    .lead-text {
+      font-size: 1.35rem;
+      line-height: 1.5;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--border-default);
+    }
+
+    /* 8px Accent Callout */
+    .brutalist-callout {
+      border-left: 8px solid var(--accent-primary);
+      background: var(--surface-raised);
+      border-top: 2px solid var(--border-default);
+      border-right: 2px solid var(--border-default);
+      border-bottom: 2px solid var(--border-default);
+      padding: 24px 28px;
+      margin: 36px 0;
+      box-shadow: 4px 4px 0 0 var(--shadow-color);
+    }
+    .brutalist-callout h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brutalist-callout p {
+      margin-bottom: 0;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       COMPONENT 4: SERIES TRACK PROGRESS CARD (Build Distributed Systems inspired)
+       ========================================================================== */
+    .track-card {
+      background: var(--surface-raised);
+      border: 4px solid var(--border-strong);
+      box-shadow: 8px 8px 0px 0px var(--shadow-color);
+      margin: 48px 0;
+      overflow: hidden;
+    }
+    .track-card-header {
+      background: var(--surface-sunken);
+      border-bottom: 4px solid var(--border-strong);
+      padding: 24px 28px;
+    }
+    .track-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .track-series-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: var(--accent-secondary);
+      color: var(--surface-base);
+      padding: 3px 8px;
+      border: 1px solid var(--border-strong);
+    }
+    .track-progress-tally {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .track-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .track-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    /* Brutalist Progress Bar */
+    .brutalist-progress-bar {
+      width: 100%;
+      height: 14px;
+      background: var(--surface-base);
+      border: 2px solid var(--border-strong);
+      position: relative;
+    }
+    .brutalist-progress-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-right: 2px solid var(--border-strong);
+      width: 40%;
+      transition: width 0.3s ease;
+    }
+
+    .track-items-list {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .track-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--surface-base);
+      border: 2px solid var(--border-strong);
+      padding: 14px 18px;
+      box-shadow: 3px 3px 0px 0px var(--shadow-color);
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .track-item-row:hover {
+      transform: translateY(-2px);
+      box-shadow: 5px 5px 0px 0px var(--shadow-color);
+      border-color: var(--accent-primary);
+    }
+    .track-item-row.completed {
+      opacity: 0.85;
+    }
+    .track-item-row.active {
+      border-color: var(--accent-primary);
+      background: var(--surface-raised);
+      box-shadow: 4px 4px 0px 0px var(--accent-primary);
+    }
+    .track-item-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .track-status-box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .track-status-box.checked {
+      background: var(--intent-success);
+      color: var(--surface-base);
+      border-color: var(--border-strong);
+    }
+    .track-status-box.active-dot {
+      background: var(--accent-primary);
+      color: var(--surface-base);
+    }
+    .track-item-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .track-item-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .difficulty-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border: 1px solid var(--border-strong);
+      box-shadow: 2px 2px 0 0 var(--shadow-color);
+    }
+    .difficulty-beginner { background: var(--intent-success); color: var(--surface-base); }
+    .difficulty-intermediate { background: var(--accent-tertiary); color: #000; }
+    .difficulty-advanced { background: var(--intent-danger); color: #fff; }
+
+    /* ==========================================================================
+       COMPONENT 5: MONOSPACE VECTOR ARCHITECTURE DIAGRAM
+       ========================================================================== */
+    .diagram-container {
+      background: var(--diagram-bg);
+      border: 4px solid var(--border-strong);
+      box-shadow: 8px 8px 0px 0px var(--shadow-color);
+      padding: 24px;
+      margin: 40px 0;
+      overflow-x: auto;
+    }
+    .diagram-header {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px dashed var(--border-default);
+      padding-bottom: 8px;
+    }
+
+    /* ==========================================================================
+       COMPONENT 6: AUTHOR ENDNOTE COLOPHON CARD (Matthew Phillips inspired)
+       ========================================================================== */
+    .author-endnote {
+      border: 4px solid var(--border-strong);
+      background: var(--surface-raised);
+      padding: 36px;
+      margin-top: 56px;
+      box-shadow: 6px 6px 0px 0px var(--shadow-color);
+    }
+    .colophon-section-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent-primary);
+      margin-bottom: 8px;
+    }
+    .author-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .author-bio {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .colophon-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .colophon-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      color: var(--text-primary);
+      background: var(--surface-base);
+      border: 2px solid var(--border-strong);
+      padding: 8px 16px;
+      box-shadow: 3px 3px 0 0 var(--shadow-color);
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .colophon-link:hover {
+      background: var(--text-primary);
+      color: var(--surface-base);
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 0 var(--shadow-color);
+    }
+
+    /* ==========================================================================
+       COMPONENT 7: CALIBRATED FOOTER SIGNATURE & NAVIGATION
+       ========================================================================== */
+    .colossal-footer {
+      border-top: 4px solid var(--border-strong);
+      margin-top: 64px;
+      padding: 40px 0 36px;
+      background: var(--surface-base);
+    }
+    .colossal-slogan {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.5rem, 3.8vw, 3.25rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .colossal-slogan .footer-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      background: var(--accent-primary);
+      color: var(--surface-base);
+      padding: 3px 8px;
+      vertical-align: middle;
+    }
+    .footer-columns {
+      border-top: 2px solid var(--border-strong);
+      padding-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    @media (max-width: 640px) {
+      .footer-columns { grid-template-columns: 1fr; }
+    }
+    .footer-col h5 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .footer-col a {
+      display: block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      text-decoration: none;
+      padding: 4px 0;
+    }
+    .footer-col a:hover {
+      color: var(--accent-primary);
+      text-decoration: underline;
+    }
+    .footer-legal {
+      border-top: 2px solid var(--border-default);
+      margin-top: 36px;
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       ISSUE CENSUS & SPECS DRAWER
+       ========================================================================== */
+    .specs-panel {
+      background: var(--surface-raised);
+      border: 4px solid var(--border-strong);
+      box-shadow: 8px 8px 0 0 var(--shadow-color);
+      padding: 32px;
+      margin: 40px 0;
+    }
+    .specs-panel h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .issue-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+    }
+    .issue-table th, .issue-table td {
+      border: 1px solid var(--border-strong);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    .issue-table th {
+      background: var(--surface-sunken);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-weight: 800;
+      font-size: 10px;
+      text-transform: uppercase;
+      background: var(--accent-tertiary);
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- EVALUATION FLOATING CONTROL DOCK -->
+  <aside class="eval-dock">
+    <div class="title">
+      <span class="status-chip">EVAL REPORT</span>
+      <span>ryankelly.dev // Design System Proposal</span>
+    </div>
+    <div class="controls">
+      <button class="btn-toggle" id="btn-sticky-toggle" onclick="toggleSticky()">
+        <span>⚓</span> Sticky Ticker: OFF
+      </button>
+      <button class="btn-toggle active" id="btn-theme-midnight" onclick="setTheme('midnight')">
+        <span>●</span> Midnight (CRT)
+      </button>
+      <button class="btn-toggle" id="btn-theme-sketch" onclick="setTheme('sketch')">
+        <span>○</span> Sketch (Paper)
+      </button>
+      <button class="btn-toggle" onclick="document.getElementById('specs-section').scrollIntoView({ behavior: 'smooth' })">
+        [ Issues Census ↓ ]
+      </button>
+    </div>
+  </aside>
+
+  <!-- TICKER PHYSICS CONTROLLER, TRAILING SLOT & DYNAMIC VELOCITY BAR -->
+  <div style="background: var(--surface-raised); border-bottom: 2px solid var(--border-strong); padding: 8px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <span style="font-weight: 800; text-transform: uppercase; color: var(--accent-primary); letter-spacing: 0.08em;">
+          [ TICKER CONTROLS ]
+        </span>
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+          <input type="radio" name="physics" value="flywheel" checked onchange="setPhysics('flywheel')" />
+          <span>Flywheel (850ms Ease)</span>
+        </label>
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+          <input type="radio" name="physics" value="viscous" onchange="setPhysics('viscous')" />
+          <span>Viscous Damper (450ms)</span>
+        </label>
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+          <input type="radio" name="physics" value="binary" onchange="setPhysics('binary')" />
+          <span>Binary Freeze (0ms)</span>
+        </label>
+        <div style="display: flex; align-items: center; gap: 6px; border-left: 2px solid var(--border-default); padding-left: 12px;">
+          <span style="color: var(--text-muted); font-size: 10px;">TRAILING SLOT (endAddon):</span>
+          <select id="slot-select" onchange="switchSlot(this.value)" style="background: var(--surface-base); color: var(--text-primary); border: 1px solid var(--border-strong); padding: 2px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 700;">
+            <option value="telemetry">AsciiGauge HUD (Issue 07)</option>
+            <option value="bullet">Micro BulletChart SVG (Branch 217)</option>
+            <option value="subscribe">Subscribe Button (Cursor_)</option>
+            <option value="presence">Live Audience Presence</option>
+            <option value="none">None (Full-Bleed Marquee)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; font-weight: 800;">
+        <span style="color: var(--text-muted); font-size: 10px;" id="speed-calc-info">VELOCITY NORMALIZATION: ~50px/s (Auto 34.8s duration)</span>
+        <span id="velocity-val" style="color: var(--intent-success); min-width: 44px; text-align: right;">100%</span>
+        <span id="velocity-bar" style="color: var(--accent-primary); font-family: monospace; letter-spacing: -1px;">[████████]</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPONENT 1: TICKER TAPE WITH DOCKED INSTRUMENT TELEMETRY HUD -->
+  <div class="ticker-shell">
+    <div class="ticker-tape" aria-hidden="true">
+      <div class="ticker-track">
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>LATEST: <strong class="accent">BUILDING MINI-KAFKA FROM FIRST PRINCIPLES</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>ESTATE GOVERNANCE: <strong>18 REPOSITORIES ALL GREEN</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>READ TIME: <strong>9 MINUTES</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>TALK WORKSHOP: <strong class="accent">DISTRIBUTED PARQUET IN C# 13</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>THEME: <strong>MIDNIGHT CRT & SKETCH GRAPHITE</strong></span>
+        </div>
+        <!-- Duplicate for infinite seamless scroll -->
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>LATEST: <strong class="accent">BUILDING MINI-KAFKA FROM FIRST PRINCIPLES</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>ESTATE GOVERNANCE: <strong>18 REPOSITORIES ALL GREEN</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>READ TIME: <strong>9 MINUTES</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>TALK WORKSHOP: <strong class="accent">DISTRIBUTED PARQUET IN C# 13</strong></span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-dot"></span>
+          <span>THEME: <strong>MIDNIGHT CRT & SKETCH GRAPHITE</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAILING CHILD SLOT CONTAINER (`endAddon`) -->
+    <div id="ticker-end-slot" style="display: flex; align-items: stretch;">
+      <!-- Slot Option 1: Standalone <TelemetryGauge /> -->
+      <div class="ticker-telemetry-hud" id="slot-telemetry" title="Standalone TelemetryGauge Component">
+        <span class="hud-status-badge hud-status-cruise" id="hud-status-badge">CRUISE</span>
+        <span class="hud-val" id="hud-velocity-pct">100%</span>
+        <span class="hud-bar" id="hud-velocity-bar">[████████]</span>
+      </div>
+      <!-- Slot Option 2: SVG Micro BulletChart (branch 217-adopt-chart-primitives) -->
+      <div class="ticker-telemetry-hud" id="slot-bullet" style="display: none; align-items: center; gap: 8px;" title="BulletChart from branch 217">
+        <span style="font-size: 9px; color: var(--text-muted); font-weight: 800;">BENCHMARK:</span>
+        <svg width="80" height="12" viewBox="0 0 80 12" style="overflow: visible;">
+          <rect x="0" y="1" width="32" height="10" fill="var(--surface-sunken)" stroke="none"></rect>
+          <rect x="32" y="1" width="28" height="10" fill="var(--surface-raised)" stroke="none"></rect>
+          <rect x="60" y="1" width="20" height="10" fill="var(--border-subtle)" stroke="none"></rect>
+          <rect id="svg-bullet-bar" x="0" y="3" width="64" height="6" fill="var(--accent-primary)"></rect>
+          <line x1="64" y1="0" x2="64" y2="12" stroke="var(--intent-warning)" stroke-width="2"></line>
+        </svg>
+        <span id="bullet-val-text" style="font-size: 9px; font-weight: 800; color: var(--text-primary); min-width: 28px;">80%</span>
+      </div>
+      <!-- Slot Option 3: Subscribe Button with Cursor -->
+      <a href="#subscribe" class="ticker-telemetry-hud" id="slot-subscribe" style="display: none; text-decoration: none; cursor: pointer;">
+        <span style="color: var(--accent-primary); font-weight: 800; font-size: 10px;">SUBSCRIBE</span>
+        <span class="cursor-blink"></span>
+      </a>
+      <!-- Slot Option 4: Live Presence Badge -->
+      <div class="ticker-telemetry-hud" id="slot-presence" style="display: none;">
+        <span style="display: inline-block; width: 6px; height: 6px; background: var(--intent-success); margin-right: 4px;"></span>
+        <span style="color: var(--text-primary); font-weight: 800; font-size: 10px;">42 LISTENING</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SITE HEADER -->
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a href="#" class="brand-logo">
+        <span class="brand-badge">&gt;_</span>
+        <span>RYAN KELLY</span>
+        <span class="cursor-blink"></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#article" class="nav-link">Essays</a>
+        <a href="#tracks" class="nav-link">Tracks</a>
+        <a href="#diagram" class="nav-link">Schematics</a>
+        <a href="#specs-section" class="nav-link">Issues</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ARTICLE MAIN SHELL -->
+  <main class="shell" id="article">
+
+    <!-- COMPONENT 2: COLOSSAL DISPLAY HEADLINE & BREADCRUMBS -->
+    <header class="article-header">
+      <div class="breadcrumbs">
+        <span>SYSTEM ARCHITECTURE</span>
+        <span>›</span>
+        <span class="active">DISTRIBUTED STORAGE</span>
+        <span>›</span>
+        <span>LOG PRIMITIVES</span>
+      </div>
+      <h1 class="colossal-title">BUILDING MINI-KAFKA FROM FIRST PRINCIPLES</h1>
+
+      <!-- COMPONENT 3: 4-COLUMN ARTICLE METADATA GRID -->
+      <div class="meta-grid">
+        <div class="meta-cell">
+          <span class="k">Published</span>
+          <span class="v">Sept 14, 2026</span>
+        </div>
+        <div class="meta-cell">
+          <span class="k">Read time</span>
+          <span class="v">9 min read</span>
+        </div>
+        <div class="meta-cell">
+          <span class="k">Series track</span>
+          <span class="v">Storage Engine #02</span>
+        </div>
+        <div class="meta-cell">
+          <span class="k">Topics & Tags</span>
+          <div class="v">
+            <span class="tag-chip">KAFKA</span>
+            <span class="tag-chip">RAFT</span>
+            <span class="tag-chip">C# 13</span>
+            <span class="tag-chip">IO</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PROSE CONTENT & SYSTEM CALLOUTS -->
+    <div class="article-layout">
+      <article class="prose-content">
+        <p class="lead-text">
+          Kafka's central genius is not its messaging queue abstractions, but treating the <strong>append-only log as the primary database</strong>. By decoupling write speed from read speed and allowing clients to advance their own offsets independently, we eliminate distributed locks and synchronous coordination.
+        </p>
+
+        <p>
+          In traditional message brokers, the broker actively deletes messages once consumers acknowledge receipt. In contrast, Kafka treats storage as durable physical log segments on disk. Replication becomes a mechanical stream replay: followers simply replicate the leader's sequential log prefix up to the <strong>high watermark</strong>.
+        </p>
+
+        <!-- 8PX ACCENT BRUTALIST CALLOUT -->
+        <div class="brutalist-callout">
+          <h4>[ INVARIANT: THE LOG IS THE DATABASE ]</h4>
+          <p>
+            Followers never resolve merge conflicts or compute vector clocks. Every state change is an immutable offset append. If two brokers diverge, the KRaft quorum enforces truncation to the leader's committed epoch.
+          </p>
+        </div>
+
+        <p>
+          Below is the complete architectural blueprint for the broker cluster, leader-follower ISR topology, and the client group consensus that we will construct across three tracks:
+        </p>
+      </article>
+
+      <!-- COMPONENT 5: MONOSPACE VECTOR SVG ARCHITECTURE DIAGRAM -->
+      <section class="diagram-container" id="diagram">
+        <div class="diagram-header">
+          <span>FIG 01 // APACHE KAFKA CLUSTER & KRaft COORDINATION QUORUM</span>
+          <span>FORMAT: MONOSPACE VECTOR SVG</span>
+        </div>
+
+        <svg viewBox="0 0 920 460" width="100%" height="auto" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; display: block;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow-wire" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--text-primary)" />
+            </marker>
+            <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--intent-success)" />
+            </marker>
+            <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--accent-primary)" />
+            </marker>
+          </defs>
+
+          <!-- Canvas Backdrop -->
+          <rect width="920" height="460" fill="var(--diagram-bg)" stroke="var(--border-strong)" stroke-width="2"/>
+
+          <!-- ===== PRODUCERS (LEFT SLAB) ===== -->
+          <text x="70" y="38" text-anchor="middle" font-weight="700" fill="var(--text-muted)">[ PRODUCERS ]</text>
+          
+          <rect x="20" y="50" width="100" height="34" fill="var(--diagram-box-bg)" stroke="var(--accent-primary)" stroke-width="2"/>
+          <text x="70" y="72" text-anchor="middle" font-weight="700" fill="var(--text-primary)">orders-svc</text>
+
+          <rect x="20" y="98" width="100" height="34" fill="var(--diagram-box-bg)" stroke="var(--accent-primary)" stroke-width="2"/>
+          <text x="70" y="120" text-anchor="middle" font-weight="700" fill="var(--text-primary)">billing-svc</text>
+
+          <rect x="20" y="146" width="100" height="34" fill="var(--diagram-box-bg)" stroke="var(--accent-primary)" stroke-width="2"/>
+          <text x="70" y="168" text-anchor="middle" font-weight="700" fill="var(--text-primary)">events-svc</text>
+
+          <!-- Produce Wires -->
+          <line x1="120" y1="67" x2="180" y2="85" stroke="var(--accent-primary)" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+          <line x1="120" y1="115" x2="180" y2="115" stroke="var(--accent-primary)" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+          <line x1="120" y1="163" x2="180" y2="180" stroke="var(--accent-primary)" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+
+          <!-- ===== BROKER CLUSTER CONTAINER (CENTER) ===== -->
+          <rect x="180" y="24" width="490" height="320" fill="var(--surface-base)" stroke="var(--border-strong)" stroke-width="3"/>
+          <text x="425" y="44" text-anchor="middle" font-weight="800" fill="var(--text-primary)" letter-spacing="0.08em">KAFKA BROKER CLUSTER (3 NODES · PARTITIONS REPLICATED)</text>
+
+          <!-- Broker 1 -->
+          <rect x="195" y="56" width="145" height="270" fill="var(--diagram-box-bg)" stroke="var(--border-strong)" stroke-width="2"/>
+          <text x="267" y="76" text-anchor="middle" font-weight="800" fill="var(--accent-primary)">BROKER-01</text>
+          
+          <text x="267" y="95" text-anchor="middle" font-size="9" fill="var(--text-muted)">topic: orders</text>
+          <rect x="205" y="100" width="125" height="22" fill="var(--diagram-leader-bg)" stroke="var(--diagram-leader-stroke)" stroke-width="2"/>
+          <text x="267" y="115" text-anchor="middle" font-weight="800" fill="var(--text-primary)">P0 [ LEADER ]</text>
+
+          <rect x="205" y="126" width="125" height="22" fill="var(--diagram-follower-bg)" stroke="var(--diagram-follower-stroke)" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <text x="267" y="141" text-anchor="middle" font-weight="700" fill="var(--text-secondary)">P1 (follower)</text>
+
+          <text x="267" y="165" text-anchor="middle" font-size="9" fill="var(--text-muted)">topic: events</text>
+          <rect x="205" y="170" width="125" height="22" fill="var(--diagram-leader-bg)" stroke="var(--diagram-leader-stroke)" stroke-width="2"/>
+          <text x="267" y="185" text-anchor="middle" font-weight="800" fill="var(--text-primary)">P0 [ LEADER ]</text>
+
+          <!-- Storage segments -->
+          <text x="267" y="214" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-muted)">LOG SEGMENTS</text>
+          <rect x="205" y="222" width="28" height="68" fill="var(--diagram-log-bg)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="237" y="222" width="28" height="68" fill="var(--diagram-log-bg)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="269" y="222" width="28" height="68" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="301" y="222" width="28" height="68" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <text x="267" y="306" text-anchor="middle" font-size="8" fill="var(--text-muted)">0000.log active</text>
+
+          <!-- Broker 2 -->
+          <rect x="352" y="56" width="145" height="270" fill="var(--diagram-box-bg)" stroke="var(--border-strong)" stroke-width="2"/>
+          <text x="424" y="76" text-anchor="middle" font-weight="800" fill="var(--accent-primary)">BROKER-02</text>
+          
+          <text x="424" y="95" text-anchor="middle" font-size="9" fill="var(--text-muted)">topic: orders</text>
+          <rect x="362" y="100" width="125" height="22" fill="var(--diagram-follower-bg)" stroke="var(--diagram-follower-stroke)" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <text x="424" y="115" text-anchor="middle" font-weight="700" fill="var(--text-secondary)">P0 (follower)</text>
+
+          <rect x="362" y="126" width="125" height="22" fill="var(--diagram-leader-bg)" stroke="var(--diagram-leader-stroke)" stroke-width="2"/>
+          <text x="424" y="141" text-anchor="middle" font-weight="800" fill="var(--text-primary)">P1 [ LEADER ]</text>
+
+          <text x="424" y="165" text-anchor="middle" font-size="9" fill="var(--text-muted)">topic: events</text>
+          <rect x="362" y="170" width="125" height="22" fill="var(--diagram-leader-bg)" stroke="var(--diagram-leader-stroke)" stroke-width="2"/>
+          <text x="424" y="185" text-anchor="middle" font-weight="800" fill="var(--text-primary)">P1 [ LEADER ]</text>
+
+          <!-- Storage segments -->
+          <text x="424" y="214" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-muted)">LOG SEGMENTS</text>
+          <rect x="362" y="222" width="28" height="68" fill="var(--diagram-leader-bg)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="394" y="222" width="28" height="68" fill="var(--diagram-leader-bg)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="426" y="222" width="28" height="68" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="458" y="222" width="28" height="68" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <text x="424" y="306" text-anchor="middle" font-size="8" fill="var(--text-muted)">0042.log active</text>
+
+          <!-- Broker 3 -->
+          <rect x="509" y="56" width="145" height="270" fill="var(--diagram-box-bg)" stroke="var(--border-strong)" stroke-width="2"/>
+          <text x="581" y="76" text-anchor="middle" font-weight="800" fill="var(--accent-primary)">BROKER-03</text>
+          
+          <text x="581" y="95" text-anchor="middle" font-size="9" fill="var(--text-muted)">topic: orders</text>
+          <rect x="519" y="100" width="125" height="22" fill="var(--diagram-leader-bg)" stroke="var(--diagram-leader-stroke)" stroke-width="2"/>
+          <text x="581" y="115" text-anchor="middle" font-weight="800" fill="var(--text-primary)">P2 [ LEADER ]</text>
+
+          <rect x="519" y="126" width="125" height="22" fill="var(--diagram-follower-bg)" stroke="var(--diagram-follower-stroke)" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <text x="581" y="141" text-anchor="middle" font-weight="700" fill="var(--text-secondary)">P0 (follower)</text>
+
+          <text x="581" y="165" text-anchor="middle" font-size="9" fill="var(--text-muted)">topic: events</text>
+          <rect x="519" y="170" width="125" height="22" fill="var(--diagram-leader-bg)" stroke="var(--diagram-leader-stroke)" stroke-width="2"/>
+          <text x="581" y="185" text-anchor="middle" font-weight="800" fill="var(--text-primary)">P2 [ LEADER ]</text>
+
+          <!-- Storage segments -->
+          <text x="581" y="214" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-muted)">LOG SEGMENTS</text>
+          <rect x="519" y="222" width="28" height="68" fill="var(--accent-secondary)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="551" y="222" width="28" height="68" fill="var(--accent-secondary)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="583" y="222" width="28" height="68" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <rect x="615" y="222" width="28" height="68" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <text x="581" y="306" text-anchor="middle" font-size="8" fill="var(--text-muted)">0108.log active</text>
+
+          <!-- ===== CONSUMER GROUPS (RIGHT SLAB) ===== -->
+          <text x="795" y="38" text-anchor="middle" font-weight="700" fill="var(--text-muted)">[ CONSUMERS ]</text>
+
+          <!-- Group A -->
+          <rect x="705" y="56" width="185" height="110" fill="var(--diagram-box-bg)" stroke="var(--accent-primary)" stroke-width="2"/>
+          <text x="797" y="75" text-anchor="middle" font-weight="800" fill="var(--accent-primary)">GROUP: ANALYTICS</text>
+          <rect x="715" y="85" width="80" height="26" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1"/>
+          <text x="755" y="102" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-primary)">c1 (p0, p1)</text>
+          <rect x="800" y="85" width="80" height="26" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1"/>
+          <text x="840" y="102" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-primary)">c2 (p2)</text>
+          <text x="797" y="132" text-anchor="middle" font-size="9" fill="var(--text-muted)">Committed Offsets:</text>
+          <text x="797" y="146" text-anchor="middle" font-size="9" font-weight="700" fill="var(--intent-success)">p0: 1042 | p1: 876 | p2: 2301</text>
+
+          <!-- Group B -->
+          <rect x="705" y="180" width="185" height="110" fill="var(--diagram-box-bg)" stroke="var(--intent-success)" stroke-width="2"/>
+          <text x="797" y="199" text-anchor="middle" font-weight="800" fill="var(--intent-success)">GROUP: FRAUD-DETECTOR</text>
+          <rect x="715" y="209" width="80" height="26" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1"/>
+          <text x="755" y="226" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-primary)">det-1 (p0)</text>
+          <rect x="800" y="209" width="80" height="26" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="1"/>
+          <text x="840" y="226" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-primary)">det-2 (p1, p2)</text>
+          <text x="797" y="256" text-anchor="middle" font-size="9" fill="var(--text-muted)">Committed Offsets:</text>
+          <text x="797" y="270" text-anchor="middle" font-size="9" font-weight="700" fill="var(--intent-success)">p0: 950 | p1: 802 | p2: 2100</text>
+
+          <!-- Wires from Brokers to Consumers -->
+          <line x1="670" y1="110" x2="705" y2="110" stroke="var(--accent-primary)" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+          <line x1="670" y1="235" x2="705" y2="235" stroke="var(--intent-success)" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+          <!-- ===== KRAFT METADATA QUORUM (BOTTOM SLAB) ===== -->
+          <rect x="180" y="360" width="490" height="42" fill="var(--surface-sunken)" stroke="var(--border-strong)" stroke-width="2" stroke-dasharray="5,3"/>
+          <text x="425" y="378" text-anchor="middle" font-weight="800" fill="var(--text-primary)">KRaft Consensus Quorum (Raft Protocol)</text>
+          <text x="425" y="393" text-anchor="middle" font-size="9" fill="var(--text-muted)">Broker-01 (Active Controller)  |  Broker-02 (Voter)  |  Broker-03 (Voter)</text>
+
+          <!-- KRaft coordination lines -->
+          <line x1="267" y1="360" x2="267" y2="330" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow-wire)"/>
+          <line x1="424" y1="360" x2="424" y2="330" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow-wire)"/>
+          <line x1="581" y1="360" x2="581" y2="330" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow-wire)"/>
+
+          <!-- ===== EMBEDDED DIAGRAM LEGEND ===== -->
+          <rect x="180" y="420" width="14" height="10" fill="var(--diagram-leader-bg)" stroke="var(--diagram-leader-stroke)" stroke-width="2"/>
+          <text x="202" y="429" font-size="9" font-weight="700" fill="var(--text-primary)">Partition LEADER</text>
+
+          <rect x="330" y="420" width="14" height="10" fill="var(--diagram-follower-bg)" stroke="var(--diagram-follower-stroke)" stroke-width="1.5" stroke-dasharray="3,1"/>
+          <text x="352" y="429" font-size="9" font-weight="700" fill="var(--text-muted)">In-Sync Replica (ISR Follower)</text>
+
+          <rect x="540" y="420" width="14" height="10" fill="var(--diagram-log-bg)" stroke="var(--border-strong)" stroke-width="1"/>
+          <text x="562" y="429" font-size="9" font-weight="700" fill="var(--text-primary)">Immutable On-Disk Segment</text>
+        </svg>
+      </section>
+
+      <!-- COMPONENT 4: SERIES TRACK PROGRESS CARD (Build Distributed Systems Inspired) -->
+      <section class="prose-content" id="tracks">
+        <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 800; text-transform: uppercase; margin-bottom: 24px;">
+          CURRICULUM IMPLEMENTATION TRACKS
+        </h3>
+
+        <!-- Card for Track 01 -->
+        <div class="track-card">
+          <div class="track-card-header">
+            <div class="track-badge-row">
+              <span class="track-series-label">TRACK 01 // STORAGE</span>
+              <span class="track-progress-tally">1 / 3 COMPLETED</span>
+            </div>
+            <h4 class="track-title">Append-Only Partition Log & Offset Index</h4>
+            <p class="track-desc">
+              Construct the fundamental storage engine. Implement sequential binary message serialization, offset addressing, and a sparse index for O(log n) seeks into arbitrary offset positions without memory scans.
+            </p>
+            <div class="brutalist-progress-bar">
+              <div class="brutalist-progress-fill" style="width: 33.33%;"></div>
+            </div>
+          </div>
+
+          <div class="track-items-list">
+            <!-- Item 1 (Completed) -->
+            <a class="track-item-row completed">
+              <div class="track-item-left">
+                <div class="track-status-box checked">✓</div>
+                <span class="track-item-title">01. Implement the Binary Append-Only Segment Log</span>
+              </div>
+              <div class="track-item-right">
+                <span class="difficulty-badge difficulty-beginner">BEGINNER</span>
+                <span>→</span>
+              </div>
+            </a>
+
+            <!-- Item 2 (Active) -->
+            <a class="track-item-row active">
+              <div class="track-item-left">
+                <div class="track-status-box active-dot">&gt;</div>
+                <span class="track-item-title">02. Build Sparse Offset Index for O(log n) Binary Seeks</span>
+              </div>
+              <div class="track-item-right">
+                <span class="difficulty-badge difficulty-intermediate">INTERMEDIATE</span>
+                <span style="color: var(--accent-primary); font-weight: 900;">→</span>
+              </div>
+            </a>
+
+            <!-- Item 3 (Upcoming) -->
+            <a class="track-item-row">
+              <div class="track-item-left">
+                <div class="track-status-box">[ ]</div>
+                <span class="track-item-title">03. Zero-Copy Socket Transfers via sendfile() Kernel API</span>
+              </div>
+              <div class="track-item-right">
+                <span class="difficulty-badge difficulty-advanced">ADVANCED</span>
+                <span>→</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- COMPONENT 6: AUTHOR ENDNOTE COLOPHON CARD (Matthew Phillips Inspired) -->
+        <div class="author-endnote">
+          <div class="colophon-section-tag">§ ABOUT THE AUTHOR // COLOPHON</div>
+          <div class="author-name">RYAN KELLY</div>
+          <p class="author-bio">
+            Principal engineer and software architect specializing in distributed data systems, high-throughput Apache Parquet serialization, C# / .NET runtimes, and brutalist design systems. Author of <code>ryankelly.dev</code> and creator of <code>@rtkelly13/design-system</code>.
+          </p>
+          <div class="colophon-links">
+            <a href="https://github.com/rtkelly" class="colophon-link">GITHUB →</a>
+            <a href="https://bsky.app" class="colophon-link">BLUESKY →</a>
+            <a href="https://ryankelly.dev" class="colophon-link">ESTATE HOME →</a>
+            <a href="/feed.xml" class="colophon-link">RSS FEED →</a>
+          </div>
+        </div>
+
+      </article>
+    </div>
+
+    <!-- SPECS & ISSUES CENSUS (For evaluation review) -->
+    <section class="specs-panel" id="specs-section">
+      <h3>[ PROPOSED IMPLEMENTATION ISSUES ON BLOG ]</h3>
+      <p style="margin-bottom: 20px; font-size: 0.95rem; color: var(--text-secondary);">
+        The following 6 feature issues have been prepared in <code>blog/.scratch/editorial-terminal-design-enhancements/issues/</code> according to the repo's localized issue tracker conventions:
+      </p>
+
+      <table class="issue-table">
+        <thead>
+          <tr>
+            <th>ID & File</th>
+            <th>Proposed Component</th>
+            <th>Primary Origin</th>
+            <th>Status</th>
+            <th>Key Tokens / Invariants</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>01-ticker-tape.md</code></td>
+            <td><strong>TickerTape</strong></td>
+            <td>Matthew Phillips</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td>Continuous CSS marquee, square dots, <code>border-b-2</code>, <code>bg-surface-sunken</code>.</td>
+          </tr>
+          <tr>
+            <td><code>02-article-metadata-grid.md</code></td>
+            <td><strong>ArticleMetadataGrid</strong></td>
+            <td>Matthew Phillips</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td>4-column key/value matrix, <code>border-b-4</code>, inverse hover chips.</td>
+          </tr>
+          <tr>
+            <td><code>03-series-track-card.md</code></td>
+            <td><strong>SeriesTrackCard & Row</strong></td>
+            <td>Build Distributed Systems</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td><code>border-4</code>, <code>shadow-hard-lg</code>, brutalist progress bar, item rows.</td>
+          </tr>
+          <tr>
+            <td><code>04-author-endnote-colophon.md</code></td>
+            <td><strong>AuthorEndnote</strong></td>
+            <td>Matthew Phillips</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td>Section marker <code>§</code>, <code>border-4</code>, inverted link chips.</td>
+          </tr>
+          <tr>
+            <td><code>05-editorial-typography-and-colossal-footer.md</code></td>
+            <td><strong>Colossal Typography & Footer</strong></td>
+            <td>Matthew Phillips</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td><code>clamp(3rem, 7vw, 6.5rem)</code> title, <code>line-height: 0.88</code>, massive footer.</td>
+          </tr>
+          <tr>
+            <td><code>06-monospace-architecture-diagrams.md</code></td>
+            <td><strong>Monospace Architecture SVGs</strong></td>
+            <td>Build Distributed Systems</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td>Monospace typography, <code>rx="0"</code>, leader/follower color semantics, embedded legend.</td>
+          </tr>
+          <tr>
+            <td><code>07-terminal-telemetry-gauge.md</code></td>
+            <td><strong>TerminalTelemetryGauge</strong></td>
+            <td>ryan-terminal-estate</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td>Standalone gauge dial, machine states (`CRUISE`, `BRAKING`, `HALTED`), slot-embeddable.</td>
+          </tr>
+          <tr>
+            <td><code>08-ticker-tape-physics-and-position-continuity.md</code></td>
+            <td><strong>TickerTape Physics Engine</strong></td>
+            <td>Bug Investigation & Architecture</td>
+            <td><span class="status-badge">needs-triage</span></td>
+            <td>Virtual RAF translate3d engine, modulo wrapping, fix for Chromium timeline resets.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- COMPREHENSIVE SKETCH UI EVALUATION & CONTRAST AUDIT -->
+    <section class="specs-panel" style="margin-top: 32px; border-color: var(--accent-primary);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <h3 style="margin-bottom: 0; color: var(--accent-primary);">[ SKETCH UI DEEP-DIVE &amp; CONTRAST AUDIT ]</h3>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-toggle" onclick="setTheme('sketch')">
+            <span>●</span> Activate Sketch View
+          </button>
+          <button class="btn-toggle" onclick="setTheme('midnight')">
+            <span>○</span> Switch to Midnight
+          </button>
+        </div>
+      </div>
+
+      <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 20px; color: var(--text-primary);">
+        In <code>@rtkelly13/design-system</code>, <strong>Sketch is not a lightened dark theme</strong>—it is an independent physical drawing executed on warm rag drafting paper (<code>#f5f3ec</code>) using graphite ink (<code>#23262e</code>), technical drafting pen accents, and letterpress stamped shadows.
+      </p>
+
+      <h4 style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; color: var(--text-muted);">
+        1. ARITHMETIC CONTRAST GATE (WCAG RATIOS ON SKETCH)
+      </h4>
+      <table class="issue-table" style="margin-bottom: 24px;">
+        <thead>
+          <tr>
+            <th>Role Pair</th>
+            <th>Sketch Token</th>
+            <th>Ground Token</th>
+            <th>Contrast Ratio</th>
+            <th>Compliance Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>text.primary</code> on <code>surface.base</code></td>
+            <td><code>#23262e</code> (Graphite Ink)</td>
+            <td><code>#f5f3ec</code> (Drafting Paper)</td>
+            <td><strong>11.4 : 1</strong></td>
+            <td><span class="status-badge" style="background: var(--intent-success); color: #fff;">WCAG AAA (PASS)</span></td>
+          </tr>
+          <tr>
+            <td><code>text.primary</code> on <code>surface.raised</code></td>
+            <td><code>#23262e</code> (Graphite Ink)</td>
+            <td><code>#ffffff</code> (Fresh Desk Sheet)</td>
+            <td><strong>13.5 : 1</strong></td>
+            <td><span class="status-badge" style="background: var(--intent-success); color: #fff;">WCAG AAA (PASS)</span></td>
+          </tr>
+          <tr>
+            <td><code>text.muted</code> on <code>surface.base</code></td>
+            <td><code>#6a6252</code> (Muted Pencil)</td>
+            <td><code>#f5f3ec</code> (Drafting Paper)</td>
+            <td><strong>5.1 : 1</strong></td>
+            <td><span class="status-badge" style="background: var(--intent-success); color: #fff;">WCAG AA (PASS &gt; 4.5)</span></td>
+          </tr>
+          <tr>
+            <td><code>accent.primary</code> on <code>surface.base</code></td>
+            <td><code>#1450d7</code> (Technical Blue Ink)</td>
+            <td><code>#f5f3ec</code> (Drafting Paper)</td>
+            <td><strong>6.2 : 1</strong></td>
+            <td><span class="status-badge" style="background: var(--intent-success); color: #fff;">WCAG AA (PASS &gt; 5.5 FLOOR)</span></td>
+          </tr>
+          <tr>
+            <td><code>intent.success</code> on <code>surface.base</code></td>
+            <td><code>#006b2e</code> (Pen Green)</td>
+            <td><code>#f5f3ec</code> (Drafting Paper)</td>
+            <td><strong>6.0 : 1</strong></td>
+            <td><span class="status-badge" style="background: var(--intent-success); color: #fff;">WCAG AA (PASS &gt; 5.5 FLOOR)</span></td>
+          </tr>
+          <tr>
+            <td><code>intent.danger</code> on <code>surface.base</code></td>
+            <td><code>#bd0010</code> (Crimson Red)</td>
+            <td><code>#f5f3ec</code> (Drafting Paper)</td>
+            <td><strong>6.9 : 1</strong></td>
+            <td><span class="status-badge" style="background: var(--intent-success); color: #fff;">WCAG AA (PASS &gt; 5.5 FLOOR)</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; color: var(--text-muted);">
+        2. SKETCH UI ANATOMY &amp; BEHAVIOR ANALYSIS
+      </h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.95rem;">
+        <div style="border: 2px solid var(--border-default); padding: 16px; background: var(--surface-sunken);">
+          <strong style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 8px; color: var(--accent-primary);">
+            [ Ground Hierarchy Inversion ]
+          </strong>
+          <p style="margin-bottom: 0; color: var(--text-secondary); font-size: 0.9rem;">
+            In Midnight, elevation moves lighter (from <code>#0a0a1a</code> up to <code>#12122b</code>). In Sketch, <strong>elevation moves toward pure paper white</strong> (<code>#ffffff</code> on <code>#f5f3ec</code>), while embedded toolbars and tickers sink into the binding paper (<code>#efeadf</code>). The <code>TrackCard</code> sits with physical page weight.
+          </p>
+        </div>
+        <div style="border: 2px solid var(--border-default); padding: 16px; background: var(--surface-sunken);">
+          <strong style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 8px; color: var(--accent-primary);">
+            [ Letterpress Offset Shadows ]
+          </strong>
+          <p style="margin-bottom: 0; color: var(--text-secondary); font-size: 0.9rem;">
+            Rather than dark phosphor glows, offset shadows in Sketch use solid graphite ink (<code>#23262e</code>). On white cards (like <code>TrackCard</code>), an 8px offset shadow creates a stark stamped relief that echoes architectural prints and letterpress posters.
+          </p>
+        </div>
+        <div style="border: 2px solid var(--border-default); padding: 16px; background: var(--surface-sunken);">
+          <strong style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 8px; color: var(--accent-primary);">
+            [ Technical Blueprint SVG Schematics ]
+          </strong>
+          <p style="margin-bottom: 0; color: var(--text-secondary); font-size: 0.9rem;">
+            The monospace vector diagram translates into an engineering patent drawing. White node blocks (<code>#ffffff</code>) with dark graphite borders, pale green leader tints (<code>#dcfce7</code>), and yellow highlighter log segments (<code>#fef08a</code>) render with surgical clarity.
+          </p>
+        </div>
+        <div style="border: 2px solid var(--border-default); padding: 16px; background: var(--surface-sunken);">
+          <strong style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 8px; color: var(--accent-primary);">
+            [ Tactile Inversion on Hover ]
+          </strong>
+          <p style="margin-bottom: 0; color: var(--text-secondary); font-size: 0.9rem;">
+            In Sketch, button chips and tags flip from white/paper to solid graphite ink with white text. This binary high-contrast pop matches the physical experience of stamping a seal onto paper.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- COMPONENT 7: COLOSSAL FOOTER BANNER -->
+  <footer class="colossal-footer">
+    <div class="shell">
+      <div class="colossal-slogan">
+        <span>RYAN KELLY · SYSTEMS &amp; SOFTWARE</span>
+        <span class="footer-tag">[ ryankelly.dev ]</span>
+      </div>
+
+      <div class="footer-columns">
+        <div class="footer-col">
+          <h5>[ NAVIGATION ]</h5>
+          <a href="#">Articles &amp; Essays</a>
+          <a href="#">Interactive Talks</a>
+          <a href="#">Architecture Notes</a>
+          <a href="#">Design System Manifest</a>
+        </div>
+        <div class="footer-col">
+          <h5>[ ESTATE PACKAGES ]</h5>
+          <a href="#">@rtkelly13/design-system</a>
+          <a href="#">@rtkelly/mermaid-toolkit</a>
+          <a href="#">Parquet.SourceGenerator</a>
+          <a href="#">Parquet.TypeProvider</a>
+        </div>
+        <div class="footer-col">
+          <h5>[ PROTOCOLS &amp; FEEDS ]</h5>
+          <a href="#">Atom / RSS Feed</a>
+          <a href="#">ActivityPub / Mastodon</a>
+          <a href="#">GitHub Estate Root</a>
+          <a href="#">Bluesky Feed</a>
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        <span>© 2026 RYAN KELLY · ALL RIGHTS RESERVED</span>
+        <span>BRUTALIST NEON-TERMINAL &amp; SKETCH DUAL-MODE</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- THEME & TICKER PHYSICS SCRIPTS -->
+  <script>
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const btnMidnight = document.getElementById('btn-theme-midnight');
+      const btnSketch = document.getElementById('btn-theme-sketch');
+      
+      if (theme === 'midnight') {
+        btnMidnight.classList.add('active');
+        btnSketch.classList.remove('active');
+      } else {
+        btnSketch.classList.add('active');
+        btnMidnight.classList.remove('active');
+      }
+    }
+
+    // Sticky ticker toggle
+    let isSticky = false;
+    function toggleSticky() {
+      isSticky = !isSticky;
+      const shell = document.querySelector('.ticker-shell');
+      const btn = document.getElementById('btn-sticky-toggle');
+      if (shell && btn) {
+        if (isSticky) {
+          shell.classList.add('is-sticky');
+          btn.classList.add('active');
+          btn.innerHTML = '<span>⚓</span> Sticky Ticker: ON';
+        } else {
+          shell.classList.remove('is-sticky');
+          btn.classList.remove('active');
+          btn.innerHTML = '<span>⚓</span> Sticky Ticker: OFF';
+        }
+      }
+    }
+
+    // Trailing slot switcher (endAddon)
+    function switchSlot(slotType) {
+      const slotTelemetry = document.getElementById('slot-telemetry');
+      const slotBullet = document.getElementById('slot-bullet');
+      const slotSubscribe = document.getElementById('slot-subscribe');
+      const slotPresence = document.getElementById('slot-presence');
+      const slotContainer = document.getElementById('ticker-end-slot');
+
+      if (!slotContainer) return;
+
+      if (slotType === 'none') {
+        slotContainer.style.display = 'none';
+        return;
+      }
+
+      slotContainer.style.display = 'flex';
+      if (slotTelemetry) slotTelemetry.style.display = slotType === 'telemetry' ? 'flex' : 'none';
+      if (slotBullet) slotBullet.style.display = slotType === 'bullet' ? 'flex' : 'none';
+      if (slotSubscribe) slotSubscribe.style.display = slotType === 'subscribe' ? 'flex' : 'none';
+      if (slotPresence) slotPresence.style.display = slotType === 'presence' ? 'flex' : 'none';
+    }
+
+    // =========================================================================
+    // TICKER TAPE MOMENTUM & DAMPING CONTROLLER (WAAPI playbackRate)
+    // =========================================================================
+    let physicsProfile = 'flywheel'; // 'flywheel' | 'viscous' | 'linear' | 'binary'
+    let currentRate = 1.0;
+    let targetRate = 1.0;
+    let rampStartRate = 1.0;
+    let rampStartTime = performance.now();
+    let isHovered = false;
+
+    // Symmetric easing profiles for decelerating into a stop and spooling back up
+    const physicsCurves = {
+      // Mechanical Flywheel: 850ms S-curve ease-in-out (smooth inertia, feels like rolling mass)
+      flywheel: {
+        duration: 850,
+        ease: t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+      },
+      // Viscous Damper: 450ms quadratic ease-in-out (responsive, snappier braking/startup)
+      viscous: {
+        duration: 450,
+        ease: t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
+      },
+      // Linear Ramp: 600ms constant-rate acceleration/deceleration
+      linear: {
+        duration: 600,
+        ease: t => t
+      },
+      // Binary Instant: 0ms (instant CSS pause comparison)
+      binary: {
+        duration: 0,
+        ease: t => 1
+      }
+    };
+
+    function setPhysics(mode) {
+      physicsProfile = mode;
+      // If switching modes while animating, re-anchor ramp
+      rampStartRate = currentRate;
+      rampStartTime = performance.now();
+    }
+
+    // Continuous virtual transform physics engine (immune to WAAPI timeline resets)
+    let scrollPos = 0;
+    let lastTime = performance.now();
+    const cruiseSpeedPxPerSec = 52; // Normalized constant reading velocity
+
+    function updateTickerPhysics(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const config = physicsCurves[physicsProfile];
+
+      if (config.duration === 0) {
+        currentRate = targetRate;
+      } else if (currentRate !== targetRate) {
+        const elapsed = now - rampStartTime;
+        const progress = Math.min(elapsed / config.duration, 1.0);
+        const eased = config.ease(progress);
+        currentRate = rampStartRate + (targetRate - rampStartRate) * eased;
+        if (progress >= 1.0) {
+          currentRate = targetRate;
+        }
+      }
+
+      // Advance virtual scroll position without ever resetting to 0
+      const track = document.querySelector('.ticker-track');
+      if (track) {
+        const loopBoundary = track.scrollWidth / 2;
+        if (loopBoundary > 0) {
+          scrollPos += currentRate * cruiseSpeedPxPerSec * dt;
+          if (scrollPos >= loopBoundary) {
+            scrollPos %= loopBoundary;
+          }
+          track.style.transform = `translate3d(-${scrollPos}px, 0, 0)`;
+        }
+      }
+
+      // Update HUD telemetry
+      const pct = Math.round(currentRate * 100);
+      const blocks = Math.round((pct / 100) * 8);
+      const barStr = '[' + '█'.repeat(blocks) + '░'.repeat(8 - blocks) + ']';
+      const statusColor = pct > 70 ? 'var(--intent-success)' : pct > 20 ? 'var(--intent-warning)' : 'var(--intent-danger)';
+
+      // 1. Top physics control bar HUD
+      const velVal = document.getElementById('velocity-val');
+      const velBar = document.getElementById('velocity-bar');
+      if (velVal && velBar) {
+        velVal.textContent = pct + '%';
+        velVal.style.color = statusColor;
+        velBar.textContent = barStr;
+      }
+
+      // 2. Docked Ticker Tape Instrument HUD
+      const hudBadge = document.getElementById('hud-status-badge');
+      const hudPct = document.getElementById('hud-velocity-pct');
+      const hudBar = document.getElementById('hud-velocity-bar');
+      if (hudBadge && hudPct && hudBar) {
+        hudPct.textContent = pct + '%';
+        hudPct.style.color = statusColor;
+        hudBar.textContent = barStr;
+
+        hudBadge.className = 'hud-status-badge ';
+        if (currentRate === 0) {
+          hudBadge.textContent = 'HALTED';
+          hudBadge.className += 'hud-status-halted';
+        } else if (targetRate === 0 && currentRate < 1) {
+          hudBadge.textContent = 'BRAKING';
+          hudBadge.className += 'hud-status-braking';
+        } else if (targetRate === 1 && currentRate < 1) {
+          hudBadge.textContent = 'SPOOLING';
+          hudBadge.className += 'hud-status-spooling';
+        } else {
+          hudBadge.textContent = 'CRUISE';
+          hudBadge.className += 'hud-status-cruise';
+        }
+      }
+
+      // 3. SVG Micro BulletChart HUD (Branch 217 representation)
+      const svgBulletBar = document.getElementById('svg-bullet-bar');
+      const bulletValText = document.getElementById('bullet-val-text');
+      if (svgBulletBar && bulletValText) {
+        const bulletWidth = Math.max(0, Math.min(80, (80 * currentRate))).toFixed(1);
+        svgBulletBar.setAttribute('width', bulletWidth);
+        bulletValText.textContent = pct + '%';
+        bulletValText.style.color = statusColor;
+      }
+
+      requestAnimationFrame(updateTickerPhysics);
+    }
+
+    // Attach hover listeners to the ticker tape
+    const tickerEl = document.querySelector('.ticker-tape');
+    if (tickerEl) {
+      tickerEl.addEventListener('mouseenter', () => {
+        isHovered = true;
+        targetRate = 0.0;
+        rampStartRate = currentRate;
+        rampStartTime = performance.now();
+      });
+
+      tickerEl.addEventListener('mouseleave', () => {
+        isHovered = false;
+        targetRate = 1.0;
+        rampStartRate = currentRate;
+        rampStartTime = performance.now();
+      });
+    }
+
+    // Start RAF physics loop
+    requestAnimationFrame(updateTickerPhysics);
+  </script>
+</body>
+</html>
