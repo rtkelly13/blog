@@ -12,6 +12,14 @@ import CustomLink from './Link';
 import NoteBlock from './NoteBlock';
 import Pre from './Pre';
 import References from './References';
+import Table, {
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './Table';
 import TalkStatsChart from './TalkStatsChart';
 import TOCInline from './TOCInline';
 import {
@@ -109,6 +117,19 @@ export const MDXComponents: MDXComponentsType = {
   TalkStatsChart,
   a: CustomLink,
   pre: Pre,
+  table: Table,
+  thead: TableHeader,
+  tbody: TableBody,
+  tr: TableRow,
+  th: TableHead,
+  td: TableCell,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableFooter,
   wrapper: Wrapper,
 };
 
