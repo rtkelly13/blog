@@ -24,6 +24,7 @@ const siteMetadata = {
   facebook: '',
   youtube: '',
   linkedin: 'https://www.linkedin.com/in/rtkelly94/',
+  bluesky: '',
   locale: 'en-US',
   stickyNav: true, // Set to false to disable sticky navigation
   analytics: {
