@@ -56,6 +56,11 @@ jobs:
         with:
           path: blog
       - uses: ./blog/.github/actions/setup-blog
+        with:
+          # The unit gate includes Vitest's Storybook browser project. Install
+          # its Chromium binary before testing the candidate package, or a
+          # missing browser is reported as a design-system failure.
+          install-playwright: "true"
 
       - name: Record the pinned version
         id: before
