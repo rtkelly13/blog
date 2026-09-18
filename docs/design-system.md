@@ -52,6 +52,10 @@ them (see `tests/theme-toggle.spec.ts`).
 - **No emoji as UI** — native emoji render as fixed full-colour OS glyphs that
   ignore the theme; use lucide icons tinted with a `text-brutalist-*` accent.
 
+Why lucide and not one of the other public packs — geometry, dual-mode
+survival and the licence cost of re-exporting art from a published npm
+package — is argued panel by panel at **`/experiments/icon-packs`**.
+
 ## Tailwind v4 (non-standard)
 
 ```css
