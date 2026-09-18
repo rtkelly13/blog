@@ -144,7 +144,8 @@
       "playwright": "1.61.1",
       "playwright-core": "1.61.1",
       "react": "19.2.8",
-      "react-dom": "19.2.8"
+      "react-dom": "19.2.8",
+      "@rtkelly13/design-system": "link:../design-system/temp/worktrees/feat-editorial-primitives"
     }
   }
 }
