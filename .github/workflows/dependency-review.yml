@@ -1,0 +1,19 @@
+name: "Dependency Review"
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: "deps"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@5a2ce3f5b92ee19cbb1541a4984b76d921600d7c # v4
