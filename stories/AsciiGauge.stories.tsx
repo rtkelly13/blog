@@ -14,7 +14,7 @@ const meta = {
     length: { control: { type: 'number', min: 4, max: 32 } },
     variant: {
       control: 'select',
-      options: ['block', 'shade', 'line', 'ascii', 'braille'],
+      options: ['block', 'shade', 'line', 'ascii'],
     },
     accent: {
       control: 'select',
@@ -85,16 +85,6 @@ export const PlainAscii: Story = {
   },
 };
 
-export const BrailleMicroMeter: Story = {
-  args: {
-    value: 90,
-    length: 10,
-    variant: 'braille',
-    accent: 'danger',
-    showValue: true,
-  },
-};
-
 export const AllVariantsMatrix: Story = {
   args: {
     value: 75,
@@ -138,16 +128,6 @@ export const AllVariantsMatrix: Story = {
           target={90}
           variant="ascii"
           accent="warning"
-          showValue
-        />
-      </div>
-      <div className="flex items-center justify-between gap-6">
-        <span className="text-zinc-400 w-24">BRAILLE:</span>
-        <AsciiGauge
-          value={75}
-          target={90}
-          variant="braille"
-          accent="danger"
           showValue
         />
       </div>
