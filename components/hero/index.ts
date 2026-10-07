@@ -1,3 +1,4 @@
+export { default as GeneratedHero } from './GeneratedHero';
 export { HERO_IDEAS, type HeroIdea, type HeroVariant } from './ideas';
 export {
   default as ShaderStage,
