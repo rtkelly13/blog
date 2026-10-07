@@ -2,7 +2,7 @@ import { FlaskConical, User } from 'lucide-react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import type { ComponentProps } from 'react';
 import type { SeriesMetadata } from 'types/Series';
-import CyberHero from '@/components/CyberHero';
+import { GeneratedHero } from '@/components/hero';
 import Link from '@/components/Link';
 import LiveTalkBanner from '@/components/LiveTalkBanner';
 import { PageSEO, SiteStructuredData } from '@/components/SEO';
@@ -40,7 +40,7 @@ export default function Home({
       />
       <SiteStructuredData />
       <div className="relative">
-        <CyberHero />
+        <GeneratedHero />
         <LiveTalkBanner />
       </div>
       <div className="mt-12">
