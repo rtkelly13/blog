@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   baseline:
     name: Build, test & publish coverage baseline
