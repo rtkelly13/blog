@@ -2,7 +2,7 @@ name: PR checks
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 # ---------------------------------------------------------------------------
 # Consolidated PR gate.
@@ -36,6 +36,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      e2e: ${{ steps.filter.outputs.e2e }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            e2e:
+              - 'pages/**'
+              - 'components/**'
+              - 'layouts/**'
+              - 'css/**'
+              - 'public/**'
+              - 'data/**'
+              - 'lib/**'
+              - 'tests/**'
+              - 'playwright.config.ts'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+
   # Fast, install-free guard: a git/SSH dependency resolution in the lockfile
   # clones over a protocol cold builds can't authenticate (Vercel: "Host key
   # verification failed"). Reads the lockfile text directly, so — unlike the
@@ -175,7 +202,11 @@ jobs:
   e2e-visual:
     name: visual
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, changes]
+    if: |
+      needs.build.outputs.outcome == 'success' &&
+      needs.changes.outputs.e2e == 'true' &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-playwright')
     # Read-only. This job compares against the committed baselines and never
     # writes them; re-baselining is a `/update-snapshots` comment away
     # (update-snapshots-command.yml), which is the only path that pushes.

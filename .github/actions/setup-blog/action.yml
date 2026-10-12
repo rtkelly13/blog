@@ -49,8 +49,22 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    - name: Install Playwright Chromium
+    - name: Cache Playwright Chromium
       if: inputs.install-playwright == 'true'
+      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-chromium-${{ runner.os }}-${{ hashFiles(format('{0}/pnpm-lock.yaml', inputs.blog-path)) }}
+
+    - name: Install Playwright Chromium
+      if: inputs.install-playwright == 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
       working-directory: ${{ inputs.blog-path }}
       shell: bash
       run: pnpm exec playwright install --with-deps chromium
+
+    - name: Install Playwright Chromium OS Dependencies (Cache Hit)
+      if: inputs.install-playwright == 'true' && steps.playwright-cache.outputs.cache-hit == 'true'
+      working-directory: ${{ inputs.blog-path }}
+      shell: bash
+      run: pnpm exec playwright install-deps chromium
