@@ -2,7 +2,7 @@ name: PR checks
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 # ---------------------------------------------------------------------------
 # Consolidated PR gate.
@@ -39,6 +39,9 @@ jobs:
   changes:
     name: changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       e2e: ${{ steps.filter.outputs.e2e }}
     steps:
@@ -48,11 +51,13 @@ jobs:
         with:
           filters: |
             e2e:
-              - 'app/**'
+              - 'pages/**'
               - 'components/**'
               - 'layouts/**'
               - 'css/**'
               - 'public/**'
+              - 'data/**'
+              - 'lib/**'
               - 'tests/**'
               - 'playwright.config.ts'
               - 'package.json'
