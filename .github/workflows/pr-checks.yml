@@ -94,6 +94,11 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: blog
+      - name: Verify no banned scripts (.sh / .ps1)
+        uses: ls-lint/action@a87c5eb4fb26d7af1bd0adba203dd1e76f7e94eb # v2.3.2
+        with:
+          config: blog/.ls-lint.yml
+          workdir: blog
       - uses: ./blog/.github/actions/setup-blog
       - id: lint
         continue-on-error: true
