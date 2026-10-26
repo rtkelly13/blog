@@ -1,0 +1,11 @@
+ls:
+  .sh: exists:0
+  .ps1: exists:0
+  "**":
+    .sh: exists:0
+    .ps1: exists:0
+
+ignore:
+  - node_modules
+  - "node_modules/**"
+  - "**/node_modules/**"
