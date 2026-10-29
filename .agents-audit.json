@@ -1,0 +1,15 @@
+{
+  "waivers": [
+    {
+      "check": "docs-code-block",
+      "path": "docs/cv-improvements-roadmap.md",
+      "reason": "The block is an ASCII drawing comparing two CV layouts, not copied source or output."
+    },
+    {
+      "check": "pointer-integrity",
+      "path": "docs/design-system-alignment.md",
+      "reason": "Links ADR-0009, which is written on slot/3 and lands with it.",
+      "expires": "2026-12-31"
+    }
+  ]
+}
