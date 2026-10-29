@@ -15,7 +15,21 @@ or reword the narrative body of posts/talks in `data/blog/**` and
 components, diagrams, assets, tooling, tests). Full policy:
 **[docs/posting.md](./docs/posting.md#authorship-policy-read-first)**.
 
+## Commands
+
+```bash
+pnpm dev          # local site
+pnpm typecheck && pnpm lint
+pnpm test:unit    # Vitest; pnpm test:e2e for Playwright
+pnpm build
+```
+
+The full set, CI and the release train are in [docs/technical-guide.md](./docs/technical-guide.md).
+
 ## Guides
+
+Every guide, ADR and agent doc is indexed in [docs/README.md](./docs/README.md); the ones most
+tasks need:
 
 | Domain | Guide | Covers |
 | ------ | ----- | ------ |
@@ -83,14 +97,6 @@ Convex agent skills for common tasks can be installed by running
 `npx convex ai-files install`.
 
 <!-- convex-ai-end -->
-
-
-## 🛑 Repository Conventions & Workflow Policy
-
-1. **Squash Merge Only**: All pull requests must be merged into `main` using **Squash and Merge** exclusively.
-2. **Delete Branch on Merge**: Feature branches must be automatically deleted immediately upon merge into `main`.
-3. **Linear History**: Maintain a strictly linear history. Rebase feature branches onto `main` before merging; no merge commits allowed.
-4. **Direct Push Protection**: Non-force direct pushes to `main` are blocked; PR mechanism required (force pushes permitted when needed).
 
 
 ## 🛑 Repository Conventions & Workflow Policy
