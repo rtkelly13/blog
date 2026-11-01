@@ -26,7 +26,7 @@ import { expect, type Page, test } from '@playwright/test';
  *
  * The RGB values below are **not** the source of truth any more. The design
  * system is, and `css/tailwind.css` no longer re-declares the accents. If these
- * need changing, the change belongs in `@rtkelly13/design-system`.
+ * need changing, the change belongs in `@rtkelly-labs/design-system`.
  */
 
 // midnight — the design system's dark Level.

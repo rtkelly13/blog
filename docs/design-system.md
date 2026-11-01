@@ -7,13 +7,16 @@ token set** — see [Dual-mode theming](#dual-mode-theming).
 
 ## Package source & local development
 
-`@rtkelly13/design-system` is installed from the public **npm registry** —
+`@rtkelly-labs/design-system` is installed from the public **npm registry** —
 no auth needed anywhere (it publishes from the design-system repo via npm
-trusted publishing). To develop against the sibling `../design-system`
-checkout instead:
+trusted publishing). To develop against your local design-system checkout
+instead (`~/code/rtkelly-labs/design-system`, per the estate's org-folder
+layout, with the blog at `~/code/personal/blog`):
 
-- `pnpm ds:link` — links the local repo via `pnpm link`. **This writes a
-  `link:../design-system` override into `package.json` and the lockfile
+- `pnpm ds:link` — links `packages/design-system` in that checkout via
+  `pnpm link`. **This writes a
+  `link:../../rtkelly-labs/design-system/packages/design-system` override into
+  `package.json` and the lockfile
   (pnpm v10 behavior) — never commit those**; the lockfile protocol guard
   rejects them. Rebuild the design system (`pnpm build` there) to see
   changes; the link is a symlink, so no reinstall needed.
@@ -57,7 +60,7 @@ them (see `tests/theme-toggle.spec.ts`).
 ```css
 /* css/tailwind.css — NOT @tailwind directives */
 @import "tailwindcss";
-@import "@rtkelly13/design-system/theme.css"; /* brutalist tokens, .dark/.dim variant, @source */
+@import "@rtkelly-labs/design-system/theme.css"; /* brutalist tokens, .dark/.dim variant, @source */
 @plugin "@tailwindcss/typography";
 @config "../tailwind.config.js"; /* only for the typography() callback now */
 ```
@@ -138,7 +141,7 @@ one Pulumi stack covering every ryankelly.dev site (site keys `blog-storybook` a
 
 > The package repo keeps an audit of the system in
 > [`docs/evaluation.md`](https://github.com/rtkelly13/design-system/blob/main/docs/evaluation.md).
-> One of its findings was this repo's `"@rtkelly13/design-system": "^0.0.5"` range,
+> One of its findings was this repo's `"@rtkelly-labs/design-system": "^0.0.5"` range,
 > which under semver matched *only* `0.0.5` and so could never resolve a release.
 > Fixed in #98 — the dependency now tracks `^0.1.3`.
 

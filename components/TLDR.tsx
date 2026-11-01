@@ -1,4 +1,4 @@
-import { TLDR as SystemTLDR } from '@rtkelly13/design-system';
+import { TLDR as SystemTLDR } from '@rtkelly-labs/design-system';
 
 interface TLDRProps {
   text: string;

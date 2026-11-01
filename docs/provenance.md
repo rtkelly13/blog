@@ -23,7 +23,7 @@ Since forking from `v1.1.0`, the codebase has evolved into a bespoke personal co
 - The package identity in `package.json` is decoupled to `@rtkelly13/blog`.
 
 ### 2. Design System & Theming
-- Replaced the starter's default Tailwind Typography / light-dark styling with a **custom brutalist design system** ([`@rtkelly13/design-system`](../../design-system)).
+- Replaced the starter's default Tailwind Typography / light-dark styling with a **custom brutalist design system** ([`@rtkelly-labs/design-system`](../../design-system)).
 - Implemented dual-mode styling (neon-terminal + sketch) using Tailwind CSS v4 tokens and theme ladders (see [`docs/design-system.md`](./design-system.md)).
 
 ### 3. Realtime Talk Platform

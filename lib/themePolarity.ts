@@ -1,4 +1,4 @@
-import { isThemeLevel, LEVELS } from '@rtkelly13/design-system';
+import { isThemeLevel, LEVELS } from '@rtkelly-labs/design-system';
 
 /**
  * Is the active theme a dark one?

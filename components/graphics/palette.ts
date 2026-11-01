@@ -1,10 +1,10 @@
-import type { Hue, ThemeLevel } from '@rtkelly13/design-system';
+import type { Hue, ThemeLevel } from '@rtkelly-labs/design-system';
 import {
   FIXED_COLOURS,
   isThemeLevel,
   LEVELS,
   PALETTE_HUES,
-} from '@rtkelly13/design-system';
+} from '@rtkelly-labs/design-system';
 
 /**
  * The graphics palette, read from the design system rather than restated here.

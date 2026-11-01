@@ -1,4 +1,4 @@
-import { Pagination as DesignSystemPagination } from '@rtkelly13/design-system';
+import { Pagination as DesignSystemPagination } from '@rtkelly-labs/design-system';
 
 interface Props {
   totalPages: number;

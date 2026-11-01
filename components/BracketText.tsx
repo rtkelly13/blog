@@ -1,2 +1,2 @@
-export type { BracketTextProps } from '@rtkelly13/design-system';
-export { BracketText as default } from '@rtkelly13/design-system';
+export type { BracketTextProps } from '@rtkelly-labs/design-system';
+export { BracketText as default } from '@rtkelly-labs/design-system';

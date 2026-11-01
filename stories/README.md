@@ -12,7 +12,7 @@ render test, an interaction test (if it has `play`), and an axe a11y pass.
 That makes the stories load-bearing: removing Storybook would remove those tests.
 See [../tests/AGENTS.md](../tests/AGENTS.md#storybook-is-part-of-the-test-suite)
 for the full picture, including why the blog keeps stories for components that
-`@rtkelly13/design-system` also covers.
+`@rtkelly-labs/design-system` also covers.
 
 ## Running Storybook
 
@@ -41,7 +41,7 @@ untouched) and is **composed into the design system's Storybook** at
 [design-system.ryankelly.dev](https://design-system.ryankelly.dev), where it appears
 in the sidebar as **`ryankelly.dev (site)`**.
 
-That split mirrors the tiers: `@rtkelly13/design-system` publishes the tokens and
+That split mirrors the tiers: `@rtkelly-labs/design-system` publishes the tokens and
 primitives, and this Storybook documents what the site composes on top of them. If a
 story here belongs to the system rather than the site, it belongs in the package repo.
 

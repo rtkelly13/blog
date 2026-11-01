@@ -5,7 +5,7 @@
 /* Design-system token contract: role-named @theme tokens, the .midnight and
    .sketch variable blocks, and @source for the DS components. 0.6.0 removed the
    `--brutalist-*` aliases, so everything here addresses a role. */
-@import "@rtkelly13/design-system/theme.css";
+@import "@rtkelly-labs/design-system/theme.css";
 
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";

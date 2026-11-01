@@ -1,5 +1,5 @@
 /**
- * Drift between this blog and `@rtkelly13/design-system`.
+ * Drift between this blog and `@rtkelly-labs/design-system`.
  *
  * ## Why a bespoke check when we already have tsc
  *
@@ -59,7 +59,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const PKG = '@rtkelly13/design-system';
+const PKG = '@rtkelly-labs/design-system';
 
 const args = process.argv.slice(2);
 const asJson = args.includes('--json');
