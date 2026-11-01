@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { FIXED_COLOURS, LEVELS, PALETTE_HUES } from '@rtkelly13/design-system';
+import {
+  FIXED_COLOURS,
+  LEVELS,
+  PALETTE_HUES,
+} from '@rtkelly-labs/design-system';
 import { describe, expect, it } from 'vitest';
 
 import {

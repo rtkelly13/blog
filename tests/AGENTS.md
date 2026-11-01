@@ -65,7 +65,7 @@ which *reports* violations without failing. So a11y coverage exists but is not
 yet a gate — flip it to `'error'` when the current violations are cleaned up.
 
 **Why the blog has stories for components the design system already covers.**
-Several `components/*.tsx` are thin re-exports of `@rtkelly13/design-system`
+Several `components/*.tsx` are thin re-exports of `@rtkelly-labs/design-system`
 (`Button`, `Card`, `Tag`, `PageTitle`, `BracketText`, `PageHeader`), and the
 design system has its own stories plus its own Playwright visual regression. The
 blog's copies are not redundant: they exercise the component through *this*

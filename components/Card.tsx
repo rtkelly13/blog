@@ -1,2 +1,2 @@
-export type { CardProps } from '@rtkelly13/design-system';
-export { Card as default } from '@rtkelly13/design-system';
+export type { CardProps } from '@rtkelly-labs/design-system';
+export { Card as default } from '@rtkelly-labs/design-system';

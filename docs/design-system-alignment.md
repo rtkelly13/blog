@@ -7,7 +7,7 @@ behind each part — because the parts only make sense once you know what each o
 
 ## The contract between them is bigger than the API
 
-`@rtkelly13/design-system` gives this blog three separate things, and they fail
+`@rtkelly-labs/design-system` gives this blog three separate things, and they fail
 in three different ways:
 
 | What | Example | What catches a break |

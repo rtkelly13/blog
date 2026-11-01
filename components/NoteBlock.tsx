@@ -1,4 +1,4 @@
-import { NoteBlock as SystemNoteBlock } from '@rtkelly13/design-system';
+import { NoteBlock as SystemNoteBlock } from '@rtkelly-labs/design-system';
 import type { ReactNode } from 'react';
 
 interface NoteBlockProps {

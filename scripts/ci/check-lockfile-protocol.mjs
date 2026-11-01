@@ -52,7 +52,7 @@ const FORBIDDEN = [
     re: /^\s*resolution:\s*\{directory:\s*\.\./,
     label: 'out-of-repo directory resolution',
   },
-  // `pnpm ds:link` (pnpm v10 `pnpm link`) records a `link:../design-system`
+  // `pnpm ds:link` (pnpm v10 `pnpm link`) records a `link:../../rtkelly-labs/design-system/…`
   // override in package.json AND the lockfile. Great for local dev, fatal if
   // committed — same ENOENT-on-Vercel failure as file: deps. Run
   // `pnpm ds:unlink` before committing dependency changes.

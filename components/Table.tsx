@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@rtkelly13/design-system';
+} from '@rtkelly-labs/design-system';
 import type { ComponentProps } from 'react';
 
 export {
@@ -23,7 +23,7 @@ export {
 export type TableProps = ComponentProps<typeof DsTable>;
 
 /**
- * Responsive Brutalist Table component re-exported from @rtkelly13/design-system.
+ * Responsive Brutalist Table component re-exported from @rtkelly-labs/design-system.
  * Wraps native markdown/MDX tables in an overflow-x-auto container with
  * cyber/brutalist borders and surfaces.
  */

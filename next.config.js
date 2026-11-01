@@ -92,11 +92,12 @@ module.exports = withBundleAnalyzer({
   // rehype-autolink-headings and its transitive deps) aren't resolvable at
   // runtime, which broke `next start` in CI. Bundling fixes the whole class.
   bundlePagesRouterDependencies: true,
-  // When @rtkelly13/design-system is pnpm-linked to the sibling checkout
-  // (`pnpm ds:link`), the symlink escapes the project root and Turbopack
-  // refuses to resolve it. Widening the root to the parent directory keeps
-  // the linked-dev flow working; harmless when installed from the registry.
-  turbopack: { root: path.join(__dirname, '..') },
+  // When @rtkelly-labs/design-system is pnpm-linked to the local checkout
+  // (`pnpm ds:link`, ~/code/rtkelly-labs/design-system), the symlink escapes
+  // the project root and Turbopack refuses to resolve it. Widening the root to
+  // the code root (two levels up, above personal/ and rtkelly-labs/) keeps the
+  // linked-dev flow working; harmless when installed from the registry.
+  turbopack: { root: path.join(__dirname, '..', '..') },
   async headers() {
     return [
       {

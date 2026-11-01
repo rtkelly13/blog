@@ -42,7 +42,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const PKG = '@rtkelly13/design-system';
+const PKG = '@rtkelly-labs/design-system';
 
 const target = process.argv[2];
 if (!target) {

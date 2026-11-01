@@ -1,6 +1,6 @@
 name: Design system drift
 
-# Answers one question on a schedule: **if we bumped @rtkelly13/design-system
+# Answers one question on a schedule: **if we bumped @rtkelly-labs/design-system
 # to the latest release today, what would break?**
 #
 # The two repos are developed in parallel, so they drift by construction. The
@@ -66,7 +66,7 @@ jobs:
         id: before
         working-directory: blog
         run: |
-          v=$(node -p "require('./node_modules/@rtkelly13/design-system/package.json').version")
+          v=$(node -p "require('./node_modules/@rtkelly-labs/design-system/package.json').version")
           echo "version=$v" >> "$GITHUB_OUTPUT"
 
       - name: Upgrade to the candidate
@@ -76,8 +76,8 @@ jobs:
         env:
           TARGET: ${{ inputs.version || 'latest' }}
         run: |
-          pnpm add "@rtkelly13/design-system@${TARGET}"
-          v=$(node -p "require('./node_modules/@rtkelly13/design-system/package.json').version")
+          pnpm add "@rtkelly-labs/design-system@${TARGET}"
+          v=$(node -p "require('./node_modules/@rtkelly-labs/design-system/package.json').version")
           echo "version=$v" >> "$GITHUB_OUTPUT"
 
       - name: Token contract
@@ -152,7 +152,7 @@ jobs:
               aligned
                 ? 'The blog is on the latest release. Nothing to do.'
                 : broken.length === 0
-                  ? `Nothing broke. \`pnpm add @rtkelly13/design-system@${TO}\` whenever convenient.`
+                  ? `Nothing broke. \`pnpm add @rtkelly-labs/design-system@${TO}\` whenever convenient.`
                   : `**${broken.length} check(s) fail on ${TO}.** The logs name what changed — see the run below.`,
               '',
               broken.length > 0 && DS === 'failure'
