@@ -11,7 +11,7 @@
  * or any Chrome launched with --remote-debugging-port). Point it at that
  * browser and the dev server:
  *
- *   BASE_URL=http://localhost:3002 \
+ *   BASE_URL=http://localhost:8110 \
  *   CDP_URL=http://127.0.0.1:53460 \
  *   node tests/live-e2e.mjs
  *
@@ -23,7 +23,7 @@
 
 import puppeteer from 'puppeteer-core';
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3002';
+const BASE_URL = process.env.BASE_URL ?? 'http://localhost:8110';
 const CDP_URL = process.env.CDP_URL ?? 'http://127.0.0.1:53460';
 // When set (and the app was built with NEXT_PUBLIC_E2E_BYPASS=1), the harness
 // launches its own headless browser and signs in via the `e2e` bypass provider

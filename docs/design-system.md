@@ -114,7 +114,7 @@ Component-level guidance (the `PageHeader` / `PageTitle` header primitives, the
 per-section accent rule, diagrams, search, talk widgets) lives in
 **[components/AGENTS.md](../components/AGENTS.md)**. Live component variations
 render in the **design sandbox** (`/design-sandbox`) and in Storybook
-(`pnpm storybook`, :6006).
+(`pnpm storybook`, :8111).
 
 Whether the homepage hero should be drawn on the GPU — and what three.js /
 react-three-fiber would cost against a plain fragment shader — is measured in

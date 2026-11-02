@@ -44,7 +44,7 @@ follow-the-presenter driver/follower, and deck sidebars are documented there.
   ryankelly.dev before presenting, re-runnable by an agent with `agent-browser`:
   **[verify-deployed-talk.md](./verify-deployed-talk.md)**.
 
-Browser automation for the gated surfaces (profiles, port 3002, the Chrome
+Browser automation for the gated surfaces (profiles, port 8110, the Chrome
 hydration gotcha) is covered in
 [technical-guide.md](./technical-guide.md#browser-control-agent-browser).
 

@@ -29,7 +29,7 @@ built with `NEXT_PUBLIC_E2E_BYPASS=1`, the harness launches its own headless
 Chromium and signs in via the bypass button — no OAuth, no profile:
 
 ```bash
-E2E_BYPASS=1 BASE_URL=http://localhost:3002 pnpm test:live-e2e
+E2E_BYPASS=1 BASE_URL=http://localhost:8110 pnpm test:live-e2e
 ```
 
 This is what `.github/workflows/live-e2e.yml` runs on PRs. The real GitHub
@@ -44,13 +44,13 @@ already-authenticated Chrome exposed over CDP (the
 
 ```bash
 # 1. dev server
-pnpm dev -p 3002
+pnpm dev
 
 # 2. a Chrome signed in as an allowlisted admin, exposing a CDP port
 #    (agent-browser writes its port to ~/.agent-browser-profiles/dev/DevToolsActivePort)
 
 # 3. the harness
-BASE_URL=http://localhost:3002 \
+BASE_URL=http://localhost:8110 \
 CDP_URL=http://127.0.0.1:<cdp-port> \
 pnpm test:live-e2e
 ```

@@ -25,7 +25,7 @@
     {
       "label": "Dev Server",
       "type": "shell",
-      "command": "pnpm dev --port 3002",
+      "command": "pnpm dev",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -44,7 +44,7 @@
     {
       "label": "Dev Server (Debug)",
       "type": "shell",
-      "command": "NODE_OPTIONS='--inspect' pnpm dev --port 3002",
+      "command": "NODE_OPTIONS='--inspect' pnpm dev",
       "group": "build",
       "problemMatcher": ["$tsc-watch"],
       "isBackground": true,

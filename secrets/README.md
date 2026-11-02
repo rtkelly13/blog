@@ -20,7 +20,7 @@ Expected keys per file:
 
 ```
 convex.dev.env:      AUTH_GITHUB_ID, AUTH_GITHUB_SECRET (dev OAuth app),
-                     SITE_URL=http://localhost:3002,
+                     SITE_URL=http://localhost:8110,
                      ADMIN_GITHUB_LOGINS, AUTH_E2E_BYPASS_SECRET
 convex.prod.env:     AUTH_GITHUB_ID, AUTH_GITHUB_SECRET (prod OAuth app),
                      SITE_URL=https://www.ryankelly.dev, ADMIN_GITHUB_LOGINS

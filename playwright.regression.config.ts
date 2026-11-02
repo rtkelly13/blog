@@ -30,7 +30,7 @@ export default defineConfig({
   /* Boot the local production build so it can be compared against deployed main. */
   webServer: {
     command: 'pnpm run serve',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:8112',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
