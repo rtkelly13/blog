@@ -29,13 +29,13 @@ Originally based on [tailwind-nextjs-starter-blog](https://github.com/timlrx/tai
 ```bash
 pnpm install                 # Install dependencies
 cp .env.example .env         # Configure environment (see below)
-pnpm dev                     # Dev server at http://localhost:3000
+pnpm dev                     # Dev server at http://localhost:8110
 ```
 
 Other common tasks:
 
 ```bash
-pnpm storybook               # Design system at http://localhost:6006
+pnpm storybook               # Design system at http://localhost:8111
 pnpm build                   # Production build (+ sitemap, search index, RSS)
 pnpm post:create             # Scaffold a new blog post
 pnpm post:wizard             # Interactive post composer

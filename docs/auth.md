@@ -36,7 +36,7 @@ design and identity is enforced where writes happen.
 | Environment | Backend | Real OAuth | Bypass | Notes |
 |---|---|---|---|---|
 | Production (ryankelly.dev) | `fiery-minnow-77` (prod) | ✅ own OAuth app | ❌ **hard-coded impossible** | Bypass provider excluded by a source constant, not config |
-| Local dev (localhost:3002) | `keen-shark-231` (dev) | ✅ own OAuth app | ✅ enabled | `SITE_URL=http://localhost:3002`; dev server **must run on 3002** |
+| Local dev (localhost:8110) | `keen-shark-231` (dev) | ✅ own OAuth app | ✅ enabled | `SITE_URL=http://localhost:8110`; dev server **must run on 8110** |
 | Feature-branch previews (Vercel) | Convex **preview deployments**, one per branch | ❌ (ephemeral callback URL — ADR-0004) | ✅ via project-default env vars; **sign-in button auto-offered** (`NEXT_PUBLIC_VERCEL_ENV === 'preview'`) | The recommended way to test feature branches — admin-gated pages (/ideas, /admin) are reachable on previews; see §6 |
 | CI (live-e2e workflow) | dedicated E2E deployment (or a preview) | ❌ | ✅ | Secrets in GitHub Actions; job self-activates when provisioned |
 | `test-github` branch | *none yet — deliberately* | (would be ✅) | ❌ hard-coded off in the client | Stable branch URL `https://blog-git-test-github-rtkelly13s-projects.vercel.app` reserved for a pre-prod OAuth rehearsal env. With the per-ship prod OAuth check (§8) it may never be needed — dormant until decided |
@@ -124,7 +124,7 @@ ready-made session.
 pnpm signin:e2e <app-url> [--convex-url <url>] [--cdp <port>] [--print]
 ```
 
-- `<app-url>`: the target (localhost:3002, or a preview's branch URL).
+- `<app-url>`: the target (localhost:8110, or a preview's branch URL).
 - `--convex-url`: the backing deployment; when omitted, **discovered by
   fetching the app and extracting the `*.convex.cloud` address from the
   served bundle** — works for any preview without dashboard access.
@@ -202,7 +202,7 @@ Env vars by deployment:
 | Var | Prod | Dev | Preview defaults | Purpose |
 |---|---|---|---|---|
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | ✅ | ✅ | — | OAuth app creds (callback = that deployment's `.convex.site`) |
-| `SITE_URL` | `https://www.ryankelly.dev` | `http://localhost:3002` | — (bypass doesn't redirect) | Post-OAuth redirect base |
+| `SITE_URL` | `https://www.ryankelly.dev` | `http://localhost:8110` | — (bypass doesn't redirect) | Post-OAuth redirect base |
 | `ADMIN_GITHUB_LOGINS` | `rtkelly13` | `rtkelly13,e2e-bypass` | `rtkelly13,e2e-bypass` | Admin allowlist (authorization) |
 | `AUTH_E2E_BYPASS_SECRET` | **never** | ✅ | ✅ | Arms the bypass provider |
 | `AUTH_E2E_BYPASS_LOGIN` | — | optional | optional | Synthetic login (default `e2e-bypass`) |
@@ -227,13 +227,13 @@ npx convex env list [--prod] | grep AUTH_E2E
 # Server-side smoke of the provider (returns tokens / null / not-found)
 npx convex run auth:signIn '{"provider":"e2e","params":{"secret":"…"}}'
 
-# Harness, headless bypass mode (dev server on :3002)
-E2E_BYPASS=1 BASE_URL=http://localhost:3002 pnpm test:live-e2e
+# Harness, headless bypass mode (dev server on :8110)
+E2E_BYPASS=1 BASE_URL=http://localhost:8110 pnpm test:live-e2e
 ```
 
 Gotchas:
 
-- Local dev server **must** be on port 3002 or the OAuth redirect lands on
+- Local dev server **must** be on port 8110 or the OAuth redirect lands on
   a dead port (`SITE_URL`).
 - `retrieveAccount` throws for unknown accounts; don't trust the docs' null.
 - The localStorage key namespace strips non-alphanumerics from the Convex

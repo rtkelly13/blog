@@ -18,7 +18,7 @@ import { PNG } from 'pngjs';
  * Override the deployed target with REGRESSION_BASE_URL (defaults to prod).
  */
 
-const LOCAL_URL = process.env.REGRESSION_LOCAL_URL ?? 'http://localhost:3000';
+const LOCAL_URL = process.env.REGRESSION_LOCAL_URL ?? 'http://localhost:8112';
 const PROD_URL = process.env.REGRESSION_BASE_URL ?? 'https://ryankelly.dev';
 
 // Include the noisier, content-dependent pages only when explicitly asked.

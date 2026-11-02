@@ -165,7 +165,7 @@ Content-dependent pages differ legitimately (drafts hidden locally, fewer posts)
 they are opt-in and given a looser tolerance.
 
 **Env overrides:** `REGRESSION_BASE_URL` (deployed target, default `https://ryankelly.dev`),
-`REGRESSION_LOCAL_URL` (default `http://localhost:3000`), `REGRESSION_ALL=1` (include
+`REGRESSION_LOCAL_URL` (default `http://localhost:8112`), `REGRESSION_ALL=1` (include
 content-dependent pages).
 
 Each test attaches `deployed-main`, `local-build`, and `diff` PNGs to the HTML report

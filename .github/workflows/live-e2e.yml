@@ -8,7 +8,7 @@ name: Live E2E
 #   CONVEX_DEPLOY_KEY_E2E   — deploy key for the E2E Convex deployment
 #   E2E_CONVEX_URL          — that deployment's .convex.cloud URL
 #   E2E_BYPASS_SECRET       — matches AUTH_E2E_BYPASS_SECRET set on it
-# The deployment itself needs: AUTH_E2E_BYPASS_SECRET, SITE_URL=http://localhost:3002,
+# The deployment itself needs: AUTH_E2E_BYPASS_SECRET, SITE_URL=http://localhost:8110,
 # and ADMIN_GITHUB_LOGINS including "e2e-bypass".
 
 on:
@@ -65,9 +65,9 @@ jobs:
           NEXT_PUBLIC_E2E_BYPASS: "1"
           NEXT_PUBLIC_E2E_BYPASS_SECRET: ${{ secrets.E2E_BYPASS_SECRET }}
         run: |
-          pnpm dev -p 3002 > dev.log 2>&1 &
+          pnpm dev > dev.log 2>&1 &
           for i in $(seq 1 60); do
-            curl -sf -o /dev/null http://localhost:3002 && break
+            curl -sf -o /dev/null http://localhost:8110 && break
             sleep 2
           done
 
@@ -75,7 +75,7 @@ jobs:
         if: steps.secrets.outputs.provisioned == 'true'
         working-directory: blog
         env:
-          BASE_URL: http://localhost:3002
+          BASE_URL: http://localhost:8110
           E2E_BYPASS: "1"
         run: node tests/live-e2e.mjs
 

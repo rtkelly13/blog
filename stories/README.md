@@ -24,7 +24,7 @@ pnpm storybook
 pnpm build-storybook
 ```
 
-Storybook runs on http://localhost:6006 in development mode.
+Storybook runs on http://localhost:8111 in development mode.
 
 ## Theme toolbar
 

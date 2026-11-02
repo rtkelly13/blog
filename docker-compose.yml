@@ -3,6 +3,6 @@ services:
   blog:
     build: .
     ports:
-      - "3000:3000"
+      - "8113:3000"
     volumes:
       - ./:/usr/app

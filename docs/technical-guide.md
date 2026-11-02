@@ -23,7 +23,7 @@ Package manager is **pnpm** (`node >=22`, `pnpm >=9`).
 ```bash
 # Development
 pnpm dev                   # dev server (Turbopack)
-pnpm storybook             # design system at :6006
+pnpm storybook             # design system at :8111
 
 # Build
 pnpm build                 # next build + feeds + sitemap + search + OG images
@@ -128,7 +128,7 @@ sign into once, isolated from your daily Chrome.
 
 ```bash
 # One-time: sign in (headed window → "Sign in with GitHub")
-agent-browser --profile ~/.agent-browser-profiles/dev --headed open http://localhost:3002/admin
+agent-browser --profile ~/.agent-browser-profiles/dev --headed open http://localhost:8110/admin
 # Thereafter the GitHub/Convex session persists:
 agent-browser --profile ~/.agent-browser-profiles/dev open <url>
 ```
@@ -139,7 +139,7 @@ Set `AGENT_BROWSER_PROFILE=~/.agent-browser-profiles/dev` to make it the default
 > problems on some versions (pages load but React never commits). Fallback:
 > launch Playwright's Chromium on the same profile with
 > `--remote-debugging-port=9223` and `agent-browser connect 9223`. The dev
-> Convex deployment expects the app on **port 3002** (OAuth callback URL).
+> Convex deployment expects the app on **port 8110** (OAuth callback URL).
 
 Avoid `--auto-connect` to your daily Chrome — driving the primary profile is a
 repeated foot-gun (CDP attach can hang and block clicks; background-tab timer
