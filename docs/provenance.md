@@ -23,7 +23,7 @@ Since forking from `v1.1.0`, the codebase has evolved into a bespoke personal co
 - The package identity in `package.json` is decoupled to `@rtkelly13/blog`.
 
 ### 2. Design System & Theming
-- Replaced the starter's default Tailwind Typography / light-dark styling with a **custom brutalist design system** ([`@rtkelly13/design-system`](../../design-system)).
+- Replaced the starter's default Tailwind Typography / light-dark styling with a **custom brutalist design system** ([`@rtkelly13/design-system`](https://github.com/rtkelly-labs/design-system)).
 - Implemented dual-mode styling (neon-terminal + sketch) using Tailwind CSS v4 tokens and theme ladders (see [`docs/design-system.md`](./design-system.md)).
 
 ### 3. Realtime Talk Platform
@@ -46,7 +46,7 @@ Since forking from `v1.1.0`, the codebase has evolved into a bespoke personal co
 
 ## Upstream Relationship & Reference
 
-- **Reference Clone**: An upstream clone of `timlrx/tailwind-nextjs-starter-blog` is maintained in the personal code estate at [`tailwind-nextjs-starter-blog/`](../../tailwind-nextjs-starter-blog) for tracking architectural patterns.
+- **Reference Clone**: An upstream clone of `timlrx/tailwind-nextjs-starter-blog` is kept locally under `~/code/external/reference/` (outside the personal estate, so governance never treats it as ours) for tracking [upstream](https://github.com/timlrx/tailwind-nextjs-starter-blog) architectural patterns.
 - **Future Alignment**: Selective adoption of upstream v2 patterns (such as typed content collections and eventual App Router migration) is evaluated in [ADR 0006 (`docs/adr/0006-upstream-v2-alignment-content-layer-then-app-router.md`)](./adr/0006-upstream-v2-alignment-content-layer-then-app-router.md).
 
 ---
